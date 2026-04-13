@@ -1,6 +1,6 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import AlbumPhotoGrid from '@/components/AlbumPhotoGrid';
 import { getGalleryAlbum, getGalleryAlbums } from '@/lib/data';
 
 export async function generateStaticParams() {
@@ -24,13 +24,7 @@ export default async function AlbumPage({
           ← 返回画册
         </Link>
         <h1 className="text-3xl font-medium text-[#f5f5f0] mt-8 mb-12 tracking-wide">{data.title}</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.photos.map((photo, idx) => (
-            <div key={idx} className="relative aspect-square overflow-hidden rounded-lg">
-              <Image src={photo.src} alt={photo.alt} fill className="object-cover" />
-            </div>
-          ))}
-        </div>
+        <AlbumPhotoGrid photos={data.photos} />
       </div>
     </section>
   );

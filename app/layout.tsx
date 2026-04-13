@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { getSiteData } from "@/lib/data";
 
 const inter = Inter({
@@ -26,6 +27,7 @@ export default async function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <Navbar name={site.name} nav={site.nav} />
         <main className="pt-0">{children}</main>
+        <Footer />
       </body>
     </html>
   );

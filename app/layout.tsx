@@ -1,30 +1,32 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import Navbar from "@/components/Navbar";
+import { getSiteData } from "@/lib/data";
 
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'})
-
-const fontMono = Geist_Mono({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-mono",
-})
+  variable: "--font-inter",
+});
 
-export default function RootLayout({
+export const metadata: Metadata = {
+  title: "无名酒吧",
+  description: "今夜，从这里开始",
+};
+
+export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
+  const site = await getSiteData();
+
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
-    >
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
+    <html lang="zh-CN">
+      <body className={`${inter.variable} font-sans antialiased`}>
+        <Navbar name={site.name} nav={site.nav} />
+        <main className="pt-0">{children}</main>
       </body>
     </html>
-  )
+  );
 }

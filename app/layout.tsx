@@ -10,10 +10,13 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-export const metadata: Metadata = {
-  title: "无名酒吧",
-  description: "今夜，从这里开始",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteData();
+  return {
+    title: site.name,
+    description: site.tagline,
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -26,7 +29,7 @@ export default async function RootLayout({
     <html lang="zh-CN">
       <body className={`${inter.variable} font-sans antialiased`}>
         <Navbar name={site.name} nav={site.nav} />
-        <main className="pt-0">{children}</main>
+        <main className="pt-0 min-h-screen">{children}</main>
         <Footer />
       </body>
     </html>

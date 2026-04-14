@@ -1,16 +1,18 @@
 [
   {
-    "category": "鸡尾酒",
+    "category": "Cocktails",
+    "categoryZh": "鸡尾酒",
     "items": [
-      { "name": "老式经典", "price": "88", "description": "波本威士忌、苦精、方糖、橙皮" },
-      { "name": "尼格罗尼", "price": "92", "description": "金酒、金巴利、甜味美思" }
+      { "name": "Old Fashioned", "nameZh": "老式经典", "price": "88", "description": "Bourbon, bitters, sugar cube, orange peel", "descriptionZh": "波本威士忌、苦精、方糖、橙皮" },
+      { "name": "Negroni", "nameZh": "尼格罗尼", "price": "92", "description": "Gin, Campari, sweet vermouth", "descriptionZh": "金酒、金巴利、甜味美思" }
     ]
   },
   {
-    "category": "威士忌",
+    "category": "Whisky",
+    "categoryZh": "威士忌",
     "items": [
-      { "name": "山崎 12年", "price": "168", "description": "日本单一麦芽威士忌" },
-      { "name": "拉弗格 10年", "price": "138", "description": "艾雷岛单一麦芽威士忌，浓郁泥煤风味" }
+      { "name": "Yamazaki 12 Year", "nameZh": "山崎 12年", "price": "168", "description": "Japanese single malt whisky", "descriptionZh": "日本单一麦芽威士忌" },
+      { "name": "Laphroaig 10 Year", "nameZh": "拉弗格 10年", "price": "138", "description": "Islay single malt whisky, rich peat smoke", "descriptionZh": "艾雷岛单一麦芽威士忌，浓郁泥煤风味" }
     ]
   }
 ]

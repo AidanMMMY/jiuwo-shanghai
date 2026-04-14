@@ -1,19 +1,21 @@
 [
   {
     "id": "opening-party",
-    "title": "开业派对",
+    "title": "Opening Party",
+    "titleZh": "开业派对",
     "cover": "/images/gallery/opening-cover.jpg",
     "photos": [
-      { "src": "/images/gallery/opening-1.jpg", "alt": "开业当晚" },
-      { "src": "/images/gallery/opening-2.jpg", "alt": "朋友们" }
+      { "src": "/images/gallery/opening-1.jpg", "alt": "Opening night", "altZh": "开业当晚" },
+      { "src": "/images/gallery/opening-2.jpg", "alt": "Friends", "altZh": "朋友们" }
     ]
   },
   {
     "id": "bartender-spotlight",
-    "title": "调酒师特辑",
+    "title": "Bartender Spotlight",
+    "titleZh": "调酒师特辑",
     "cover": "/images/gallery/bartender-cover.jpg",
     "photos": [
-      { "src": "/images/gallery/bartender-1.jpg", "alt": "调酒师工作照" }
+      { "src": "/images/gallery/bartender-1.jpg", "alt": "Bartender at work", "altZh": "调酒师工作照" }
     ]
   }
 ]

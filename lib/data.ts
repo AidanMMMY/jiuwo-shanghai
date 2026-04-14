@@ -121,7 +121,7 @@ export async function getSiteData(): Promise<SiteData> {
 }
 
 export async function getSiteDataZh(): Promise<SiteData> {
-  const site = await readJsonFile<SiteData>('site.json');
+  const site = await getSiteData();
   return localizeSite(site);
 }
 
@@ -130,7 +130,7 @@ export async function getHeroSlides(): Promise<HeroSlide[]> {
 }
 
 export async function getHeroSlidesZh(): Promise<HeroSlide[]> {
-  const slides = await readJsonFile<HeroSlide[]>('hero.json');
+  const slides = await getHeroSlides();
   return localizeHero(slides);
 }
 
@@ -140,8 +140,8 @@ export async function getJournalEntries(): Promise<JournalEntry[]> {
 }
 
 export async function getJournalEntriesZh(): Promise<JournalEntry[]> {
-  const entries = await readJsonFile<JournalEntry[]>('journal.json');
-  return localizeJournal(entries).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const entries = await getJournalEntries();
+  return localizeJournal(entries);
 }
 
 export async function getJournalEntry(slug: string): Promise<JournalEntry | undefined> {
@@ -159,7 +159,7 @@ export async function getGalleryAlbums(): Promise<GalleryAlbum[]> {
 }
 
 export async function getGalleryAlbumsZh(): Promise<GalleryAlbum[]> {
-  const albums = await readJsonFile<GalleryAlbum[]>('gallery.json');
+  const albums = await getGalleryAlbums();
   return localizeGallery(albums);
 }
 
@@ -178,7 +178,7 @@ export async function getMenu(): Promise<MenuCategory[]> {
 }
 
 export async function getMenuZh(): Promise<MenuCategory[]> {
-  const categories = await readJsonFile<MenuCategory[]>('menu.json');
+  const categories = await getMenu();
   return localizeMenu(categories);
 }
 
@@ -187,6 +187,6 @@ export async function getAboutData(): Promise<AboutData> {
 }
 
 export async function getAboutDataZh(): Promise<AboutData> {
-  const about = await readJsonFile<AboutData>('about.json');
+  const about = await getAboutData();
   return localizeAbout(about);
 }

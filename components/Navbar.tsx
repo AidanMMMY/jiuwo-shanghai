@@ -20,14 +20,14 @@ export default function Navbar({
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const otherHref = isZh
     ? pathname === '/zh' || pathname === '/zh/'
       ? '/'
-      : pathname.replace('/zh', '')
+      : pathname.replace(/^\/zh/, '')
     : pathname === '/'
       ? '/zh'
       : `/zh${pathname}`;

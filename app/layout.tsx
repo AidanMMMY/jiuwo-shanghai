@@ -26,11 +26,11 @@ export default async function RootLayout({
   const site = await getSiteData();
 
   return (
-    <html lang="zh-CN">
+    <html lang="en">
       <body className={`${inter.variable} font-sans antialiased`}>
         <Navbar name={site.name} nav={site.nav} />
         <main className="pt-0 min-h-screen">{children}</main>
-        <Footer />
+        <Footer site={site} />
       </body>
     </html>
   );

@@ -1,8 +1,6 @@
-import { getSiteData } from '@/lib/data';
+import type { SiteData } from '@/lib/data';
 
-export default async function Footer() {
-  const site = await getSiteData();
-
+export default function Footer({ site }: { site: SiteData }) {
   return (
     <footer className="border-t border-[#222] bg-[#0a0a0a] py-12 px-6">
       <div className="mx-auto max-w-7xl flex flex-col md:flex-row justify-between items-center gap-6">

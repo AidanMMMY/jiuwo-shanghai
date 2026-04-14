@@ -1,11 +1,13 @@
 {
-  "name": "无名酒吧",
-  "tagline": "今夜，从这里开始",
+  "name": "Nameless Bar",
+  "nameZh": "无名酒吧",
+  "tagline": "The night starts here.",
+  "taglineZh": "今夜，从这里开始",
   "nav": [
-    { "label": "首页", "href": "/" },
-    { "label": "画册", "href": "/gallery" },
-    { "label": "酒单", "href": "/menu" },
-    { "label": "信息", "href": "/about" }
+    { "label": "Home", "href": "/", "labelZh": "首页" },
+    { "label": "Gallery", "href": "/gallery", "labelZh": "画册" },
+    { "label": "Menu", "href": "/menu", "labelZh": "酒单" },
+    { "label": "About", "href": "/about", "labelZh": "信息" }
   ],
   "social": {
     "instagram": "https://instagram.com",

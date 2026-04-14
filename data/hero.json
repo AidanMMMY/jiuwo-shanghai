@@ -1,5 +1,5 @@
 [
-  { "src": "/images/hero/hero-1.jpg", "alt": "吧台夜景" },
-  { "src": "/images/hero/hero-2.jpg", "alt": "特调鸡尾酒" },
-  { "src": "/images/hero/hero-3.jpg", "alt": "客座一角" }
+  { "src": "/images/hero/hero-1.jpg", "alt": "Bar at night", "altZh": "吧台夜景" },
+  { "src": "/images/hero/hero-2.jpg", "alt": "Signature cocktails", "altZh": "特调鸡尾酒" },
+  { "src": "/images/hero/hero-3.jpg", "alt": "Guest corner", "altZh": "客座一角" }
 ]

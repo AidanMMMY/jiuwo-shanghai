@@ -3,11 +3,13 @@ import path from 'path';
 
 const dataDirectory = path.join(process.cwd(), 'data');
 
-export type NavItem = { label: string; href: string };
+export type NavItem = { label: string; href: string; labelZh: string };
 
 export type SiteData = {
   name: string;
+  nameZh: string;
   tagline: string;
+  taglineZh: string;
   nav: NavItem[];
   social: {
     instagram?: string;
@@ -19,40 +21,56 @@ export type SiteData = {
 export type HeroSlide = {
   src: string;
   alt: string;
+  altZh: string;
 };
 
 export type JournalEntry = {
   slug: string;
   title: string;
+  titleZh: string;
   date: string;
   cover: string;
   content: string;
+  contentZh: string;
+};
+
+export type GalleryPhoto = {
+  src: string;
+  alt: string;
+  altZh: string;
 };
 
 export type GalleryAlbum = {
   id: string;
   title: string;
+  titleZh: string;
   cover: string;
-  photos: { src: string; alt: string }[];
+  photos: GalleryPhoto[];
 };
 
 export type MenuItem = {
   name: string;
+  nameZh: string;
   price: string;
   description: string;
+  descriptionZh: string;
 };
 
 export type MenuCategory = {
   category: string;
+  categoryZh: string;
   items: MenuItem[];
 };
 
 export type AboutData = {
   hours: string;
+  hoursZh: string;
   address: string;
+  addressZh: string;
   phone: string;
   mapEmbedUrl: string;
   story: string;
+  storyZh: string;
 };
 
 async function readJsonFile<T>(filename: string): Promise<T> {
@@ -61,12 +79,59 @@ async function readJsonFile<T>(filename: string): Promise<T> {
   return JSON.parse(content) as T;
 }
 
+function localizeSite(site: SiteData): SiteData {
+  return { ...site, name: site.nameZh, tagline: site.taglineZh, nav: site.nav.map((n) => ({ ...n, label: n.labelZh })) };
+}
+
+function localizeHero(slides: HeroSlide[]): HeroSlide[] {
+  return slides.map((s) => ({ ...s, alt: s.altZh }));
+}
+
+function localizeJournal(entries: JournalEntry[]): JournalEntry[] {
+  return entries.map((e) => ({ ...e, title: e.titleZh, content: e.contentZh }));
+}
+
+function localizeGallery(albums: GalleryAlbum[]): GalleryAlbum[] {
+  return albums.map((a) => ({
+    ...a,
+    title: a.titleZh,
+    photos: a.photos.map((p) => ({ ...p, alt: p.altZh })),
+  }));
+}
+
+function localizeMenu(categories: MenuCategory[]): MenuCategory[] {
+  return categories.map((c) => ({
+    ...c,
+    category: c.categoryZh,
+    items: c.items.map((i) => ({ ...i, name: i.nameZh, description: i.descriptionZh })),
+  }));
+}
+
+function localizeAbout(about: AboutData): AboutData {
+  return {
+    ...about,
+    hours: about.hoursZh,
+    address: about.addressZh,
+    story: about.storyZh,
+  };
+}
+
 export async function getSiteData(): Promise<SiteData> {
   return readJsonFile<SiteData>('site.json');
 }
 
+export async function getSiteDataZh(): Promise<SiteData> {
+  const site = await readJsonFile<SiteData>('site.json');
+  return localizeSite(site);
+}
+
 export async function getHeroSlides(): Promise<HeroSlide[]> {
   return readJsonFile<HeroSlide[]>('hero.json');
+}
+
+export async function getHeroSlidesZh(): Promise<HeroSlide[]> {
+  const slides = await readJsonFile<HeroSlide[]>('hero.json');
+  return localizeHero(slides);
 }
 
 export async function getJournalEntries(): Promise<JournalEntry[]> {
@@ -74,8 +139,18 @@ export async function getJournalEntries(): Promise<JournalEntry[]> {
   return entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
+export async function getJournalEntriesZh(): Promise<JournalEntry[]> {
+  const entries = await readJsonFile<JournalEntry[]>('journal.json');
+  return localizeJournal(entries).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
 export async function getJournalEntry(slug: string): Promise<JournalEntry | undefined> {
   const entries = await getJournalEntries();
+  return entries.find((e) => e.slug === slug);
+}
+
+export async function getJournalEntryZh(slug: string): Promise<JournalEntry | undefined> {
+  const entries = await getJournalEntriesZh();
   return entries.find((e) => e.slug === slug);
 }
 
@@ -83,8 +158,18 @@ export async function getGalleryAlbums(): Promise<GalleryAlbum[]> {
   return readJsonFile<GalleryAlbum[]>('gallery.json');
 }
 
+export async function getGalleryAlbumsZh(): Promise<GalleryAlbum[]> {
+  const albums = await readJsonFile<GalleryAlbum[]>('gallery.json');
+  return localizeGallery(albums);
+}
+
 export async function getGalleryAlbum(id: string): Promise<GalleryAlbum | undefined> {
   const albums = await getGalleryAlbums();
+  return albums.find((a) => a.id === id);
+}
+
+export async function getGalleryAlbumZh(id: string): Promise<GalleryAlbum | undefined> {
+  const albums = await getGalleryAlbumsZh();
   return albums.find((a) => a.id === id);
 }
 
@@ -92,6 +177,16 @@ export async function getMenu(): Promise<MenuCategory[]> {
   return readJsonFile<MenuCategory[]>('menu.json');
 }
 
+export async function getMenuZh(): Promise<MenuCategory[]> {
+  const categories = await readJsonFile<MenuCategory[]>('menu.json');
+  return localizeMenu(categories);
+}
+
 export async function getAboutData(): Promise<AboutData> {
   return readJsonFile<AboutData>('about.json');
+}
+
+export async function getAboutDataZh(): Promise<AboutData> {
+  const about = await readJsonFile<AboutData>('about.json');
+  return localizeAbout(about);
 }

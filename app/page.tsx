@@ -1,18 +1,12 @@
-import HeroCarousel from '@/components/HeroCarousel';
-import JournalList from '@/components/JournalList';
+import HomePage from '@/app/components/pages/HomePage';
 import { getHeroSlides, getJournalEntries, getSiteData } from '@/lib/data';
 
-export default async function HomePage() {
+export default async function Page() {
   const [site, slides, entries] = await Promise.all([
     getSiteData(),
     getHeroSlides(),
     getJournalEntries(),
   ]);
 
-  return (
-    <>
-      <HeroCarousel slides={slides} title={site.name} tagline={site.tagline} />
-      <JournalList entries={entries} />
-    </>
-  );
+  return <HomePage site={site} slides={slides} entries={entries} journalTitle="Journal" />;
 }

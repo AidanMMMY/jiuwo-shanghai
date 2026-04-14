@@ -2,12 +2,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { JournalEntry } from '@/lib/data';
 
-export default function JournalCard({ entry }: { entry: JournalEntry }) {
+export default function JournalCard({ entry, basePath = '' }: { entry: JournalEntry; basePath?: string }) {
   const summary = entry.content.slice(0, 100) + (entry.content.length > 100 ? '…' : '');
 
   return (
     <article className="group">
-      <Link href={`/journal/${entry.slug}`}>
+      <Link href={`${basePath}/journal/${entry.slug}`}>
         <div className="relative aspect-[16/10] overflow-hidden rounded-lg mb-4">
           <Image
             src={entry.cover}

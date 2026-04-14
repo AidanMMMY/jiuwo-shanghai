@@ -6,16 +6,18 @@ import type { JournalEntry } from '@/lib/data';
 export default async function JournalPage({
   entry,
   backLabel,
+  backHref = '/',
 }: {
   entry: JournalEntry;
   backLabel?: string;
+  backHref?: string;
 }) {
   const contentHtml = await markdownToHtml(entry.content);
 
   return (
     <article className="pt-24 pb-20 px-6 bg-[#0a0a0a] min-h-screen">
       <div className="mx-auto max-w-3xl">
-        <Link href="/" className="text-sm text-[#a0a0a0] hover:text-[#c9a227] transition-colors">
+        <Link href={backHref} className="text-sm text-[#a0a0a0] hover:text-[#c9a227] transition-colors">
           {backLabel ?? '← Back to home'}
         </Link>
         <header className="mt-8 mb-10">

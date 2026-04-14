@@ -12,5 +12,5 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const entry = await getJournalEntryZh(slug);
   if (!entry) notFound();
 
-  return <JournalPage entry={entry} backLabel="← 返回首页" />;
+  return <JournalPage entry={entry} backLabel="← 返回首页" backHref="/zh" />;
 }

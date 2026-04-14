@@ -7,16 +7,18 @@ export default function HomePage({
   slides,
   entries,
   journalTitle,
+  basePath = '',
 }: {
   site: SiteData;
   slides: HeroSlide[];
   entries: JournalEntry[];
   journalTitle?: string;
+  basePath?: string;
 }) {
   return (
     <>
       <HeroCarousel slides={slides} title={site.name} tagline={site.tagline} />
-      <JournalList entries={entries} title={journalTitle} />
+      <JournalList entries={entries} title={journalTitle} basePath={basePath} />
     </>
   );
 }

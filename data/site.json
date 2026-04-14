@@ -1,8 +1,8 @@
 {
-  "name": "Nameless Bar",
-  "nameZh": "无名酒吧",
-  "tagline": "The night starts here.",
-  "taglineZh": "今夜，从这里开始",
+  "name": "JIUWO",
+  "nameZh": "啾喔",
+  "tagline": "Drink on me, the stars are watching",
+  "taglineZh": "风月好看 人间浪漫",
   "nav": [
     { "label": "Home", "href": "/", "labelZh": "首页" },
     { "label": "Gallery", "href": "/gallery", "labelZh": "画册" },

@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getSiteDataZh } from "@/lib/data";
+import { getSiteData } from "@/lib/data";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -11,19 +11,19 @@ const inter = Inter({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const site = await getSiteDataZh();
+  const site = await getSiteData();
   return {
     title: site.name,
     description: site.tagline,
   };
 }
 
-export default async function ZhLayout({
+export default async function EnLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const site = await getSiteDataZh();
+  const site = await getSiteData();
 
   return (
     <div className={`${inter.variable} font-sans antialiased`}>

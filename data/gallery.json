@@ -1,12 +1,19 @@
 [
   {
-    "id": "opening-party",
-    "title": "Opening Party",
-    "titleZh": "开业派对",
+    "id": "one-night-host",
+    "title": "One-Night Host",
+    "titleZh": "一日店长活动",
     "cover": "/images/gallery/opening-cover.jpg",
     "photos": [
-      { "src": "/images/gallery/opening-1.jpg", "alt": "Opening night", "altZh": "开业当晚" },
-      { "src": "/images/gallery/opening-2.jpg", "alt": "Friends", "altZh": "朋友们" }
+      { "src": "/images/gallery/one-night-host-.jpg", "alt": "one-night-host-", "altZh": "" },
+      { "src": "/images/gallery/one-night-host-.jpg", "alt": "one-night-host-", "altZh": "" },
+      { "src": "/images/gallery/one-night-host-.jpg", "alt": "one-night-host-", "altZh": "" },
+      { "src": "/images/gallery/one-night-host-.jpg", "alt": "one-night-host-", "altZh": "" },
+      { "src": "/images/gallery/one-night-host-.jpg", "alt": "one-night-host-", "altZh": "" },
+      { "src": "/images/gallery/one-night-host-.jpg", "alt": "one-night-host-", "altZh": "" },
+      { "src": "/images/gallery/one-night-host-.jpg", "alt": "one-night-host-", "altZh": "" },
+      { "src": "/images/gallery/one-night-host-.jpg", "alt": "one-night-host-", "altZh": "" },
+      { "src": "/images/gallery/one-night-host-.jpg", "alt": "one-night-host-", "altZh": "" }
     ]
   },
   {

@@ -36,3 +36,12 @@ pnpm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 .worktrees/
+
+# vercel
+.vercel
+
+# macOS finder duplicates
+*\ 2/
+*\ 3/
+*\ 2.json
+*\ 3.json

@@ -8,5 +8,5 @@ export default async function Page() {
     getJournalEntriesZh(),
   ]);
 
-  return <HomePage site={site} slides={slides} entries={entries} journalTitle="日记" />;
+  return <HomePage site={site} slides={slides} entries={entries} journalTitle="动态" />;
 }

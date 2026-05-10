@@ -10,7 +10,7 @@ export default function AboutPage({
     hours: string;
     address: string;
     mapTitle: string;
-    phone: string;
+    email: string;
     story: string;
   };
 }) {
@@ -43,8 +43,8 @@ export default function AboutPage({
           </div>
 
           <div>
-            <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.phone}</h2>
-            <p className="text-lg text-[#f5f5f0]">{about.phone}</p>
+            <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.email}</h2>
+            <p className="text-lg text-[#f5f5f0]">{about.email}</p>
           </div>
 
           <div>

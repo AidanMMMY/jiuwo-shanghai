@@ -7,7 +7,7 @@ export default function JournalCard({ entry, basePath = '' }: { entry: JournalEn
 
   return (
     <article className="group">
-      <Link href={`${basePath}/journal/${entry.slug}`}>
+      <Link href={`${basePath}/updates/${entry.slug}`}>
         <div className="relative aspect-[16/10] overflow-hidden rounded-lg mb-4">
           <Image
             src={entry.cover}

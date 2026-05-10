@@ -11,7 +11,7 @@ export default async function Page() {
         hours: 'Hours',
         address: 'Address',
         mapTitle: 'Map',
-        phone: 'Phone',
+        email: 'E-Mail',
         story: 'Our Story',
       }}
     />

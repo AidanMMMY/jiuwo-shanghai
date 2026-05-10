@@ -67,7 +67,7 @@ export type AboutData = {
   hoursZh: string;
   address: string;
   addressZh: string;
-  phone: string;
+  email: string;
   mapEmbedUrl: string;
   story: string;
   storyZh: string;
@@ -135,7 +135,7 @@ export async function getHeroSlidesZh(): Promise<HeroSlide[]> {
 }
 
 export async function getJournalEntries(): Promise<JournalEntry[]> {
-  const entries = await readJsonFile<JournalEntry[]>('journal.json');
+  const entries = await readJsonFile<JournalEntry[]>('updates.json');
   return entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 

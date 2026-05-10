@@ -11,7 +11,7 @@ export default async function Page() {
         hours: '营业时间',
         address: '地址',
         mapTitle: '地图',
-        phone: '联系电话',
+        email: '电子邮箱',
         story: '品牌故事',
       }}
     />

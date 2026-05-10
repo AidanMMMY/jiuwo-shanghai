@@ -1,5 +1,5 @@
 [
-  { "src": "/images/hero/hero-1.jpg", "alt": "hero-1", "altZh": "大图1" },
-  { "src": "/images/hero/hero-2.jpg", "alt": "hero-2", "altZh": "大图2" },
-  { "src": "/images/hero/hero-3.jpg", "alt": "hero-3", "altZh": "大图3" }
+  { "src": "/images/hero/hero-1.webp", "alt": "hero-1", "altZh": "大图1" },
+  { "src": "/images/hero/hero-2.webp", "alt": "hero-2", "altZh": "大图2" },
+  { "src": "/images/hero/hero-3.webp", "alt": "hero-3", "altZh": "大图3" }
 ]

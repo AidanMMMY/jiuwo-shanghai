@@ -54,6 +54,7 @@ export type MenuItem = {
   price: string;
   description: string;
   descriptionZh: string;
+  image?: string;
 };
 
 export type MenuCategory = {

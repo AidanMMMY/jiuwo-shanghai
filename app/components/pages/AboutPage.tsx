@@ -21,8 +21,24 @@ export default function AboutPage({
 
         <div className="space-y-10">
           <div>
+            <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.story}</h2>
+            <div className="space-y-5">
+              {about.story.split('\n').map((paragraph, i) => (
+                <p key={i} className="text-lg text-[#a0a0a0] leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          <div>
             <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.hours}</h2>
             <p className="text-lg text-[#f5f5f0]">{about.hours}</p>
+          </div>
+
+          <div>
+            <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.email}</h2>
+            <p className="text-lg text-[#f5f5f0]">{about.email}</p>
           </div>
 
           <div>
@@ -40,16 +56,6 @@ export default function AboutPage({
                 title={labels.mapTitle}
               />
             </div>
-          </div>
-
-          <div>
-            <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.email}</h2>
-            <p className="text-lg text-[#f5f5f0]">{about.email}</p>
-          </div>
-
-          <div>
-            <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.story}</h2>
-            <p className="text-base text-[#a0a0a0] leading-relaxed">{about.story}</p>
           </div>
         </div>
       </div>

@@ -3,16 +3,122 @@
     "category": "Cocktails",
     "categoryZh": "鸡尾酒",
     "items": [
-      { "name": "Old Fashioned", "nameZh": "老式经典", "price": "88", "description": "Bourbon, bitters, sugar cube, orange peel", "descriptionZh": "波本威士忌、苦精、方糖、橙皮" },
-      { "name": "Negroni", "nameZh": "尼格罗尼", "price": "92", "description": "Gin, Campari, sweet vermouth", "descriptionZh": "金酒、金巴利、甜味美思" }
+      {
+        "name": "Chungking Express",
+        "nameZh": "重庆森林",
+        "price": "55",
+        "description": "Pineapple juice, lemon liqueur, lemon, gin, soda water",
+        "descriptionZh": "菠萝汁、柠檬利口酒、柠檬、金酒、气泡水",
+        "image": "/images/menu/chungking-express.png"
+      },
+      {
+        "name": "As Tears Go By",
+        "nameZh": "旺角卡门",
+        "price": "55",
+        "description": "Coffee liqueur, vodka, milk",
+        "descriptionZh": "咖啡利口酒、伏特加、牛奶",
+        "image": "/images/menu/as-tears-go-by.png"
+      },
+      {
+        "name": "Shanghai Scoundrel",
+        "nameZh": "上海渣男",
+        "price": "55",
+        "description": "Hawthorn, tequila, whiskey",
+        "descriptionZh": "山楂、龙舌兰、威士忌",
+        "image": "/images/menu/shanghai-scoundrel.png"
+      },
+      {
+        "name": "Wuhan Scoundrel",
+        "nameZh": "武汉渣男",
+        "price": "55",
+        "description": "Gin, orange juice",
+        "descriptionZh": "金酒、橙汁",
+        "image": "/images/menu/wuhan-scoundrel.png"
+      },
+      {
+        "name": "Quanzhou Scoundrel",
+        "nameZh": "泉州渣男",
+        "price": "55",
+        "description": "Lapsang souchong, gin, tonic water",
+        "descriptionZh": "正山小种、金酒、汤力水",
+        "image": "/images/menu/quanzhou-scoundrel.png"
+      },
+      {
+        "name": "Long Island Iced Tea",
+        "nameZh": "长岛冰茶",
+        "price": "55",
+        "description": "White rum, vodka, tequila, lemon juice, cola",
+        "descriptionZh": "白朗姆、伏特加、龙舌兰、柠檬汁、可乐",
+        "image": "/images/menu/long-island-iced-tea.png"
+      },
+      {
+        "name": "The Wizard of Oz",
+        "nameZh": "绿野仙踪",
+        "price": "45",
+        "description": "Elderflower, kiwi, lemon juice",
+        "descriptionZh": "接骨木、奇异果、柠檬汁",
+        "image": "/images/menu/the-wizard-of-oz.png"
+      },
+      {
+        "name": "Beijing Scoundrel",
+        "nameZh": "北京渣男",
+        "price": "45",
+        "description": "Vodka, soda water, raspberry, orange juice",
+        "descriptionZh": "伏特加、气泡水、树莓、橙汁",
+        "image": "/images/menu/beijing-scoundrel.png"
+      },
+      {
+        "name": "First Love",
+        "nameZh": "初恋",
+        "price": "45",
+        "description": "Vodka, grape juice, strawberry milk",
+        "descriptionZh": "伏特加、葡萄汁、草莓奶",
+        "image": "/images/menu/first-love.png"
+      },
+      {
+        "name": "Get Lost",
+        "nameZh": "滚",
+        "price": "45",
+        "description": "Gin, lemon juice, egg white",
+        "descriptionZh": "金酒、柠檬汁、蛋清",
+        "image": "/images/menu/get-lost.png"
+      },
+      {
+        "name": "Whiskey Sour",
+        "nameZh": "威士忌酸",
+        "price": "45",
+        "description": "Whiskey, lemon juice, egg white",
+        "descriptionZh": "威士忌、柠檬汁、蛋清",
+        "image": "/images/menu/whiskey-sour.png"
+      },
+      {
+        "name": "Gin & Tonic",
+        "nameZh": "金汤力",
+        "price": "35",
+        "description": "Gin, tonic water, lemon",
+        "descriptionZh": "金酒、汤力水、柠檬",
+        "image": "/images/menu/gin-tonic.png"
+      }
     ]
   },
   {
     "category": "Whisky",
     "categoryZh": "威士忌",
     "items": [
-      { "name": "Yamazaki 12 Year", "nameZh": "山崎 12年", "price": "168", "description": "Japanese single malt whisky", "descriptionZh": "日本单一麦芽威士忌" },
-      { "name": "Laphroaig 10 Year", "nameZh": "拉弗格 10年", "price": "138", "description": "Islay single malt whisky, rich peat smoke", "descriptionZh": "艾雷岛单一麦芽威士忌，浓郁泥煤风味" }
+      {
+        "name": "Yamazaki 12 Year",
+        "nameZh": "山崎 12年",
+        "price": "168",
+        "description": "Japanese single malt whisky",
+        "descriptionZh": "日本单一麦芽威士忌"
+      },
+      {
+        "name": "Laphroaig 10 Year",
+        "nameZh": "拉弗格 10年",
+        "price": "138",
+        "description": "Islay single malt whisky, rich peat smoke",
+        "descriptionZh": "艾雷岛单一麦芽威士忌，浓郁泥煤风味"
+      }
     ]
   }
 ]

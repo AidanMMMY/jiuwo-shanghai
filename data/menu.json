@@ -9,7 +9,7 @@
         "price": "55",
         "description": "Pineapple juice, lemon liqueur, lemon, gin, soda water",
         "descriptionZh": "菠萝汁、柠檬利口酒、柠檬、金酒、气泡水",
-        "image": "/images/menu/chungking-express.png"
+        "image": "/images/menu/cocktail/chungking-express.png"
       },
       {
         "name": "As Tears Go By",
@@ -17,7 +17,7 @@
         "price": "55",
         "description": "Coffee liqueur, vodka, milk",
         "descriptionZh": "咖啡利口酒、伏特加、牛奶",
-        "image": "/images/menu/as-tears-go-by.png"
+        "image": "/images/menu/cocktail/as-tears-go-by.png"
       },
       {
         "name": "Shanghai Scoundrel",
@@ -25,7 +25,7 @@
         "price": "55",
         "description": "Hawthorn, tequila, whiskey",
         "descriptionZh": "山楂、龙舌兰、威士忌",
-        "image": "/images/menu/shanghai-scoundrel.png"
+        "image": "/images/menu/cocktail/shanghai-scoundrel.png"
       },
       {
         "name": "Wuhan Scoundrel",
@@ -33,7 +33,7 @@
         "price": "55",
         "description": "Gin, orange juice",
         "descriptionZh": "金酒、橙汁",
-        "image": "/images/menu/wuhan-scoundrel.png"
+        "image": "/images/menu/cocktail/wuhan-scoundrel.png"
       },
       {
         "name": "Quanzhou Scoundrel",
@@ -41,7 +41,7 @@
         "price": "55",
         "description": "Lapsang souchong, gin, tonic water",
         "descriptionZh": "正山小种、金酒、汤力水",
-        "image": "/images/menu/quanzhou-scoundrel.png"
+        "image": "/images/menu/cocktail/quanzhou-scoundrel.png"
       },
       {
         "name": "Long Island Iced Tea",
@@ -49,7 +49,7 @@
         "price": "55",
         "description": "White rum, vodka, tequila, lemon juice, cola",
         "descriptionZh": "白朗姆、伏特加、龙舌兰、柠檬汁、可乐",
-        "image": "/images/menu/long-island-iced-tea.png"
+        "image": "/images/menu/cocktail/long-island-iced-tea.png"
       },
       {
         "name": "The Wizard of Oz",
@@ -57,7 +57,7 @@
         "price": "45",
         "description": "Elderflower, kiwi, lemon juice",
         "descriptionZh": "接骨木、奇异果、柠檬汁",
-        "image": "/images/menu/the-wizard-of-oz.png"
+        "image": "/images/menu/cocktail/the-wizard-of-oz.png"
       },
       {
         "name": "Beijing Scoundrel",
@@ -65,7 +65,7 @@
         "price": "45",
         "description": "Vodka, soda water, raspberry, orange juice",
         "descriptionZh": "伏特加、气泡水、树莓、橙汁",
-        "image": "/images/menu/beijing-scoundrel.png"
+        "image": "/images/menu/cocktail/beijing-scoundrel.png"
       },
       {
         "name": "First Love",
@@ -73,7 +73,7 @@
         "price": "45",
         "description": "Vodka, grape juice, strawberry milk",
         "descriptionZh": "伏特加、葡萄汁、草莓奶",
-        "image": "/images/menu/first-love.png"
+        "image": "/images/menu/cocktail/first-love.png"
       },
       {
         "name": "Get Lost",
@@ -81,7 +81,7 @@
         "price": "45",
         "description": "Gin, lemon juice, egg white",
         "descriptionZh": "金酒、柠檬汁、蛋清",
-        "image": "/images/menu/get-lost.png"
+        "image": "/images/menu/cocktail/get-lost.png"
       },
       {
         "name": "Whiskey Sour",
@@ -89,7 +89,7 @@
         "price": "45",
         "description": "Whiskey, lemon juice, egg white",
         "descriptionZh": "威士忌、柠檬汁、蛋清",
-        "image": "/images/menu/whiskey-sour.png"
+        "image": "/images/menu/cocktail/whiskey-sour.png"
       },
       {
         "name": "Gin & Tonic",
@@ -97,27 +97,163 @@
         "price": "35",
         "description": "Gin, tonic water, lemon",
         "descriptionZh": "金酒、汤力水、柠檬",
-        "image": "/images/menu/gin-tonic.png"
+        "image": "/images/menu/cocktail/gin-tonic.png"
       }
     ]
   },
   {
-    "category": "Whisky",
-    "categoryZh": "威士忌",
+    "category": "BTG",
+    "categoryZh": "杯酒",
     "items": [
       {
-        "name": "Yamazaki 12 Year",
-        "nameZh": "山崎 12年",
-        "price": "168",
-        "description": "Japanese single malt whisky",
-        "descriptionZh": "日本单一麦芽威士忌"
+        "name": "Vecchia Cantina Chianti DOCG 2019",
+        "nameZh": "璞山古堡·克安蒂红葡萄酒",
+        "price": "39",
+        "description": "Italy / 13.5% / 50ml",
+        "descriptionZh": "意大利 / 13.5% / 50ml",
+        "image": "/images/menu/BTG/Chianti.png"
       },
       {
-        "name": "Laphroaig 10 Year",
-        "nameZh": "拉弗格 10年",
-        "price": "138",
-        "description": "Islay single malt whisky, rich peat smoke",
-        "descriptionZh": "艾雷岛单一麦芽威士忌，浓郁泥煤风味"
+        "name": "Librandi Asylia Bianco Melissa DOC 2020",
+        "nameZh": "郦珀·梅丽莎白葡萄酒",
+        "price": "39",
+        "description": "Italy / 12.5% / 50ml",
+        "descriptionZh": "意大利 / 12.5% / 50ml",
+        "image": "/images/menu/BTG/Asylia.png"
+      },
+      {
+        "name": "Macallan Highland Single Malt Scotch Whisky 12 Year",
+        "nameZh": "麦卡伦双桶12年威士忌",
+        "price": "65",
+        "description": "Scotland / 40% / 40ml",
+        "descriptionZh": "苏格兰 / 40% / 40ml",
+        "image": "/images/menu/BTG/Macallan12.png"
+      },
+      {
+        "name": "Lagavulin Islay Single Malt Scotch Whisky 16 Years",
+        "nameZh": "乐加维林16年艾莱岛单一麦芽苏格兰威士忌",
+        "price": "90",
+        "description": "Scotland / 43% / 40ml",
+        "descriptionZh": "苏格兰 / 43% / 40ml",
+        "image": "/images/menu/BTG/Lagavulin16.png"
+      },
+      {
+        "name": "Yamazaki Single Malt Whisky",
+        "nameZh": "山崎1923单一麦芽威士忌",
+        "price": "90",
+        "description": "Japan / 43% / 40ml",
+        "descriptionZh": "日本 / 43% / 40ml",
+        "image": "/images/menu/BTG/Yamazaki1923.png"
+      },
+      {
+        "name": "Glenfarclas Highland Single Malt Scotch Whisky 15 Years",
+        "nameZh": "格兰花格15年单一麦芽威士忌",
+        "price": "98",
+        "description": "Scotland / 46% / 40ml",
+        "descriptionZh": "苏格兰 / 46% / 40ml",
+        "image": "/images/menu/BTG/Glenfarclas15.png"
+      },
+      {
+        "name": "Macallan Highland Single Malt Scotch Whisky Sherry Oak Cask 12 Years",
+        "nameZh": "麦卡伦经典雪莉桶12年威士忌",
+        "price": "120",
+        "description": "Scotland / 40% / 40ml",
+        "descriptionZh": "苏格兰 / 40% / 40ml",
+        "image": "/images/menu/BTG/MacallanSherry.png"
+      },
+      {
+        "name": "Yamazaki Single Malt Whisky 12 Years",
+        "nameZh": "山崎12年单一麦芽威士忌",
+        "price": "198",
+        "description": "Japan / 43% / 40ml",
+        "descriptionZh": "日本 / 43% / 40ml",
+        "image": "/images/menu/BTG/Yamazaki12.png"
+      },
+      {
+        "name": "Agavales Gold Tequila",
+        "nameZh": "阿卡维拉斯金标龙舌兰酒",
+        "price": "30",
+        "description": "Mexico / 45% / 30ml",
+        "descriptionZh": "墨西哥 / 45% / 30ml",
+        "image": "/images/menu/BTG/Agavales.png"
+      },
+      {
+        "name": "A Shy Secret That Cannot Be Told",
+        "nameZh": "不能说的羞羞酒",
+        "price": "180",
+        "description": "China / 35% / 110ml",
+        "descriptionZh": "中国 / 35% / 110ml",
+        "image": "/images/menu/BTG/ShySecret.png"
+      }
+    ]
+  },
+  {
+    "category": "Tea",
+    "categoryZh": "茶",
+    "items": [
+      {
+        "name": "Pu-erh Raw Tea — Snow-Whisking (2019)",
+        "nameZh": "普洱生茶（2019年拂雪）",
+        "price": "55",
+        "description": "Orchid fragrance is rich and pronounced. The liquor is gentle and sweet, with a silky mouthfeel and a lingering, persistent finish.",
+        "descriptionZh": "幽兰花香浓郁，香高馥郁。茶汤柔和甜润，水路细腻，回甘持久。",
+        "image": "/images/menu/tea/Snow-Whisking.png"
+      },
+      {
+        "name": "Pu-erh Raw Tea — Biandao (2021)",
+        "nameZh": "普洱生茶（2021年冰岛）",
+        "price": "125",
+        "description": "Delicately sweet with a long, enduring energy. Bright golden liquor, smooth and full-bodied, leaving a prolonged, cooling sweetness across the palate.",
+        "descriptionZh": "香甜细腻，气韵悠长，清凉愉悦。汤色金黄透亮，口感细腻醇厚，口腔两颊生津绵延持久。",
+        "image": "/images/menu/tea/Biandao.png"
+      },
+      {
+        "name": "Pu-erh Ripe Tea — 7581 White Paper Version (1998)",
+        "nameZh": "普洱熟茶（1998年白纸版7581）",
+        "price": "85",
+        "description": "A classic 7581 profile. Pronounced aged aroma with subtle medicinal notes. The liquor is rich and mellow, layered in fragrance, with a complex, evolving finish.",
+        "descriptionZh": "典型的7581经典滋味。陈香显著、略显药香、茶汤醇厚，香气丰富，滋味变化层次明显。",
+        "image": "/images/menu/tea/7581.png"
+      },
+      {
+        "name": "Pu-erh Ripe Tea — Hehua Ancient Trees (2018)",
+        "nameZh": "普洱熟茶（2018年荷华古树）",
+        "price": "55",
+        "description": "A ruby-bright liquor with a clean, pronounced aged aroma. Velvety and smooth on entry, the texture is almost glutinous—like biting into a rice dumpling steeped in pu-erh. Gentle and warming in nature.",
+        "descriptionZh": "汤色如红酒般瑰丽透亮，陈香显著，干净无杂异味，入口醇厚顺滑，汤感顺滑柔软，如嚼着普洱味的糯米粽子，整体茶性柔和温润。",
+        "image": "/images/menu/tea/Hehua.png"
+      },
+      {
+        "name": "Yunnan Black Tea — Wintersweet (2021)",
+        "nameZh": "云南红茶（2021年梅占）",
+        "price": "55",
+        "description": "Honeyed notes lift high above the cup. Golden, luminous liquor with a rich, mellow sweetness and a soft, rounded body.",
+        "descriptionZh": "蜜香高扬，茶汤金黄透亮，甜香浓郁，茶汤柔和甜润。",
+        "image": "/images/menu/tea/Wintersweet.png"
+      },
+      {
+        "name": "Wuyi Black Tea — Lapsang Souchong",
+        "nameZh": "武夷红茶（正山小种）",
+        "price": "65",
+        "description": "Its signature is pine-smoke and longan fruit. Amber liquor, brisk and enduring in aroma, with a rich, lively sweetness. The leaves unfurl to a bright copper hue, soft and substantial.",
+        "descriptionZh": "松烟香、桂圆味是它的显赫标志。茶汤呈琥珀色，香气高爽持久，滋味浓纯，活泼甘甜，叶底明亮，呈古铜色，叶张柔软厚实。",
+        "image": "/images/menu/tea/Lapsang.png"
+      },
+      {
+        "name": "Wuyi Rock Tea — Cassia Tea",
+        "nameZh": "武夷岩茶（武夷肉桂）",
+        "price": "85",
+        "description": "Cream, stone fruit, and cassia bark on the nose. Full-bodied with a sweet, lingering aftertaste that clings to the cheeks. Bright orange liquor; the leaves show a pale green center edged in red. The signature \"rock rhyme\" of cassia endures through six or seven infusions.",
+        "descriptionZh": "茶汤特具奶油、花果、桂皮般的香气；入口醇厚回甘，咽后齿颊留香，茶汤橙黄清澈，叶底匀亮，呈淡绿底红镶边，冲泡六七次仍有\"岩韵\"的肉桂香。",
+        "image": "/images/menu/tea/Cassia.png"
+      },
+      {
+        "name": "Wuyi Rock Tea — Narcissus",
+        "nameZh": "武夷岩茶（慧苑坑水仙）",
+        "price": "125",
+        "description": "Crystalline orange-yellow liquor, soft and weighty on the tongue. Deep yet quietly elegant fragrance—orchid and aged wood, with the distinct \"bush character\" of old groves. Silky and expansive on entry, with a resonant throat feel and a pronounced, lasting body.",
+        "descriptionZh": "汤色清艳透亮，显橙黄色，水柔，香浓而清幽，有独特的兰花香和木质味，丛味，入口顺滑绵柔，喉韵足，滋味重。",
+        "image": "/images/menu/tea/Narcissus.png"
       }
     ]
   }

@@ -44,6 +44,8 @@ export type GalleryAlbum = {
   id: string;
   title: string;
   titleZh: string;
+  subtitle: string;
+  subtitleZh: string;
   cover: string;
   photos: GalleryPhoto[];
 };
@@ -96,6 +98,7 @@ function localizeGallery(albums: GalleryAlbum[]): GalleryAlbum[] {
   return albums.map((a) => ({
     ...a,
     title: a.titleZh,
+    subtitle: a.subtitleZh,
     photos: a.photos.map((p) => ({ ...p, alt: p.altZh })),
   }));
 }

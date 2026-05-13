@@ -3,6 +3,8 @@
     "id": "one-night-host",
     "title": "One-Night Host",
     "titleZh": "一日店长活动",
+    "subtitle": "Posters from past special events with our special friends.",
+    "subtitleZh": "来看看我们历次一日店长活动的海报吧。",
     "cover": "/images/gallery/one-night-host/20251212.JPG",
     "photos": [
       {
@@ -86,11 +88,6 @@
         "altZh": "2024年11月22日"
       },
       {
-        "src": "/images/gallery/one-night-host/20241020.JPG",
-        "alt": "2024-10-20",
-        "altZh": "2024年10月20日"
-      },
-      {
         "src": "/images/gallery/one-night-host/20240915.JPG",
         "alt": "2024-09-15",
         "altZh": "2024年9月15日"
@@ -148,20 +145,16 @@
     ]
   },
   {
-    "id": "our-city",
-    "title": "Our City",
-    "titleZh": "我们的城市",
-    "cover": "/images/gallery/our-city/shanghai-01.jpg",
+    "id": "time-in-the-corners",
+    "title": "Time in the Corners",
+    "titleZh": "角落里的时间",
+    "subtitle": "Pictures with nothing to tell",
+    "subtitleZh": "无需多言",
+    "cover": "/images/gallery/time-in-the-corners/time-in-the-corners-001.webp",
     "photos": [
-      { "src": "/images/gallery/our-city/shanghai-01.jpg", "alt": "French Concession street", "altZh": "法租界街道" },
-      { "src": "/images/gallery/our-city/shanghai-02.jpg", "alt": "Shanghai old lane", "altZh": "上海老弄堂" },
-      { "src": "/images/gallery/our-city/shanghai-03.jpg", "alt": "Shanghai street scene", "altZh": "上海街景" },
-      { "src": "/images/gallery/our-city/shanghai-04.jpg", "alt": "City architecture", "altZh": "城市建筑" },
-      { "src": "/images/gallery/our-city/shanghai-05.jpg", "alt": "Shanghai skyline", "altZh": "上海天际线" },
-      { "src": "/images/gallery/our-city/shanghai-06.jpg", "alt": "Historic district", "altZh": "历史街区" },
-      { "src": "/images/gallery/our-city/shanghai-07.jpg", "alt": "French Concession trees", "altZh": "法租界梧桐" },
-      { "src": "/images/gallery/our-city/shanghai-08.jpg", "alt": "Old Shanghai alley", "altZh": "老上海巷子" },
-      { "src": "/images/gallery/our-city/shanghai-09.jpg", "alt": "Urban details", "altZh": "城市细节" }
+      { "src": "/images/gallery/time-in-the-corners/time-in-the-corners-001.webp", "alt": "001", "altZh": "001" },
+      { "src": "/images/gallery/time-in-the-corners/time-in-the-corners-002.webp", "alt": "002", "altZh": "002" },
+      { "src": "/images/gallery/time-in-the-corners/time-in-the-corners-003.webp", "alt": "003", "altZh": "003" }
     ]
   }
 ]

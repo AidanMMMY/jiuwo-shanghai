@@ -17,8 +17,15 @@ export default function GalleryAlbumPage({
         <Link href={backHref ?? '/gallery'} className="text-sm text-[#a0a0a0] hover:text-[#c9a227] transition-colors">
           {backLabel ?? '← Back to Gallery'}
         </Link>
-        <h1 className="text-3xl font-medium text-[#f5f5f0] mt-8 mb-12 tracking-wide">{album.title}</h1>
-        <AlbumPhotoGrid photos={album.photos} />
+        <header className="mt-8">
+          <h1 className="text-3xl md:text-4xl font-medium text-[#f5f5f0] tracking-wide">{album.title}</h1>
+          {album.subtitle && (
+            <p className="mt-3 text-sm text-[#a0a0a0] leading-relaxed max-w-2xl">{album.subtitle}</p>
+          )}
+        </header>
+        <div className="mt-12">
+          <AlbumPhotoGrid photos={album.photos} />
+        </div>
       </div>
     </section>
   );

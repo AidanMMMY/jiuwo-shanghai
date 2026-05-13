@@ -40,17 +40,22 @@ export default function Lightbox({
       onClick={onClose}
     >
       <button
-        className="absolute top-6 right-6 text-[#f5f5f0] text-2xl hover:text-[#c9a227]"
+        className="absolute top-4 right-4 z-10 p-3 text-[#f5f5f0] text-3xl hover:text-[#c9a227]"
         onClick={onClose}
         aria-label="关闭"
       >
         ×
       </button>
+
       {photos.length > 1 && (
         <>
           <button
-            className="absolute left-6 top-1/2 -translate-y-1/2 text-[#f5f5f0] text-3xl hover:text-[#c9a227]"
+            className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-10 p-4 text-[#f5f5f0] text-4xl md:text-5xl hover:text-[#c9a227] select-none"
             onClick={(e) => {
+              e.stopPropagation();
+              onPrev();
+            }}
+            onTouchStart={(e) => {
               e.stopPropagation();
               onPrev();
             }}
@@ -59,8 +64,12 @@ export default function Lightbox({
             ‹
           </button>
           <button
-            className="absolute right-6 top-1/2 -translate-y-1/2 text-[#f5f5f0] text-3xl hover:text-[#c9a227]"
+            className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-10 p-4 text-[#f5f5f0] text-4xl md:text-5xl hover:text-[#c9a227] select-none"
             onClick={(e) => {
+              e.stopPropagation();
+              onNext();
+            }}
+            onTouchStart={(e) => {
               e.stopPropagation();
               onNext();
             }}
@@ -70,9 +79,11 @@ export default function Lightbox({
           </button>
         </>
       )}
+
       <div className="relative w-[90vw] h-[80vh]" onClick={(e) => e.stopPropagation()}>
         <Image src={photo.src} alt={photo.alt} fill className="object-contain" />
       </div>
+
       <p className="absolute bottom-6 text-sm text-[#a0a0a0]">
         {currentIndex + 1} / {photos.length}
       </p>

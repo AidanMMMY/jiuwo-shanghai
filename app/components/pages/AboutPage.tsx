@@ -17,7 +17,7 @@ export default function AboutPage({
   return (
     <section className="pt-32 pb-20 px-6 bg-[#0a0a0a] min-h-screen">
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-3xl font-medium text-[#f5f5f0] mb-12 tracking-wide">{labels.title}</h1>
+        <h1 className="text-4xl font-semibold text-[#f5f5f0] tracking-wide mb-12">{labels.title}</h1>
 
         <div className="space-y-10">
           <div>

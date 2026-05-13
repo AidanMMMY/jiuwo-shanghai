@@ -8,5 +8,5 @@ export default async function Page() {
     getJournalEntries(),
   ]);
 
-  return <HomePage site={site} slides={slides} entries={entries} journalTitle="Update" />;
+  return <HomePage site={site} slides={slides} entries={entries} journalTitle="Updates" />;
 }

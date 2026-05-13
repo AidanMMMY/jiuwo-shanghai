@@ -20,12 +20,12 @@ export default function JournalStreamList({
   return (
     <section className="py-14 px-6 bg-[#0a0a0a]">
       <div className="mx-auto max-w-3xl">
-        <h2 className="text-2xl font-medium text-[#f5f5f0] mb-8 tracking-wide">{title ?? 'Journal'}</h2>
+        <h2 className="text-4xl font-semibold text-[#f5f5f0] tracking-wide mb-8">{title ?? 'Journal'}</h2>
         <div className="space-y-16">
           {visibleEntries.map((entry) => (
             <article key={entry.slug} className="border-b border-[#222] pb-14 pt-4 last:border-0">
               <time className="text-sm text-[#a0a0a0]">{entry.date}</time>
-              <h3 className="text-2xl font-medium text-[#f5f5f0] mt-2 mb-6 tracking-wide">{entry.title}</h3>
+              <h3 className="text-2xl font-medium text-[#a0a0a0] mt-2 mb-6 tracking-wide">{entry.title}</h3>
               <div className="flex justify-center mb-8">
                 <Image
                   src={entry.cover}

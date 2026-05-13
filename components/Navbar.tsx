@@ -53,11 +53,15 @@ export default function Navbar({
                 ? '/zh'
                 : `/zh${item.href}`
               : item.href;
+            const isActive =
+              pathname === localizedHref || pathname === localizedHref + '/' || pathname.startsWith(localizedHref + '/');
             return (
               <Link
                 key={item.href}
                 href={localizedHref}
-                className="text-xs md:text-sm text-[#a0a0a0] hover:text-[#c9a227] transition-colors whitespace-nowrap"
+                className={`text-xs md:text-sm transition-colors whitespace-nowrap ${
+                  isActive ? 'text-[#c9a227] font-medium' : 'text-[#a0a0a0] hover:text-[#c9a227]'
+                }`}
               >
                 {item.label}
               </Link>

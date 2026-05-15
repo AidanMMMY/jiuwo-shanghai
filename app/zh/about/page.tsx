@@ -7,7 +7,7 @@ export default async function Page() {
     <AboutPage
       about={about}
       labels={{
-        title: '关于我们',
+        title: '我们',
         hours: '营业时间',
         address: '地址',
         mapTitle: '地图',

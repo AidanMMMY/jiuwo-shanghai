@@ -12,7 +12,7 @@ export default function HeroCarousel({
   title: string;
   tagline: string;
 }) {
-  const duration = slides.length * 5;
+  const duration = slides.length * 3;
   const step = 100 / slides.length;
   const fade = 100 / duration;
 
@@ -24,7 +24,7 @@ export default function HeroCarousel({
           className="absolute inset-0 opacity-0"
           style={{
             animation: `heroFade ${duration}s infinite`,
-            animationDelay: `${-index * 5}s`,
+            animationDelay: `${-index * 3}s`,
           }}
         >
           <Image

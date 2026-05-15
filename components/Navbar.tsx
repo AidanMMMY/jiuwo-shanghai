@@ -53,8 +53,10 @@ export default function Navbar({
                 ? '/zh'
                 : `/zh${item.href}`
               : item.href;
+            const normalizedPath = pathname.replace(/^\/zh/, '') || '/';
             const isActive =
-              pathname === localizedHref || pathname === localizedHref + '/' || pathname.startsWith(localizedHref + '/');
+              item.href === normalizedPath ||
+              (item.href !== '/' && normalizedPath.startsWith(item.href + '/'));
             return (
               <Link
                 key={item.href}

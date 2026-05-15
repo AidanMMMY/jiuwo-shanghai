@@ -7,7 +7,7 @@
     { "label": "Home", "href": "/", "labelZh": "首页" },
     { "label": "Gallery", "href": "/gallery", "labelZh": "画册" },
     { "label": "Menu", "href": "/menu", "labelZh": "酒单" },
-    { "label": "About", "href": "/about", "labelZh": "信息" }
+    { "label": "About", "href": "/about", "labelZh": "我们" }
   ],
   "social": {
     "instagram": "https://instagram.com",

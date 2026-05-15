@@ -156,5 +156,38 @@
       { "src": "/images/gallery/time-in-the-corners/time-in-the-corners-002.webp", "alt": "002", "altZh": "002" },
       { "src": "/images/gallery/time-in-the-corners/time-in-the-corners-003.webp", "alt": "003", "altZh": "003" }
     ]
+  },
+  {
+    "id": "our-friend-phillip",
+    "title": "Our Friend Phillip",
+    "titleZh": "小马",
+    "subtitle": "We decide to creat an album for each of our best friends.",
+    "subtitleZh": "我们的好朋友，小马。",
+    "cover": "/images/gallery/our-friend-phillip/Phillip-20260515-01.webp",
+    "photos": [
+      { "src": "/images/gallery/our-friend-phillip/Phillip-20260515-01.webp", "alt": "Phillip 01", "altZh": "小马 01" },
+      { "src": "/images/gallery/our-friend-phillip/Phillip-20260515-02.webp", "alt": "Phillip 02", "altZh": "小马 02" },
+      { "src": "/images/gallery/our-friend-phillip/Phillip-20260515-03.webp", "alt": "Phillip 03", "altZh": "小马 03" },
+      { "src": "/images/gallery/our-friend-phillip/Phillip-20260515-04.webp", "alt": "Phillip 04", "altZh": "小马 04" },
+      { "src": "/images/gallery/our-friend-phillip/Phillip-20260515-05.webp", "alt": "Phillip 05", "altZh": "小马 05" },
+      { "src": "/images/gallery/our-friend-phillip/Phillip-20260515-06.webp", "alt": "Phillip 06", "altZh": "小马 06" },
+      { "src": "/images/gallery/our-friend-phillip/Phillip-20260515-07.webp", "alt": "Phillip 07", "altZh": "小马 07" }
+    ]
+  },
+  {
+    "id": "our-friend-dex",
+    "title": "Our Friend Dex",
+    "titleZh": "Dex",
+    "subtitle": "We decide to creat an album for each of our best friends.",
+    "subtitleZh": "我们的好朋友Dex。",
+    "cover": "/images/gallery/our-friend-dex/Dex-20260515-01.webp",
+    "photos": [
+      { "src": "/images/gallery/our-friend-dex/Dex-20260515-01.webp", "alt": "Dex 01", "altZh": "Dex 01" },
+      { "src": "/images/gallery/our-friend-dex/Dex-20260515-02.webp", "alt": "Dex 02", "altZh": "Dex 02" },
+      { "src": "/images/gallery/our-friend-dex/Dex-20260515-03.webp", "alt": "Dex 03", "altZh": "Dex 03" },
+      { "src": "/images/gallery/our-friend-dex/Dex-20260515-04.webp", "alt": "Dex 04", "altZh": "Dex 04" },
+      { "src": "/images/gallery/our-friend-dex/Dex-20260515-05.webp", "alt": "Dex 05", "altZh": "Dex 05" },
+      { "src": "/images/gallery/our-friend-dex/Dex-20260515-06.webp", "alt": "Dex 06", "altZh": "Dex 06" }
+    ]
   }
 ]

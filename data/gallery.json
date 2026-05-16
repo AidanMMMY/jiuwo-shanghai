@@ -1,5 +1,44 @@
 [
   {
+    "id": "after-dark",
+    "title": "After Dark",
+    "titleZh": "夜",
+    "subtitle": "Photography by our friend Haoyang.",
+    "subtitleZh": "好朋友一号羊的摄影集。",
+    "cover": "/images/gallery/after-dark/After-Dark-20201223-01.jpg",
+    "photos": [
+      { "src": "/images/gallery/after-dark/After-Dark-20201223-01.jpg", "alt": "After Dark 2020-12-23 01", "altZh": "夜 2020-12-23 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20220122-01.jpg", "alt": "After Dark 2022-01-22 01", "altZh": "夜 2022-01-22 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20220608-01.jpg", "alt": "After Dark 2022-06-08 01", "altZh": "夜 2022-06-08 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20220612-01.jpg", "alt": "After Dark 2022-06-12 01", "altZh": "夜 2022-06-12 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20220909-01.jpg", "alt": "After Dark 2022-09-09 01", "altZh": "夜 2022-09-09 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20220911-01.jpg", "alt": "After Dark 2022-09-11 01", "altZh": "夜 2022-09-11 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20221007-01.jpg", "alt": "After Dark 2022-10-07 01", "altZh": "夜 2022-10-07 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20221208-01.jpg", "alt": "After Dark 2022-12-08 01", "altZh": "夜 2022-12-08 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20230212-01.jpg", "alt": "After Dark 2023-02-12 01", "altZh": "夜 2023-02-12 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20230419-01.jpg", "alt": "After Dark 2023-04-19 01", "altZh": "夜 2023-04-19 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20230521-01.jpg", "alt": "After Dark 2023-05-21 01", "altZh": "夜 2023-05-21 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20230928-01.jpg", "alt": "After Dark 2023-09-28 01", "altZh": "夜 2023-09-28 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20240420-01.jpg", "alt": "After Dark 2024-04-20 01", "altZh": "夜 2024-04-20 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20240814-01.jpg", "alt": "After Dark 2024-08-14 01", "altZh": "夜 2024-08-14 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20240823-01.jpg", "alt": "After Dark 2024-08-23 01", "altZh": "夜 2024-08-23 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20241127-01.jpg", "alt": "After Dark 2024-11-27 01", "altZh": "夜 2024-11-27 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20251001-01.jpg", "alt": "After Dark 2025-10-01 01", "altZh": "夜 2025-10-01 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20251005-01.jpg", "alt": "After Dark 2025-10-05 01", "altZh": "夜 2025-10-05 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20251005-02.jpg", "alt": "After Dark 2025-10-05 02", "altZh": "夜 2025-10-05 02" },
+      { "src": "/images/gallery/after-dark/After-Dark-20251006-01.jpg", "alt": "After Dark 2025-10-06 01", "altZh": "夜 2025-10-06 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20251007-01.jpg", "alt": "After Dark 2025-10-07 01", "altZh": "夜 2025-10-07 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20251226-01.jpg", "alt": "After Dark 2025-12-26 01", "altZh": "夜 2025-12-26 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20260116-01.jpg", "alt": "After Dark 2026-01-16 01", "altZh": "夜 2026-01-16 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20260208-01.jpg", "alt": "After Dark 2026-02-08 01", "altZh": "夜 2026-02-08 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20260225-01.jpg", "alt": "After Dark 2026-02-25 01", "altZh": "夜 2026-02-25 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20260321-01.jpg", "alt": "After Dark 2026-03-21 01", "altZh": "夜 2026-03-21 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20260501-01.jpg", "alt": "After Dark 2026-05-01 01", "altZh": "夜 2026-05-01 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20260502-01.jpg", "alt": "After Dark 2026-05-02 01", "altZh": "夜 2026-05-02 01" },
+      { "src": "/images/gallery/after-dark/After-Dark-20260502-02.jpg", "alt": "After Dark 2026-05-02 02", "altZh": "夜 2026-05-02 02" }
+    ]
+  },
+  {
     "id": "our-friend-phillip",
     "title": "Our Friend Phillip",
     "titleZh": "小马",
@@ -30,6 +69,19 @@
       { "src": "/images/gallery/our-friend-dex/Dex-20260515-04.webp", "alt": "Dex 04", "altZh": "Dex 04" },
       { "src": "/images/gallery/our-friend-dex/Dex-20260515-05.webp", "alt": "Dex 05", "altZh": "Dex 05" },
       { "src": "/images/gallery/our-friend-dex/Dex-20260515-06.webp", "alt": "Dex 06", "altZh": "Dex 06" }
+    ]
+  },
+  {
+    "id": "our-friend-zack",
+    "title": "Our Friend Zack",
+    "titleZh": "Zack",
+    "subtitle": "We decide to creat an album for each of our best friends.",
+    "subtitleZh": "我们的好朋友Zack。",
+    "cover": "/images/gallery/our-friend-zack/Zack-20260422-01.webp",
+    "photos": [
+      { "src": "/images/gallery/our-friend-zack/Zack-20260422-01.webp", "alt": "Zack 01", "altZh": "Zack 01" },
+      { "src": "/images/gallery/our-friend-zack/Zack-20260424-01.webp", "alt": "Zack 02", "altZh": "Zack 02" },
+      { "src": "/images/gallery/our-friend-zack/Zack-20260516-01.webp", "alt": "Zack 03", "altZh": "Zack 03" }
     ]
   },
   {

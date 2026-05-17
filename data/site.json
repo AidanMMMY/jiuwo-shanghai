@@ -3,6 +3,8 @@
   "nameZh": "啾喔",
   "tagline": "Drink on me, the stars are watching",
   "taglineZh": "风月好看 人间浪漫",
+  "intro": "A small wine bar where friends gather—regulars, new faces, and everyone in between.",
+  "introZh": "一间小酒馆，朋友们常来。熟客、新面孔，都欢迎。",
   "nav": [
     { "label": "Home", "href": "/", "labelZh": "首页" },
     { "label": "Gallery", "href": "/gallery", "labelZh": "画册" },

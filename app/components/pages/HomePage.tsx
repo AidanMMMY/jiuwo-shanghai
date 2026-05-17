@@ -15,7 +15,7 @@ export default function HomePage({
 }) {
   return (
     <>
-      <HeroCarousel slides={slides} title={site.name} tagline={site.tagline} />
+      <HeroCarousel slides={slides} title={site.name} tagline={site.tagline} intro={site.intro} />
       <JournalStream entries={entries} title={journalTitle} />
     </>
   );

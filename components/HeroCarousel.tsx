@@ -7,10 +7,12 @@ export default function HeroCarousel({
   slides,
   title,
   tagline,
+  intro,
 }: {
   slides: HeroSlide[];
   title: string;
   tagline: string;
+  intro: string;
 }) {
   const duration = slides.length * 3;
   const step = 100 / slides.length;
@@ -45,13 +47,44 @@ export default function HeroCarousel({
           ${100 - fade}% { opacity: 0; }
           100% { opacity: 1; }
         }
+        @keyframes taglineShimmer {
+          0%, 15% { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+          55%, 100% { -webkit-mask-position: 0% 0; mask-position: 0% 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .tagline-shimmer { animation: none !important; -webkit-mask-image: none !important; mask-image: none !important; }
+        }
       `}</style>
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+      <div
+        className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
+        style={{ paddingBottom: '8rem' }}
+      >
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-medium tracking-widest text-[#f5f5f0] mb-6">
           {title}
         </h1>
-        <p className="text-xl md:text-2xl lg:text-3xl text-[#a0a0a0] tracking-wide">
+        <p
+          className="tagline-shimmer text-xl md:text-2xl lg:text-3xl tracking-wide text-[#f5f5f0]"
+          style={{
+            WebkitMaskImage:
+              'linear-gradient(110deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 35%, rgba(0,0,0,1) 50%, rgba(0,0,0,0.3) 65%, rgba(0,0,0,0.3) 100%)',
+            maskImage:
+              'linear-gradient(110deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 35%, rgba(0,0,0,1) 50%, rgba(0,0,0,0.3) 65%, rgba(0,0,0,0.3) 100%)',
+            WebkitMaskSize: '300% 100%',
+            maskSize: '300% 100%',
+            WebkitMaskRepeat: 'no-repeat',
+            maskRepeat: 'no-repeat',
+            animation: 'taglineShimmer 3s ease-in-out infinite',
+          }}
+        >
           {tagline}
+        </p>
+      </div>
+      <div
+        className="z-10 px-6 text-center"
+        style={{ position: 'absolute', left: 0, right: 0, bottom: '3rem' }}
+      >
+        <p className="text-xl tracking-wide text-[#a0a0a0] md:text-2xl lg:text-3xl">
+          {intro}
         </p>
       </div>
     </section>

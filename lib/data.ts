@@ -10,6 +10,8 @@ export type SiteData = {
   nameZh: string;
   tagline: string;
   taglineZh: string;
+  intro: string;
+  introZh: string;
   nav: NavItem[];
   social: {
     instagram?: string;
@@ -83,7 +85,7 @@ async function readJsonFile<T>(filename: string): Promise<T> {
 }
 
 function localizeSite(site: SiteData): SiteData {
-  return { ...site, name: site.nameZh, tagline: site.taglineZh, nav: site.nav.map((n) => ({ ...n, label: n.labelZh })) };
+  return { ...site, name: site.nameZh, tagline: site.taglineZh, intro: site.introZh, nav: site.nav.map((n) => ({ ...n, label: n.labelZh })) };
 }
 
 function localizeHero(slides: HeroSlide[]): HeroSlide[] {

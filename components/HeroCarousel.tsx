@@ -83,7 +83,7 @@ export default function HeroCarousel({
         className="z-10 px-6 text-center"
         style={{ position: 'absolute', left: 0, right: 0, bottom: '3rem' }}
       >
-        <p className="text-xl tracking-wide text-[#c9a227] md:text-2xl lg:text-3xl">
+        <p className="text-lg tracking-wide text-[#f5f5f0] md:text-xl lg:text-2xl">
           {intro}
         </p>
       </div>

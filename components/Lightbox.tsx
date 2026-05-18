@@ -55,10 +55,6 @@ export default function Lightbox({
               e.stopPropagation();
               onPrev();
             }}
-            onTouchStart={(e) => {
-              e.stopPropagation();
-              onPrev();
-            }}
             aria-label="上一张"
           >
             ‹
@@ -66,10 +62,6 @@ export default function Lightbox({
           <button
             className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-10 p-4 text-[#f5f5f0] text-4xl md:text-5xl hover:text-[#c9a227] select-none"
             onClick={(e) => {
-              e.stopPropagation();
-              onNext();
-            }}
-            onTouchStart={(e) => {
               e.stopPropagation();
               onNext();
             }}

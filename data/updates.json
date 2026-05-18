@@ -1,7 +1,7 @@
 [
   {
     "slug": "single-glance-eternal",
-    "title": "A single glance, eternal as time",
+    "title": "A Single Glance, Eternal as Time",
     "titleZh": "一眼万年",
     "date": "2024-04-30",
     "cover": "/images/journal/20240430.webp",
@@ -11,7 +11,7 @@
   },
   {
     "slug": "unexpected-encounter",
-    "title": "Unexpected encounter",
+    "title": "Unexpected Encounter",
     "titleZh": "意外的相遇",
     "date": "2026-05-15",
     "cover": "/images/journal/20260515.jpeg",
@@ -21,7 +21,7 @@
   },
   {
     "slug": "dex-quiet-moment",
-    "title": "A quiet moment of Dex",
+    "title": "A Quiet Moment of Dex",
     "titleZh": "Dex的一刻",
     "date": "2026-04-25",
     "cover": "/images/journal/dex-moment.webp",
@@ -31,7 +31,7 @@
   },
   {
     "slug": "sunny-saucy",
-    "title": "Sunny Saucy, Fifty Shades Of Grey",
+    "title": "Sunny Saucy, Fifty Shades of Grey",
     "titleZh": "阳光骚年，五十度灰",
     "date": "2026-04-17",
     "cover": "/images/journal/20260417-C.JPG",
@@ -51,12 +51,22 @@
   },
   {
     "slug": "happy-birthday-robin",
-    "title": "Happy birthday",
+    "title": "Happy Birthday",
     "titleZh": "生日快乐",
     "date": "2026-02-22",
     "cover": "/images/journal/20260222-1.jpg",
     "content": "It's our best friend Robin's birthday. I'm sure it's not the right picture to post, but anyway haha.",
     "contentZh": "今天是好朋友铁塔的生日，来一起祝他生日快乐吧！",
+    "coverIsLandscape": true
+  },
+  {
+    "slug": "dancing-in-the-bubbles",
+    "title": "Dancing in the Bubbles",
+    "titleZh": "泡泡中的浪漫",
+    "date": "2025-05-23",
+    "cover": "/images/journal/20250523-1.webp",
+    "content": "I'm dancing in the rain, singing in the rain.",
+    "contentZh": "让我在泡泡中短暂地感受一下爱情吧。",
     "coverIsLandscape": true
   }
 ]

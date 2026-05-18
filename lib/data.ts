@@ -34,6 +34,7 @@ export type JournalEntry = {
   cover: string;
   content: string;
   contentZh: string;
+  coverIsLandscape?: boolean;
 };
 
 export type GalleryPhoto = {

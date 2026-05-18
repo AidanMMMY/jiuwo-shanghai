@@ -6,7 +6,8 @@
     "date": "2026-05-15",
     "cover": "/images/journal/20260515.jpeg",
     "content": "What beats seeing friends after a long day?",
-    "contentZh": "还有什么比忙碌了一天之后见到朋友们更令人开心的。"
+    "contentZh": "还有什么比忙碌了一天之后见到朋友们更令人开心的。",
+    "coverIsLandscape": true
   },
   {
     "slug": "dex-quiet-moment",
@@ -15,7 +16,8 @@
     "date": "2026-04-25",
     "cover": "/images/journal/dex-moment.webp",
     "content": "Dex is a good friend of ours who's been dropping by most weeks lately. One evening before the heat set in, I caught this shot of him — ended up being one of his favorites too.",
-    "contentZh": "Dex是我们的老朋友，近来几乎每周都会来。入夏前的某个夜晚，我随手按下快门，没想到定格了他最松弛的样子——他自己看了，也说喜欢。"
+    "contentZh": "Dex是我们的老朋友，近来几乎每周都会来。入夏前的某个夜晚，我随手按下快门，没想到定格了他最松弛的样子——他自己看了，也说喜欢。",
+    "coverIsLandscape": true
   },
   {
     "slug": "sunny-saucy",
@@ -24,7 +26,8 @@
     "date": "2026-04-17",
     "cover": "/images/journal/20260417-C.JPG",
     "content": "This Friday night, come and have a drink or much more, with Matthew, our latest one-night host. ",
-    "contentZh": "本周五晚上，我们将迎来一日店长马修，来和他一醉方休吧！"
+    "contentZh": "本周五晚上，我们将迎来一日店长马修，来和他一醉方休吧！",
+    "coverIsLandscape": false
   },
   {
     "slug": "untold-surprise",
@@ -33,7 +36,8 @@
     "date": "2026-02-22",
     "cover": "/images/journal/20260222-2.jpg",
     "content": "What I didn't mention—Yida, our old friend who moved to Australia, is back in town after all this time.",
-    "contentZh": "我故意没说的是，今天好久没见的移居澳洲的朋友益达回来啦！！非常开心！！"
+    "contentZh": "我故意没说的是，今天好久没见的移居澳洲的朋友益达回来啦！！非常开心！！",
+    "coverIsLandscape": true
   },
   {
     "slug": "happy-birthday-robin",
@@ -42,6 +46,7 @@
     "date": "2026-02-22",
     "cover": "/images/journal/20260222-1.jpg",
     "content": "It's our best friend Robin's birthday. I'm sure it's not the right picture to post, but anyway haha.",
-    "contentZh": "今天是好朋友铁塔的生日，来一起祝他生日快乐吧！"
+    "contentZh": "今天是好朋友铁塔的生日，来一起祝他生日快乐吧！",
+    "coverIsLandscape": true
   }
 ]

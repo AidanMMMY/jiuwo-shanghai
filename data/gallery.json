@@ -1,5 +1,21 @@
 [
   {
+    "id": "our-friend-josh-hu",
+    "title": "Our Friend Josh Hu",
+    "titleZh": "Josh Hu",
+    "subtitle": "We decide to create an album for each of our best friends.",
+    "subtitleZh": "我们的好朋友Josh Hu。",
+    "cover": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-01.jpg",
+    "photos": [
+      { "src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-01.jpg", "alt": "Josh Hu 01", "altZh": "Josh Hu 01" },
+      { "src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-02.jpg", "alt": "Josh Hu 02", "altZh": "Josh Hu 02" },
+      { "src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-03.jpg", "alt": "Josh Hu 03", "altZh": "Josh Hu 03" },
+      { "src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-04.jpg", "alt": "Josh Hu 04", "altZh": "Josh Hu 04" },
+      { "src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-05.jpg", "alt": "Josh Hu 05", "altZh": "Josh Hu 05" },
+      { "src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-06.jpg", "alt": "Josh Hu 06", "altZh": "Josh Hu 06" }
+    ]
+  },
+  {
     "id": "after-dark",
     "title": "After Dark",
     "titleZh": "夜",

@@ -80,24 +80,12 @@ export default function HeroCarousel({
         </p>
       </div>
       <div
-        className="z-10 px-6"
+        className="z-10 px-6 text-center"
         style={{ position: 'absolute', left: 0, right: 0, bottom: '3rem' }}
       >
-        <div className="flex items-center justify-center gap-2">
-          <div className="relative h-6 w-6 overflow-hidden md:h-7 md:w-7 lg:h-8 lg:w-8">
-            <Image
-              src="/images/intro-icon.jpeg"
-              alt=""
-              fill
-              sizes="32px"
-              className="object-cover"
-              style={{ mixBlendMode: 'screen', transform: 'scale(1.4)' }}
-            />
-          </div>
-          <p className="text-base tracking-wide text-[#f5f5f0] md:text-lg lg:text-xl">
-            {intro}
-          </p>
-        </div>
+        <p className="text-base tracking-wide text-[#f5f5f0] md:text-lg lg:text-xl">
+          {intro}
+        </p>
       </div>
     </section>
   );

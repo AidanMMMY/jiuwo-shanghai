@@ -1,5 +1,15 @@
 [
   {
+    "slug": "single-glance-eternal",
+    "title": "A single glance, eternal as time",
+    "titleZh": "一眼万年",
+    "date": "2024-04-30",
+    "cover": "/images/journal/20240430.webp",
+    "content": "One gaze, time stranded in the now",
+    "contentZh": "一眼凝眸，时光便在此刻搁浅。",
+    "coverIsLandscape": true
+  },
+  {
     "slug": "unexpected-encounter",
     "title": "Unexpected encounter",
     "titleZh": "意外的相遇",

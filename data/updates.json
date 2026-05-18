@@ -1,5 +1,14 @@
 [
   {
+    "slug": "unexpected-encounter",
+    "title": "Unexpected encounter",
+    "titleZh": "意外的相遇",
+    "date": "2026-05-15",
+    "cover": "/images/journal/20260515.jpeg",
+    "content": "What beats seeing friends after a long day?",
+    "contentZh": "还有什么比忙碌了一天之后见到朋友们更令人开心的。"
+  },
+  {
     "slug": "dex-quiet-moment",
     "title": "A quiet moment of Dex",
     "titleZh": "Dex的一刻",

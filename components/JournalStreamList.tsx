@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import type { JournalEntry } from '@/lib/data';
 
-type Entry = JournalEntry & { contentHtml: string };
+type Entry = JournalEntry & { contentHtml: string; coverIsLandscape: boolean };
 
 export default function JournalStreamList({
   entries,
@@ -33,7 +33,11 @@ export default function JournalStreamList({
                   width={0}
                   height={0}
                   sizes="100vw"
-                  className="max-w-full max-h-[66vh] w-auto h-auto rounded-lg object-contain"
+                  className={
+                    entry.coverIsLandscape
+                      ? 'w-full h-auto rounded-lg'
+                      : 'max-w-full max-h-[66vh] w-auto h-auto rounded-lg object-contain'
+                  }
                 />
               </div>
               <div

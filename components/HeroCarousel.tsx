@@ -19,7 +19,7 @@ export default function HeroCarousel({
   const fade = 100 / duration;
 
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative h-screen w-full overflow-hidden" style={{ height: '100svh' }}>
       {slides.map((slide, index) => (
         <div
           key={slide.src}

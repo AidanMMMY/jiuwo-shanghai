@@ -8,6 +8,7 @@ export default async function Page() {
       about={about}
       labels={{
         title: 'About Us',
+        subtitle: 'JIUWO · Since 2022 · Shanghai',
         hours: 'Hours',
         address: 'Address',
         mapTitle: 'Map',

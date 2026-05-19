@@ -78,6 +78,9 @@ export type AboutData = {
   mapEmbedUrl: string;
   story: string;
   storyZh: string;
+  pullQuote: string;
+  pullQuoteZh: string;
+  heroImage: string;
 };
 
 async function readJsonFile<T>(filename: string): Promise<T> {
@@ -121,6 +124,7 @@ function localizeAbout(about: AboutData): AboutData {
     hours: about.hoursZh,
     address: about.addressZh,
     story: about.storyZh,
+    pullQuote: about.pullQuoteZh,
   };
 }
 

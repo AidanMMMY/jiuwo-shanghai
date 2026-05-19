@@ -8,6 +8,7 @@ export default async function Page() {
       about={about}
       labels={{
         title: '我们',
+        subtitle: 'JIUWO · 2022年 · 上海',
         hours: '营业时间',
         address: '地址',
         mapTitle: '地图',

@@ -1,3 +1,5 @@
+import Image from 'next/image';
+import ScrollReveal from '@/components/ScrollReveal';
 import type { AboutData } from '@/lib/data';
 
 export default function AboutPage({
@@ -7,6 +9,7 @@ export default function AboutPage({
   about: AboutData;
   labels: {
     title: string;
+    subtitle: string;
     hours: string;
     address: string;
     mapTitle: string;
@@ -14,37 +17,108 @@ export default function AboutPage({
     story: string;
   };
 }) {
-  return (
-    <section className="pt-32 pb-20 px-6 bg-[#0a0a0a] min-h-screen">
-      <div className="mx-auto max-w-3xl">
-        <h1 className="text-4xl font-semibold text-[#f5f5f0] tracking-wide mb-12">{labels.title}</h1>
+  const paragraphs = about.story.split('\n').filter((p) => p.trim().length > 0);
+  const [firstParagraph, ...restParagraphs] = paragraphs;
+  const firstChar = firstParagraph?.charAt(0) ?? '';
+  const firstParagraphRest = firstParagraph?.slice(1) ?? '';
 
-        <div className="space-y-10">
-          <div>
-            <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.story}</h2>
-            <div className="space-y-5">
-              {about.story.split('\n').map((paragraph, i) => (
-                <p key={i} className="text-lg text-[#a0a0a0] leading-relaxed">
-                  {paragraph}
+  return (
+    <main className="bg-[#0a0a0a] min-h-screen">
+      {/* Hero block */}
+      <section className="relative w-full h-[70vh] md:h-[80vh] overflow-hidden">
+        <Image
+          src={about.heroImage}
+          alt={labels.title}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+          <h1 className="text-5xl md:text-7xl font-medium tracking-widest text-[#f5f5f0]">
+            {labels.title}
+          </h1>
+          <p className="mt-4 text-xs md:text-sm uppercase tracking-[0.3em] text-[#c9a227]">
+            {labels.subtitle}
+          </p>
+        </div>
+      </section>
+
+      {/* Story block */}
+      <section className="px-6 py-20 md:py-28">
+        <div className="mx-auto max-w-2xl">
+          <ScrollReveal>
+            <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-8">{labels.story}</h2>
+          </ScrollReveal>
+          <div className="space-y-8 text-lg md:text-xl text-[#a0a0a0] leading-relaxed">
+            {firstParagraph && (
+              <ScrollReveal delay={100}>
+                <p>
+                  <span
+                    className="float-left text-7xl md:text-8xl font-semibold text-[#c9a227] leading-none mr-3 mt-1"
+                    aria-hidden="true"
+                  >
+                    {firstChar}
+                  </span>
+                  {firstParagraphRest}
                 </p>
-              ))}
+              </ScrollReveal>
+            )}
+            {restParagraphs.map((paragraph, i) => (
+              <ScrollReveal key={i} delay={(i + 2) * 100}>
+                <p>{paragraph}</p>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pull quote */}
+      <section className="px-6 py-12 md:py-16">
+        <ScrollReveal>
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="mx-auto h-px w-12 bg-[#c9a227] mb-8" />
+            <p className="text-2xl md:text-3xl italic text-[#f5f5f0] leading-relaxed">
+              <span className="text-[#c9a227] mr-1">&ldquo;</span>
+              {about.pullQuote.replace(/[""""]/g, '').trim()}
+              <span className="text-[#c9a227] ml-1">&rdquo;</span>
+            </p>
+            <div className="mx-auto h-px w-12 bg-[#c9a227] mt-8" />
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* Info block: hours / email / address */}
+      <section className="px-6 py-16 md:py-20">
+        <ScrollReveal>
+          <div className="mx-auto max-w-3xl grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
+            <div className="border-l border-[#c9a227] pl-4">
+              <h3 className="text-xs uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.hours}</h3>
+              <p className="text-base md:text-lg text-[#f5f5f0]">{about.hours}</p>
+            </div>
+            <div className="border-l border-[#c9a227] pl-4">
+              <h3 className="text-xs uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.email}</h3>
+              <a
+                href={`mailto:${about.email}`}
+                className="text-base md:text-lg text-[#f5f5f0] hover:text-[#c9a227] transition-colors"
+              >
+                {about.email}
+              </a>
+            </div>
+            <div className="border-l border-[#c9a227] pl-4">
+              <h3 className="text-xs uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.address}</h3>
+              <p className="text-base md:text-lg text-[#f5f5f0]">{about.address}</p>
             </div>
           </div>
+        </ScrollReveal>
+      </section>
 
-          <div>
-            <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.hours}</h2>
-            <p className="text-lg text-[#f5f5f0]">{about.hours}</p>
-          </div>
-
-          <div>
-            <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.email}</h2>
-            <p className="text-lg text-[#f5f5f0]">{about.email}</p>
-          </div>
-
-          <div>
-            <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-2">{labels.address}</h2>
-            <p className="text-lg text-[#f5f5f0]">{about.address}</p>
-            <div className="mt-4 aspect-video w-full rounded-lg overflow-hidden border border-[#222]">
+      {/* Map block */}
+      <section className="px-6 pb-24">
+        <ScrollReveal>
+          <div className="mx-auto max-w-3xl">
+            <div className="aspect-video w-full rounded-lg overflow-hidden border border-[#c9a22733]">
               <iframe
                 src={about.mapEmbedUrl}
                 width="100%"
@@ -57,8 +131,8 @@ export default function AboutPage({
               />
             </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </ScrollReveal>
+      </section>
+    </main>
   );
 }

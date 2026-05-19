@@ -37,7 +37,8 @@
     "cover": "/images/journal/20260417-C.JPG",
     "content": "This Friday night, come and have a drink or much more, with Matthew, our latest one-night host. ",
     "contentZh": "本周五晚上，我们将迎来一日店长马修，来和他一醉方休吧！",
-    "coverIsLandscape": false
+    "coverIsLandscape": false,
+    "hidden": true
   },
   {
     "slug": "untold-surprise",
@@ -61,12 +62,12 @@
   },
   {
     "slug": "dancing-in-the-bubbles",
-    "title": "Dancing in the Bubbles",
-    "titleZh": "泡泡中的浪漫",
+    "title": "Bubble Romance",
+    "titleZh": "爱的泡泡",
     "date": "2025-05-23",
     "cover": "/images/journal/20250523-1.webp",
-    "content": "I'm dancing in the rain, singing in the rain.",
-    "contentZh": "让我在泡泡中短暂地感受一下爱情吧。",
+    "content": "I'm singing in the rain, and dancing in the rain.",
+    "contentZh": "你看，好多泡泡啊。",
     "coverIsLandscape": true
   }
 ]

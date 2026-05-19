@@ -35,6 +35,7 @@ export type JournalEntry = {
   content: string;
   contentZh: string;
   coverIsLandscape?: boolean;
+  hidden?: boolean;
 };
 
 export type GalleryPhoto = {
@@ -143,7 +144,9 @@ export async function getHeroSlidesZh(): Promise<HeroSlide[]> {
 
 export async function getJournalEntries(): Promise<JournalEntry[]> {
   const entries = await readJsonFile<JournalEntry[]>('updates.json');
-  return entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return entries
+    .filter((e) => !e.hidden)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 export async function getJournalEntriesZh(): Promise<JournalEntry[]> {

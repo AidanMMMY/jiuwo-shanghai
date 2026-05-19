@@ -73,10 +73,29 @@ export default function HeroCarousel({
         .scroll-hint {
           animation: scrollHintBounce 1.8s ease-in-out infinite;
         }
+        .rainbow-text {
+          font-weight: 600;
+          background-image: linear-gradient(60deg,
+            #ff3d6e 0%,  #ff8a2e 16%, #ffe14d 33%,
+            #2ed47a 50%, #4fb3ff 66%, #b46cff 83%,
+            #ff3d6e 100%);
+          background-size: 300% 100%;
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          -webkit-text-fill-color: transparent;
+          animation: rainbowFlow 10s linear infinite;
+          text-shadow: 0 0 1px rgba(255, 255, 255, 0.15);
+        }
+        @keyframes rainbowFlow {
+          0%   { background-position: 0% 50%; }
+          100% { background-position: 300% 50%; }
+        }
         @media (prefers-reduced-motion: reduce) {
           .tagline-shimmer { animation: none !important; -webkit-mask-image: none !important; mask-image: none !important; }
           .hero-intro-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
           .scroll-hint { animation: none !important; }
+          .rainbow-text { animation: none !important; }
         }
       `}</style>
       <div

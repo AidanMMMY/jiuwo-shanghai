@@ -25,7 +25,7 @@ export default function AboutPage({
   return (
     <main className="bg-[#0a0a0a] min-h-screen">
       {/* Hero block */}
-      <section className="relative w-full h-[70vh] md:h-[80vh] overflow-hidden">
+      <section className="relative w-full h-[55vh] md:h-[80vh] overflow-hidden">
         <Image
           src={about.heroImage}
           alt={labels.title}

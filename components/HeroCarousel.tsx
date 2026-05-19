@@ -18,6 +18,14 @@ export default function HeroCarousel({
   const step = 100 / slides.length;
   const fade = 100 / duration;
 
+  function renderIntro(text: string) {
+    return text.split(/(\[\[[^\]]+\]\])/).map((part, i) =>
+      part.startsWith('[[') && part.endsWith(']]')
+        ? <span key={i} className="rainbow-text">{part.slice(2, -2)}</span>
+        : part
+    );
+  }
+
   return (
     <section className="relative h-screen w-full overflow-hidden" style={{ height: '100svh' }}>
       {slides.map((slide, index) => (
@@ -100,7 +108,7 @@ export default function HeroCarousel({
         style={{ position: 'absolute', left: 0, right: 0, bottom: '4rem' }}
       >
         <p className="hero-intro-fade-up text-base tracking-wide text-[#f5f5f0] md:text-lg lg:text-xl">
-          {intro}
+          {renderIntro(intro)}
         </p>
       </div>
       <div

@@ -37,6 +37,7 @@ pnpm-debug.log*
 next-env.d.ts
 .worktrees/
 .claude/
+.superpowers/
 
 # vercel
 .vercel

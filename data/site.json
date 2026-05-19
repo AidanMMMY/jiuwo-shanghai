@@ -3,8 +3,8 @@
   "nameZh": "啾喔",
   "tagline": "Drink on me, the stars are watching",
   "taglineZh": "风月好看 人间浪漫",
-  "intro": "Tea, Wine, Cocktails, and MUCH MORE",
-  "introZh": "小酒吧，啥都有，全是朋友",
+  "intro": "Tea, Wine, Cocktails, and [[MUCH MORE]]",
+  "introZh": "小酒吧，啥都有，[[全是朋友]]",
   "nav": [
     { "label": "Home", "href": "/", "labelZh": "首页" },
     { "label": "Gallery", "href": "/gallery", "labelZh": "画册" },

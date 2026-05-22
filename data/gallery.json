@@ -77,8 +77,9 @@
     "titleZh": "Dex",
     "subtitle": "We decide to create an album for each of our best friends.",
     "subtitleZh": "我们的好朋友Dex。",
-    "cover": "/images/gallery/our-friend-dex/Dex-20260515-01.webp",
+    "cover": "/images/gallery/our-friend-dex/Dex-20260522-01.webp",
     "photos": [
+      { "src": "/images/gallery/our-friend-dex/Dex-20260522-01.webp", "alt": "Dex 07", "altZh": "Dex 07" },
       { "src": "/images/gallery/our-friend-dex/Dex-20260515-01.webp", "alt": "Dex 01", "altZh": "Dex 01" },
       { "src": "/images/gallery/our-friend-dex/Dex-20260515-02.webp", "alt": "Dex 02", "altZh": "Dex 02" },
       { "src": "/images/gallery/our-friend-dex/Dex-20260515-03.webp", "alt": "Dex 03", "altZh": "Dex 03" },
@@ -93,11 +94,15 @@
     "titleZh": "Zack",
     "subtitle": "We decide to create an album for each of our best friends.",
     "subtitleZh": "我们的好朋友Zack。",
-    "cover": "/images/gallery/our-friend-zack/Zack-20260422-01.webp",
+    "cover": "/images/gallery/our-friend-zack/Zack-20260520-01.webp",
     "photos": [
-      { "src": "/images/gallery/our-friend-zack/Zack-20260422-01.webp", "alt": "Zack 01", "altZh": "Zack 01" },
-      { "src": "/images/gallery/our-friend-zack/Zack-20260424-01.webp", "alt": "Zack 02", "altZh": "Zack 02" },
-      { "src": "/images/gallery/our-friend-zack/Zack-20260516-01.webp", "alt": "Zack 03", "altZh": "Zack 03" }
+      { "src": "/images/gallery/our-friend-zack/Zack-20260520-01.webp", "alt": "Zack 01", "altZh": "Zack 01" },
+      { "src": "/images/gallery/our-friend-zack/Zack-20260516-01.webp", "alt": "Zack 02", "altZh": "Zack 02" },
+      { "src": "/images/gallery/our-friend-zack/Zack-20260424-01.webp", "alt": "Zack 03", "altZh": "Zack 03" },
+      { "src": "/images/gallery/our-friend-zack/Zack-20260422-01.webp", "alt": "Zack 04", "altZh": "Zack 04" },
+      { "src": "/images/gallery/our-friend-zack/Zack-20260222-01.webp", "alt": "Zack 05", "altZh": "Zack 05" },
+      { "src": "/images/gallery/our-friend-zack/Zack-20260222-02.webp", "alt": "Zack 06", "altZh": "Zack 06" },
+      { "src": "/images/gallery/our-friend-zack/Zack-20260221-01.webp", "alt": "Zack 07", "altZh": "Zack 07" }
     ]
   },
   {

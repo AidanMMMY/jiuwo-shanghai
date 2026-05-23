@@ -1,12 +1,12 @@
 [
   {
-    "slug": "woof-woof",
-    "title": "Woof Woof",
-    "titleZh": "汪，汪！",
-    "date": "2026-05-22",
-    "cover": "/images/journal/20260522-02.webp",
-    "content": "Even the woof-woof's angling for a sip.",
-    "contentZh": "狗狗也想来一口。",
+    "slug": "aidan-birthday",
+    "title": "Aidan's Birthday",
+    "titleZh": "Aidan的生日",
+    "date": "2025-03-29",
+    "cover": "/images/journal/20250329-01.webp",
+    "content": "It's Aidan's birthday soon, he was so happy when he received this special gift.",
+    "contentZh": "我们的朋友Aidan要过生日啦，我们送了他一个特别的礼物，他非常开心。",
     "coverIsLandscape": true
   },
   {
@@ -14,9 +14,19 @@
     "title": "Big Guys Rule!",
     "titleZh": "熊王局",
     "date": "2026-05-23",
-    "cover": "/images/journal/20260523-01.jpg",
+    "cover": "/images/journal/20260523-02.webp",
     "content": "Another Saturday night, the big guys are in the house.",
     "contentZh": "一个重量级选手云集的周六晚。",
+    "coverIsLandscape": true
+  },
+  {
+    "slug": "woof-woof",
+    "title": "Woof Woof",
+    "titleZh": "汪，汪！",
+    "date": "2026-05-23",
+    "cover": "/images/journal/20260523-01.webp",
+    "content": "Even the woof-woof's angling for a sip.",
+    "contentZh": "狗狗也想来一口。",
     "coverIsLandscape": true
   },
   {

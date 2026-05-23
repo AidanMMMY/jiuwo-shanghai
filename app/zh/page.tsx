@@ -15,7 +15,7 @@ export default async function Page() {
     getSiteDataZh(),
     getHeroSlides(),
     getJournalEntriesZh(),
-    listEntries(3),
+    listEntries(5),
     countEntries(),
   ]);
 

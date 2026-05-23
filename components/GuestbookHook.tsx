@@ -16,7 +16,7 @@ export default function GuestbookHook({
   return (
     <Link href={href} className="block">
       <section className="bg-[#0a0a0a] px-6 py-16 md:py-20 cursor-pointer hover:bg-[#0d0d0d] transition-colors duration-300">
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto max-w-6xl">
           {/* Title */}
           <div className="text-center mb-10">
             <p className="text-xs uppercase tracking-[0.3em] text-[#c9a227] mb-2">
@@ -29,7 +29,7 @@ export default function GuestbookHook({
 
           {/* Recent entries */}
           {entries.length > 0 && (
-            <div className="space-y-6 mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-40 gap-y-6 mb-10">
               {entries.map((entry) => (
                 <div
                   key={entry.id}

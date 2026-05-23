@@ -3,8 +3,6 @@ import { listEntries, deleteEntry } from '@/lib/guestbook';
 import { StampIcon } from '@/components/StampIcon';
 import type { StampId } from '@/lib/guestbook';
 
-export const dynamic = 'force-dynamic';
-
 interface PageProps {
   searchParams: Promise<{ key?: string; id?: string }>;
 }

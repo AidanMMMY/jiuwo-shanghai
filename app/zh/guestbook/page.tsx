@@ -2,7 +2,7 @@ import GuestbookPage from '@/app/components/pages/GuestbookPage';
 import { listEntries, countEntries } from '@/lib/guestbook';
 import type { GuestbookLabels } from '@/lib/guestbook';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 const labels: GuestbookLabels = {
   title: '客言',

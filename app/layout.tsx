@@ -11,10 +11,7 @@ export const metadata: Metadata = {
   title: "Nameless Bar",
   description: "The night starts here.",
   icons: {
-    icon: [
-      { url: "/images/logo-for-dark.png", media: "(prefers-color-scheme: dark)" },
-      { url: "/images/logo-for-light.png", media: "(prefers-color-scheme: light)" },
-    ],
+    icon: "/images/logo-for-light.png",
   },
 };
 
@@ -26,6 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased`}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){function apply(){var dark=window.matchMedia('(prefers-color-scheme: dark)').matches;var href=dark?'/images/logo-for-dark.png':'/images/logo-for-light.png';document.querySelectorAll('link[rel="icon"]').forEach(function(el){el.parentNode.removeChild(el);});var link=document.createElement('link');link.rel='icon';link.href=href;document.head.appendChild(link);}apply();var mq=window.matchMedia('(prefers-color-scheme: dark)');mq.addEventListener?mq.addEventListener('change',apply):mq.addListener(apply);})();`,
+          }}
+        />
         {children}
       </body>
     </html>

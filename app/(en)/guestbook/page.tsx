@@ -22,17 +22,29 @@ const labels: GuestbookLabels = {
 };
 
 export default async function Page() {
-  const [entries, totalCount] = await Promise.all([
-    listEntries(),
-    countEntries(),
-  ]);
+  try {
+    const [entries, totalCount] = await Promise.all([
+      listEntries(),
+      countEntries(),
+    ]);
 
-  return (
-    <GuestbookPage
-      entries={entries}
-      totalCount={totalCount}
-      labels={labels}
-      locale="en"
-    />
-  );
+    return (
+      <GuestbookPage
+        entries={entries}
+        totalCount={totalCount}
+        labels={labels}
+        locale="en"
+      />
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return (
+      <main className="bg-[#0a0a0a] min-h-screen px-6 py-20">
+        <div className="mx-auto max-w-2xl">
+          <h1 className="text-2xl text-red-400 mb-4">Error loading guestbook</h1>
+          <pre className="text-sm text-[#a0a0a0] whitespace-pre-wrap">{message}</pre>
+        </div>
+      </main>
+    );
+  }
 }

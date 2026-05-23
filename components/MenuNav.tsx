@@ -1,8 +1,41 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import type { MenuCategory } from '@/lib/data';
 
 export default function MenuNav({ categories }: { categories: MenuCategory[] }) {
+  const [active, setActive] = useState<string | null>(categories[0]?.category ?? null);
+
+  useEffect(() => {
+    if (categories.length === 0) return;
+    const sections = categories
+      .map((cat) => document.getElementById(cat.category))
+      .filter((el): el is HTMLElement => el !== null);
+    if (sections.length === 0) return;
+
+    const visible = new Map<string, number>();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            visible.set(entry.target.id, entry.boundingClientRect.top);
+          } else {
+            visible.delete(entry.target.id);
+          }
+        }
+        if (visible.size > 0) {
+          const topmost = [...visible.entries()].reduce((a, b) => (a[1] < b[1] ? a : b))[0];
+          setActive(topmost);
+        }
+      },
+      { rootMargin: '-128px 0px -60% 0px', threshold: 0 }
+    );
+
+    sections.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [categories]);
+
   return (
     <nav className="sticky top-16 z-40 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-[#222] py-4 mb-12">
       <div className="mx-auto max-w-7xl px-6 flex gap-6 overflow-x-auto">
@@ -10,7 +43,9 @@ export default function MenuNav({ categories }: { categories: MenuCategory[] }) 
           <a
             key={cat.category}
             href={`#${cat.category}`}
-            className="whitespace-nowrap text-sm text-[#a0a0a0] hover:text-[#c9a227] transition-colors"
+            className={`whitespace-nowrap text-sm transition-colors ${
+              active === cat.category ? 'text-[#c9a227]' : 'text-[#a0a0a0] hover:text-[#c9a227]'
+            }`}
           >
             {cat.category}
           </a>

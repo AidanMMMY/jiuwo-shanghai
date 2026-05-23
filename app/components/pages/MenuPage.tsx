@@ -15,7 +15,7 @@ export default function MenuPage({
     <div className="pt-24 pb-20 bg-[#0a0a0a] min-h-screen">
       <div className="mx-auto max-w-7xl px-6">
         <h1 className="text-4xl font-semibold text-[#f5f5f0] tracking-wide mb-4">{title ?? 'Menu'}</h1>
-        <p className="text-sm text-[#a0a0a0] mb-8">{subtitle ?? 'Click a category below to jump'}</p>
+        <p className="text-sm text-[#a0a0a0] mb-8 whitespace-pre-line">{subtitle ?? 'Click a category below to jump'}</p>
       </div>
       <MenuNav categories={categories} />
       <div className="mx-auto max-w-7xl px-6">

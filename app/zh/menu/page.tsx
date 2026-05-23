@@ -3,5 +3,11 @@ import { getMenuZh } from '@/lib/data';
 
 export default async function Page() {
   const categories = await getMenuZh();
-  return <MenuPage categories={categories} title="酒单" subtitle="点击下方分类快速跳转" />;
+  return (
+    <MenuPage
+      categories={categories}
+      title="酒单"
+      subtitle="葡萄酒种类不少，白的红的都有，挑起来不会无聊。茶以岩茶、普洱和红茶为主，都是品质不错的。鸡尾酒也很有特色，每款背后都有个故事，喝的时候可以问问看。"
+    />
+  );
 }

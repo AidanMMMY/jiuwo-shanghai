@@ -1,4 +1,13 @@
-import { sql } from '@vercel/postgres';
+import { neon } from '@neondatabase/serverless';
+
+// Lazy env check — don't break the build if env var is missing in dev
+function getSql() {
+  const url = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+  if (!url) {
+    throw new Error('POSTGRES_URL or DATABASE_URL is not set');
+  }
+  return neon(url, { fullResults: true });
+}
 
 export const ALLOWED_STAMPS = ['monkey', 'pig', 'wolf', 'dog', 'bear'] as const;
 export type StampId = (typeof ALLOWED_STAMPS)[number];
@@ -68,54 +77,59 @@ export async function createEntry({
   email?: string;
   ipHash: string;
 }): Promise<GuestbookEntry> {
-  const result = await sql<GuestbookEntryRaw>`
+  const sql = getSql();
+  const result = await sql`
     INSERT INTO guestbook_entries (name, message, stamp, email, ip_hash)
     VALUES (${name}, ${message}, ${stamp}, ${email || null}, ${ipHash})
     RETURNING id, name, message, stamp, created_at
   `;
-  return result.rows[0];
+  return result.rows[0] as GuestbookEntry;
 }
 
 export async function listEntries(limit?: number): Promise<GuestbookEntry[]> {
-  const query = limit
-    ? sql<GuestbookEntry>`
+  const sql = getSql();
+  const result = limit
+    ? await sql`
         SELECT id, name, message, stamp, created_at
         FROM guestbook_entries
         ORDER BY created_at DESC
         LIMIT ${limit}
       `
-    : sql<GuestbookEntry>`
+    : await sql`
         SELECT id, name, message, stamp, created_at
         FROM guestbook_entries
         ORDER BY created_at DESC
       `;
-  const result = await query;
-  return result.rows;
+  return result.rows as GuestbookEntry[];
 }
 
 export async function countEntries(): Promise<number> {
-  const result = await sql<{ count: number }>`SELECT COUNT(*) as count FROM guestbook_entries`;
-  return Number(result.rows[0].count);
+  const sql = getSql();
+  const result = await sql`SELECT COUNT(*) as count FROM guestbook_entries`;
+  return Number((result.rows[0] as { count: number }).count);
 }
 
 export async function recentCountForIp(ipHash: string, minutes: number = 60): Promise<number> {
-  const result = await sql<{ count: number }>`
+  const sql = getSql();
+  const result = await sql`
     SELECT COUNT(*) as count
     FROM guestbook_entries
     WHERE ip_hash = ${ipHash}
-      AND created_at > NOW() - INTERVAL '${minutes} minutes'
+      AND created_at > NOW() - INTERVAL '1 minute' * ${minutes}
   `;
-  return Number(result.rows[0].count);
+  return Number((result.rows[0] as { count: number }).count);
 }
 
 export async function deleteEntry(id: number): Promise<boolean> {
+  const sql = getSql();
   const result = await sql`DELETE FROM guestbook_entries WHERE id = ${id}`;
   return result.rowCount ? result.rowCount > 0 : false;
 }
 
 export async function getEntryById(id: number): Promise<GuestbookEntryRaw | null> {
-  const result = await sql<GuestbookEntryRaw>`
+  const sql = getSql();
+  const result = await sql`
     SELECT * FROM guestbook_entries WHERE id = ${id}
   `;
-  return result.rows[0] || null;
+  return (result.rows[0] as GuestbookEntryRaw) || null;
 }

@@ -2,7 +2,7 @@ import { neon } from '@neondatabase/serverless';
 
 // Lazy env check — don't break the build if env var is missing in dev
 function getSql() {
-  const url = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+  const url = process.env.POSTGRES_URL || process.env.GUESTBOOK_POSTGRES_URL || process.env.DATABASE_URL;
   if (!url) {
     throw new Error('POSTGRES_URL or DATABASE_URL is not set');
   }

@@ -1,5 +1,15 @@
 [
   {
+    "slug": "big-guys-rule",
+    "title": "Big Guys Rule!",
+    "titleZh": "熊王局",
+    "date": "2026-05-23",
+    "cover": "/images/journal/20260523-01.jpg",
+    "content": "Another Saturday night, the big guys are in the house.",
+    "contentZh": "一个重量级选手云集的周六晚。",
+    "coverIsLandscape": true
+  },
+  {
     "slug": "single-glance-eternal",
     "title": "A Single Glance",
     "titleZh": "一眼万年",

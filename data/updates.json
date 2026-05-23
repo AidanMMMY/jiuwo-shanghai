@@ -1,5 +1,15 @@
 [
   {
+    "slug": "woof-woof",
+    "title": "Woof Woof",
+    "titleZh": "汪，汪！",
+    "date": "2026-05-22",
+    "cover": "/images/journal/20260522-02.webp",
+    "content": "Even the woof-woof's angling for a sip.",
+    "contentZh": "狗狗也想来一口。",
+    "coverIsLandscape": true
+  },
+  {
     "slug": "big-guys-rule",
     "title": "Big Guys Rule!",
     "titleZh": "熊王局",

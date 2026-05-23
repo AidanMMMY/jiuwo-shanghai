@@ -16,10 +16,15 @@ export default function GuestbookHook({
   return (
     <section className="bg-[#0a0a0a] px-6 py-16 md:py-20">
       <div className="mx-auto max-w-2xl">
-        {/* Count */}
-        <p className="text-center text-sm tracking-wider text-[#a0a0a0] mb-10">
-          —— {totalCount} {labels.countText} ——
-        </p>
+        {/* Title */}
+        <div className="text-center mb-10">
+          <p className="text-xs uppercase tracking-[0.3em] text-[#c9a227] mb-2">
+            Guestbook
+          </p>
+          <p className="text-sm tracking-wider text-[#a0a0a0]">
+            —— {totalCount} {labels.countText} ——
+          </p>
+        </div>
 
         {/* Recent entries */}
         {entries.length > 0 && (
@@ -29,9 +34,14 @@ export default function GuestbookHook({
                 key={entry.id}
                 className="flex items-start justify-between gap-4"
               >
-                <p className="text-base md:text-lg text-[#f5f5f0] leading-relaxed italic">
-                  &ldquo;{entry.message}&rdquo;
-                </p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-base md:text-lg text-[#f5f5f0] leading-relaxed italic">
+                    &ldquo;{entry.message}&rdquo;
+                  </p>
+                  <p className="text-sm text-[#c9a227] mt-1 tracking-wider">
+                    — {entry.name}
+                  </p>
+                </div>
                 <StampIcon
                   stamp={entry.stamp as StampId}
                   size={24}

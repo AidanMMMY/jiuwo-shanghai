@@ -10,6 +10,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Nameless Bar",
   description: "The night starts here.",
+  icons: {
+    icon: [
+      { url: "/images/logo-for-dark.png", media: "(prefers-color-scheme: dark)" },
+      { url: "/images/logo-for-light.png", media: "(prefers-color-scheme: light)" },
+    ],
+  },
 };
 
 export default function RootLayout({

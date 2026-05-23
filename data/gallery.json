@@ -1,5 +1,18 @@
 [
   {
+    "id": "bar-owner-tee",
+    "title": "Bar Owner Tee",
+    "titleZh": "老板，老王",
+    "subtitle": "One of the two owners of JIUWO, definitely deserves an album.",
+    "subtitleZh": "两个老板之一的老王，当然值得一个相册。",
+    "cover": "/images/gallery/bar-owner-tee/20250907-01.webp",
+    "photos": [
+      {"src": "/images/gallery/bar-owner-tee/20250907-01.webp", "alt": "Tee 01", "altZh": "Tee 01"},
+      {"src": "/images/gallery/bar-owner-tee/20250127-01.webp", "alt": "Tee 02", "altZh": "Tee 02"},
+      {"src": "/images/gallery/bar-owner-tee/20230627-01.webp", "alt": "Tee 03", "altZh": "Tee 03"}
+    ]
+  },
+  {
     "id": "time-in-the-corners",
     "title": "Time in the Corners",
     "titleZh": "角落里的时间",

@@ -1,5 +1,15 @@
 [
   {
+    "slug": "happy-sandwich",
+    "title": "Happy Sandwich",
+    "titleZh": "开心三明治",
+    "date": "2025-11-10",
+    "cover": "/images/journal/20251110-01.webp",
+    "content": "To be greeted by Will and Daisuke like this—front and back, all at once—isn't something that happens every day.",
+    "contentZh": "想被白二和大介这样前拥后抱吗，这种机会可不是天天有哦。",
+    "coverIsLandscape": true
+  },
+  {
     "slug": "oh-santa",
     "title": "Oh Santa!",
     "titleZh": "圣诞塔哥",

@@ -1,5 +1,19 @@
 [
   {
+    "id": "cross-fit-buddy",
+    "title": "CrossFit Buddy",
+    "titleZh": "CF小组",
+    "subtitle": "A crew of CrossFit regulars.",
+    "subtitleZh": "一帮热爱CF运动的朋友。",
+    "cover": "/images/gallery/cross-fit-buddy/20260523-01.webp",
+    "photos": [
+      {"src": "/images/gallery/cross-fit-buddy/20260523-01.webp", "alt": "CF 01", "altZh": "CF 01"},
+      {"src": "/images/gallery/cross-fit-buddy/20260221-01.webp", "alt": "CF 02", "altZh": "CF 02"},
+      {"src": "/images/gallery/cross-fit-buddy/20240810-01.webp", "alt": "CF 03", "altZh": "CF 03"},
+      {"src": "/images/gallery/cross-fit-buddy/20220828-01.webp", "alt": "CF 04", "altZh": "CF 04"}
+    ]
+  },
+  {
     "id": "bar-owner-tee",
     "title": "Bar Owner Tee",
     "titleZh": "老板，老王",

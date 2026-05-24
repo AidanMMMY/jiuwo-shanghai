@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import ScrollReveal from '@/components/ScrollReveal';
 import type { AboutData } from '@/lib/data';
 
@@ -25,19 +24,10 @@ export default function AboutPage({
   return (
     <main className="bg-[#0a0a0a] min-h-screen">
       {/* Hero block */}
-      <section className="relative w-full h-[55vh] md:h-[80vh] overflow-hidden">
-        <Image
-          src={about.heroImage}
-          alt={labels.title}
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
-          <h1 className="text-5xl md:text-7xl font-medium tracking-widest text-[#f5f5f0]">
-            {labels.title}
+      <section className="w-full bg-[#0a0a0a]">
+        <div className="flex flex-col items-center justify-center px-6 pt-24 md:pt-40 pb-16 md:pb-20 text-center">
+          <h1 className="text-5xl md:text-7xl font-medium tracking-widest text-[#f5f5f0] uppercase">
+            {labels.story}
           </h1>
           <p className="mt-4 text-xs md:text-sm uppercase tracking-[0.3em] text-[#c9a227]">
             {labels.subtitle}
@@ -46,11 +36,8 @@ export default function AboutPage({
       </section>
 
       {/* Story block */}
-      <section className="px-6 py-20 md:py-28">
+      <section className="px-6 pt-16 md:pt-20 pb-20 md:pb-28">
         <div className="mx-auto max-w-2xl">
-          <ScrollReveal>
-            <h2 className="text-sm uppercase tracking-widest text-[#a0a0a0] mb-8">{labels.story}</h2>
-          </ScrollReveal>
           <div className="space-y-8 text-lg md:text-xl text-[#a0a0a0] leading-relaxed">
             {firstParagraph && (
               <ScrollReveal delay={100}>

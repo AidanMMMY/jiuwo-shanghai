@@ -27,6 +27,11 @@ export default function GalleryGrid({ albums, basePath = '' }: { albums: Gallery
               <div className="absolute top-3 right-3 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium tracking-wide text-[#f5f5f0] tabular-nums backdrop-blur-sm">
                 {album.photos.length}
               </div>
+              {album.category && (
+                <div className="absolute top-3 left-3 rounded bg-black/25 px-2.5 py-1 text-[9px] uppercase tracking-[0.15em] text-[#808080] backdrop-blur-sm">
+                  {album.category}
+                </div>
+              )}
               <div className="absolute right-0 bottom-0 left-0 p-4">
                 <h3 className="text-lg font-medium text-[#f5f5f0]">{album.title}</h3>
                 {album.subtitle && (

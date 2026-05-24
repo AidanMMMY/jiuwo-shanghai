@@ -6,6 +6,8 @@
     "subtitle": "A crew of CrossFit regulars.",
     "subtitleZh": "一帮热爱CF运动的朋友。",
     "cover": "/images/gallery/cross-fit-buddy/20260524-06.webp",
+    "category": "Our Life",
+    "categoryZh": "我们的生活",
     "photos": [
       {"src": "/images/gallery/cross-fit-buddy/20260524-06.webp", "alt": "CF 01", "altZh": "CF 01"},
       {"src": "/images/gallery/cross-fit-buddy/20260524-05.webp", "alt": "CF 02", "altZh": "CF 02"},
@@ -26,6 +28,8 @@
     "subtitle": "We decide to create an album for each of our best friends.",
     "subtitleZh": "我们的好朋友老王。",
     "cover": "/images/gallery/our-friend-tee/20250907-01.webp",
+    "category": "Our Friends",
+    "categoryZh": "我们的朋友",
     "photos": [
       {"src": "/images/gallery/our-friend-tee/20250907-01.webp", "alt": "Tee 01", "altZh": "Tee 01"},
       {"src": "/images/gallery/our-friend-tee/20250127-01.webp", "alt": "Tee 02", "altZh": "Tee 02"},
@@ -39,6 +43,8 @@
     "subtitle": "No words. Just us.",
     "subtitleZh": "你不言，我不语。",
     "cover": "/images/gallery/time-in-the-corners/time-in-the-corners-004.webp",
+    "category": "Jiuwo Stories",
+    "categoryZh": "啾喔的故事",
     "photos": [
       {"src": "/images/gallery/time-in-the-corners/time-in-the-corners-004.webp", "alt": "004", "altZh": "004"},
       {"src": "/images/gallery/time-in-the-corners/time-in-the-corners-001.webp", "alt": "001", "altZh": "001"},
@@ -53,6 +59,8 @@
     "subtitle": "Two owners and friends out enjoying the nature in Hangzhou.",
     "subtitleZh": "俩老板和朋友周末去杭州玩儿得很开心。",
     "cover": "/images/gallery/weekend-trip-to-hangzhou/20260523-11.webp",
+    "category": "Our Life",
+    "categoryZh": "我们的生活",
     "photos": [
       {"src": "/images/gallery/weekend-trip-to-hangzhou/20260523-11.webp", "alt": "Hangzhou 11", "altZh": "杭州 11"},
       {"src": "/images/gallery/weekend-trip-to-hangzhou/20260523-10.webp", "alt": "Hangzhou 10", "altZh": "杭州 10"},
@@ -74,6 +82,8 @@
     "subtitle": "We decide to create an album for each of our best friends.",
     "subtitleZh": "我们的好朋友Zack。",
     "cover": "/images/gallery/our-friend-zack/Zack-20260520-01.webp",
+    "category": "Our Friends",
+    "categoryZh": "我们的朋友",
     "photos": [
       {"src": "/images/gallery/our-friend-zack/Zack-20260520-01.webp", "alt": "Zack 01", "altZh": "Zack 01"},
       {"src": "/images/gallery/our-friend-zack/Zack-20260516-01.webp", "alt": "Zack 02", "altZh": "Zack 02"},
@@ -91,6 +101,8 @@
     "subtitle": "We decide to create an album for each of our best friends.",
     "subtitleZh": "我们的好朋友Dex。",
     "cover": "/images/gallery/our-friend-dex/Dex-20260522-01.webp",
+    "category": "Our Friends",
+    "categoryZh": "我们的朋友",
     "photos": [
       {"src": "/images/gallery/our-friend-dex/Dex-20260522-01.webp", "alt": "Dex 07", "altZh": "Dex 07"},
       {"src": "/images/gallery/our-friend-dex/Dex-20260515-01.webp", "alt": "Dex 01", "altZh": "Dex 01"},
@@ -108,6 +120,8 @@
     "subtitle": "We decide to create an album for each of our best friends.",
     "subtitleZh": "我们的好朋友Josh Hu。",
     "cover": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-01.jpg",
+    "category": "Our Friends",
+    "categoryZh": "我们的朋友",
     "photos": [
       {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-01.jpg", "alt": "Josh Hu 01", "altZh": "Josh Hu 01"},
       {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-02.jpg", "alt": "Josh Hu 02", "altZh": "Josh Hu 02"},
@@ -124,6 +138,8 @@
     "subtitle": "Photography by our friend Haoyang.",
     "subtitleZh": "好朋友一号羊的摄影集。",
     "cover": "/images/gallery/after-dark/After-Dark-20201223-01.jpg",
+    "category": "Photography",
+    "categoryZh": "摄影作品",
     "photos": [
       {"src": "/images/gallery/after-dark/After-Dark-20201223-01.jpg", "alt": "After Dark 2020-12-23 01", "altZh": "夜 2020-12-23 01"},
       {"src": "/images/gallery/after-dark/After-Dark-20220122-01.jpg", "alt": "After Dark 2022-01-22 01", "altZh": "夜 2022-01-22 01"},
@@ -163,6 +179,8 @@
     "subtitle": "We decide to create an album for each of our best friends.",
     "subtitleZh": "我们的好朋友，小马。",
     "cover": "/images/gallery/our-friend-phillip/Phillip-20260515-01.webp",
+    "category": "Our Friends",
+    "categoryZh": "我们的朋友",
     "photos": [
       {"src": "/images/gallery/our-friend-phillip/Phillip-20260515-01.webp", "alt": "Phillip 01", "altZh": "小马 01"},
       {"src": "/images/gallery/our-friend-phillip/Phillip-20260515-02.webp", "alt": "Phillip 02", "altZh": "小马 02"},
@@ -180,6 +198,8 @@
     "subtitle": "Posters from past special events with our special friends.",
     "subtitleZh": "来看看我们历次一日店长活动的海报吧。",
     "cover": "/images/gallery/one-night-host/20251212.JPG",
+    "category": "Jiuwo Stories",
+    "categoryZh": "啾喔的故事",
     "photos": [
       {"src": "/images/gallery/one-night-host/20251212.JPG", "alt": "2025-12-12", "altZh": "2025年12月12日"},
       {"src": "/images/gallery/one-night-host/20251031.JPG", "alt": "2025-10-31", "altZh": "2025年10月31日"},

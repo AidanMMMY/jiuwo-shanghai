@@ -52,6 +52,8 @@ export type GalleryAlbum = {
   subtitleZh: string;
   cover: string;
   photos: GalleryPhoto[];
+  category: string;
+  categoryZh: string;
 };
 
 export type MenuItem = {
@@ -106,6 +108,7 @@ function localizeGallery(albums: GalleryAlbum[]): GalleryAlbum[] {
     ...a,
     title: a.titleZh,
     subtitle: a.subtitleZh,
+    category: a.categoryZh,
     photos: a.photos.map((p) => ({ ...p, alt: p.altZh })),
   }));
 }

@@ -1,5 +1,20 @@
 [
   {
+    "id": "our-friend-df",
+    "title": "Our Friend D.F",
+    "titleZh": "豆腐",
+    "subtitle": "We decide to create an album for each of our best friends.",
+    "subtitleZh": "我们的好朋友豆腐。",
+    "cover": "/images/gallery/our-friend-df/20260524-05.webp",
+    "photos": [
+      {"src": "/images/gallery/our-friend-df/20260524-05.webp", "alt": "D.F 01", "altZh": "D.F 01"},
+      {"src": "/images/gallery/our-friend-df/20260524-04.webp", "alt": "D.F 02", "altZh": "D.F 02"},
+      {"src": "/images/gallery/our-friend-df/20260524-03.webp", "alt": "D.F 03", "altZh": "D.F 03"},
+      {"src": "/images/gallery/our-friend-df/20260524-02.webp", "alt": "D.F 04", "altZh": "D.F 04"},
+      {"src": "/images/gallery/our-friend-df/20260524-01.webp", "alt": "D.F 05", "altZh": "D.F 05"}
+    ]
+  },
+  {
     "id": "cross-fit-buddy",
     "title": "CrossFit Buddy",
     "titleZh": "CF小组",

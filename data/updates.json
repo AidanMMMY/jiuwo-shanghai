@@ -1,5 +1,15 @@
 [
   {
+    "slug": "cf-4-drink",
+    "title": "CF 4 Drink",
+    "titleZh": "CF喝酒两不误",
+    "date": "2025-12-24",
+    "cover": "/images/journal/20251224-01.webp",
+    "content": "Yes it's Christmas time. We train. We drink. Both, non-negotiable.",
+    "contentZh": "圣诞来了，我们CF小组，练是要练的，酒也是要喝的。",
+    "coverIsLandscape": true
+  },
+  {
     "slug": "aidan-birthday",
     "title": "Aidan's Birthday",
     "titleZh": "Aidan的生日",

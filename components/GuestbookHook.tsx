@@ -14,9 +14,9 @@ export default function GuestbookHook({
   href: string;
 }) {
   return (
-    <Link href={href} className="block">
-      <section className="bg-[#0a0a0a] px-6 py-16 md:py-20 cursor-pointer hover:bg-[#0d0d0d] transition-colors duration-300">
-        <div className="mx-auto max-w-6xl">
+    <section className="bg-[#0a0a0a] px-6 py-16 md:py-20 hover:bg-[#0d0d0d] transition-colors duration-300">
+      <div className="mx-auto max-w-6xl">
+        <Link href={href} className="block">
           {/* Title */}
           <div className="text-center mb-10">
             <p className="text-xs uppercase tracking-[0.3em] text-[#c9a227] mb-2">
@@ -52,15 +52,18 @@ export default function GuestbookHook({
               ))}
             </div>
           )}
+        </Link>
 
-          {/* CTA */}
-          <div className="text-center">
-            <span className="inline-block text-sm text-[#c9a227] tracking-wider">
-              {labels.cta} →
-            </span>
-          </div>
+        {/* CTA — opens write panel */}
+        <div className="text-center">
+          <Link
+            href={`${href}?write=1`}
+            className="inline-block text-sm text-[#c9a227] tracking-wider hover:underline"
+          >
+            {labels.cta} →
+          </Link>
         </div>
-      </section>
-    </Link>
+      </div>
+    </section>
   );
 }

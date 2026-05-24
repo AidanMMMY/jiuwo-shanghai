@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { StampIcon } from '@/components/StampIcon';
 import { StampPanel } from '@/components/StampPanel';
 import type { GuestbookEntry, StampId, GuestbookLabels } from '@/lib/guestbook';
@@ -40,6 +40,16 @@ export default function GuestbookPage({
   const [entries, setEntries] = useState<GuestbookEntry[]>(initialEntries);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [animatingEntryId, setAnimatingEntryId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('write') === '1') {
+      setIsPanelOpen(true);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('write');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
 
   const handleNewEntry = useCallback((entry: GuestbookEntry) => {
     setEntries((prev) => [entry, ...prev]);

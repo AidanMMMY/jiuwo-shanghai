@@ -1,6 +1,5 @@
 [
   { "src": "/images/hero/hero-01.webp", "alt": "hero-01", "altZh": "大图1" },
-  { "src": "/images/hero/hero-02.webp", "alt": "hero-02", "altZh": "大图2" },
   { "src": "/images/hero/hero-03.webp", "alt": "hero-03", "altZh": "大图3" },
   { "src": "/images/hero/hero-04.webp", "alt": "hero-04", "altZh": "大图4" },
   { "src": "/images/hero/hero-05.webp", "alt": "hero-05", "altZh": "大图5" },
@@ -8,5 +7,6 @@
   { "src": "/images/hero/hero-07.webp", "alt": "hero-07", "altZh": "大图7" },
   { "src": "/images/hero/hero-08.webp", "alt": "hero-08", "altZh": "大图8" },
   { "src": "/images/hero/hero-09.webp", "alt": "hero-09", "altZh": "大图9" },
-  { "src": "/images/hero/hero-10.webp", "alt": "hero-10", "altZh": "大图10" }
+  { "src": "/images/hero/hero-10.webp", "alt": "hero-10", "altZh": "大图10" },
+  { "src": "/images/hero/hero-02.webp", "alt": "hero-02", "altZh": "大图2" }
 ]

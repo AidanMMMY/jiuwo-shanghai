@@ -1,5 +1,15 @@
 [
   {
+    "slug": "oh-santa",
+    "title": "Oh Santa!",
+    "titleZh": "圣诞塔哥",
+    "date": "2025-12-24",
+    "cover": "/images/journal/20251224-02.webp",
+    "content": "Merry Christmas! Have anything in mind that you hope to get from Santa Robin?",
+    "contentZh": "圣诞快乐！有想从圣诞塔哥这里得到的礼物吗？",
+    "coverIsLandscape": true
+  },
+  {
     "slug": "cf-4-drink",
     "title": "CF 4 Drink",
     "titleZh": "CF喝酒两不误",

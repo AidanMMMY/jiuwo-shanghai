@@ -25,7 +25,7 @@ export default function AboutPage({
     <main className="bg-[#0a0a0a] min-h-screen">
       {/* Hero block */}
       <section className="w-full bg-[#0a0a0a]">
-        <div className="flex flex-col items-center justify-center px-6 pt-24 md:pt-40 pb-16 md:pb-20 text-center">
+        <div className="flex flex-col items-center justify-center px-6 pt-32 md:pt-40 pb-20 md:pb-24 text-center">
           <h1 className="text-5xl md:text-7xl font-medium tracking-widest text-[#f5f5f0] uppercase">
             {labels.story}
           </h1>
@@ -36,7 +36,7 @@ export default function AboutPage({
       </section>
 
       {/* Story block */}
-      <section className="px-6 pt-16 md:pt-20 pb-20 md:pb-28">
+      <section className="px-6 pt-20 md:pt-24 pb-20 md:pb-28">
         <div className="mx-auto max-w-2xl">
           <div className="space-y-8 text-lg md:text-xl text-[#a0a0a0] leading-relaxed">
             {firstParagraph && (

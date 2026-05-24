@@ -5,25 +5,31 @@
     "titleZh": "CF小组",
     "subtitle": "A crew of CrossFit regulars.",
     "subtitleZh": "一帮热爱CF运动的朋友。",
-    "cover": "/images/gallery/cross-fit-buddy/20260523-01.webp",
+    "cover": "/images/gallery/cross-fit-buddy/20260524-01.webp",
     "photos": [
-      {"src": "/images/gallery/cross-fit-buddy/20260523-01.webp", "alt": "CF 01", "altZh": "CF 01"},
-      {"src": "/images/gallery/cross-fit-buddy/20260221-01.webp", "alt": "CF 02", "altZh": "CF 02"},
-      {"src": "/images/gallery/cross-fit-buddy/20240810-01.webp", "alt": "CF 03", "altZh": "CF 03"},
-      {"src": "/images/gallery/cross-fit-buddy/20220828-01.webp", "alt": "CF 04", "altZh": "CF 04"}
+      {"src": "/images/gallery/cross-fit-buddy/20260524-01.webp", "alt": "CF 01", "altZh": "CF 01"},
+      {"src": "/images/gallery/cross-fit-buddy/20260524-02.webp", "alt": "CF 02", "altZh": "CF 02"},
+      {"src": "/images/gallery/cross-fit-buddy/20260524-03.webp", "alt": "CF 03", "altZh": "CF 03"},
+      {"src": "/images/gallery/cross-fit-buddy/20260524-04.webp", "alt": "CF 04", "altZh": "CF 04"},
+      {"src": "/images/gallery/cross-fit-buddy/20260524-05.webp", "alt": "CF 05", "altZh": "CF 05"},
+      {"src": "/images/gallery/cross-fit-buddy/20260524-06.webp", "alt": "CF 06", "altZh": "CF 06"},
+      {"src": "/images/gallery/cross-fit-buddy/20260523-01.webp", "alt": "CF 07", "altZh": "CF 07"},
+      {"src": "/images/gallery/cross-fit-buddy/20260221-01.webp", "alt": "CF 08", "altZh": "CF 08"},
+      {"src": "/images/gallery/cross-fit-buddy/20240810-01.webp", "alt": "CF 09", "altZh": "CF 09"},
+      {"src": "/images/gallery/cross-fit-buddy/20220828-01.webp", "alt": "CF 10", "altZh": "CF 10"}
     ]
   },
   {
-    "id": "bar-owner-tee",
-    "title": "Bar Owner Tee",
-    "titleZh": "老板，老王",
-    "subtitle": "One of the two owners of JIUWO, definitely deserves an album.",
-    "subtitleZh": "两个老板之一的老王，当然值得一个相册。",
-    "cover": "/images/gallery/bar-owner-tee/20250907-01.webp",
+    "id": "our-friend-tee",
+    "title": "Our Friend Tee",
+    "titleZh": "老王",
+    "subtitle": "We decide to create an album for each of our best friends.",
+    "subtitleZh": "我们的好朋友老王。",
+    "cover": "/images/gallery/our-friend-tee/20250907-01.webp",
     "photos": [
-      {"src": "/images/gallery/bar-owner-tee/20250907-01.webp", "alt": "Tee 01", "altZh": "Tee 01"},
-      {"src": "/images/gallery/bar-owner-tee/20250127-01.webp", "alt": "Tee 02", "altZh": "Tee 02"},
-      {"src": "/images/gallery/bar-owner-tee/20230627-01.webp", "alt": "Tee 03", "altZh": "Tee 03"}
+      {"src": "/images/gallery/our-friend-tee/20250907-01.webp", "alt": "Tee 01", "altZh": "Tee 01"},
+      {"src": "/images/gallery/our-friend-tee/20250127-01.webp", "alt": "Tee 02", "altZh": "Tee 02"},
+      {"src": "/images/gallery/our-friend-tee/20230627-01.webp", "alt": "Tee 03", "altZh": "Tee 03"}
     ]
   },
   {

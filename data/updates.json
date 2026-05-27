@@ -1,5 +1,15 @@
 [
   {
+    "slug": "something-buried",
+    "title": "Something Buried",
+    "titleZh": "深藏的",
+    "date": "2026-05-27",
+    "cover": "/images/journal/20260527-01.webp",
+    "content": "Hard to believe it's been seven years. Time moves fast. We've changed, or maybe we haven't—who's to say?",
+    "contentZh": "七年没见，时间快得不像真的。我们变了，又好像没变——变没变呢，谁知道。",
+    "coverIsLandscape": true
+  },
+  {
     "slug": "happy-sandwich",
     "title": "Happy Sandwich",
     "titleZh": "开心三明治",

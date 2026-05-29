@@ -9,7 +9,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: 'JIUWO 啾喔 — 上海鸡尾酒吧',
   description:
-    '上海巨鹿路上的鸡尾酒吧。自然酒、手工鸡尾酒、岩茶。温馨舒适的空间，周二至周日晚上7点营业。',
+    'JIUWO 啾喔，上海巨鹿路上一家友好的鸡尾酒吧。自然酒、手工鸡尾酒、岩茶，温馨 welcoming 的空间。周二至周日晚上7点营业。',
   alternates: { canonical: '/zh' },
   openGraph: {
     locale: 'zh_CN',

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     default: "JIUWO — Shanghai Cocktail Bar & Wine Lounge",
   },
   description:
-    "A queer-friendly cocktail bar on Julu Road, Shanghai. Natural wines, craft cocktails, and rock oolong tea in a warm, intimate space. Open Tue–Sun 7pm–2am.",
+    "JIUWO is a queer-friendly cocktail bar on Julu Road in Shanghai. Natural wines, craft cocktails, rock oolong tea, and a welcoming space for everyone. Open Tue–Sun 7pm–2am.",
   keywords: [
     "Shanghai bar",
     "cocktail bar Shanghai",
@@ -26,7 +26,12 @@ export const metadata: Metadata = {
     "Shanghai nightlife",
     "JIUWO",
     "queer friendly",
+    "queer friendly bar Shanghai",
+    "gay bar Shanghai",
+    "LGBTQ bar Shanghai",
+    "LGBT friendly bar",
     "巨鹿路酒吧",
+    "上海酒吧",
   ],
   authors: [{ name: "JIUWO" }],
   openGraph: {

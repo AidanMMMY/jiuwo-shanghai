@@ -5,7 +5,7 @@ import { getAboutDataZh } from '@/lib/data';
 export const metadata: Metadata = {
   title: '关于我们',
   description:
-    'JIUWO 啾喔，上海巨鹿路鸡尾酒吧，2022年创立。周二至周日 19:00–02:00 营业。自然酒、手工鸡尾酒、岩茶。',
+    'JIUWO 啾喔，上海巨鹿路上一家友好开放的鸡尾酒吧，2022年创立。上海 LGBTQ 社群的温馨聚集地。周二至周日 19:00–02:00 营业。',
   alternates: { canonical: '/zh/about' },
 };
 
@@ -21,7 +21,7 @@ function generateJsonLd(about: {
     name: 'JIUWO',
     alternateName: '啾喔',
     description:
-      '上海巨鹿路上的一家鸡尾酒吧。自然酒、手工鸡尾酒、岩茶。温馨舒适的空间。',
+      '上海巨鹿路上一家友好开放的鸡尾酒吧。上海 LGBTQ 社群的温馨聚集地。自然酒、手工鸡尾酒、岩茶。',
     url: 'https://jiuwoshanghai.net',
     image: `https://jiuwoshanghai.net${about.heroImage}`,
     address: {
@@ -49,6 +49,10 @@ function generateJsonLd(about: {
     email: about.email,
     telephone: '+86-21-0000-0000',
     sameAs: ['https://instagram.com/jiuwoshanghai'],
+    audience: {
+      '@type': 'PeopleAudience',
+      audienceType: 'LGBTQ+ friendly',
+    },
   };
 }
 

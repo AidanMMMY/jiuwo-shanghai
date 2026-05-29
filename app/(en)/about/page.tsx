@@ -5,7 +5,7 @@ import { getAboutData } from '@/lib/data';
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'JIUWO is a cocktail bar on Julu Road, Shanghai, founded in August 2022. Open Tue–Sun 7pm–2am. Natural wines, craft cocktails, and rock oolong tea.',
+    'JIUWO is a queer-friendly cocktail bar on Julu Road, Shanghai, founded in August 2022. A welcoming space for Shanghai\'s LGBTQ community. Open Tue–Sun 7pm–2am.',
   alternates: { canonical: '/about' },
 };
 
@@ -21,7 +21,7 @@ function generateJsonLd(about: {
     name: 'JIUWO',
     alternateName: '啾喔',
     description:
-      'A queer-friendly cocktail bar on Julu Road, Shanghai. Natural wines, craft cocktails, and rock oolong tea in a warm, intimate space.',
+      'A queer-friendly cocktail bar on Julu Road, Shanghai. A welcoming gathering place for the LGBTQ community. Natural wines, craft cocktails, and rock oolong tea.',
     url: 'https://jiuwoshanghai.net',
     image: `https://jiuwoshanghai.net${about.heroImage}`,
     address: {
@@ -49,6 +49,10 @@ function generateJsonLd(about: {
     email: about.email,
     telephone: '+86-21-0000-0000',
     sameAs: ['https://instagram.com/jiuwoshanghai'],
+    audience: {
+      '@type': 'PeopleAudience',
+      audienceType: 'LGBTQ+ friendly',
+    },
   };
 }
 

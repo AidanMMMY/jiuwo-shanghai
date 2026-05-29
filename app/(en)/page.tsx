@@ -7,6 +7,8 @@ import type { GuestbookHookLabels } from '@/lib/guestbook';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
+  description:
+    "JIUWO — a queer-friendly cocktail bar on Julu Road, Shanghai. Natural wines, craft cocktails, and a warm, welcoming space. Open Tue–Sun 7pm–2am.",
   alternates: { canonical: '/' },
 };
 

@@ -1,5 +1,13 @@
+import type { Metadata } from 'next';
 import GalleryPage from '@/app/components/pages/GalleryPage';
 import { getGalleryAlbums } from '@/lib/data';
+
+export const metadata: Metadata = {
+  title: 'Gallery',
+  description:
+    'Photo gallery of JIUWO — snapshots of friends, event posters, photography by guests, and the joy of people coming together.',
+  alternates: { canonical: '/gallery' },
+};
 
 export default async function Page() {
   const albums = await getGalleryAlbums();

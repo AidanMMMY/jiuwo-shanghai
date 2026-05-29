@@ -1,8 +1,15 @@
+import type { Metadata } from 'next';
 import GuestbookPage from '@/app/components/pages/GuestbookPage';
 import { listEntries, countEntries } from '@/lib/guestbook';
 import type { GuestbookLabels } from '@/lib/guestbook';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: 'Guestbook',
+  description: 'Leave your mark on the JIUWO guestbook. See what others have shared.',
+  alternates: { canonical: '/guestbook' },
+};
 
 const labels: GuestbookLabels = {
   title: 'GUESTBOOK',

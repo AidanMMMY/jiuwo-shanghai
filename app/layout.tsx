@@ -10,10 +10,58 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Nameless Bar",
-  description: "The night starts here.",
+  metadataBase: new URL("https://jiuwoshanghai.net"),
+  title: {
+    template: "%s | JIUWO",
+    default: "JIUWO — Shanghai Cocktail Bar & Wine Lounge",
+  },
+  description:
+    "A queer-friendly cocktail bar on Julu Road, Shanghai. Natural wines, craft cocktails, and rock oolong tea in a warm, intimate space. Open Tue–Sun 7pm–2am.",
+  keywords: [
+    "Shanghai bar",
+    "cocktail bar Shanghai",
+    "Julu Road",
+    "wine bar",
+    "natural wine",
+    "Shanghai nightlife",
+    "JIUWO",
+    "queer friendly",
+    "巨鹿路酒吧",
+  ],
+  authors: [{ name: "JIUWO" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "JIUWO",
+    images: [
+      {
+        url: "/images/og-default.jpg",
+        width: 1200,
+        height: 630,
+        alt: "JIUWO — Shanghai Cocktail Bar",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@jiuwoshanghai",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: "/images/logo-for-light.png",
+  },
+  verification: {
+    google: "google-site-verification-code",
   },
 };
 

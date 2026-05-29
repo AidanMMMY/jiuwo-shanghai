@@ -1,8 +1,15 @@
+import type { Metadata } from 'next';
 import GuestbookPage from '@/app/components/pages/GuestbookPage';
 import { listEntries, countEntries } from '@/lib/guestbook';
 import type { GuestbookLabels } from '@/lib/guestbook';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: '客言',
+  description: '在 JIUWO 客言墙上留下你的痕迹，看看其他人分享了什么。',
+  alternates: { canonical: '/zh/guestbook' },
+};
 
 const labels: GuestbookLabels = {
   title: '客言',

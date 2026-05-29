@@ -1,9 +1,14 @@
+import type { Metadata } from 'next';
 import HomePage from '@/app/components/pages/HomePage';
 import { getHeroSlides, getJournalEntries, getSiteData } from '@/lib/data';
 import { listEntries, countEntries } from '@/lib/guestbook';
 import type { GuestbookHookLabels } from '@/lib/guestbook';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 const guestbookLabels: GuestbookHookLabels = {
   countText: 'stamps so far',

@@ -1,5 +1,13 @@
+import type { Metadata } from 'next';
 import MenuPage from '@/app/components/pages/MenuPage';
 import { getMenu } from '@/lib/data';
+
+export const metadata: Metadata = {
+  title: 'Menu',
+  description:
+    'JIUWO menu — natural wines, craft cocktails, and rock oolong tea. Curated drinks with stories behind every cocktail.',
+  alternates: { canonical: '/menu' },
+};
 
 export default async function Page() {
   const categories = await getMenu();

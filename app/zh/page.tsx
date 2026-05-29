@@ -7,7 +7,7 @@ import type { GuestbookHookLabels } from '@/lib/guestbook';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'JIUWO 啾喔 — 上海鸡尾酒吧',
+  title: '啾喔 — 上海葡萄酒、鸡尾酒吧',
   description:
     'JIUWO 啾喔，上海巨鹿路上一家友好的鸡尾酒吧。自然酒、手工鸡尾酒、岩茶，温馨 welcoming 的空间。周二至周日晚上7点营业。',
   alternates: { canonical: '/zh' },

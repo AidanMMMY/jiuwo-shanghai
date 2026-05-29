@@ -13,7 +13,6 @@ const inter = Inter({
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteDataZh();
   return {
-    title: site.name,
     description: site.tagline,
   };
 }

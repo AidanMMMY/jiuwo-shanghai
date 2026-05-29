@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://jiuwoshanghai.net"),
   title: {
     template: "%s | JIUWO",
-    default: "JIUWO — Shanghai Cocktail Bar & Wine Lounge",
+    default: "JIUWO — Shanghai Wine & Cocktail Bar",
   },
   description:
     "JIUWO is a queer-friendly cocktail bar on Julu Road in Shanghai. Natural wines, craft cocktails, rock oolong tea, and a welcoming space for everyone. Open Tue–Sun 7pm–2am.",

@@ -1,5 +1,32 @@
 [
   {
+    "id": "our-friend-josh-hu",
+    "title": "Our Friend Josh Hu",
+    "titleZh": "Josh Hu",
+    "subtitle": "We decide to create an album for each of our best friends.",
+    "subtitleZh": "我们的好朋友Josh Hu。",
+    "cover": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260530-06.webp",
+    "category": "Our Friends",
+    "categoryZh": "我们的朋友",
+    "friendSocial": {
+      "instagram": "Josh_hmy",
+      "xiaohongshu": "https://www.xiaohongshu.com/user/profile/5620796a58944623685e460c?xsec_token=YBT9g6v0lhSnraXMSBRDX2miU8SPdgjUkYew2GPt1XPL4=&xsec_source=app_share&xhsshare=WeixinSession&appuid=5e1a12be00000000010040c5&apptime=1780149793&share_id=5a7cfb3340ee44c3a06b30e461a1b105&wechatWid=3697c9d7c2cc0e1be7e99f292fe6cc25&wechatOrigin=menu"
+    },
+    "photos": [
+      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260530-06.webp", "alt": "Josh Hu 01", "altZh": "Josh Hu 01"},
+      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260530-04.webp", "alt": "Josh Hu 02", "altZh": "Josh Hu 02"},
+      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260530-03.webp", "alt": "Josh Hu 03", "altZh": "Josh Hu 03"},
+      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260530-02.webp", "alt": "Josh Hu 04", "altZh": "Josh Hu 04"},
+      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260530-01.webp", "alt": "Josh Hu 05", "altZh": "Josh Hu 05"},
+      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-06.jpg", "alt": "Josh Hu 06", "altZh": "Josh Hu 06"},
+      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-05.jpg", "alt": "Josh Hu 07", "altZh": "Josh Hu 07"},
+      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-04.jpg", "alt": "Josh Hu 08", "altZh": "Josh Hu 08"},
+      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-03.jpg", "alt": "Josh Hu 09", "altZh": "Josh Hu 09"},
+      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-02.jpg", "alt": "Josh Hu 10", "altZh": "Josh Hu 10"},
+      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-01.jpg", "alt": "Josh Hu 11", "altZh": "Josh Hu 11"}
+    ]
+  },
+  {
     "id": "our-friend-pp",
     "title": "Our Friend PP",
     "titleZh": "PP",
@@ -155,28 +182,6 @@
       {"src": "/images/gallery/our-friend-dex/Dex-20260515-04.webp", "alt": "Dex 04", "altZh": "Dex 04"},
       {"src": "/images/gallery/our-friend-dex/Dex-20260515-05.webp", "alt": "Dex 05", "altZh": "Dex 05"},
       {"src": "/images/gallery/our-friend-dex/Dex-20260515-06.webp", "alt": "Dex 06", "altZh": "Dex 06"}
-    ]
-  },
-  {
-    "id": "our-friend-josh-hu",
-    "title": "Our Friend Josh Hu",
-    "titleZh": "Josh Hu",
-    "subtitle": "We decide to create an album for each of our best friends.",
-    "subtitleZh": "我们的好朋友Josh Hu。",
-    "cover": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-01.jpg",
-    "category": "Our Friends",
-    "categoryZh": "我们的朋友",
-    "friendSocial": {
-      "instagram": "Josh_hmy",
-      "xiaohongshu": "https://www.xiaohongshu.com/user/profile/5620796a58944623685e460c?xsec_token=YBT9g6v0lhSnraXMSBRDX2miU8SPdgjUkYew2GPt1XPL4=&xsec_source=app_share&xhsshare=WeixinSession&appuid=5e1a12be00000000010040c5&apptime=1780149793&share_id=5a7cfb3340ee44c3a06b30e461a1b105&wechatWid=3697c9d7c2cc0e1be7e99f292fe6cc25&wechatOrigin=menu"
-    },
-    "photos": [
-      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-01.jpg", "alt": "Josh Hu 01", "altZh": "Josh Hu 01"},
-      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-02.jpg", "alt": "Josh Hu 02", "altZh": "Josh Hu 02"},
-      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-03.jpg", "alt": "Josh Hu 03", "altZh": "Josh Hu 03"},
-      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-04.jpg", "alt": "Josh Hu 04", "altZh": "Josh Hu 04"},
-      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-05.jpg", "alt": "Josh Hu 05", "altZh": "Josh Hu 05"},
-      {"src": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260518-06.jpg", "alt": "Josh Hu 06", "altZh": "Josh Hu 06"}
     ]
   },
   {

@@ -1,31 +1,58 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useState } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
 import LikeButton from './LikeButton';
 
 export default function Lightbox({
   photos,
   currentIndex,
   onClose,
-  onPrev,
-  onNext,
+  onIndexChange,
 }: {
   photos: { src: string; alt: string }[];
   currentIndex: number;
   onClose: () => void;
-  onPrev: () => void;
-  onNext: () => void;
+  onIndexChange: (index: number) => void;
 }) {
-  const touchStartX = useRef<number | null>(null);
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    startIndex: currentIndex,
+    loop: true,
+  });
 
+  const [selectedIndex, setSelectedIndex] = useState(currentIndex);
+
+  // Sync embla selection to parent
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    const index = emblaApi.selectedScrollSnap();
+    setSelectedIndex(index);
+    onIndexChange(index);
+  }, [emblaApi, onIndexChange]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  // Sync parent currentIndex to embla (when keyboard nav triggers)
+  useEffect(() => {
+    if (!emblaApi || emblaApi.selectedScrollSnap() === currentIndex) return;
+    emblaApi.scrollTo(currentIndex);
+  }, [emblaApi, currentIndex]);
+
+  // Keyboard navigation
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
-      if (e.key === 'ArrowLeft') onPrev();
-      if (e.key === 'ArrowRight') onNext();
+      if (e.key === 'ArrowLeft') emblaApi?.scrollPrev();
+      if (e.key === 'ArrowRight') emblaApi?.scrollNext();
     },
-    [onClose, onPrev, onNext]
+    [onClose, emblaApi]
   );
 
   useEffect(() => {
@@ -33,58 +60,78 @@ export default function Lightbox({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
+  // Prevent body scroll when open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
-    const threshold = 50;
-    if (diff > threshold) {
-      onNext();
-    } else if (diff < -threshold) {
-      onPrev();
-    }
-    touchStartX.current = null;
-  }, [onPrev, onNext]);
-
-  if (currentIndex < 0 || currentIndex >= photos.length) return null;
-
-  const photo = photos[currentIndex];
+  const photo = photos[selectedIndex];
+  if (!photo) return null;
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+      className="fixed inset-0 z-[100] bg-black/95 flex flex-col"
       onClick={onClose}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
     >
+      {/* Close button */}
       <button
         className="absolute top-4 right-4 z-10 p-3 text-[#f5f5f0] text-3xl hover:text-[#c9a227]"
-        onClick={onClose}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
         aria-label="关闭"
       >
         ×
       </button>
 
+      {/* Carousel */}
+      <div
+        ref={emblaRef}
+        className="flex-1 overflow-hidden cursor-grab active:cursor-grabbing"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex h-full">
+          {photos.map((p, i) => (
+            <div
+              key={`${p.src}-${i}`}
+              className="flex-[0_0_100%] min-w-0 h-full flex items-center justify-center px-4"
+            >
+              <div className="relative w-full h-[80vh]">
+                <Image
+                  src={p.src}
+                  alt={p.alt}
+                  fill
+                  className="object-contain"
+                  priority={i === selectedIndex}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Prev / Next buttons (desktop) */}
       {photos.length > 1 && (
         <>
           <button
-            className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-10 p-4 text-[#f5f5f0] text-4xl md:text-5xl hover:text-[#c9a227] select-none"
+            className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 p-4 text-[#f5f5f0] text-4xl hover:text-[#c9a227] select-none items-center justify-center"
             onClick={(e) => {
               e.stopPropagation();
-              onPrev();
+              emblaApi?.scrollPrev();
             }}
             aria-label="上一张"
           >
             ‹
           </button>
           <button
-            className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-10 p-4 text-[#f5f5f0] text-4xl md:text-5xl hover:text-[#c9a227] select-none"
+            className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 p-4 text-[#f5f5f0] text-4xl hover:text-[#c9a227] select-none items-center justify-center"
             onClick={(e) => {
               e.stopPropagation();
-              onNext();
+              emblaApi?.scrollNext();
             }}
             aria-label="下一张"
           >
@@ -93,13 +140,10 @@ export default function Lightbox({
         </>
       )}
 
-      <div className="relative w-[90vw] h-[80vh]" onClick={(e) => e.stopPropagation()}>
-        <Image src={photo.src} alt={photo.alt} fill className="object-contain" />
-      </div>
-
-      <div className="absolute bottom-6 flex items-center gap-4">
+      {/* Bottom bar */}
+      <div className="flex items-center justify-center gap-4 py-4">
         <p className="text-sm text-[#a0a0a0]">
-          {currentIndex + 1} / {photos.length}
+          {selectedIndex + 1} / {photos.length}
         </p>
         <LikeButton targetType="photo" targetId={photo.src} />
       </div>

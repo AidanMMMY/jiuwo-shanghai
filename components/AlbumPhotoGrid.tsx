@@ -29,8 +29,7 @@ export default function AlbumPhotoGrid({
           photos={photos}
           currentIndex={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
-          onPrev={() => setLightboxIndex((prev) => (prev === null || prev === 0 ? photos.length - 1 : prev - 1))}
-          onNext={() => setLightboxIndex((prev) => (prev === null || prev === photos.length - 1 ? 0 : prev + 1))}
+          onIndexChange={(index) => setLightboxIndex(index)}
         />
       )}
     </>

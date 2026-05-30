@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 
 export default function Lightbox({
   photos,
@@ -16,6 +16,8 @@ export default function Lightbox({
   onPrev: () => void;
   onNext: () => void;
 }) {
+  const touchStartX = useRef<number | null>(null);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -30,6 +32,22 @@ export default function Lightbox({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    const threshold = 50;
+    if (diff > threshold) {
+      onNext();
+    } else if (diff < -threshold) {
+      onPrev();
+    }
+    touchStartX.current = null;
+  }, [onPrev, onNext]);
+
   if (currentIndex < 0 || currentIndex >= photos.length) return null;
 
   const photo = photos[currentIndex];
@@ -38,6 +56,8 @@ export default function Lightbox({
     <div
       className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
       onClick={onClose}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       <button
         className="absolute top-4 right-4 z-10 p-3 text-[#f5f5f0] text-3xl hover:text-[#c9a227]"

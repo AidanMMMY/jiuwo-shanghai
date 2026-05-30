@@ -1,5 +1,22 @@
 [
   {
+    "id": "our-friend-pp",
+    "title": "Our Friend PP",
+    "titleZh": "PP",
+    "subtitle": "We decide to create an album for each of our best friends.",
+    "subtitleZh": "我们的好朋友PP。",
+    "cover": "/images/gallery/our-friend-pp/PP-20260529-05.webp",
+    "category": "Our Friends",
+    "categoryZh": "我们的朋友",
+    "photos": [
+      {"src": "/images/gallery/our-friend-pp/PP-20260529-05.webp", "alt": "PP 01", "altZh": "PP 01"},
+      {"src": "/images/gallery/our-friend-pp/PP-20260529-04.webp", "alt": "PP 02", "altZh": "PP 02"},
+      {"src": "/images/gallery/our-friend-pp/PP-20260529-03.webp", "alt": "PP 03", "altZh": "PP 03"},
+      {"src": "/images/gallery/our-friend-pp/PP-20260529-02.webp", "alt": "PP 04", "altZh": "PP 04"},
+      {"src": "/images/gallery/our-friend-pp/PP-20260529-01.webp", "alt": "PP 05", "altZh": "PP 05"}
+    ]
+  },
+  {
     "id": "our-friend-df",
     "title": "Our Friend D.F",
     "titleZh": "豆腐",

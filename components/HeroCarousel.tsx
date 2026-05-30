@@ -1,7 +1,29 @@
 'use client';
 
+import { useMemo } from 'react';
 import Image from 'next/image';
 import type { HeroSlide } from '@/lib/data';
+
+function AnimatedTitle({ text }: { text: string }) {
+  const letters = useMemo(() => text.split(''), [text]);
+
+  return (
+    <h1
+      className="text-6xl md:text-8xl lg:text-9xl font-semibold tracking-[0.12em] hero-title-gradient hero-title-shadow"
+      style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}
+    >
+      {letters.map((char, i) => (
+        <span
+          key={i}
+          className="inline-block hero-letter-entrance"
+          style={{ animationDelay: `${200 + i * 90}ms` }}
+        >
+          {char}
+        </span>
+      ))}
+    </h1>
+  );
+}
 
 export default function HeroCarousel({
   slides,
@@ -28,6 +50,7 @@ export default function HeroCarousel({
 
   return (
     <section className="relative h-screen w-full overflow-hidden" style={{ height: '100svh' }}>
+      {/* Background slides */}
       {slides.map((slide, index) => (
         <div
           key={slide.src}
@@ -44,69 +67,20 @@ export default function HeroCarousel({
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 bg-black/55" />
         </div>
       ))}
-      <style>{`
-        @keyframes heroFade {
-          0% { opacity: 1; }
-          ${step - fade}% { opacity: 1; }
-          ${step}% { opacity: 0; }
-          ${100 - fade}% { opacity: 0; }
-          100% { opacity: 1; }
-        }
-        @keyframes taglineShimmer {
-          0%, 5% { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
-          85%, 100% { -webkit-mask-position: 0% 0; mask-position: 0% 0; }
-        }
-        @keyframes heroIntroFadeUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .hero-intro-fade-up {
-          animation: heroIntroFadeUp 1400ms cubic-bezier(0.16, 1, 0.3, 1) 600ms both;
-        }
-        @keyframes scrollHintBounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-5px); }
-        }
-        .scroll-hint {
-          animation: scrollHintBounce 1.8s ease-in-out infinite;
-        }
-        .rainbow-text {
-          font-weight: 600;
-          background-image: linear-gradient(60deg,
-            #ff3d6e 0%,  #ff8a2e 16%, #ffe14d 33%,
-            #2ed47a 50%, #4fb3ff 66%, #b46cff 83%,
-            #ff3d6e 100%);
-          background-size: 300% 100%;
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-          -webkit-text-fill-color: transparent;
-          animation: rainbowFlow 10s linear infinite;
-          text-shadow: 0 0 1px rgba(255, 255, 255, 0.15);
-        }
-        @keyframes rainbowFlow {
-          0%   { background-position: 0% 50%; }
-          100% { background-position: 300% 50%; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .tagline-shimmer { animation: none !important; -webkit-mask-image: none !important; mask-image: none !important; }
-          .hero-intro-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
-          .scroll-hint { animation: none !important; }
-          .rainbow-text { animation: none !important; }
-        }
-      `}</style>
+
+      {/* Title & Tagline */}
       <div
         className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
         style={{ paddingBottom: '8rem' }}
       >
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-medium tracking-widest text-[#f5f5f0] mb-6">
-          {title}
-        </h1>
+        <div className="hero-title-breathe">
+          <AnimatedTitle text={title} />
+        </div>
         <p
-          className="tagline-shimmer text-xl md:text-2xl lg:text-3xl tracking-wide text-[#f5f5f0]"
+          className="tagline-shimmer mt-5 text-xl md:text-2xl lg:text-3xl tracking-wide text-[#f5f5f0] hero-tagline-entrance"
           style={{
             WebkitMaskImage:
               'linear-gradient(110deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 35%, rgba(0,0,0,1) 50%, rgba(0,0,0,0.3) 65%, rgba(0,0,0,0.3) 100%)',
@@ -116,12 +90,14 @@ export default function HeroCarousel({
             maskSize: '300% 100%',
             WebkitMaskRepeat: 'no-repeat',
             maskRepeat: 'no-repeat',
-            animation: 'taglineShimmer 3s ease-in-out infinite',
+            animation: 'taglineShimmer 4s ease-in-out infinite',
           }}
         >
           {tagline}
         </p>
       </div>
+
+      {/* Intro */}
       <div
         className="z-10 px-6 text-center"
         style={{ position: 'absolute', left: 0, right: 0, bottom: '4rem' }}
@@ -130,6 +106,8 @@ export default function HeroCarousel({
           {renderIntro(intro)}
         </p>
       </div>
+
+      {/* Scroll hint */}
       <div
         className="scroll-hint z-10 flex justify-center"
         style={{ position: 'absolute', left: 0, right: 0, bottom: '1rem' }}
@@ -149,6 +127,96 @@ export default function HeroCarousel({
           <polyline points="2,20 12,14 22,20" opacity="0.5" />
         </svg>
       </div>
+
+      <style>{`
+        @keyframes heroFade {
+          0% { opacity: 1; }
+          ${step - fade}% { opacity: 1; }
+          ${step}% { opacity: 0; }
+          ${100 - fade}% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        @keyframes taglineShimmer {
+          0%, 5% { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+          85%, 100% { -webkit-mask-position: 0% 0; mask-position: 0% 0; }
+        }
+        @keyframes heroIntroFadeUp {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scrollHintBounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-5px); }
+        }
+        @keyframes letterEntrance {
+          0% { opacity: 0; transform: translateY(30px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes taglineEntrance {
+          0% { opacity: 0; transform: translateY(12px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes titleBreathe {
+          0%, 100% { opacity: 0.94; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.005); }
+        }
+        @keyframes rainbowFlow {
+          0%   { background-position: 0% 50%; }
+          100% { background-position: 300% 50%; }
+        }
+
+        .hero-letter-entrance {
+          animation: letterEntrance 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .hero-tagline-entrance {
+          opacity: 0;
+          animation: taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 800ms forwards;
+        }
+        .hero-title-breathe {
+          animation: titleBreathe 5s ease-in-out infinite;
+          animation-delay: 1.2s;
+        }
+        .hero-intro-fade-up {
+          animation: heroIntroFadeUp 1400ms cubic-bezier(0.16, 1, 0.3, 1) 1000ms both;
+        }
+        .scroll-hint {
+          animation: scrollHintBounce 1.8s ease-in-out infinite;
+        }
+        .rainbow-text {
+          font-weight: 600;
+          background-image: linear-gradient(60deg,
+            #ff3d6e 0%,  #ff8a2e 16%, #ffe14d 33%,
+            #2ed47a 50%, #4fb3ff 66%, #b46cff 83%,
+            #ff3d6e 100%);
+          background-size: 300% 100%;
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          -webkit-text-fill-color: transparent;
+          animation: rainbowFlow 10s linear infinite;
+          text-shadow: 0 0 1px rgba(255, 255, 255, 0.15);
+        }
+        .hero-title-gradient {
+          background-image: linear-gradient(180deg, #f5f5f0 0%, #e8d9a8 40%, #c9a227 100%);
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          -webkit-text-fill-color: transparent;
+        }
+        .hero-title-shadow {
+          filter: drop-shadow(0 2px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 40px rgba(0,0,0,0.3));
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .tagline-shimmer { animation: none !important; -webkit-mask-image: none !important; mask-image: none !important; }
+          .hero-letter-entrance { animation: none !important; opacity: 1 !important; transform: none !important; }
+          .hero-tagline-entrance { animation: none !important; opacity: 1 !important; transform: none !important; }
+          .hero-title-breathe { animation: none !important; }
+          .hero-intro-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
+          .scroll-hint { animation: none !important; }
+          .rainbow-text { animation: none !important; }
+        }
+      `}</style>
     </section>
   );
 }

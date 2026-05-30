@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useCallback, useRef } from 'react';
+import LikeButton from './LikeButton';
 
 export default function Lightbox({
   photos,
@@ -96,9 +97,12 @@ export default function Lightbox({
         <Image src={photo.src} alt={photo.alt} fill className="object-contain" />
       </div>
 
-      <p className="absolute bottom-6 text-sm text-[#a0a0a0]">
-        {currentIndex + 1} / {photos.length}
-      </p>
+      <div className="absolute bottom-6 flex items-center gap-4">
+        <p className="text-sm text-[#a0a0a0]">
+          {currentIndex + 1} / {photos.length}
+        </p>
+        <LikeButton targetType="photo" targetId={photo.src} />
+      </div>
     </div>
   );
 }

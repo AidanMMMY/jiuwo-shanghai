@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { markdownToHtml } from '@/lib/utils';
+import LikeButton from '@/components/LikeButton';
 import type { JournalEntry } from '@/lib/data';
 
 export default async function JournalPage({
@@ -23,6 +24,9 @@ export default async function JournalPage({
         <header className="mt-8 mb-10">
           <time className="text-sm text-[#a0a0a0]">{entry.date}</time>
           <h1 className="text-3xl md:text-4xl font-medium text-[#f5f5f0] mt-2 tracking-wide">{entry.title}</h1>
+          <div className="mt-3">
+            <LikeButton targetType="journal" targetId={entry.slug} />
+          </div>
         </header>
         <div className="relative aspect-[16/9] w-full mb-10 rounded-lg overflow-hidden">
           <Image src={entry.cover} alt={entry.title} fill className="object-cover" />

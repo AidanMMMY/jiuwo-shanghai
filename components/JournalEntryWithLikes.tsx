@@ -28,7 +28,7 @@ export default function JournalEntryWithLikes({
     date: string;
     title: string;
     cover: string;
-    coverIsLandscape?: boolean;
+    coverAspect?: 'wide' | 'square' | 'tall';
     contentHtml: string;
   };
 }) {
@@ -118,9 +118,9 @@ export default function JournalEntryWithLikes({
           height={0}
           sizes="100vw"
           className={
-            entry.coverIsLandscape !== false
-              ? 'w-full h-auto rounded-lg'
-              : 'max-w-full max-h-[66vh] w-auto h-auto rounded-lg object-contain'
+            entry.coverAspect === 'tall'
+              ? 'max-w-full max-h-[66vh] w-auto h-auto rounded-lg object-contain'
+              : 'w-full h-auto rounded-lg'
           }
         />
       </div>

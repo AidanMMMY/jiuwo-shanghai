@@ -34,7 +34,7 @@ export type JournalEntry = {
   cover: string;
   content: string;
   contentZh: string;
-  coverIsLandscape?: boolean;
+  coverAspect?: 'wide' | 'square' | 'tall';
   hidden?: boolean;
 };
 

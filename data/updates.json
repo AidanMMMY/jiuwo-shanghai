@@ -7,7 +7,7 @@
     "cover": "/images/journal/20260531-01.webp",
     "content": "Dancing on you—my honor, your memory worth keeping.",
     "contentZh": "在你身上起舞——是我的荣幸，也是你值得珍藏的回忆。",
-    "coverIsLandscape": false
+    "coverAspect": "square"
   },
   {
     "slug": "hello-everyone",
@@ -17,7 +17,7 @@
     "cover": "/images/journal/20260530-01.webp",
     "content": "Three years in, still going strong.",
     "contentZh": "相遇三年，历久弥坚。",
-    "coverIsLandscape": false
+    "coverAspect": "square"
   },
   {
     "slug": "something-buried",
@@ -26,8 +26,7 @@
     "date": "2026-05-27",
     "cover": "/images/journal/20260527-01.webp",
     "content": "Hard to believe it's been seven years. Time moves fast. We've changed, or maybe we haven't—who's to say?",
-    "contentZh": "七年没见，时间快得不像真的。我们变了，又好像没变——变没变呢，谁知道。",
-    "coverIsLandscape": true
+    "contentZh": "七年没见，时间快得不像真的。我们变了，又好像没变——变没变呢，谁知道。"
   },
   {
     "slug": "happy-sandwich",
@@ -36,8 +35,7 @@
     "date": "2025-11-10",
     "cover": "/images/journal/20251110-01.webp",
     "content": "To be greeted by Will and Daisuke like this—front and back, all at once—isn't something that happens every day.",
-    "contentZh": "想被白二和大介这样前拥后抱吗，这种机会可不是天天有哦。",
-    "coverIsLandscape": true
+    "contentZh": "想被白二和大介这样前拥后抱吗，这种机会可不是天天有哦。"
   },
   {
     "slug": "oh-santa",
@@ -46,8 +44,7 @@
     "date": "2025-12-24",
     "cover": "/images/journal/20251224-02.webp",
     "content": "Merry Christmas! Have anything in mind that you hope to get from Santa Robin?",
-    "contentZh": "圣诞快乐！有想从圣诞塔哥这里得到的礼物吗？",
-    "coverIsLandscape": true
+    "contentZh": "圣诞快乐！有想从圣诞塔哥这里得到的礼物吗？"
   },
   {
     "slug": "cf-4-drink",
@@ -56,8 +53,7 @@
     "date": "2025-12-24",
     "cover": "/images/journal/20251224-01.webp",
     "content": "Yes it's Christmas time. We train. We drink. Both, non-negotiable.",
-    "contentZh": "圣诞来了，我们CF小组，练是要练的，酒也是要喝的。",
-    "coverIsLandscape": true
+    "contentZh": "圣诞来了，我们CF小组，练是要练的，酒也是要喝的。"
   },
   {
     "slug": "aidan-birthday",
@@ -66,8 +62,7 @@
     "date": "2025-03-29",
     "cover": "/images/journal/20250329-01.webp",
     "content": "It's Aidan's birthday soon, he's so happy when he received this special gift.",
-    "contentZh": "老朋友Aidan要过生日啦，我们送了他一个特别的礼物，他开心坏了。",
-    "coverIsLandscape": true
+    "contentZh": "老朋友Aidan要过生日啦，我们送了他一个特别的礼物，他开心坏了。"
   },
   {
     "slug": "big-guys-rule",
@@ -76,8 +71,7 @@
     "date": "2026-05-23",
     "cover": "/images/journal/20260523-02.webp",
     "content": "Another Saturday night, the big guys are in the house.",
-    "contentZh": "一个重量级选手云集的周六晚。",
-    "coverIsLandscape": true
+    "contentZh": "一个重量级选手云集的周六晚。"
   },
   {
     "slug": "woof-woof",
@@ -86,8 +80,7 @@
     "date": "2026-05-23",
     "cover": "/images/journal/20260523-01.webp",
     "content": "DQ is an old friend of ours too. Even she's angling for a sip.",
-    "contentZh": "DQ也是老朋友啦，就连她也想来上一口。",
-    "coverIsLandscape": true
+    "contentZh": "DQ也是老朋友啦，就连她也想来上一口。"
   },
   {
     "slug": "single-glance-eternal",
@@ -96,8 +89,7 @@
     "date": "2024-04-30",
     "cover": "/images/journal/20240430.webp",
     "content": "One gaze, time stranded in the now.",
-    "contentZh": "一眼凝眸，时光便在此刻搁浅。",
-    "coverIsLandscape": true
+    "contentZh": "一眼凝眸，时光便在此刻搁浅。"
   },
   {
     "slug": "unexpected-encounter",
@@ -106,8 +98,7 @@
     "date": "2026-05-15",
     "cover": "/images/journal/20260515.jpeg",
     "content": "What beats seeing friends after a long day?",
-    "contentZh": "还有什么比忙碌了一天之后见到朋友们更令人开心的。",
-    "coverIsLandscape": true
+    "contentZh": "还有什么比忙碌了一天之后见到朋友们更令人开心的。"
   },
   {
     "slug": "dex-quiet-moment",
@@ -116,8 +107,7 @@
     "date": "2026-04-25",
     "cover": "/images/journal/dex-moment.webp",
     "content": "Dex is a good friend of ours who's been dropping by most weeks lately. One evening before the heat set in, I caught this shot of him — ended up being one of his favorites too.",
-    "contentZh": "Dex是我们的老朋友，近来几乎每周都会来。入夏前的某个夜晚，我随手按下快门，没想到定格了他最松弛的样子——他自己看了，也说喜欢。",
-    "coverIsLandscape": true
+    "contentZh": "Dex是我们的老朋友，近来几乎每周都会来。入夏前的某个夜晚，我随手按下快门，没想到定格了他最松弛的样子——他自己看了，也说喜欢。"
   },
   {
     "slug": "sunny-saucy",
@@ -127,7 +117,7 @@
     "cover": "/images/journal/20260417-C.JPG",
     "content": "This Friday night, come and have a drink or much more, with Matthew, our latest one-night host. ",
     "contentZh": "本周五晚上，我们将迎来一日店长马修，来和他一醉方休吧！",
-    "coverIsLandscape": false,
+    "coverAspect": "tall",
     "hidden": true
   },
   {
@@ -137,8 +127,7 @@
     "date": "2026-02-22",
     "cover": "/images/journal/20260222-2.jpg",
     "content": "What I didn't mention—Yida, our old friend who moved to Australia, is back in town after all this time.",
-    "contentZh": "我故意没说的是，今天好久没见的移居澳洲的朋友益达回来啦！非常开心！！",
-    "coverIsLandscape": true
+    "contentZh": "我故意没说的是，今天好久没见的移居澳洲的朋友益达回来啦！非常开心！！"
   },
   {
     "slug": "happy-birthday-robin",
@@ -147,8 +136,7 @@
     "date": "2026-02-22",
     "cover": "/images/journal/20260222-1.jpg",
     "content": "It's our best friend Robin's birthday. I'm sure it's not the right picture to post, but anyway haha.",
-    "contentZh": "今天是好朋友铁塔的生日，来一起祝他生日快乐吧！照片选的可能不太对，但……",
-    "coverIsLandscape": true
+    "contentZh": "今天是好朋友铁塔的生日，来一起祝他生日快乐吧！照片选的可能不太对，但……"
   },
   {
     "slug": "dancing-in-the-bubbles",
@@ -157,7 +145,6 @@
     "date": "2025-05-23",
     "cover": "/images/journal/20250523-1.webp",
     "content": "I'm singing in the rain, and dancing in the rain.",
-    "contentZh": "你看，好多泡泡啊。",
-    "coverIsLandscape": true
+    "contentZh": "你看，好多泡泡啊。"
   }
 ]

@@ -1,32 +1,19 @@
 'use client';
 
-import { useMemo } from 'react';
 import Image from 'next/image';
 import type { HeroSlide } from '@/lib/data';
 
 function AnimatedTitle({ text }: { text: string }) {
-  const letters = useMemo(() => text.split(''), [text]);
-
   return (
     <h1
-      className="text-6xl md:text-8xl lg:text-9xl tracking-[0.14em]"
+      className="text-6xl md:text-8xl lg:text-9xl tracking-[0.14em] hero-title-shine"
       style={{
         fontFamily: 'var(--font-bodoni), Georgia, serif',
         fontWeight: 700,
         textShadow: '0 2px 20px rgba(0,0,0,0.5), 0 0 60px rgba(0,0,0,0.3)',
       }}
     >
-      <span className="hero-title-shine">
-        {letters.map((char, i) => (
-          <span
-            key={i}
-            className="inline-block hero-letter-entrance"
-            style={{ animationDelay: `${200 + i * 90}ms` }}
-          >
-            {char}
-          </span>
-        ))}
-      </span>
+      {text}
     </h1>
   );
 }
@@ -155,8 +142,8 @@ export default function HeroCarousel({
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-5px); }
         }
-        @keyframes letterEntrance {
-          0% { opacity: 0; transform: translateY(30px); }
+        @keyframes titleEntrance {
+          0% { opacity: 0; transform: translateY(20px); }
           100% { opacity: 1; transform: translateY(0); }
         }
         @keyframes taglineEntrance {
@@ -176,9 +163,6 @@ export default function HeroCarousel({
           100% { background-position: 0% 0; }
         }
 
-        .hero-letter-entrance {
-          animation: letterEntrance 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
         .hero-title-breathe {
           animation: titleBreathe 5s ease-in-out infinite;
           animation-delay: 1.2s;
@@ -199,7 +183,9 @@ export default function HeroCarousel({
           -webkit-background-clip: text;
           color: transparent;
           -webkit-text-fill-color: transparent;
-          animation: heroTitleShine 7s linear 1.6s infinite;
+          animation:
+            titleEntrance 900ms cubic-bezier(0.16, 1, 0.3, 1) 200ms both,
+            heroTitleShine 7s linear 1.6s infinite;
         }
         .hero-intro-fade-up {
           animation: heroIntroFadeUp 1400ms cubic-bezier(0.16, 1, 0.3, 1) 1000ms both;
@@ -223,9 +209,8 @@ export default function HeroCarousel({
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .hero-letter-entrance { animation: none !important; opacity: 1 !important; transform: none !important; }
           .hero-title-breathe { animation: none !important; }
-          .hero-title-shine { animation: none !important; background-position: 100% 0; }
+          .hero-title-shine { animation: none !important; background-position: 100% 0; opacity: 1; transform: none; }
           .hero-intro-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
           .scroll-hint { animation: none !important; }
           .rainbow-text { animation: none !important; }

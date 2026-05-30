@@ -9,8 +9,11 @@ function AnimatedTitle({ text }: { text: string }) {
 
   return (
     <h1
-      className="text-6xl md:text-8xl lg:text-9xl font-semibold tracking-[0.12em] hero-title-gradient hero-title-shadow"
-      style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}
+      className="text-6xl md:text-8xl lg:text-9xl font-semibold tracking-[0.12em] text-[#c9a227]"
+      style={{
+        fontFamily: 'var(--font-playfair), Georgia, serif',
+        textShadow: '0 2px 20px rgba(0,0,0,0.5), 0 0 60px rgba(0,0,0,0.3)',
+      }}
     >
       {letters.map((char, i) => (
         <span
@@ -80,8 +83,10 @@ export default function HeroCarousel({
           <AnimatedTitle text={title} />
         </div>
         <p
-          className="tagline-shimmer mt-5 text-xl md:text-2xl lg:text-3xl tracking-wide text-[#f5f5f0] hero-tagline-entrance"
+          className="mt-5 text-xl md:text-2xl lg:text-3xl tracking-wide text-[#f5f5f0]"
           style={{
+            opacity: 0,
+            animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 800ms forwards, taglineShimmer 4s ease-in-out 1600ms infinite',
             WebkitMaskImage:
               'linear-gradient(110deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 35%, rgba(0,0,0,1) 50%, rgba(0,0,0,0.3) 65%, rgba(0,0,0,0.3) 100%)',
             maskImage:
@@ -90,7 +95,6 @@ export default function HeroCarousel({
             maskSize: '300% 100%',
             WebkitMaskRepeat: 'no-repeat',
             maskRepeat: 'no-repeat',
-            animation: 'taglineShimmer 4s ease-in-out infinite',
           }}
         >
           {tagline}
@@ -168,10 +172,6 @@ export default function HeroCarousel({
         .hero-letter-entrance {
           animation: letterEntrance 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
         }
-        .hero-tagline-entrance {
-          opacity: 0;
-          animation: taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 800ms forwards;
-        }
         .hero-title-breathe {
           animation: titleBreathe 5s ease-in-out infinite;
           animation-delay: 1.2s;
@@ -196,21 +196,9 @@ export default function HeroCarousel({
           animation: rainbowFlow 10s linear infinite;
           text-shadow: 0 0 1px rgba(255, 255, 255, 0.15);
         }
-        .hero-title-gradient {
-          background-image: linear-gradient(180deg, #f5f5f0 0%, #e8d9a8 40%, #c9a227 100%);
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-          -webkit-text-fill-color: transparent;
-        }
-        .hero-title-shadow {
-          filter: drop-shadow(0 2px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 40px rgba(0,0,0,0.3));
-        }
 
         @media (prefers-reduced-motion: reduce) {
-          .tagline-shimmer { animation: none !important; -webkit-mask-image: none !important; mask-image: none !important; }
           .hero-letter-entrance { animation: none !important; opacity: 1 !important; transform: none !important; }
-          .hero-tagline-entrance { animation: none !important; opacity: 1 !important; transform: none !important; }
           .hero-title-breathe { animation: none !important; }
           .hero-intro-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
           .scroll-hint { animation: none !important; }

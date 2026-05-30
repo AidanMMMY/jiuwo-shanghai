@@ -172,8 +172,8 @@ export default function HeroCarousel({
           100% { background-position: 300% 50%; }
         }
         @keyframes heroTitleShine {
-          0%   { background-position: 200% 0; }
-          100% { background-position: -100% 0; }
+          0%   { background-position: 100% 0; }
+          100% { background-position: 0% 0; }
         }
 
         .hero-letter-entrance {
@@ -187,14 +187,14 @@ export default function HeroCarousel({
           display: inline-block;
           background-image: linear-gradient(105deg,
             #c9a227 0%,
-            #c9a227 38%,
-            #f4d77a 47%,
+            #c9a227 42%,
+            #f4d77a 48%,
             #fff4c2 50%,
-            #f4d77a 53%,
-            #c9a227 62%,
+            #f4d77a 52%,
+            #c9a227 58%,
             #c9a227 100%);
-          background-size: 220% 100%;
-          background-position: 200% 0;
+          background-size: 250% 100%;
+          background-position: 100% 0;
           background-clip: text;
           -webkit-background-clip: text;
           color: transparent;
@@ -225,7 +225,7 @@ export default function HeroCarousel({
         @media (prefers-reduced-motion: reduce) {
           .hero-letter-entrance { animation: none !important; opacity: 1 !important; transform: none !important; }
           .hero-title-breathe { animation: none !important; }
-          .hero-title-shine { animation: none !important; background-position: 50% 0; }
+          .hero-title-shine { animation: none !important; background-position: 100% 0; }
           .hero-intro-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
           .scroll-hint { animation: none !important; }
           .rainbow-text { animation: none !important; }

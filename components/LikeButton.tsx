@@ -21,9 +21,11 @@ function HeartIcon({ filled, className }: { filled: boolean; className?: string 
 export default function LikeButton({
   targetType,
   targetId,
+  className,
 }: {
   targetType: string;
   targetId: string;
+  className?: string;
 }) {
   const [count, setCount] = useState(0);
   const [liked, setLiked] = useState(false);
@@ -79,7 +81,7 @@ export default function LikeButton({
       onDoubleClick={handleDoubleClick}
       className={`inline-flex items-center gap-1.5 text-sm transition-colors ${
         liked ? 'text-[#c9a227]' : 'text-[#a0a0a0] hover:text-[#c9a227]'
-      }`}
+      } ${className ?? ''}`}
       aria-label={liked ? 'Unlike' : 'Like'}
     >
       <HeartIcon

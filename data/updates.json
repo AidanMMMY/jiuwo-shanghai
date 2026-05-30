@@ -1,5 +1,25 @@
 [
   {
+    "slug": "dancing-on-you",
+    "title": "Dancing on You",
+    "titleZh": "你身我舞",
+    "date": "2026-05-31",
+    "cover": "/images/journal/20260531-01.webp",
+    "content": "Dancing on you—my honor, your memory worth keeping.",
+    "contentZh": "在你身上起舞——是我的荣幸，也是你值得珍藏的回忆。",
+    "coverIsLandscape": false
+  },
+  {
+    "slug": "hello-everyone",
+    "title": "Hello Everyone",
+    "titleZh": "大家好",
+    "date": "2026-05-30",
+    "cover": "/images/journal/20260530-01.webp",
+    "content": "Three years in, still going strong.",
+    "contentZh": "相遇三年，历久弥坚。",
+    "coverIsLandscape": false
+  },
+  {
     "slug": "something-buried",
     "title": "Something Buried",
     "titleZh": "深藏的",

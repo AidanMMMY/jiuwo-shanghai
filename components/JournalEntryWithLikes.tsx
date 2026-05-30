@@ -111,57 +111,58 @@ export default function JournalEntryWithLikes({
       <time className="text-sm text-[#a0a0a0]">{entry.date}</time>
       <h3 className="text-2xl font-medium text-[#a0a0a0] mt-2 mb-6 tracking-wide">{entry.title}</h3>
       <div className="flex justify-center mb-8">
-        <Image
-          src={entry.cover}
-          alt={entry.title}
-          width={0}
-          height={0}
-          sizes="100vw"
-          className={
-            entry.coverAspect === 'tall'
-              ? 'max-w-full max-h-[66vh] w-auto h-auto rounded-lg object-contain'
-              : 'w-full h-auto rounded-lg'
-          }
-        />
+        <div className={`relative ${entry.coverAspect === 'tall' ? 'inline-block' : 'w-full'}`}>
+          <Image
+            src={entry.cover}
+            alt={entry.title}
+            width={0}
+            height={0}
+            sizes="100vw"
+            className={
+              entry.coverAspect === 'tall'
+                ? 'max-w-full max-h-[66vh] w-auto h-auto rounded-lg object-contain block'
+                : 'w-full h-auto rounded-lg block'
+            }
+          />
+          <button
+            onClick={async (e) => {
+              e.stopPropagation();
+              setAnimating(true);
+              setTimeout(() => setAnimating(false), 300);
+              const nextLiked = !liked;
+              setLiked(nextLiked);
+              setCount((prev) => (nextLiked ? prev + 1 : prev - 1));
+              try {
+                const res = await fetch('/api/likes', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ targetType: 'journal', targetId: entry.slug }),
+                });
+                if (!res.ok) throw new Error('Failed');
+                const data = await res.json();
+                setLiked(data.liked);
+                setCount(data.count);
+              } catch {
+                setLiked((prev) => !prev);
+                setCount((prev) => (liked ? prev + 1 : prev - 1));
+              }
+            }}
+            className={`absolute bottom-3 right-3 z-10 inline-flex items-center gap-1 rounded-full bg-black/40 backdrop-blur-sm px-2.5 py-1.5 text-xs transition-all hover:bg-black/60 ${
+              liked ? 'text-[#c9a227]' : 'text-white/80'
+            }`}
+          >
+            <HeartIcon
+              filled={liked}
+              className={`w-3.5 h-3.5 transition-transform ${animating ? 'scale-125' : 'scale-100'}`}
+            />
+            <span className="tabular-nums">{loaded ? count : '—'}</span>
+          </button>
+        </div>
       </div>
       <div
         className="prose prose-invert prose-stone max-w-none prose-headings:text-[#f5f5f0] prose-p:text-[#a0a0a0] prose-a:text-[#c9a227] [&_img]:block [&_img]:mx-auto [&_img]:my-6 [&_img]:max-w-full [&_img]:max-h-[66vh] [&_img]:h-auto [&_img]:rounded-lg"
         dangerouslySetInnerHTML={{ __html: entry.contentHtml }}
       />
-      <div className="mt-8 flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-        <button
-          onClick={async () => {
-            setAnimating(true);
-            setTimeout(() => setAnimating(false), 300);
-            const nextLiked = !liked;
-            setLiked(nextLiked);
-            setCount((prev) => (nextLiked ? prev + 1 : prev - 1));
-            try {
-              const res = await fetch('/api/likes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetType: 'journal', targetId: entry.slug }),
-              });
-              if (!res.ok) throw new Error('Failed');
-              const data = await res.json();
-              setLiked(data.liked);
-              setCount(data.count);
-            } catch {
-              setLiked((prev) => !prev);
-              setCount((prev) => (liked ? prev + 1 : prev - 1));
-            }
-          }}
-          className={`inline-flex items-center gap-1.5 text-sm transition-colors ${
-            liked ? 'text-[#c9a227]' : 'text-[#a0a0a0] hover:text-[#c9a227]'
-          }`}
-        >
-          <HeartIcon
-            filled={liked}
-            className={`transition-transform ${animating ? 'scale-125' : 'scale-100'}`}
-          />
-          <span className="tabular-nums">{loaded ? count : '—'}</span>
-        </button>
-      </div>
 
       <style jsx>{`
         @keyframes heartPop {

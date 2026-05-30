@@ -35,6 +35,7 @@ export default async function Page({ params }: { params: Promise<{ album: string
       album={data}
       backHref="/gallery"
       backLabel="← Back to Gallery"
+      locale="en"
     />
   );
 }

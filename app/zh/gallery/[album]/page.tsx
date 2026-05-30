@@ -35,6 +35,7 @@ export default async function Page({ params }: { params: Promise<{ album: string
       album={data}
       backHref="/zh/gallery"
       backLabel="← 返回画册"
+      locale="zh"
     />
   );
 }

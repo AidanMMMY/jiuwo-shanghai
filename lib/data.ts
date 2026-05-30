@@ -44,6 +44,13 @@ export type GalleryPhoto = {
   altZh: string;
 };
 
+export type FriendSocial = {
+  instagram?: string;
+  weibo?: string;
+  xiaohongshu?: string;
+  wechat?: string;
+};
+
 export type GalleryAlbum = {
   id: string;
   title: string;
@@ -54,6 +61,7 @@ export type GalleryAlbum = {
   photos: GalleryPhoto[];
   category: string;
   categoryZh: string;
+  friendSocial?: FriendSocial;
 };
 
 export type MenuItem = {

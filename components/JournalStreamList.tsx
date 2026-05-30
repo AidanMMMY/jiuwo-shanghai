@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { useState } from 'react';
+import JournalEntryWithLikes from './JournalEntryWithLikes';
 import type { JournalEntry } from '@/lib/data';
 
 type Entry = JournalEntry & { contentHtml: string };
@@ -23,28 +23,7 @@ export default function JournalStreamList({
         <h2 className="text-4xl font-semibold text-[#f5f5f0] tracking-wide mb-8">{title ?? 'Journal'}</h2>
         <div className="space-y-16">
           {visibleEntries.map((entry) => (
-            <article key={entry.slug} className="border-b border-[#222] pb-14 pt-4 last:border-0">
-              <time className="text-sm text-[#a0a0a0]">{entry.date}</time>
-              <h3 className="text-2xl font-medium text-[#a0a0a0] mt-2 mb-6 tracking-wide">{entry.title}</h3>
-              <div className="flex justify-center mb-8">
-                <Image
-                  src={entry.cover}
-                  alt={entry.title}
-                  width={0}
-                  height={0}
-                  sizes="100vw"
-                  className={
-                    entry.coverIsLandscape !== false
-                      ? 'w-full h-auto rounded-lg'
-                      : 'max-w-full max-h-[66vh] w-auto h-auto rounded-lg object-contain'
-                  }
-                />
-              </div>
-              <div
-                className="prose prose-invert prose-stone max-w-none prose-headings:text-[#f5f5f0] prose-p:text-[#a0a0a0] prose-a:text-[#c9a227] [&_img]:block [&_img]:mx-auto [&_img]:my-6 [&_img]:max-w-full [&_img]:max-h-[66vh] [&_img]:h-auto [&_img]:rounded-lg"
-                dangerouslySetInnerHTML={{ __html: entry.contentHtml }}
-              />
-            </article>
+            <JournalEntryWithLikes key={entry.slug} entry={entry} />
           ))}
         </div>
         {hasMore && (

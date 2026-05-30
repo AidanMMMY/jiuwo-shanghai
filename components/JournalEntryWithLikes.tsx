@@ -163,14 +163,6 @@ export default function JournalEntryWithLikes({
         className="prose prose-invert prose-stone max-w-none prose-headings:text-[#f5f5f0] prose-p:text-[#a0a0a0] prose-a:text-[#c9a227] [&_img]:block [&_img]:mx-auto [&_img]:my-6 [&_img]:max-w-full [&_img]:max-h-[66vh] [&_img]:h-auto [&_img]:rounded-lg"
         dangerouslySetInnerHTML={{ __html: entry.contentHtml }}
       />
-
-      <style jsx>{`
-        @keyframes heartPop {
-          0% { transform: scale(0); opacity: 0; }
-          50% { transform: scale(1.2); opacity: 1; }
-          100% { transform: scale(1); opacity: 0; }
-        }
-      `}</style>
     </article>
   );
 }

@@ -1,9 +1,110 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import Lightbox from './Lightbox';
 import LikeButton from './LikeButton';
+
+function PhotoCard({
+  photo,
+  idx,
+  onOpen,
+}: {
+  photo: { src: string; alt: string };
+  idx: number;
+  onOpen: () => void;
+}) {
+  const [liked, setLiked] = useState(false);
+  const [count, setCount] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+  const [showHeart, setShowHeart] = useState(false);
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clickCount = useRef(0);
+
+  useEffect(() => {
+    fetch(`/api/likes?type=${encodeURIComponent('photo')}&id=${encodeURIComponent(photo.src)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setCount(data.count ?? 0);
+        setLiked(data.liked ?? false);
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, [photo.src]);
+
+  const doLike = useCallback(async () => {
+    if (liked) return;
+    setShowHeart(true);
+    setTimeout(() => setShowHeart(false), 800);
+
+    setLiked(true);
+    setCount((prev) => prev + 1);
+
+    try {
+      const res = await fetch('/api/likes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetType: 'photo', targetId: photo.src }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      setLiked(data.liked);
+      setCount(data.count);
+    } catch {
+      setLiked(false);
+      setCount((prev) => prev - 1);
+    }
+  }, [photo.src, liked]);
+
+  const handleClick = useCallback(() => {
+    clickCount.current += 1;
+    if (clickCount.current === 1) {
+      clickTimer.current = setTimeout(() => {
+        onOpen();
+        clickCount.current = 0;
+      }, 300);
+    } else if (clickCount.current === 2) {
+      if (clickTimer.current) clearTimeout(clickTimer.current);
+      clickTimer.current = null;
+      clickCount.current = 0;
+      doLike();
+    }
+  }, [onOpen, doLike]);
+
+  return (
+    <div
+      className="relative aspect-square overflow-hidden rounded-lg cursor-pointer select-none"
+      onClick={handleClick}
+    >
+      <Image src={photo.src} alt={photo.alt} fill className="object-cover" />
+
+      {/* Double-click heart animation */}
+      {showHeart && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+          <svg
+            viewBox="0 0 24 24"
+            fill="#c9a227"
+            className="w-16 h-16 animate-[heartPop_0.8s_ease-out_forwards]"
+          >
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
+        </div>
+      )}
+
+      {/* Like button overlay — bottom-right corner */}
+      <div
+        className="absolute bottom-2 right-2 z-10 flex items-center gap-1 rounded-full bg-black/50 px-2 py-1 backdrop-blur-sm"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <LikeButton
+          targetType="photo"
+          targetId={photo.src}
+          className="text-xs"
+        />
+      </div>
+    </div>
+  );
+}
 
 export default function AlbumPhotoGrid({
   photos,
@@ -16,24 +117,12 @@ export default function AlbumPhotoGrid({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {photos.map((photo, idx) => (
-          <div
+          <PhotoCard
             key={idx}
-            className="relative aspect-square overflow-hidden rounded-lg cursor-pointer group"
-            onClick={() => setLightboxIndex(idx)}
-          >
-            <Image src={photo.src} alt={photo.alt} fill className="object-cover" />
-            {/* Like button overlay — bottom-right corner */}
-            <div
-              className="absolute bottom-2 right-2 z-10 flex items-center gap-1 rounded-full bg-black/50 px-2 py-1 backdrop-blur-sm"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <LikeButton
-                targetType="photo"
-                targetId={photo.src}
-                className="text-xs"
-              />
-            </div>
-          </div>
+            photo={photo}
+            idx={idx}
+            onOpen={() => setLightboxIndex(idx)}
+          />
         ))}
       </div>
       {lightboxIndex !== null && (

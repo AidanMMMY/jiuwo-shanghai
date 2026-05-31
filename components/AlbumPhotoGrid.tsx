@@ -13,7 +13,7 @@ function PhotoCard({
 }: {
   photo: { src: string; alt: string };
   idx: number;
-  onOpen: () => void;
+  onOpen: (originRect?: DOMRect) => void;
 }) {
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(0);
@@ -22,6 +22,7 @@ function PhotoCard({
   const [animating, setAnimating] = useState(false);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clickCount = useRef(0);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch(`/api/likes?type=${encodeURIComponent('photo')}&id=${encodeURIComponent(photo.src)}`)
@@ -78,7 +79,8 @@ function PhotoCard({
     clickCount.current += 1;
     if (clickCount.current === 1) {
       clickTimer.current = setTimeout(() => {
-        onOpen();
+        const rect = cardRef.current?.getBoundingClientRect();
+        onOpen(rect);
         clickCount.current = 0;
       }, 300);
     } else if (clickCount.current === 2) {
@@ -91,6 +93,7 @@ function PhotoCard({
 
   return (
     <div
+      ref={cardRef}
       className="relative aspect-square overflow-hidden rounded-lg cursor-pointer select-none overflow-hidden"
       onClick={handleClick}
     >
@@ -133,7 +136,7 @@ export default function AlbumPhotoGrid({
 }: {
   photos: { src: string; alt: string }[];
 }) {
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [lightboxState, setLightboxState] = useState<{ index: number; originRect?: DOMRect } | null>(null);
 
   return (
     <>
@@ -144,17 +147,18 @@ export default function AlbumPhotoGrid({
               key={idx}
               photo={photo}
               idx={idx}
-              onOpen={() => setLightboxIndex(idx)}
+              onOpen={(rect) => setLightboxState({ index: idx, originRect: rect })}
             />
           </ScrollReveal>
         ))}
       </div>
-      {lightboxIndex !== null && (
+      {lightboxState !== null && (
         <Lightbox
           photos={photos}
-          currentIndex={lightboxIndex}
-          onClose={() => setLightboxIndex(null)}
-          onIndexChange={(index) => setLightboxIndex(index)}
+          currentIndex={lightboxState.index}
+          onClose={() => setLightboxState(null)}
+          onIndexChange={(index) => setLightboxState((prev) => prev ? { ...prev, index } : null)}
+          originRect={lightboxState.originRect}
         />
       )}
     </>

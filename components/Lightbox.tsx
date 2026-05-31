@@ -60,6 +60,27 @@ export default function Lightbox({
   const flyingRef = useRef<HTMLImageElement>(null);
   const [bgOpacity, setBgOpacity] = useState(originRect ? 0 : 1);
 
+  // Swipe-to-dismiss state
+  const [dragOffset, setDragOffset] = useState(0);
+  const touchStartY = useRef(0);
+  const touchStartTime = useRef(0);
+
+  // First-time hint
+  const [showSwipeHint, setShowSwipeHint] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !localStorage.getItem('lightbox-hint-shown');
+  });
+
+  useEffect(() => {
+    if (showSwipeHint && showContent) {
+      const timer = setTimeout(() => {
+        setShowSwipeHint(false);
+        localStorage.setItem('lightbox-hint-shown', 'true');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSwipeHint, showContent]);
+
   // Background fade-in
   useEffect(() => {
     if (originRect) {
@@ -124,6 +145,31 @@ export default function Lightbox({
     };
   }, []);
 
+  // Touch handlers for swipe-to-dismiss
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    touchStartTime.current = Date.now();
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const delta = e.touches[0].clientY - touchStartY.current;
+    if (delta > 0) {
+      setDragOffset(delta);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    const delta = dragOffset;
+    const duration = Date.now() - touchStartTime.current;
+    const velocity = delta / (duration || 1);
+
+    if (delta > 100 || velocity > 0.5) {
+      onClose();
+    } else {
+      setDragOffset(0);
+    }
+  }, [dragOffset, onClose]);
+
   const photo = photos[selectedIndex];
   if (!photo) return null;
 
@@ -149,78 +195,103 @@ export default function Lightbox({
         />
       )}
 
-      {/* Content - only show after animation */}
-      <div className={`flex-1 flex flex-col ${showContent ? 'opacity-100' : 'opacity-0'} transition-opacity duration-150`}>
-        {/* Close button */}
-        <button
-          className="absolute top-4 right-4 z-10 p-3 text-[#f5f5f0] text-3xl hover:text-[#c9a227]"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          aria-label="关闭"
-        >
-          ×
-        </button>
+      {/* Swipe-to-dismiss wrapper */}
+      <div
+        style={{
+          transform: dragOffset > 0 ? `translateY(${dragOffset * 0.4}px)` : undefined,
+          opacity: dragOffset > 0 ? Math.max(0.2, 1 - dragOffset / 500) : undefined,
+          transition: dragOffset === 0 ? 'transform 0.3s ease-out, opacity 0.3s ease-out' : undefined,
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Content - only show after animation */}
+        <div className={`flex-1 flex flex-col ${showContent ? 'opacity-100' : 'opacity-0'} transition-opacity duration-150`}>
+          {/* Close button */}
+          <button
+            className="absolute top-4 right-4 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm text-[#f5f5f0] hover:bg-[#c9a227]/20 hover:text-[#c9a227] transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            aria-label="关闭"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M1 1l14 14M15 1L1 15" />
+            </svg>
+          </button>
 
-        {/* Carousel */}
-        <div
-          ref={emblaRef}
-          className="flex-1 overflow-hidden cursor-grab active:cursor-grabbing"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex h-full">
-            {photos.map((p, i) => (
-              <div
-                key={`${p.src}-${i}`}
-                className="flex-[0_0_100%] min-w-0 h-full flex items-center justify-center px-4"
-              >
-                <div className="relative w-full h-[80vh]">
-                  <Image
-                    src={p.src}
-                    alt={p.alt}
-                    fill
-                    className="object-contain"
-                    priority={i === selectedIndex}
-                  />
+          {/* Carousel */}
+          <div
+            ref={emblaRef}
+            className="flex-1 overflow-hidden cursor-grab active:cursor-grabbing"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex h-full">
+              {photos.map((p, i) => (
+                <div
+                  key={`${p.src}-${i}`}
+                  className="flex-[0_0_100%] min-w-0 h-full flex items-center justify-center px-4"
+                >
+                  <div className="relative w-full h-[80vh]">
+                    <Image
+                      src={p.src}
+                      alt={p.alt}
+                      fill
+                      className="object-contain"
+                      priority={i === selectedIndex}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Prev / Next buttons (desktop) */}
-        {photos.length > 1 && (
-          <>
-            <button
-              className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 p-4 text-[#f5f5f0] text-4xl hover:text-[#c9a227] select-none items-center justify-center"
-              onClick={(e) => {
-                e.stopPropagation();
-                emblaApi?.scrollPrev();
-              }}
-              aria-label="上一张"
-            >
-              ‹
-            </button>
-            <button
-              className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 p-4 text-[#f5f5f0] text-4xl hover:text-[#c9a227] select-none items-center justify-center"
-              onClick={(e) => {
-                e.stopPropagation();
-                emblaApi?.scrollNext();
-              }}
-              aria-label="下一张"
-            >
-              ›
-            </button>
-          </>
-        )}
+          {/* Prev / Next buttons (desktop) */}
+          {photos.length > 1 && (
+            <>
+              <button
+                className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-10 items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm text-[#f5f5f0] hover:bg-[#c9a227]/20 hover:text-[#c9a227] transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  emblaApi?.scrollPrev();
+                }}
+                aria-label="上一张"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 2L4 8l6 6" />
+                </svg>
+              </button>
+              <button
+                className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-10 items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm text-[#f5f5f0] hover:bg-[#c9a227]/20 hover:text-[#c9a227] transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  emblaApi?.scrollNext();
+                }}
+                aria-label="下一张"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 2l6 6-6 6" />
+                </svg>
+              </button>
+            </>
+          )}
 
-        {/* Bottom bar */}
-        <div className="flex items-center justify-center gap-4 py-4">
-          <p className="text-sm text-[#a0a0a0]">
-            {selectedIndex + 1} / {photos.length}
-          </p>
-          <LikeButton targetType="photo" targetId={photo.src} />
+          {/* Swipe hint */}
+          {showSwipeHint && (
+            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 text-xs text-[#a0a0a0]/60 animate-[fadeInDown_0.5s_ease-out]">
+              滑动切换照片 · 下滑关闭
+            </div>
+          )}
+
+          {/* Bottom bar */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-4 rounded-full bg-black/40 backdrop-blur-md px-5 py-2">
+            <p className="text-xs text-[#a0a0a0] tabular-nums">
+              {selectedIndex + 1} / {photos.length}
+            </p>
+            <LikeButton targetType="photo" targetId={photo.src} />
+          </div>
         </div>
       </div>
     </div>

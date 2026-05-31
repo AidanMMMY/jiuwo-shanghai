@@ -22,34 +22,57 @@ export default function LikeButton({
   targetType,
   targetId,
   className,
+  liked: externalLiked,
+  count: externalCount,
+  loaded: externalLoaded,
+  onToggle,
 }: {
   targetType: string;
   targetId: string;
   className?: string;
+  liked?: boolean;
+  count?: number;
+  loaded?: boolean;
+  onToggle?: () => void;
 }) {
-  const [count, setCount] = useState(0);
-  const [liked, setLiked] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const isControlled = externalLiked !== undefined;
+
+  const [internalCount, setInternalCount] = useState(0);
+  const [internalLiked, setInternalLiked] = useState(false);
+  const [internalLoaded, setInternalLoaded] = useState(false);
   const [animating, setAnimating] = useState(false);
 
   useEffect(() => {
+    if (isControlled) return;
     fetch(`/api/likes?type=${encodeURIComponent(targetType)}&id=${encodeURIComponent(targetId)}`)
       .then((res) => res.json())
       .then((data) => {
-        setCount(data.count ?? 0);
-        setLiked(data.liked ?? false);
-        setLoaded(true);
+        setInternalCount(data.count ?? 0);
+        setInternalLiked(data.liked ?? false);
+        setInternalLoaded(true);
       })
-      .catch(() => setLoaded(true));
-  }, [targetType, targetId]);
+      .catch(() => setInternalLoaded(true));
+  }, [targetType, targetId, isControlled]);
+
+  const count = isControlled ? externalCount! : internalCount;
+  const liked = isControlled ? externalLiked! : internalLiked;
+  const loaded = isControlled ? externalLoaded! : internalLoaded;
 
   const handleLike = useCallback(async () => {
     setAnimating(true);
     setTimeout(() => setAnimating(false), 300);
 
+    if (onToggle) {
+      onToggle();
+      return;
+    }
+
+    setAnimating(true);
+    setTimeout(() => setAnimating(false), 300);
+
     const nextLiked = !liked;
-    setLiked(nextLiked);
-    setCount((prev) => (nextLiked ? prev + 1 : prev - 1));
+    setInternalLiked(nextLiked);
+    setInternalCount((prev) => (nextLiked ? prev + 1 : prev - 1));
 
     try {
       const res = await fetch('/api/likes', {
@@ -61,13 +84,13 @@ export default function LikeButton({
       if (!res.ok) throw new Error('Failed to toggle like');
 
       const data = await res.json();
-      setLiked(data.liked);
-      setCount(data.count);
+      setInternalLiked(data.liked);
+      setInternalCount(data.count);
     } catch {
-      setLiked((prev) => !prev);
-      setCount((prev) => (liked ? prev + 1 : prev - 1));
+      setInternalLiked((prev) => !prev);
+      setInternalCount((prev) => (liked ? prev + 1 : prev - 1));
     }
-  }, [targetType, targetId, liked]);
+  }, [targetType, targetId, liked, onToggle]);
 
   const handleDoubleClick = useCallback(() => {
     if (!liked) {

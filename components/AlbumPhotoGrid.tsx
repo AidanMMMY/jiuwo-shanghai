@@ -18,6 +18,7 @@ function PhotoCard({
   const [count, setCount] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
+  const [animating, setAnimating] = useState(false);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clickCount = useRef(0);
 
@@ -32,13 +33,9 @@ function PhotoCard({
       .catch(() => setLoaded(true));
   }, [photo.src]);
 
-  const doLike = useCallback(async () => {
-    if (liked) return;
-    setShowHeart(true);
-    setTimeout(() => setShowHeart(false), 800);
-
-    setLiked(true);
-    setCount((prev) => prev + 1);
+  const doToggleLike = useCallback(async (nextLiked: boolean) => {
+    setLiked(nextLiked);
+    setCount((prev) => (nextLiked ? prev + 1 : prev - 1));
 
     try {
       const res = await fetch('/api/likes', {
@@ -51,10 +48,30 @@ function PhotoCard({
       setLiked(data.liked);
       setCount(data.count);
     } catch {
-      setLiked(false);
-      setCount((prev) => prev - 1);
+      setLiked((prev) => !prev);
+      setCount((prev) => (nextLiked ? prev - 1 : prev + 1));
     }
-  }, [photo.src, liked]);
+  }, [photo.src]);
+
+  const handleToggleLike = useCallback(() => {
+    const nextLiked = !liked;
+    if (nextLiked) {
+      setAnimating(true);
+      setTimeout(() => setAnimating(false), 300);
+      setShowHeart(true);
+      setTimeout(() => setShowHeart(false), 800);
+    }
+    doToggleLike(nextLiked);
+  }, [liked, doToggleLike]);
+
+  const handleDoubleClickLike = useCallback(() => {
+    if (liked) return; // 双击只点赞，不取消
+    setAnimating(true);
+    setTimeout(() => setAnimating(false), 300);
+    setShowHeart(true);
+    setTimeout(() => setShowHeart(false), 800);
+    doToggleLike(true);
+  }, [liked, doToggleLike]);
 
   const handleClick = useCallback(() => {
     clickCount.current += 1;
@@ -67,9 +84,9 @@ function PhotoCard({
       if (clickTimer.current) clearTimeout(clickTimer.current);
       clickTimer.current = null;
       clickCount.current = 0;
-      doLike();
+      handleDoubleClickLike();
     }
-  }, [onOpen, doLike]);
+  }, [onOpen, handleDoubleClickLike]);
 
   return (
     <div
@@ -100,6 +117,10 @@ function PhotoCard({
           targetType="photo"
           targetId={photo.src}
           className="text-xs"
+          liked={liked}
+          count={count}
+          loaded={loaded}
+          onToggle={handleToggleLike}
         />
       </div>
     </div>

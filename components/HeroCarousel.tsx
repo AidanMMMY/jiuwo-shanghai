@@ -171,11 +171,11 @@ export default function HeroCarousel({
           display: inline-block;
           background-image: linear-gradient(105deg,
             #c9a227 0%,
-            #c9a227 42%,
-            #f4d77a 48%,
-            #fff4c2 50%,
-            #f4d77a 52%,
-            #c9a227 58%,
+            #c9a227 44%,
+            #f5e6a8 48%,
+            #ffffff 50%,
+            #f5e6a8 52%,
+            #c9a227 56%,
             #c9a227 100%);
           background-size: 250% 100%;
           background-position: 100% 0;
@@ -185,7 +185,7 @@ export default function HeroCarousel({
           -webkit-text-fill-color: transparent;
           animation:
             titleEntrance 900ms cubic-bezier(0.16, 1, 0.3, 1) 200ms both,
-            heroTitleShine 7s linear 1.6s infinite;
+            heroTitleShine 4s linear 1.6s infinite;
         }
         .hero-intro-fade-up {
           animation: heroIntroFadeUp 1400ms cubic-bezier(0.16, 1, 0.3, 1) 1000ms both;

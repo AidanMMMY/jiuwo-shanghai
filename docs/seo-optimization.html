@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JIUWO SEO 优化方案总结</title>
+<style>
+:root{--bg:#0a0a0a;--fg:#f5f5f0;--muted:#a0a0a0;--accent:#c9a227;--surface:#141414;--border:#222;}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.7;margin:0;padding:0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:800px;margin:0 auto;padding:48px 24px}
+header{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:40px}
+header h1{font-size:2.2rem;font-weight:600;margin:0 0 8px;letter-spacing:-0.02em}
+header .meta{color:var(--muted);font-size:0.95rem}
+blockquote{border-left:3px solid var(--accent);margin:20px 0;padding:12px 20px;background:var(--surface);border-radius:0 8px 8px 0;color:var(--muted)}
+blockquote p{margin:0}
+blockquote p+p{margin-top:8px}
+h2{font-size:1.5rem;font-weight:600;margin:48px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border);color:var(--fg)}
+h3{font-size:1.15rem;font-weight:600;margin:32px 0 12px;color:var(--accent)}
+hr{border:none;border-top:1px solid var(--border);margin:40px 0}
+p{margin:12px 0}
+ul,ol{margin:12px 0;padding-left:24px}
+li{margin:6px 0}
+li>p{margin:4px 0}
+table{width:100%;border-collapse:collapse;margin:20px 0;font-size:0.95rem}
+th,td{border:1px solid var(--border);padding:10px 14px;text-align:left}
+th{background:var(--surface);font-weight:600;color:var(--accent)}
+tr:nth-child(even){background:rgba(255,255,255,0.02)}
+code{background:var(--surface);padding:2px 8px;border-radius:4px;font-family:"SF Mono",Monaco,"Cascadia Code","Roboto Mono",Consolas,"Courier New",monospace;font-size:0.9em;color:var(--accent)}
+pre{background:var(--surface);padding:16px 20px;border-radius:8px;overflow-x:auto;margin:16px 0}
+pre code{background:none;padding:0;font-size:0.85em}
+ol{list-style-type:decimal}
+ol li::marker{font-weight:600;color:var(--accent)}
+::selection{background:rgba(201,162,39,0.25)}
+@media(max-width:600px){.container{padding:24px 16px}header h1{font-size:1.6rem}h2{font-size:1.25rem}table{font-size:0.85rem}th,td{padding:8px 10px}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+<h1>JIUWO SEO 优化方案总结</h1>
+<div class="meta">
+<p>更新日期：2026-05-29</p>
+<p>包含两版优化：基础 SEO 设置 + LGBTQ+/Shanghai bar 关键词优化</p>
+</div>
+</header>
+
+<h2>第一版：基础 SEO 设置（2026-05-29）</h2>
+<h3>1. 自动生成 Sitemap</h3>
+<p>文件：<code>app/sitemap.ts</code></p>
+<ul>
+<li>自动生成全站 <code>sitemap.xml</code></li>
+<li>覆盖所有中英文静态页、journal 文章、gallery 相册</li>
+<li>每页带 <code>hreflang</code> 交替语言标注（<code>zh-CN</code> / <code>en</code>）</li>
+<li>支持优先级 (<code>priority</code>) 和更新频率 (<code>changeFrequency</code>)</li>
+</ul>
+<p>访问地址：<code>https://jiuwoshanghai.net/sitemap.xml</code></p>
+
+<h3>2. Robots.txt</h3>
+<p>文件：<code>public/robots.txt</code></p>
+<ul>
+<li>允许全站爬取</li>
+<li>屏蔽 <code>/admin/</code></li>
+<li>引用 sitemap</li>
+</ul>
+
+<h3>3. 全局 Metadata（根 Layout）</h3>
+<p>文件：<code>app/layout.tsx</code></p>
+<ul>
+<li><code>metadataBase</code>: <code>https://jiuwoshanghai.net</code></li>
+<li>Title template: <code>%s | JIUWO</code>，默认：<code>JIUWO — Shanghai Wine &amp; Cocktail Bar</code></li>
+<li>全局 description 和 keywords</li>
+<li>Open Graph 默认配置（type, locale, siteName, 默认图片）</li>
+<li>Twitter Card 配置</li>
+<li>Robots 规则（index + follow + Google 预览参数）</li>
+</ul>
+
+<h3>4. 页面级独立 Metadata（10 个页面）</h3>
+<p>每个页面都有独立的 <code>title</code>、<code>description</code>、<code>canonical</code>：</p>
+<table>
+<thead>
+<tr><th>页面</th><th>EN Title</th><th>ZH Title</th></tr>
+</thead>
+<tbody>
+<tr><td>首页</td><td><code>JIUWO — Shanghai Wine &amp; Cocktail Bar</code></td><td><code>啾喔 — 上海葡萄酒、鸡尾酒吧</code></td></tr>
+<tr><td>About</td><td><code>About | JIUWO</code></td><td><code>关于我们 | JIUWO</code></td></tr>
+<tr><td>Menu</td><td><code>Menu | JIUWO</code></td><td><code>酒单 | JIUWO</code></td></tr>
+<tr><td>Gallery</td><td><code>Gallery | JIUWO</code></td><td><code>画册 | JIUWO</code></td></tr>
+<tr><td>Guestbook</td><td><code>Guestbook | JIUWO</code></td><td><code>客言 | JIUWO</code></td></tr>
+</tbody>
+</table>
+
+<h3>5. 动态页面 Metadata</h3>
+<p><strong>Journal 文章页</strong> (<code>app/(en)/updates/[slug]/page.tsx</code>, <code>app/zh/updates/[slug]/page.tsx</code>)</p>
+<ul>
+<li>标题：文章标题</li>
+<li>描述：文章内容前 160 字符</li>
+<li>OG 图片：文章封面图</li>
+</ul>
+<p><strong>Gallery 相册页</strong> (<code>app/(en)/gallery/[album]/page.tsx</code>, <code>app/zh/gallery/[album]/page.tsx</code>)</p>
+<ul>
+<li>标题：相册标题</li>
+<li>描述：相册副标题</li>
+<li>OG 图片：相册封面图</li>
+</ul>
+
+<h3>6. Open Graph 默认图</h3>
+<p>文件：<code>public/images/og-default.jpg</code></p>
+<ul>
+<li>尺寸：1200 &times; 630 像素</li>
+<li>来源：hero-01.webp 居中裁剪缩放</li>
+<li>用途：所有页面的默认社交分享预览图</li>
+</ul>
+
+<h3>7. 结构化数据（JSON-LD）</h3>
+<p>文件：<code>app/(en)/about/page.tsx</code>, <code>app/zh/about/page.tsx</code></p>
+<ul>
+<li>类型：<code>BarOrPub</code>（Schema.org）</li>
+<li>包含字段：名称、地址、坐标、营业时间、价格区间、邮箱、社交媒体</li>
+<li>受众标注：<code>LGBTQ+ friendly</code></li>
+</ul>
+
+<hr>
+
+<h2>第二版：LGBTQ+/Shanghai bar 关键词优化（2026-05-29）</h2>
+<h3>1. 全局 Keywords 扩展</h3>
+<p>文件：<code>app/layout.tsx</code></p>
+<p>新增关键词：</p>
+<ul>
+<li><code>queer friendly bar Shanghai</code></li>
+<li><code>gay bar Shanghai</code></li>
+<li><code>LGBTQ bar Shanghai</code></li>
+<li><code>LGBT friendly bar</code></li>
+<li><code>上海酒吧</code></li>
+</ul>
+
+<h3>2. 页面描述优化</h3>
+<p><strong>根 layout description</strong></p>
+<blockquote>
+<p>&quot;JIUWO is a queer-friendly cocktail bar on Julu Road in Shanghai. Natural wines, craft cocktails, rock oolong tea, and a welcoming space for everyone.&quot;</p>
+</blockquote>
+<p><strong>EN 首页</strong></p>
+<blockquote>
+<p>&quot;JIUWO &mdash; a queer-friendly cocktail bar on Julu Road, Shanghai.&quot;</p>
+</blockquote>
+<p><strong>ZH 首页</strong></p>
+<blockquote>
+<p>&quot;JIUWO 啾喔，上海巨鹿路上一家友好的鸡尾酒吧&hellip;温馨 welcoming 的空间&quot;</p>
+</blockquote>
+<p><strong>EN About</strong></p>
+<blockquote>
+<p>&quot;JIUWO is a queer-friendly cocktail bar&hellip; A welcoming space for Shanghai's LGBTQ community.&quot;</p>
+</blockquote>
+<p><strong>ZH About</strong></p>
+<blockquote>
+<p>&quot;JIUWO 啾喔，上海巨鹿路上一家友好开放的鸡尾酒吧&hellip;上海 LGBTQ 社群的温馨聚集地&quot;</p>
+</blockquote>
+
+<h3>3. JSON-LD Audience 标注</h3>
+<p>文件：<code>app/(en)/about/page.tsx</code>, <code>app/zh/about/page.tsx</code></p>
+<pre><code class="language-json">&quot;audience&quot;: {
+  &quot;@type&quot;: &quot;PeopleAudience&quot;,
+  &quot;audienceType&quot;: &quot;LGBTQ+ friendly&quot;
+}
+</code></pre>
+<p>让搜索引擎和 Rich Results 明确识别酒吧的社区属性。</p>
+
+<hr>
+
+<h2>后续建议（未实施）</h2>
+<h3>高优先级</h3>
+<ol>
+<li><p><strong>Google Business Profile</strong></p>
+<ul>
+<li>在 <a href="https://business.google.com">business.google.com</a> 创建商家档案</li>
+<li>类别：Bar / Cocktail Bar</li>
+<li>勾选 <strong>LGBTQ+ friendly</strong> 属性</li>
+<li>这是提升 &quot;shanghai gay bar&quot; 本地搜索排名的最有效方法</li>
+</ul>
+</li>
+<li><p><strong>Google Search Console 验证</strong></p>
+<ul>
+<li>替换 <code>app/layout.tsx</code> 中的 <code>google-site-verification-code</code> 占位符</li>
+<li>提交 sitemap.xml 并监控索引状态</li>
+</ul>
+</li>
+</ol>
+
+<h3>中优先级</h3>
+<ol start="3">
+<li><p><strong>外链建设</strong></p>
+<ul>
+<li>Time Out Shanghai：联系编辑争取收录到 &quot;Best bars in Shanghai&quot;</li>
+<li>That's Shanghai：bar guide 投稿</li>
+<li>SmartShanghai：提交商家信息</li>
+<li>TripAdvisor：创建商家列表</li>
+</ul>
+</li>
+<li><p><strong>用户评论</strong></p>
+<ul>
+<li>在吧台放置 Google Review 引导牌</li>
+<li>或在 guestbook 页面引导至 Google Maps 评论</li>
+</ul>
+</li>
+</ol>
+
+<h3>低优先级</h3>
+<ol start="5">
+<li><strong>内容优化</strong>
+<ul>
+<li>在 <code>data/about.json</code> 的品牌故事中自然融入 LGBTQ+ 社区相关叙述</li>
+<li>Gallery 图片 alt 文本加入场景描述</li>
+</ul>
+</li>
+</ol>
+
+<hr>
+
+<h2>验证工具</h2>
+<ul>
+<li><a href="https://search.google.com/test/rich-results">Google Rich Results Test</a></li>
+<li><a href="https://www.xml-sitemaps.com/validate-xml-sitemap.html">Sitemap 验证</a></li>
+<li><a href="https://search.google.com/search-console">Google Search Console</a></li>
+</ul>
+
+</div>
+</body>
+</html>

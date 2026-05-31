@@ -38,18 +38,35 @@ export default function MenuNav({ categories }: { categories: MenuCategory[] }) 
 
   return (
     <nav className="sticky top-16 z-40 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-[#222] py-4 mb-12">
-      <div className="mx-auto max-w-7xl px-6 flex gap-6 overflow-x-auto">
-        {categories.map((cat) => (
-          <a
-            key={cat.category}
-            href={`#${cat.category}`}
-            className={`whitespace-nowrap text-sm transition-colors ${
-              active === cat.category ? 'text-[#c9a227]' : 'text-[#a0a0a0] hover:text-[#c9a227]'
-            }`}
-          >
-            {cat.category}
-          </a>
-        ))}
+      <div className="mx-auto max-w-7xl px-6">
+        <div
+          className="flex gap-6 overflow-x-auto"
+          style={{
+            WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+            maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+          }}
+        >
+          {categories.map((cat) => (
+            <a
+              key={cat.category}
+              href={`#${cat.category}`}
+              className="group relative whitespace-nowrap text-sm transition-colors py-1"
+            >
+              <span
+                className={`transition-colors ${
+                  active === cat.category ? 'text-[#c9a227]' : 'text-[#a0a0a0] group-hover:text-[#c9a227]'
+                }`}
+              >
+                {cat.category}
+              </span>
+              <span
+                className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#c9a227] transition-transform duration-300 ease-out origin-center ${
+                  active === cat.category ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                }`}
+              />
+            </a>
+          ))}
+        </div>
       </div>
     </nav>
   );

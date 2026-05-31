@@ -5,7 +5,7 @@ import type { MenuCategory } from '@/lib/data';
 export default function MenuSection({ category }: { category: MenuCategory }) {
   return (
     <ScrollReveal>
-      <section id={category.category} className="mb-16 scroll-mt-32">
+      <section id={category.category} className="mb-16 scroll-mt-44">
         {/* Category title with gold accent line */}
         <div className="flex items-center gap-3 mb-8">
           <div className="w-1 h-6 bg-[#c9a227] rounded-full" />

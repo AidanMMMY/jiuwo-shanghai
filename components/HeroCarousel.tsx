@@ -122,6 +122,9 @@ export default function HeroCarousel({
         </svg>
       </div>
 
+      {/* Bottom gradient fade into black */}
+      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent pointer-events-none z-[5]" />
+
       <style>{`
         @keyframes heroFade {
           0% { opacity: 1; }

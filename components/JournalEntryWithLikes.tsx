@@ -92,7 +92,7 @@ export default function JournalEntryWithLikes({
 
   return (
     <article
-      className="border-b border-[#222] pb-14 pt-4 last:border-0 relative select-none"
+      className="relative select-none group"
       onClick={handleClick}
     >
       {/* Double-click heart animation overlay */}
@@ -108,10 +108,17 @@ export default function JournalEntryWithLikes({
         </div>
       )}
 
-      <time className="text-sm text-[#a0a0a0]">{entry.date}</time>
-      <h3 className="text-2xl font-medium text-[#a0a0a0] mt-2 mb-6 tracking-wide">{entry.title}</h3>
+      {/* Date with gold accent line */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-1 h-4 bg-[#c9a227] rounded-full" />
+        <time className="text-xs uppercase tracking-[0.2em] text-[#a0a0a0]">{entry.date}</time>
+      </div>
+
+      <h3 className="text-2xl font-medium text-[#a0a0a0] mb-6 tracking-wide leading-snug">{entry.title}</h3>
+
+      {/* Cover image with hover zoom */}
       <div className="flex justify-center mb-8">
-        <div className={`relative ${entry.coverAspect === 'tall' ? 'inline-block' : 'w-full'}`}>
+        <div className={`relative overflow-hidden rounded-lg ${entry.coverAspect === 'tall' ? 'inline-block' : 'w-full'}`}>
           <Image
             src={entry.cover}
             alt={entry.title}
@@ -120,8 +127,8 @@ export default function JournalEntryWithLikes({
             sizes="100vw"
             className={
               entry.coverAspect === 'tall'
-                ? 'max-w-full max-h-[66vh] w-auto h-auto rounded-lg object-contain block'
-                : 'w-full h-auto rounded-lg block'
+                ? 'max-w-full max-h-[66vh] w-auto h-auto rounded-lg object-contain block transition-transform duration-500 ease-out group-hover:scale-[1.02]'
+                : 'w-full h-auto rounded-lg block transition-transform duration-500 ease-out group-hover:scale-[1.02]'
             }
           />
           <button
@@ -159,10 +166,14 @@ export default function JournalEntryWithLikes({
           </button>
         </div>
       </div>
+
       <div
         className="prose prose-invert prose-stone max-w-none prose-headings:text-[#f5f5f0] prose-p:text-[#a0a0a0] prose-a:text-[#c9a227] [&_img]:block [&_img]:mx-auto [&_img]:my-6 [&_img]:max-w-full [&_img]:max-h-[66vh] [&_img]:h-auto [&_img]:rounded-lg"
         dangerouslySetInnerHTML={{ __html: entry.contentHtml }}
       />
+
+      {/* Fading divider */}
+      <div className="mt-14 h-px bg-gradient-to-r from-transparent via-[#222] to-transparent" />
     </article>
   );
 }

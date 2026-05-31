@@ -82,30 +82,21 @@ export default function Navbar({
               </Link>
             );
           })}
-          {/* Language switcher — pill style */}
-          <div className="flex items-center shrink-0">
-            <div className="flex items-center rounded-full border border-[#333] bg-[#111] overflow-hidden">
-              <Link
-                href={otherHref}
-                className={`px-2.5 py-1 text-xs md:text-sm transition-all duration-300 ${
-                  !isZh
-                    ? 'bg-[#c9a227] text-[#0a0a0a] font-medium'
-                    : 'text-[#a0a0a0] hover:text-[#c9a227]'
-                }`}
-              >
-                EN
-              </Link>
-              <Link
-                href={otherHref}
-                className={`px-2.5 py-1 text-xs md:text-sm transition-all duration-300 ${
-                  isZh
-                    ? 'bg-[#c9a227] text-[#0a0a0a] font-medium'
-                    : 'text-[#a0a0a0] hover:text-[#c9a227]'
-                }`}
-              >
-                中
-              </Link>
-            </div>
+          {/* Language switcher */}
+          <div className="flex items-center gap-1.5 text-xs md:text-sm border-l border-[#333] pl-3 md:pl-6 ml-1 md:ml-2 shrink-0">
+            <Link
+              href={otherHref}
+              className={`${isZh ? 'text-[#a0a0a0] hover:text-[#c9a227]' : 'text-[#f5f5f0] font-medium'} transition-colors`}
+            >
+              EN
+            </Link>
+            <span className="text-[#555]">/</span>
+            <Link
+              href={otherHref}
+              className={`${isZh ? 'text-[#f5f5f0] font-medium' : 'text-[#a0a0a0] hover:text-[#c9a227]'} transition-colors`}
+            >
+              中
+            </Link>
           </div>
         </nav>
       </div>

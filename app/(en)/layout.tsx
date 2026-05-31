@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackToTop from "@/components/BackToTop";
+import ReadingProgress from "@/components/ReadingProgress";
 import { getSiteData } from "@/lib/data";
 
 const inter = Inter({
@@ -29,6 +31,8 @@ export default async function EnLayout({
       <Navbar name={site.name} nav={site.nav} />
       <main className="pt-0 min-h-screen">{children}</main>
       <Footer site={site} />
+      <BackToTop />
+      <ReadingProgress />
     </div>
   );
 }

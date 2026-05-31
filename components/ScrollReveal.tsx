@@ -29,10 +29,12 @@ export default function ScrollReveal({
   children,
   delay = 0,
   className = '',
+  effect = 'fade-up',
 }: {
   children: React.ReactNode;
   delay?: number;
   className?: string;
+  effect?: 'fade-up' | 'fade-in' | 'scale-in';
 }) {
   const { ref, visible } = useScrollReveal();
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -47,13 +49,25 @@ export default function ScrollReveal({
 
   const isVisible = visible || reducedMotion;
 
+  const getTransform = () => {
+    if (reducedMotion) return 'none';
+    switch (effect) {
+      case 'fade-up':
+        return isVisible ? 'translateY(0)' : 'translateY(24px)';
+      case 'scale-in':
+        return isVisible ? 'scale(1)' : 'scale(0.96)';
+      default:
+        return 'none';
+    }
+  };
+
   return (
     <div
       ref={ref}
       className={`transition-all duration-700 ease-out ${className}`}
       style={{
         opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0)' : 'translateY(24px)',
+        transform: getTransform(),
         transitionDelay: reducedMotion ? '0ms' : `${delay}ms`,
       }}
     >

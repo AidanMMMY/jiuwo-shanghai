@@ -35,14 +35,19 @@ export default function Navbar({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
-        scrolled ? 'bg-[#0a0a0a]/95 backdrop-blur-sm' : 'bg-[#0a0a0a]/60'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? 'bg-[#0a0a0a]/95 backdrop-blur-md shadow-[0_1px_0_rgba(201,162,39,0.08)]'
+          : 'bg-[#0a0a0a]/60'
       }`}
     >
       <div className="mx-auto max-w-7xl px-4 md:px-6 py-4 flex items-center justify-between">
-        <Link href={isZh ? '/zh' : '/'} className="flex items-center gap-2 text-lg font-medium tracking-wide text-[#f5f5f0] hover:text-[#c9a227] transition-colors shrink-0">
+        <Link
+          href={isZh ? '/zh' : '/'}
+          className="flex items-center gap-2.5 text-lg font-medium tracking-wide text-[#f5f5f0] hover:text-[#c9a227] transition-colors duration-300 shrink-0 group"
+        >
           <div className="relative w-8 h-8">
-            <Image src="/images/logo.png" alt="logo" fill className="object-contain" />
+            <Image src="/images/logo.png" alt="logo" fill className="object-contain transition-transform duration-300 group-hover:scale-110" />
           </div>
           <span className="hidden sm:inline">{name}</span>
         </Link>
@@ -61,28 +66,46 @@ export default function Navbar({
               <Link
                 key={item.href}
                 href={localizedHref}
-                className={`text-xs md:text-sm transition-colors whitespace-nowrap ${
-                  isActive ? 'text-[#c9a227] font-medium' : 'text-[#a0a0a0] hover:text-[#c9a227]'
-                }`}
+                className={`relative text-xs md:text-sm transition-colors duration-300 whitespace-nowrap py-1 ${
+                  isActive
+                    ? 'text-[#c9a227] font-medium'
+                    : 'text-[#a0a0a0] hover:text-[#c9a227]'
+                } group`}
               >
                 {item.label}
+                {/* Active indicator: gold underline */}
+                <span
+                  className={`absolute -bottom-0.5 left-0 h-px bg-[#c9a227] transition-all duration-300 ${
+                    isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                  }`}
+                />
               </Link>
             );
           })}
-          <div className="flex items-center gap-1.5 text-xs md:text-sm border-l border-[#333] pl-3 md:pl-6 ml-1 md:ml-2 shrink-0">
-            <Link
-              href={otherHref}
-              className={`${isZh ? 'text-[#a0a0a0] hover:text-[#c9a227]' : 'text-[#f5f5f0] font-medium'} transition-colors`}
-            >
-              EN
-            </Link>
-            <span className="text-[#555]">/</span>
-            <Link
-              href={otherHref}
-              className={`${isZh ? 'text-[#f5f5f0] font-medium' : 'text-[#a0a0a0] hover:text-[#c9a227]'} transition-colors`}
-            >
-              中
-            </Link>
+          {/* Language switcher — pill style */}
+          <div className="flex items-center shrink-0">
+            <div className="flex items-center rounded-full border border-[#333] bg-[#111] overflow-hidden">
+              <Link
+                href={otherHref}
+                className={`px-2.5 py-1 text-xs md:text-sm transition-all duration-300 ${
+                  !isZh
+                    ? 'bg-[#c9a227] text-[#0a0a0a] font-medium'
+                    : 'text-[#a0a0a0] hover:text-[#c9a227]'
+                }`}
+              >
+                EN
+              </Link>
+              <Link
+                href={otherHref}
+                className={`px-2.5 py-1 text-xs md:text-sm transition-all duration-300 ${
+                  isZh
+                    ? 'bg-[#c9a227] text-[#0a0a0a] font-medium'
+                    : 'text-[#a0a0a0] hover:text-[#c9a227]'
+                }`}
+              >
+                中
+              </Link>
+            </div>
           </div>
         </nav>
       </div>

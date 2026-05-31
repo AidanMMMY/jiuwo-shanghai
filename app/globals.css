@@ -130,3 +130,54 @@ body {
     50% { transform: scale(1.2); opacity: 1; }
     100% { transform: scale(1); opacity: 0; }
 }
+
+/* ── Global Micro-interactions ── */
+
+/* Links: underline expand from left */
+a:not([class*="no-link-style"]) {
+    position: relative;
+}
+
+/* Buttons: unified hover language */
+@layer utilities {
+    .btn-gold {
+        @apply relative overflow-hidden border border-[#333] text-[#a0a0a0] transition-all duration-300;
+    }
+    .btn-gold:hover {
+        @apply border-[#c9a227] text-[#f5f5f0];
+    }
+    .btn-gold::before {
+        content: '';
+        @apply absolute inset-0 bg-[#c9a227]/5 opacity-0 transition-opacity duration-300;
+    }
+    .btn-gold:hover::before {
+        @apply opacity-100;
+    }
+}
+
+/* Card hover lift effect */
+@layer utilities {
+    .card-lift {
+        @apply transition-all duration-300;
+    }
+    .card-lift:hover {
+        @apply -translate-y-0.5;
+    }
+}
+
+/* Image hover zoom (subtle) */
+@layer utilities {
+    .img-zoom {
+        @apply transition-transform duration-500 ease-out;
+    }
+    .group:hover .img-zoom {
+        @apply scale-[1.03];
+    }
+}
+
+/* Focus rings (accessibility) */
+@layer utilities {
+    .focus-gold {
+        @apply focus:outline-none focus:ring-1 focus:ring-[#c9a227]/50 focus:ring-offset-1 focus:ring-offset-[#0a0a0a];
+    }
+}

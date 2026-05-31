@@ -102,6 +102,768 @@
     ]
   },
   {
+    "category": "Sparkling",
+    "categoryZh": "起泡酒",
+    "items": [
+      {
+        "name": "Prosecco Spumante",
+        "nameZh": "普罗赛克起泡酒",
+        "price": "220",
+        "description": "Veneto / Friuli, Italy · Glera · Sparkling",
+        "descriptionZh": "意大利威尼托/ 弗留利 · 格雷拉 · 起泡",
+        "image": "/images/menu/sparkling/05.png"
+      },
+      {
+        "name": "Tingyun Chardonnay Rose Tea Pét-Nat",
+        "nameZh": "停云茶多丽玫瑰花起泡酒",
+        "price": "220",
+        "description": "Helan Mountain, Ningxia · Chardonnay + 玫瑰花茶 · Pét-Nat",
+        "descriptionZh": "中国宁夏贺兰山东麓 · 霞多丽 + 玫瑰花茶 · 茶酒 Pét-Nat",
+        "image": "/images/menu/sparkling/08.png"
+      },
+      {
+        "name": "Tingyun Chardonnay Jasmine Tea Pét-Nat",
+        "nameZh": "停云茶多丽茉莉花茶起泡酒",
+        "price": "240",
+        "description": "Helan Mountain, Ningxia · Chardonnay + 茉莉花茶 · Pét-Nat",
+        "descriptionZh": "中国宁夏贺兰山东麓 · 霞多丽 + 茉莉花茶 · 茶酒 Pét-Nat",
+        "image": "/images/menu/sparkling/07.png"
+      },
+      {
+        "name": "Tingyun Chardonnay Oolong Tea Pét-Nat",
+        "nameZh": "停云茶多丽乌龙茶起泡酒",
+        "price": "240",
+        "description": "Helan Mountain, Ningxia · Chardonnay + 乌龙茶 · Pét-Nat",
+        "descriptionZh": "中国宁夏贺兰山东麓 · 霞多丽 + 乌龙茶 · 茶酒 Pét-Nat",
+        "image": "/images/menu/sparkling/10.png"
+      },
+      {
+        "name": "Moscato Spumante / Muscat Sparkling Wine",
+        "nameZh": "莫斯卡托起泡酒",
+        "price": "240",
+        "description": "Italy · Moscato / Muscat · Sparkling",
+        "descriptionZh": "意大利 · 莫斯卡托 · 起泡",
+        "image": "/images/menu/sparkling/12.png"
+      },
+      {
+        "name": "Prosecco Rosé Spumante",
+        "nameZh": "普罗赛克桃红起泡酒",
+        "price": "280",
+        "description": "Veneto, Italy · Glera, Pinot Noir · Sparkling",
+        "descriptionZh": "意大利威尼托 · 格雷拉、黑皮诺 · 起泡",
+        "image": "/images/menu/sparkling/06.png"
+      },
+      {
+        "name": "Tingyun Chardonnay Riesling Tea Pét-Nat",
+        "nameZh": "停云茶多丽雷司令茶起泡酒",
+        "price": "320",
+        "description": "Helan Mountain, Ningxia · Chardonnay + 雷司令茶 · Pét-Nat",
+        "descriptionZh": "中国宁夏贺兰山东麓 · 霞多丽 + 雷司令茶 · 茶酒 Pét-Nat",
+        "image": "/images/menu/sparkling/09.png"
+      },
+      {
+        "name": "Belvini Blanc de Noirs Champagne",
+        "nameZh": "贝尔维尼黑中白香槟",
+        "price": "880",
+        "description": "Champagne, France · Pinot Noir, Meunier · Sparkling",
+        "descriptionZh": "法国香槟区 · 黑皮诺、莫尼耶 · 起泡",
+        "image": "/images/menu/sparkling/02.png"
+      },
+      {
+        "name": "Belvini Blanc de Blancs Champagne",
+        "nameZh": "贝尔维尼白中白香槟",
+        "price": "980",
+        "description": "Champagne, France · Chardonnay · Sparkling",
+        "descriptionZh": "法国香槟区 · 霞多丽 · 起泡",
+        "image": "/images/menu/sparkling/01.png"
+      },
+      {
+        "name": "Pierre Gimonnet & Fils Cuvée Special Club Blanc de Blancs",
+        "nameZh": "绮梦里酒庄特使团白中白香槟",
+        "price": "980",
+        "description": "Côte des Blancs, Champagne · Chardonnay · Sparkling",
+        "descriptionZh": "法国香槟区白丘 · 霞多丽 · 起泡",
+        "image": "/images/menu/sparkling/03.png"
+      },
+      {
+        "name": "Moët & Chandon Brut Impérial",
+        "nameZh": "酩悦皇室干型香槟",
+        "price": "980",
+        "description": "Champagne, France · Pinot Noir, Chardonnay, Meunier · Sparkling",
+        "descriptionZh": "法国香槟区 · 黑皮诺、霞多丽、莫尼耶 · 起泡",
+        "image": "/images/menu/sparkling/04.png"
+      },
+      {
+        "name": "Ruinart Blanc de Blancs Champagne",
+        "nameZh": "瑞纳特白中白香槟",
+        "price": "1080",
+        "description": "Reims, Champagne · Chardonnay · Sparkling",
+        "descriptionZh": "法国香槟区兰斯 · 霞多丽 · 起泡",
+        "image": "/images/menu/sparkling/11.png"
+      }
+    ]
+  },
+  {
+    "category": "White",
+    "categoryZh": "白葡萄酒",
+    "items": [
+      {
+        "name": "Meili Sha Bai Dry White",
+        "nameZh": "美丽沙白干白葡萄酒",
+        "price": "180",
+        "description": "Dry White",
+        "descriptionZh": "干白",
+        "image": "/images/menu/white/47.png"
+      },
+      {
+        "name": "Aveleda Vinho Verde",
+        "nameZh": "阿维莱达绿酒干白葡萄酒",
+        "price": "180",
+        "description": "Vinho Verde, Portugal · Loureiro, Alvarinho · Dry White",
+        "descriptionZh": "葡萄牙绿酒产区 · 洛雷罗、阿尔巴利诺 · 干白",
+        "image": "/images/menu/white/48.png"
+      },
+      {
+        "name": "Baoli Ridge Catarratto",
+        "nameZh": "宝丽岭卡塔拉托干白葡萄酒",
+        "price": "180",
+        "description": "Sicily, Italy · Catarratto · Dry White",
+        "descriptionZh": "意大利西西里岛 · 卡塔拉托 · 干白",
+        "image": "/images/menu/white/49.png"
+      },
+      {
+        "name": "Château Bellevue Dry White",
+        "nameZh": "美景古堡干白葡萄酒",
+        "price": "180",
+        "description": "France · Dry White",
+        "descriptionZh": "法国 · 干白",
+        "image": "/images/menu/white/50.png"
+      },
+      {
+        "name": "Lukang Chardonnay",
+        "nameZh": "鹭康莎当妮干白葡萄酒",
+        "price": "195",
+        "description": "Chardonnay · Dry White",
+        "descriptionZh": "霞多丽 · 干白",
+        "image": "/images/menu/white/46.png"
+      },
+      {
+        "name": "Tian Ding Yang Guan Dry White",
+        "nameZh": "天顶阳冠干白葡萄酒",
+        "price": "220",
+        "description": "China · Dry White",
+        "descriptionZh": "中国 · 干白",
+        "image": "/images/menu/white/44.png"
+      },
+      {
+        "name": "Yuyanjia Dry White",
+        "nameZh": "玉言家干白葡萄酒",
+        "price": "220",
+        "description": "China · Dry White",
+        "descriptionZh": "中国 · 干白",
+        "image": "/images/menu/white/45.png"
+      },
+      {
+        "name": "Star Sea Riesling",
+        "nameZh": "星辰大海雷司令干白葡萄酒",
+        "price": "220",
+        "description": "Germany · Riesling · Dry White",
+        "descriptionZh": "德国 · 雷司令 · 干白",
+        "image": "/images/menu/white/62.png"
+      },
+      {
+        "name": "Misty Cove Grüner Veltliner",
+        "nameZh": "雾湾绿维特利纳干白葡萄酒",
+        "price": "270",
+        "description": "Marlborough, New Zealand · Grüner Veltliner · Dry White",
+        "descriptionZh": "新西兰马尔堡 · 绿维特利纳 · 干白",
+        "image": "/images/menu/white/52.png"
+      },
+      {
+        "name": "Misty Cove Landmark Riesling",
+        "nameZh": "雾湾地标雷司令干白葡萄酒",
+        "price": "270",
+        "description": "Marlborough, New Zealand · Riesling · Dry White",
+        "descriptionZh": "新西兰马尔堡 · 雷司令 · 干白",
+        "image": "/images/menu/white/53.png"
+      },
+      {
+        "name": "Misty Cove Landmark Sauvignon Blanc",
+        "nameZh": "雾湾地标长相思干白葡萄酒",
+        "price": "270",
+        "description": "Marlborough, New Zealand · Sauvignon Blanc · Dry White",
+        "descriptionZh": "新西兰马尔堡 · 长相思 · 干白",
+        "image": "/images/menu/white/54.png"
+      },
+      {
+        "name": "Mo Quanzhang Riesling",
+        "nameZh": "摩权杖雷司令干白葡萄酒",
+        "price": "280",
+        "description": "Germany · Riesling · Dry White",
+        "descriptionZh": "德国 · 雷司令 · 干白",
+        "image": "/images/menu/white/37.png"
+      },
+      {
+        "name": "Santa Maria Moscato",
+        "nameZh": "圣碟酒庄莫斯卡托甜白葡萄酒",
+        "price": "280",
+        "description": "Italy · Moscato · Sweet White",
+        "descriptionZh": "意大利 · 莫斯卡托 · 甜白",
+        "image": "/images/menu/white/38.png"
+      },
+      {
+        "name": "Sea Mystery Dry White",
+        "nameZh": "海之谜干白葡萄酒",
+        "price": "280",
+        "description": "Dry White",
+        "descriptionZh": "干白",
+        "image": "/images/menu/white/39.png"
+      },
+      {
+        "name": "Norman Sugarcata Dry White",
+        "nameZh": "诺曼侬苏格卡塔干白葡萄酒",
+        "price": "280",
+        "description": "Dry White",
+        "descriptionZh": "干白",
+        "image": "/images/menu/white/40.png"
+      },
+      {
+        "name": "Nueva Dry White",
+        "nameZh": "纽埃拉干白葡萄酒",
+        "price": "280",
+        "description": "Dry White",
+        "descriptionZh": "干白",
+        "image": "/images/menu/white/41.png"
+      },
+      {
+        "name": "Kulan Aini Dry White",
+        "nameZh": "蔻兰艾尼干白葡萄酒",
+        "price": "280",
+        "description": "Dry White",
+        "descriptionZh": "干白",
+        "image": "/images/menu/white/42.png"
+      },
+      {
+        "name": "Taijialuo Dry White",
+        "nameZh": "泰嘉罗干白葡萄酒",
+        "price": "280",
+        "description": "Italy · Dry White",
+        "descriptionZh": "意大利 · 干白",
+        "image": "/images/menu/white/43.png"
+      },
+      {
+        "name": "Christopher Dry White",
+        "nameZh": "克里斯托福干白葡萄酒",
+        "price": "280",
+        "description": "Dry White",
+        "descriptionZh": "干白",
+        "image": "/images/menu/white/55.png"
+      },
+      {
+        "name": "Flower Fairy Dry White",
+        "nameZh": "花仙子干白葡萄酒",
+        "price": "280",
+        "description": "Dry White",
+        "descriptionZh": "干白",
+        "image": "/images/menu/white/57.png"
+      },
+      {
+        "name": "Chloe Riesling",
+        "nameZh": "克洛伊雷司令干白葡萄酒",
+        "price": "280",
+        "description": "Germany / New Zealand · Riesling · Dry White",
+        "descriptionZh": "德国或新西兰 · 雷司令 · 干白",
+        "image": "/images/menu/white/61.png"
+      },
+      {
+        "name": "Tohle Riesling",
+        "nameZh": "托乐雷司令干白葡萄酒",
+        "price": "290",
+        "description": "Germany · Riesling · Dry White",
+        "descriptionZh": "德国 · 雷司令 · 干白",
+        "image": "/images/menu/white/36.png"
+      },
+      {
+        "name": "Hengji De Sauvignon Blanc",
+        "nameZh": "哼吉德长相思干白葡萄酒",
+        "price": "320",
+        "description": "Sauvignon Blanc · Dry White",
+        "descriptionZh": "长相思 · 干白",
+        "image": "/images/menu/white/32.png"
+      },
+      {
+        "name": "Felleti Campania White",
+        "nameZh": "费莱特坎帕尼亚干白葡萄酒",
+        "price": "320",
+        "description": "Campania, Italy · 本地白葡萄品种 · Dry White",
+        "descriptionZh": "意大利坎帕尼亚 · 本地白葡萄品种 · 干白",
+        "image": "/images/menu/white/34.png"
+      },
+      {
+        "name": "Liv Rhône Valley White",
+        "nameZh": "丽芙罗纳河谷干白葡萄酒",
+        "price": "320",
+        "description": "Rhône Valley, France · 维欧尼 (Viognier) 或混酿 · Dry White",
+        "descriptionZh": "法国罗纳河谷 · 维欧尼 (Viognier) 或混酿 · 干白",
+        "image": "/images/menu/white/35.png"
+      },
+      {
+        "name": "Nueva Riesling",
+        "nameZh": "纽埃拉雷司令干白葡萄酒",
+        "price": "330",
+        "description": "Riesling · Dry White",
+        "descriptionZh": "雷司令 · 干白",
+        "image": "/images/menu/white/31.png"
+      },
+      {
+        "name": "Lianxi Chardonnay",
+        "nameZh": "莲曦霞多丽干白葡萄酒",
+        "price": "330",
+        "description": "Chardonnay · Dry White",
+        "descriptionZh": "霞多丽 · 干白",
+        "image": "/images/menu/white/33.png"
+      },
+      {
+        "name": "Misty Cove Landmark Chardonnay",
+        "nameZh": "雾湾地标霞多丽干白葡萄酒",
+        "price": "330",
+        "description": "Marlborough, New Zealand · Chardonnay · Dry White",
+        "descriptionZh": "新西兰马尔堡 · 霞多丽 · 干白",
+        "image": "/images/menu/white/51.png"
+      },
+      {
+        "name": "Nebout Cool Drink Dry White",
+        "nameZh": "尼伯特酷饮干白葡萄酒",
+        "price": "340",
+        "description": "France · Dry White",
+        "descriptionZh": "法国 · 干白",
+        "image": "/images/menu/white/30.png"
+      },
+      {
+        "name": "Framingham Classic Riesling",
+        "nameZh": "弗雷明翰经典雷司令干白葡萄酒",
+        "price": "350",
+        "description": "Marlborough, New Zealand · Riesling · Dry White",
+        "descriptionZh": "新西兰马尔堡 · 雷司令 · 干白",
+        "image": "/images/menu/white/29.png"
+      },
+      {
+        "name": "Wairau Valley Terroir Sauvignon Blanc",
+        "nameZh": "怀劳河谷风土长相思干白葡萄酒",
+        "price": "360",
+        "description": "Marlborough, New Zealand · Sauvignon Blanc · Dry White",
+        "descriptionZh": "新西兰马尔堡 · 长相思 · 干白",
+        "image": "/images/menu/white/27.png"
+      },
+      {
+        "name": "Schneemann Riesling",
+        "nameZh": "诗乃曼雷司令干白葡萄酒",
+        "price": "360",
+        "description": "Germany / Austria · Riesling · Dry White",
+        "descriptionZh": "德国或奥地利 · 雷司令 · 干白",
+        "image": "/images/menu/white/28.png"
+      },
+      {
+        "name": "Albert Bichot Mâcon-Lugny",
+        "nameZh": "亚伯必修酒庄马贡-吕尼干白葡萄酒",
+        "price": "370",
+        "description": "Mâconnais, Burgundy · Chardonnay · Dry White",
+        "descriptionZh": "法国勃艮第马贡 · 霞多丽 · 干白",
+        "image": "/images/menu/white/20.png"
+      },
+      {
+        "name": "Janne Gaja Chardonnay",
+        "nameZh": "詹妮嘉雅霞多丽干白葡萄酒",
+        "price": "380",
+        "description": "Chardonnay · Dry White",
+        "descriptionZh": "霞多丽 · 干白",
+        "image": "/images/menu/white/24.png"
+      },
+      {
+        "name": "Pfaffl Hütte Grüner Veltliner",
+        "nameZh": "普法酒庄小屋绿维特利纳干白葡萄酒",
+        "price": "380",
+        "description": "Austria · Grüner Veltliner · Dry White",
+        "descriptionZh": "奥地利 · 绿维特利纳 · 干白",
+        "image": "/images/menu/white/26.png"
+      },
+      {
+        "name": "Delafosse White Wine",
+        "nameZh": "德莱芙干白葡萄酒",
+        "price": "390",
+        "description": "France · 霞多丽 (Chardonnay) 或其他 · Dry White",
+        "descriptionZh": "法国 · 霞多丽 (Chardonnay) 或其他 · 干白",
+        "image": "/images/menu/white/21.png"
+      },
+      {
+        "name": "Luigi Baudana Dragon Bianco",
+        "nameZh": "路易吉·宝达娜龙干白葡萄酒",
+        "price": "390",
+        "description": "Italy · Dry White",
+        "descriptionZh": "意大利 · 干白",
+        "image": "/images/menu/white/22.png"
+      },
+      {
+        "name": "Bourgogne Aligoté Vieilles Vignes",
+        "nameZh": "勃艮第阿里高特老藤干白葡萄酒",
+        "price": "390",
+        "description": "Burgundy, France · Aligoté · Dry White",
+        "descriptionZh": "法国勃艮第 · 阿里高特 · 干白",
+        "image": "/images/menu/white/23.png"
+      },
+      {
+        "name": "Albert Bichot Chardonnay",
+        "nameZh": "亚伯必修酒庄霞多丽干白葡萄酒",
+        "price": "390",
+        "description": "Burgundy, France · Chardonnay · Dry White",
+        "descriptionZh": "法国勃艮第 · 霞多丽 · 干白",
+        "image": "/images/menu/white/25.png"
+      },
+      {
+        "name": "Konglai Riesling",
+        "nameZh": "孔莱雷司令干白葡萄酒",
+        "price": "390",
+        "description": "Germany · Riesling · Dry White",
+        "descriptionZh": "德国 · 雷司令 · 干白",
+        "image": "/images/menu/white/59.png"
+      },
+      {
+        "name": "Tenuta Etna Bianco",
+        "nameZh": "特纳火山干白葡萄酒",
+        "price": "405",
+        "description": "Etna, Sicily · Carricante · Dry White",
+        "descriptionZh": "意大利西西里岛埃特纳 · 卡里坎特 · 干白",
+        "image": "/images/menu/white/19.png"
+      },
+      {
+        "name": "Aubert Vouvray Demi-Sec",
+        "nameZh": "奥伯特武弗雷半干白葡萄酒",
+        "price": "450",
+        "description": "Vouvray, Loire · Chenin Blanc · Off-Dry White",
+        "descriptionZh": "法国卢瓦尔河谷武弗雷 · 白诗南 · 半干白",
+        "image": "/images/menu/white/18.png"
+      },
+      {
+        "name": "Cordier Family Dry White",
+        "nameZh": "科迪埃世家干白葡萄酒",
+        "price": "550",
+        "description": "Bordeaux, France · Sémillon, 长相思 (Sauvignon Blanc) 混酿 · Dry White",
+        "descriptionZh": "法国波尔多 · 赛美蓉、长相思 (Sauvignon Blanc) 混酿 · 干白",
+        "image": "/images/menu/white/58.png"
+      },
+      {
+        "name": "Roland Lavantureux Chablis",
+        "nameZh": "拉万图酒庄夏布利干白葡萄酒",
+        "price": "580",
+        "description": "Chablis, Burgundy · Chardonnay · Dry White",
+        "descriptionZh": "法国勃艮第夏布利 · 霞多丽 · 干白",
+        "image": "/images/menu/white/15.png"
+      },
+      {
+        "name": "Pierre Guillemot-Jeandellin Viognier",
+        "nameZh": "皮尔·嘉雅珍德琳维欧尼干白葡萄酒",
+        "price": "580",
+        "description": "France · Viognier · Dry White",
+        "descriptionZh": "法国 · 维欧尼 · 干白",
+        "image": "/images/menu/white/17.png"
+      },
+      {
+        "name": "Laimos Burgundy Prestige White",
+        "nameZh": "蕾摩斯勃艮第名誉干白葡萄酒",
+        "price": "580",
+        "description": "Burgundy, France · Chardonnay · Dry White",
+        "descriptionZh": "法国勃艮第 · 霞多丽 · 干白",
+        "image": "/images/menu/white/56.png"
+      },
+      {
+        "name": "Domaine Masson-Blondelet Sancerre",
+        "nameZh": "马森-布隆德莱桑塞尔干白葡萄酒",
+        "price": "620",
+        "description": "Sancerre, Loire · Sauvignon Blanc · Dry White",
+        "descriptionZh": "法国卢瓦尔河谷桑塞尔 · 长相思 · 干白",
+        "image": "/images/menu/white/16.png"
+      },
+      {
+        "name": "Domaine Masson-Blondelet Pouilly-Fumé",
+        "nameZh": "马森-布隆德莱普伊-芙美干白葡萄酒",
+        "price": "620",
+        "description": "Pouilly-Fumé, Loire · Sauvignon Blanc · Dry White",
+        "descriptionZh": "法国卢瓦尔河谷普伊-芙美 · 长相思 · 干白",
+        "image": "/images/menu/white/60.png"
+      },
+      {
+        "name": "Domaine Moreau Chablis",
+        "nameZh": "梦露酒庄夏布利干白葡萄酒",
+        "price": "690",
+        "description": "Chablis, Burgundy · Chardonnay · Dry White",
+        "descriptionZh": "法国勃艮第夏布利 · 霞多丽 · 干白",
+        "image": "/images/menu/white/14.png"
+      },
+      {
+        "name": "Marina Chardonnay",
+        "nameZh": "玛丽娜·莎当妮白葡萄酒",
+        "price": "780",
+        "description": "Abruzzo, Italy · Chardonnay · Dry White",
+        "descriptionZh": "意大利阿布鲁佐 · 霞多丽 · 干白",
+        "image": "/images/menu/white/13.png"
+      }
+    ]
+  },
+  {
+    "category": "Red",
+    "categoryZh": "红葡萄酒",
+    "items": [
+      {
+        "name": "Shanna Merlot",
+        "nameZh": "尚安娜梅洛红葡萄酒",
+        "price": "180",
+        "description": "Merlot · Dry Red",
+        "descriptionZh": "梅洛 · 干红",
+        "image": "/images/menu/red/88.png"
+      },
+      {
+        "name": "Italian Sunny Red",
+        "nameZh": "意大利艳阳红红葡萄酒",
+        "price": "180",
+        "description": "Italy · Dry Red",
+        "descriptionZh": "意大利 · 干红",
+        "image": "/images/menu/red/89.png"
+      },
+      {
+        "name": "Tingyun Syrah",
+        "nameZh": "停云西拉红葡萄酒",
+        "price": "220",
+        "description": "Helan Mountain, Ningxia · Syrah / Shiraz · Dry Red",
+        "descriptionZh": "中国宁夏贺兰山东麓 · 西拉 · 干红",
+        "image": "/images/menu/red/87.png"
+      },
+      {
+        "name": "Duobao Ten Shiraz",
+        "nameZh": "朵宝十人西拉红葡萄酒",
+        "price": "260",
+        "description": "Australia · Shiraz / Syrah · Dry Red",
+        "descriptionZh": "澳大利亚 · 西拉 · 干红",
+        "image": "/images/menu/red/86.png"
+      },
+      {
+        "name": "Feima Yipin Appassimento Red Wine",
+        "nameZh": "飞马伊品风干红葡萄酒",
+        "price": "280",
+        "description": "Italy · Dry Red",
+        "descriptionZh": "意大利 · 干红",
+        "image": "/images/menu/red/83.png"
+      },
+      {
+        "name": "Pangsong Appassimento Red Wine",
+        "nameZh": "庞颂风干红葡萄酒",
+        "price": "280",
+        "description": "Italy · Dry Red",
+        "descriptionZh": "意大利 · 干红",
+        "image": "/images/menu/red/84.png"
+      },
+      {
+        "name": "Misty Cove Pinot Noir",
+        "nameZh": "雾湾黑皮诺红葡萄酒",
+        "price": "280",
+        "description": "Marlborough, New Zealand · Pinot Noir · Dry Red",
+        "descriptionZh": "新西兰马尔堡 · 黑皮诺 · 干红",
+        "image": "/images/menu/red/85.png"
+      },
+      {
+        "name": "Flower Fairy Red Wine",
+        "nameZh": "花仙子红葡萄酒",
+        "price": "280",
+        "description": "Dry Red",
+        "descriptionZh": "干红",
+        "image": "/images/menu/red/92.png"
+      },
+      {
+        "name": "Misty Cove Rock Daisy Pinot Noir",
+        "nameZh": "雾湾岩石雏菊黑皮诺红葡萄酒",
+        "price": "290",
+        "description": "Marlborough, New Zealand · Pinot Noir · Dry Red",
+        "descriptionZh": "新西兰马尔堡 · 黑皮诺 · 干红",
+        "image": "/images/menu/red/90.png"
+      },
+      {
+        "name": "Georges Duboeuf Beaujolais (Red Bottle)",
+        "nameZh": "乔治·杜波夫博若莱红葡萄酒（红瓶）",
+        "price": "320",
+        "description": "Beaujolais, France · Gamay · Dry Red",
+        "descriptionZh": "法国博若莱 · 佳美 · 干红",
+        "image": "/images/menu/red/75.png"
+      },
+      {
+        "name": "Wang's Spring Red Wine",
+        "nameZh": "王之泉红葡萄酒",
+        "price": "320",
+        "description": "China · Dry Red",
+        "descriptionZh": "中国 · 干红",
+        "image": "/images/menu/red/79.png"
+      },
+      {
+        "name": "Terri Pinot Noir",
+        "nameZh": "特丽黑皮诺红葡萄酒",
+        "price": "320",
+        "description": "Pinot Noir · Dry Red",
+        "descriptionZh": "黑皮诺 · 干红",
+        "image": "/images/menu/red/80.png"
+      },
+      {
+        "name": "Tohle Pinot Noir",
+        "nameZh": "托乐黑皮诺红葡萄酒",
+        "price": "320",
+        "description": "Pinot Noir · Dry Red",
+        "descriptionZh": "黑皮诺 · 干红",
+        "image": "/images/menu/red/81.png"
+      },
+      {
+        "name": "Gaston Family Reserve Red Wine",
+        "nameZh": "盖斯顿家族珍藏红葡萄酒",
+        "price": "320",
+        "description": "France · Dry Red",
+        "descriptionZh": "法国 · 干红",
+        "image": "/images/menu/red/82.png"
+      },
+      {
+        "name": "Tingyun Pinot Noir",
+        "nameZh": "停云黑皮诺红葡萄酒",
+        "price": "320",
+        "description": "Helan Mountain, Ningxia · Pinot Noir · Dry Red",
+        "descriptionZh": "中国宁夏贺兰山东麓 · 黑皮诺 · 干红",
+        "image": "/images/menu/red/93.png"
+      },
+      {
+        "name": "You Have Me Red Wine",
+        "nameZh": "你中有我红葡萄酒",
+        "price": "330",
+        "description": "Dry Red",
+        "descriptionZh": "干红",
+        "image": "/images/menu/red/76.png"
+      },
+      {
+        "name": "Lianxi Cabernet Sauvignon",
+        "nameZh": "莲曦赤霞珠红葡萄酒",
+        "price": "330",
+        "description": "Cabernet Sauvignon · Dry Red",
+        "descriptionZh": "赤霞珠 · 干红",
+        "image": "/images/menu/red/77.png"
+      },
+      {
+        "name": "Côte Chalonnaise Pinot Noir Vieilles Vignes",
+        "nameZh": "夏隆内丘黑皮诺老藤红葡萄酒",
+        "price": "330",
+        "description": "Côte Chalonnaise, Burgundy · Pinot Noir · Dry Red",
+        "descriptionZh": "法国勃艮第夏隆内丘 · 黑皮诺 · 干红",
+        "image": "/images/menu/red/78.png"
+      },
+      {
+        "name": "Georges Duboeuf Beaujolais-Villages (Blue Bottle)",
+        "nameZh": "乔治·杜波夫博若莱村庄级红葡萄酒（蓝瓶）",
+        "price": "350",
+        "description": "Beaujolais, France · Gamay · Dry Red",
+        "descriptionZh": "法国博若莱 · 佳美 · 干红",
+        "image": "/images/menu/red/74.png"
+      },
+      {
+        "name": "Nebout Cool Drink Red Wine",
+        "nameZh": "尼伯特酷饮红葡萄酒",
+        "price": "380",
+        "description": "France · Dry Red",
+        "descriptionZh": "法国 · 干红",
+        "image": "/images/menu/red/72.png"
+      },
+      {
+        "name": "1952 Remaining Red Wine",
+        "nameZh": "1952年份剩余红葡萄酒",
+        "price": "380",
+        "description": "Dry Red",
+        "descriptionZh": "干红",
+        "image": "/images/menu/red/73.png"
+      },
+      {
+        "name": "Grand Canal Red Wine",
+        "nameZh": "大运红葡萄酒",
+        "price": "390",
+        "description": "China · Dry Red",
+        "descriptionZh": "中国 · 干红",
+        "image": "/images/menu/red/71.png"
+      },
+      {
+        "name": "Xuanwu Bay Cabernet Sauvignon",
+        "nameZh": "玄武之湾赤霞珠红葡萄酒",
+        "price": "390",
+        "description": "China · Cabernet Sauvignon · Dry Red",
+        "descriptionZh": "中国 · 赤霞珠 · 干红",
+        "image": "/images/menu/red/91.png"
+      },
+      {
+        "name": "Misty Cove 1203 Pinot Noir",
+        "nameZh": "雾湾1203黑皮诺红葡萄酒",
+        "price": "480",
+        "description": "Marlborough, New Zealand · Pinot Noir · Dry Red",
+        "descriptionZh": "新西兰马尔堡 · 黑皮诺 · 干红",
+        "image": "/images/menu/red/69.png"
+      },
+      {
+        "name": "Tingyun Red Beard Red Wine",
+        "nameZh": "停云红胡子红葡萄酒",
+        "price": "480",
+        "description": "Helan Mountain, Ningxia · Dry Red",
+        "descriptionZh": "中国宁夏贺兰山东麓 · 干红",
+        "image": "/images/menu/red/70.png"
+      },
+      {
+        "name": "Gosset Ripasso della Valpolicella",
+        "nameZh": "歌诗爱琅里帕索红葡萄酒",
+        "price": "580",
+        "description": "Veneto, Italy · Corvina, Rondinella · Dry Red",
+        "descriptionZh": "意大利威尼托 · 科维纳、罗蒂内拉 · 干红",
+        "image": "/images/menu/red/65.png"
+      },
+      {
+        "name": "Fidèle Marignan Burgundy Pinot Noir",
+        "nameZh": "菲德律·马尼央勃艮第黑皮诺红葡萄酒",
+        "price": "580",
+        "description": "Burgundy, France · Pinot Noir · Dry Red",
+        "descriptionZh": "法国勃艮第 · 黑皮诺 · 干红",
+        "image": "/images/menu/red/67.png"
+      },
+      {
+        "name": "Colle Nebbiolo",
+        "nameZh": "科莱内比奥罗红葡萄酒",
+        "price": "580",
+        "description": "Piemonte, Italy · Nebbiolo · Dry Red",
+        "descriptionZh": "意大利皮埃蒙特 · 内比奥罗 · 干红",
+        "image": "/images/menu/red/68.png"
+      },
+      {
+        "name": "Michel Chavallon Red Wine",
+        "nameZh": "米歇尔·丘瓦隆红葡萄酒",
+        "price": "630",
+        "description": "France · Dry Red",
+        "descriptionZh": "法国 · 干红",
+        "image": "/images/menu/red/64.png"
+      },
+      {
+        "name": "Michel Hautes-Côtes-de-Nuits",
+        "nameZh": "米歇尔·上夜丘红葡萄酒",
+        "price": "630",
+        "description": "Hautes-Côtes-de-Nuits, Burgundy · Pinot Noir · Dry Red",
+        "descriptionZh": "法国勃艮第上夜丘 · 黑皮诺 · 干红",
+        "image": "/images/menu/red/66.png"
+      },
+      {
+        "name": "Gosset Amarone della Valpolicella",
+        "nameZh": "歌诗爱琅阿玛罗尼红葡萄酒",
+        "price": "980",
+        "description": "Veneto, Italy · Corvina, Rondinella, Molinara · Dry Red",
+        "descriptionZh": "意大利威尼托 · 科维纳、罗蒂内拉、莫利纳拉 · 干红",
+        "image": "/images/menu/red/63.png"
+      }
+    ]
+  },
+  {
     "category": "BTG",
     "categoryZh": "杯酒",
     "items": [

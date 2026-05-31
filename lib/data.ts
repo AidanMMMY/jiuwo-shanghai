@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import { z } from 'zod';
 
 const dataDirectory = path.join(process.cwd(), 'data');
 
@@ -93,12 +94,6 @@ export type AboutData = {
   heroImage: string;
 };
 
-async function readJsonFile<T>(filename: string): Promise<T> {
-  const filePath = path.join(dataDirectory, filename);
-  const content = await fs.readFile(filePath, 'utf-8');
-  return JSON.parse(content) as T;
-}
-
 function localizeSite(site: SiteData): SiteData {
   return { ...site, name: site.nameZh, tagline: site.taglineZh, intro: site.introZh, nav: site.nav.map((n) => ({ ...n, label: n.labelZh })) };
 }
@@ -140,7 +135,7 @@ function localizeAbout(about: AboutData): AboutData {
 }
 
 export async function getSiteData(): Promise<SiteData> {
-  return readJsonFile<SiteData>('site.json');
+  return readAndValidateJson('site.json', siteDataSchema);
 }
 
 export async function getSiteDataZh(): Promise<SiteData> {
@@ -149,7 +144,7 @@ export async function getSiteDataZh(): Promise<SiteData> {
 }
 
 export async function getHeroSlides(): Promise<HeroSlide[]> {
-  return readJsonFile<HeroSlide[]>('hero.json');
+  return readAndValidateJson('hero.json', z.array(heroSlideSchema));
 }
 
 export async function getHeroSlidesZh(): Promise<HeroSlide[]> {
@@ -158,7 +153,7 @@ export async function getHeroSlidesZh(): Promise<HeroSlide[]> {
 }
 
 export async function getJournalEntries(): Promise<JournalEntry[]> {
-  const entries = await readJsonFile<JournalEntry[]>('updates.json');
+  const entries = await readAndValidateJson('updates.json', z.array(journalEntrySchema));
   return entries
     .filter((e) => !e.hidden)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -180,7 +175,7 @@ export async function getJournalEntryZh(slug: string): Promise<JournalEntry | un
 }
 
 export async function getGalleryAlbums(): Promise<GalleryAlbum[]> {
-  return readJsonFile<GalleryAlbum[]>('gallery.json');
+  return readAndValidateJson('gallery.json', z.array(galleryAlbumSchema));
 }
 
 export async function getGalleryAlbumsZh(): Promise<GalleryAlbum[]> {
@@ -199,7 +194,7 @@ export async function getGalleryAlbumZh(id: string): Promise<GalleryAlbum | unde
 }
 
 export async function getMenu(): Promise<MenuCategory[]> {
-  return readJsonFile<MenuCategory[]>('menu.json');
+  return readAndValidateJson('menu.json', z.array(menuCategorySchema));
 }
 
 export async function getMenuZh(): Promise<MenuCategory[]> {
@@ -208,10 +203,113 @@ export async function getMenuZh(): Promise<MenuCategory[]> {
 }
 
 export async function getAboutData(): Promise<AboutData> {
-  return readJsonFile<AboutData>('about.json');
+  return readAndValidateJson('about.json', aboutDataSchema);
 }
 
 export async function getAboutDataZh(): Promise<AboutData> {
   const about = await getAboutData();
   return localizeAbout(about);
+}
+
+// ── Zod schemas for runtime validation ──
+
+const navItemSchema = z.object({
+  label: z.string(),
+  href: z.string(),
+  labelZh: z.string(),
+});
+
+const siteDataSchema = z.object({
+  name: z.string(),
+  nameZh: z.string(),
+  tagline: z.string(),
+  taglineZh: z.string(),
+  intro: z.string(),
+  introZh: z.string(),
+  nav: z.array(navItemSchema),
+  social: z.object({
+    instagram: z.string().optional(),
+    weibo: z.string().optional(),
+    xiaohongshu: z.string().optional(),
+  }),
+});
+
+const heroSlideSchema = z.object({
+  src: z.string(),
+  alt: z.string(),
+  altZh: z.string(),
+});
+
+const journalEntrySchema = z.object({
+  slug: z.string(),
+  title: z.string(),
+  titleZh: z.string(),
+  date: z.string(),
+  cover: z.string(),
+  content: z.string(),
+  contentZh: z.string(),
+  coverAspect: z.enum(['wide', 'square', 'tall']).optional(),
+  hidden: z.boolean().optional(),
+});
+
+const galleryPhotoSchema = z.object({
+  src: z.string(),
+  alt: z.string(),
+  altZh: z.string(),
+});
+
+const friendSocialSchema = z.object({
+  instagram: z.string().optional(),
+  weibo: z.string().optional(),
+  xiaohongshu: z.string().optional(),
+  wechat: z.string().optional(),
+});
+
+const galleryAlbumSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  titleZh: z.string(),
+  subtitle: z.string(),
+  subtitleZh: z.string(),
+  cover: z.string(),
+  photos: z.array(galleryPhotoSchema),
+  category: z.string(),
+  categoryZh: z.string(),
+  friendSocial: friendSocialSchema.optional(),
+});
+
+const menuItemSchema = z.object({
+  name: z.string(),
+  nameZh: z.string(),
+  price: z.string(),
+  description: z.string(),
+  descriptionZh: z.string(),
+  image: z.string().optional(),
+});
+
+const menuCategorySchema = z.object({
+  category: z.string(),
+  categoryZh: z.string(),
+  items: z.array(menuItemSchema),
+});
+
+const aboutDataSchema = z.object({
+  hours: z.string(),
+  hoursZh: z.string(),
+  address: z.string(),
+  addressZh: z.string(),
+  email: z.string(),
+  mapEmbedUrl: z.string(),
+  story: z.string(),
+  storyZh: z.string(),
+  pullQuote: z.string(),
+  pullQuoteZh: z.string(),
+  heroImage: z.string(),
+});
+
+async function readAndValidateJson<T>(filename: string, schema: z.ZodSchema<T>): Promise<T> {
+  const filePath = path.join(dataDirectory, filename);
+  const content = await fs.readFile(filePath, 'utf-8');
+  const parsed = JSON.parse(content);
+  return schema.parse(parsed);
 }

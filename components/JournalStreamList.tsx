@@ -1,50 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import JournalEntryWithLikes from './JournalEntryWithLikes';
+import ScrollReveal from './ScrollReveal';
 import type { JournalEntry } from '@/lib/data';
 
 type Entry = JournalEntry & { contentHtml: string };
-
-function useScrollReveal(threshold = 0.15) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.unobserve(el);
-        }
-      },
-      { threshold }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  return { ref, visible };
-}
-
-function RevealWrapper({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const { ref, visible } = useScrollReveal();
-  return (
-    <div
-      ref={ref}
-      className="transition-all duration-700 ease-out"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(24px)',
-        transitionDelay: `${delay}ms`,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
 
 export default function JournalStreamList({
   entries,
@@ -71,9 +32,9 @@ export default function JournalStreamList({
 
         <div className="space-y-16">
           {visibleEntries.map((entry, index) => (
-            <RevealWrapper key={entry.slug} delay={index % 3 * 80}>
+            <ScrollReveal key={entry.slug} delay={index % 3 * 80}>
               <JournalEntryWithLikes entry={entry} />
-            </RevealWrapper>
+            </ScrollReveal>
           ))}
         </div>
 

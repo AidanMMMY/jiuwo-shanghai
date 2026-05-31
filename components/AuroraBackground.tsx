@@ -59,8 +59,7 @@ export default function AuroraBackground() {
       return;
     }
 
-    let startTime = Date.now();
-    let lastTime = startTime;
+    const startTime = Date.now();
 
     function draw(time: number) {
       const elapsed = time - startTime;

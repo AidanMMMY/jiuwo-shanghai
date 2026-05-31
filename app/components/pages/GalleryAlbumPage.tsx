@@ -21,8 +21,9 @@ export default function GalleryAlbumPage({
           href={backHref ?? '/gallery'}
           className="group inline-flex items-center gap-2 text-sm text-[#a0a0a0] hover:text-[#c9a227] transition-colors"
         >
-          <span className="transition-transform duration-200 group-hover:-translate-x-1">←</span>
-          <span>{backLabel ?? 'Back to Gallery'}</span>
+          <span className="inline-flex items-center gap-2 transition-transform duration-200 group-hover:-translate-x-1">
+            {backLabel ?? '← Back to Gallery'}
+          </span>
         </Link>
         <header className="mt-8">
           <h1 className="text-3xl md:text-4xl font-medium text-[#f5f5f0] tracking-wide">{album.title}</h1>

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import Lightbox from './Lightbox';
 import LikeButton from './LikeButton';
+import ScrollReveal from './ScrollReveal';
 
 function PhotoCard({
   photo,
@@ -90,10 +91,10 @@ function PhotoCard({
 
   return (
     <div
-      className="relative aspect-square overflow-hidden rounded-lg cursor-pointer select-none"
+      className="relative aspect-square overflow-hidden rounded-lg cursor-pointer select-none overflow-hidden"
       onClick={handleClick}
     >
-      <Image src={photo.src} alt={photo.alt} fill className="object-cover" />
+      <Image src={photo.src} alt={photo.alt} fill className="object-cover transition-all duration-500 active:scale-[0.98] active:brightness-110" />
 
       {/* Double-click heart animation */}
       {showHeart && (
@@ -138,12 +139,14 @@ export default function AlbumPhotoGrid({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {photos.map((photo, idx) => (
-          <PhotoCard
-            key={idx}
-            photo={photo}
-            idx={idx}
-            onOpen={() => setLightboxIndex(idx)}
-          />
+          <ScrollReveal key={idx} delay={idx * 60}>
+            <PhotoCard
+              key={idx}
+              photo={photo}
+              idx={idx}
+              onOpen={() => setLightboxIndex(idx)}
+            />
+          </ScrollReveal>
         ))}
       </div>
       {lightboxIndex !== null && (

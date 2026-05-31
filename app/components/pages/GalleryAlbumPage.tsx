@@ -17,14 +17,19 @@ export default function GalleryAlbumPage({
   return (
     <section className="pt-32 pb-20 px-6 bg-[#0a0a0a] min-h-screen">
       <div className="mx-auto max-w-7xl">
-        <Link href={backHref ?? '/gallery'} className="text-sm text-[#a0a0a0] hover:text-[#c9a227] transition-colors">
-          {backLabel ?? '← Back to Gallery'}
+        <Link
+          href={backHref ?? '/gallery'}
+          className="group inline-flex items-center gap-2 text-sm text-[#a0a0a0] hover:text-[#c9a227] transition-colors"
+        >
+          <span className="transition-transform duration-200 group-hover:-translate-x-1">←</span>
+          <span>{backLabel ?? 'Back to Gallery'}</span>
         </Link>
         <header className="mt-8">
           <h1 className="text-3xl md:text-4xl font-medium text-[#f5f5f0] tracking-wide">{album.title}</h1>
           {album.subtitle && (
             <p className="mt-3 text-sm text-[#a0a0a0] leading-relaxed max-w-2xl">{album.subtitle}</p>
           )}
+          <div className="mt-6 h-px bg-gradient-to-r from-[#c9a227]/30 via-[#333] to-transparent" />
           <FriendSocialBar social={album.friendSocial} locale={locale} />
         </header>
         <div className="mt-12">

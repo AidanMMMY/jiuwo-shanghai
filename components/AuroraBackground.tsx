@@ -50,7 +50,9 @@ interface Ribbon {
   speed: number;
   offset: number;
   amplitude: number;
-  color: string;
+  coreColor: string;   // center hue (most saturated)
+  glowColor: string;   // transition hue toward edges
+  shadowColor: string; // shadow/glow color
   noiseScale: number;
 }
 
@@ -72,9 +74,24 @@ export default function AuroraBackground() {
     let height = 0;
 
     const ribbons: Ribbon[] = [
-      { speed: 0.0003, offset: 0, amplitude: 0.28, color: 'rgba(201,162,39,0.10)', noiseScale: 2.0 },
-      { speed: 0.0004, offset: 1.5, amplitude: 0.22, color: 'rgba(201,162,39,0.08)', noiseScale: 2.8 },
-      { speed: 0.00025, offset: 3.0, amplitude: 0.32, color: 'rgba(160,120,30,0.06)', noiseScale: 3.5 },
+      {
+        speed: 0.0003, offset: 0, amplitude: 0.28, noiseScale: 2.0,
+        coreColor: 'rgba(232,200,96,0.12)',    // bright gold center
+        glowColor: 'rgba(212,168,56,0.07)',     // amber edges
+        shadowColor: 'rgba(201,162,39,0.12)',
+      },
+      {
+        speed: 0.0004, offset: 1.5, amplitude: 0.22, noiseScale: 2.8,
+        coreColor: 'rgba(216,140,80,0.10)',     // warm orange center
+        glowColor: 'rgba(192,96,104,0.05)',     // rose edges
+        shadowColor: 'rgba(212,120,72,0.10)',
+      },
+      {
+        speed: 0.00025, offset: 3.0, amplitude: 0.32, noiseScale: 3.5,
+        coreColor: 'rgba(192,96,104,0.08)',     // deep rose center
+        glowColor: 'rgba(168,42,74,0.04)',      // crimson edges
+        shadowColor: 'rgba(180,80,90,0.08)',
+      },
     ];
 
     function resize() {
@@ -105,6 +122,31 @@ export default function AuroraBackground() {
     const startTime = Date.now();
     const numPoints = 40;
 
+    function drawRibbonPath(
+      c: CanvasRenderingContext2D,
+      pts: { x: number; y: number }[],
+      w: number,
+      h: number,
+    ) {
+      c.beginPath();
+      c.moveTo(pts[0].x, pts[0].y);
+      for (let i = 0; i < pts.length - 2; i++) {
+        const xc = (pts[i].x + pts[i + 1].x) / 2;
+        const yc = (pts[i].y + pts[i + 1].y) / 2;
+        c.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+      }
+      c.quadraticCurveTo(
+        pts[pts.length - 2].x,
+        pts[pts.length - 2].y,
+        pts[pts.length - 1].x,
+        pts[pts.length - 1].y,
+      );
+      c.lineTo(w, h);
+      c.lineTo(0, h);
+      c.closePath();
+      c.fill();
+    }
+
     function draw(time: number) {
       const elapsed = time - startTime;
       scrollY.current += (targetScrollY.current - scrollY.current) * 0.05;
@@ -116,17 +158,6 @@ export default function AuroraBackground() {
       const segmentWidth = width / (numPoints - 1);
 
       for (const ribbon of ribbons) {
-        ctx!.save();
-        ctx!.shadowColor = 'rgba(201,162,39,0.15)';
-        ctx!.shadowBlur = 80;
-
-        const gradient = ctx!.createLinearGradient(0, 0, width, 0);
-        gradient.addColorStop(0, 'rgba(26,20,8,0)');
-        gradient.addColorStop(0.3, ribbon.color);
-        gradient.addColorStop(0.7, ribbon.color);
-        gradient.addColorStop(1, 'rgba(26,20,8,0)');
-        ctx!.fillStyle = gradient;
-
         // Pre-compute all points — noise-driven, fully continuous
         const points: { x: number; y: number }[] = [];
         const t = elapsed * ribbon.speed;
@@ -140,29 +171,22 @@ export default function AuroraBackground() {
           points.push({ x, y });
         }
 
-        // Draw C1-continuous smooth curve through points
-        // Midpoint quadratic bezier: control point = Pi, endpoint = midpoint(Pi, Pi+1)
-        ctx!.beginPath();
-        ctx!.moveTo(points[0].x, points[0].y);
+        // ── Warm sunset ribbon with rainbow hue per layer ──
+        ctx!.save();
 
-        for (let i = 0; i < points.length - 2; i++) {
-          const xc = (points[i].x + points[i + 1].x) / 2;
-          const yc = (points[i].y + points[i + 1].y) / 2;
-          ctx!.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
-        }
+        // Horizontal rainbow gradient: dark at edges, warm hues in the middle
+        const rainbowGrad = ctx!.createLinearGradient(0, 0, width, 0);
+        rainbowGrad.addColorStop(0, 'rgba(10,10,10,0)');
+        rainbowGrad.addColorStop(0.15, ribbon.glowColor);
+        rainbowGrad.addColorStop(0.5, ribbon.coreColor);
+        rainbowGrad.addColorStop(0.85, ribbon.glowColor);
+        rainbowGrad.addColorStop(1, 'rgba(10,10,10,0)');
+        ctx!.fillStyle = rainbowGrad;
 
-        // Last segment
-        ctx!.quadraticCurveTo(
-          points[points.length - 2].x,
-          points[points.length - 2].y,
-          points[points.length - 1].x,
-          points[points.length - 1].y,
-        );
+        ctx!.shadowColor = ribbon.shadowColor;
+        ctx!.shadowBlur = 60;
 
-        ctx!.lineTo(width, height);
-        ctx!.lineTo(0, height);
-        ctx!.closePath();
-        ctx!.fill();
+        drawRibbonPath(ctx!, points, width, height);
         ctx!.restore();
       }
 

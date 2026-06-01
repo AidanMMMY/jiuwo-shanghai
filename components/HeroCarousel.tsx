@@ -53,7 +53,12 @@ function ShakerIcon() {
 function LoveIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 24C14 24 4 18 4 10.5C4 7.46 6.46 5 9.5 5C11.24 5 12.76 5.81 14 7.03C15.24 5.81 16.76 5 18.5 5C21.54 5 24 7.46 24 10.5C24 18 14 24 14 24Z" />
+      <g transform="translate(-1, 2) scale(0.85)">
+        <path d="M14 24C14 24 4 18 4 10.5C4 7.46 6.46 5 9.5 5C11.24 5 12.76 5.81 14 7.03C15.24 5.81 16.76 5 18.5 5C21.54 5 24 7.46 24 10.5C24 18 14 24 14 24Z" />
+      </g>
+      <g transform="translate(6, -1) scale(0.75)">
+        <path d="M14 24C14 24 4 18 4 10.5C4 7.46 6.46 5 9.5 5C11.24 5 12.76 5.81 14 7.03C15.24 5.81 16.76 5 18.5 5C21.54 5 24 7.46 24 10.5C24 18 14 24 14 24Z" />
+      </g>
     </svg>
   );
 }

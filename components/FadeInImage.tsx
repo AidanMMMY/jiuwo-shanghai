@@ -26,7 +26,7 @@ export default function FadeInImage({
   const [loaded, setLoaded] = useState(false);
 
   const containerClass = `relative bg-[#111] transition-colors duration-700 ${loaded ? '' : 'animate-pulse'}`;
-  const imageClass = `${className} transition-opacity duration-700 ${loaded ? 'opacity-100' : 'opacity-0'}`;
+  const imageClass = `${className} transition-all duration-700 ease-out ${loaded ? 'opacity-100 blur-0 scale-100' : 'opacity-0 blur-[8px] scale-[1.02]'}`;
 
   if (fill) {
     return (

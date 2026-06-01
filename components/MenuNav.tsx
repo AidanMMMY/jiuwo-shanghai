@@ -40,7 +40,7 @@ export default function MenuNav({ categories }: { categories: MenuCategory[] }) 
     <nav className="sticky top-16 z-40 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-[#222] py-4 mb-12">
       <div className="mx-auto max-w-7xl px-6">
         <div
-          className="flex gap-6 overflow-x-auto"
+          className="flex gap-6 overflow-x-auto px-2"
           style={{
             WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
             maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
@@ -50,7 +50,7 @@ export default function MenuNav({ categories }: { categories: MenuCategory[] }) 
             <a
               key={cat.category}
               href={`#${cat.category}`}
-              className="group relative whitespace-nowrap text-sm transition-colors py-1"
+              className="group relative flex-shrink-0 whitespace-nowrap text-sm transition-colors py-1"
             >
               <span
                 className={`transition-colors ${

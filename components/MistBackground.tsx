@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-// ── Simplex-like 2D noise ──────────────────────────────────────
+// ── Noise ───────────────────────────────────────────────────────
 
 function hash(n: number): number {
   const s = Math.sin(n * 127.1 + 311.7) * 43758.5453123;
@@ -40,40 +40,18 @@ function fbm(x: number, y: number, octaves: number): number {
   return v;
 }
 
-// ── Colour helpers ─────────────────────────────────────────────
+// ── Ribbon config ───────────────────────────────────────────────
 
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
+interface Ribbon {
+  baseY: number;
+  speed: number;
+  offset: number;
+  amplitude: number;
+  color: string;
+  glow: string;
+  thickness: number;
+  blur: number;
 }
-
-// Smooth palette: bright cyan → blue → purple → warm amber → deep red
-function palette(t: number): [number, number, number] {
-  // t ∈ [0,1], wrap smoothly
-  const p = [
-    [20, 140, 185],  // bright cyan (laser-like)
-    [45, 85, 165],   // vivid blue
-    [75, 55, 125],   // purple
-    [175, 105, 30],  // warm amber
-    [165, 40, 50],   // deep red
-    [25, 130, 170],  // back toward bright cool
-  ];
-
-  const scaled = t * (p.length - 1);
-  const i = Math.floor(scaled) % p.length;
-  const j = (i + 1) % p.length;
-  const localT = scaled - Math.floor(scaled);
-  const st = localT * localT * (3 - 2 * localT);
-
-  return [
-    lerp(p[i][0], p[j][0], st),
-    lerp(p[i][1], p[j][1], st),
-    lerp(p[i][2], p[j][2], st),
-  ];
-}
-
-// ── Component ──────────────────────────────────────────────────
-
-const FOG_SCALE = 18; // low-res factor: finer texture
 
 export default function MistBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -88,9 +66,16 @@ export default function MistBackground() {
     let width = 0;
     let height = 0;
 
-    // Offscreen low-res canvas for the fog texture
-    const fogCanvas = document.createElement('canvas');
-    const fogCtx = fogCanvas.getContext('2d', { willReadFrequently: true })!;
+    // 7 laser ribbons: warm / cool alternating, fast & thin
+    const ribbons: Ribbon[] = [
+      { baseY: 0.12, speed: 0.0009,  offset: 0,    amplitude: 0.42, color: 'rgba(20,160,200,0.28)',  glow: 'rgba(20,160,200,0.15)',  thickness: 3, blur: 50 },
+      { baseY: 0.24, speed: 0.0012,  offset: 1.2,  amplitude: 0.38, color: 'rgba(210,60,50,0.24)',   glow: 'rgba(210,60,50,0.12)',   thickness: 3, blur: 45 },
+      { baseY: 0.38, speed: 0.0007,  offset: 2.5,  amplitude: 0.45, color: 'rgba(230,190,35,0.22)',  glow: 'rgba(230,190,35,0.10)',  thickness: 3, blur: 40 },
+      { baseY: 0.52, speed: 0.0010,  offset: 3.8,  amplitude: 0.40, color: 'rgba(45,80,190,0.26)',   glow: 'rgba(45,80,190,0.13)',   thickness: 3, blur: 48 },
+      { baseY: 0.65, speed: 0.0008,  offset: 5.1,  amplitude: 0.44, color: 'rgba(200,80,60,0.23)',   glow: 'rgba(200,80,60,0.11)',   thickness: 3, blur: 42 },
+      { baseY: 0.78, speed: 0.0011,  offset: 6.4,  amplitude: 0.36, color: 'rgba(30,150,160,0.25)',  glow: 'rgba(30,150,160,0.12)',  thickness: 3, blur: 46 },
+      { baseY: 0.90, speed: 0.0006,  offset: 7.7,  amplitude: 0.48, color: 'rgba(210,150,30,0.22)',  glow: 'rgba(210,150,30,0.10)',  thickness: 3, blur: 40 },
+    ];
 
     function resize() {
       width = window.innerWidth;
@@ -110,64 +95,62 @@ export default function MistBackground() {
 
     const startTime = Date.now();
     let raf = 0;
-    let frame = 0;
+    const numPoints = 50;
 
     function draw(time: number) {
       const elapsed = time - startTime;
-      frame++;
-
-      // Update fog texture every 2nd frame to save CPU
-      if (frame % 2 === 0) {
-        const fogW = Math.max(1, Math.ceil(width / FOG_SCALE));
-        const fogH = Math.max(1, Math.ceil(height / FOG_SCALE));
-
-        if (fogCanvas.width !== fogW || fogCanvas.height !== fogH) {
-          fogCanvas.width = fogW;
-          fogCanvas.height = fogH;
-        }
-
-        const img = fogCtx.createImageData(fogW, fogH);
-        const d = img.data;
-
-        // Faster drift for more dynamism
-        const driftX = elapsed * 0.00008;
-        const driftY = elapsed * 0.00006;
-
-        for (let py = 0; py < fogH; py++) {
-          for (let px = 0; px < fogW; px++) {
-            const nx = px / fogW;
-            const ny = py / fogH;
-
-            // Two layered noises: one drives hue, one drives brightness
-            const hueNoise = fbm(nx * 1.8 + driftX, ny * 1.8 + driftY, 3);
-            const brightNoise = fbm(nx * 2.5 - driftX * 0.7, ny * 2.5 + driftY * 0.5, 2);
-
-            // Laser streaks: thin bright bands that cut through the fog
-            const laserNoise = fbm(nx * 0.5 + driftX * 3, ny * 5 + driftY * 2, 2);
-            const laserBoost = Math.max(0, laserNoise) * 0.55;
-
-            // Map hueNoise [-1,1] → palette position [0,1]
-            const hueT = (hueNoise + 1) * 0.5;
-            const [cr, cg, cb] = palette(hueT);
-
-            // Brighter so texture and palette are visible
-            const brightness = (0.65 + brightNoise * 0.30) * (1 + laserBoost);
-            const alpha = (0.10 + brightNoise * 0.06) * (1 + laserBoost * 0.6);
-
-            const idx = (py * fogW + px) * 4;
-            d[idx] = cr * brightness;
-            d[idx + 1] = cg * brightness;
-            d[idx + 2] = cb * brightness;
-            d[idx + 3] = alpha * 255;
-          }
-        }
-
-        fogCtx.putImageData(img, 0, 0);
-      }
-
-      // Draw scaled fog to main canvas (bilinear interpolation = smooth)
       ctx!.clearRect(0, 0, width, height);
-      ctx!.drawImage(fogCanvas, 0, 0, width, height);
+
+      const segmentWidth = width / (numPoints - 1);
+
+      for (const r of ribbons) {
+        // Build ribbon path points with layered sine waves for rhythm
+        const points: { x: number; y: number }[] = [];
+        const t = elapsed * r.speed;
+
+        for (let i = 0; i < numPoints; i++) {
+          const x = i * segmentWidth;
+          const phase = t + r.offset + i * 0.55;
+
+          // Primary wave + secondary harmonic = organic rhythm
+          const wave1 = Math.sin(phase) * r.amplitude;
+          const wave2 = Math.sin(phase * 1.7 + 1.3) * r.amplitude * 0.35;
+          const wave3 = Math.cos(phase * 0.6 + 2.1) * r.amplitude * 0.15;
+
+          const y = height * r.baseY + (wave1 + wave2 + wave3) * height * 0.5;
+          points.push({ x, y });
+        }
+
+        // Glow layer (wider, softer)
+        ctx!.save();
+        ctx!.strokeStyle = r.glow;
+        ctx!.lineWidth = r.thickness * 4;
+        ctx!.lineCap = 'round';
+        ctx!.lineJoin = 'round';
+        ctx!.shadowColor = r.glow;
+        ctx!.shadowBlur = r.blur;
+        ctx!.beginPath();
+        ctx!.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          ctx!.lineTo(points[i].x, points[i].y);
+        }
+        ctx!.stroke();
+        ctx!.restore();
+
+        // Core layer (thin, bright)
+        ctx!.save();
+        ctx!.strokeStyle = r.color;
+        ctx!.lineWidth = r.thickness;
+        ctx!.lineCap = 'round';
+        ctx!.lineJoin = 'round';
+        ctx!.beginPath();
+        ctx!.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          ctx!.lineTo(points[i].x, points[i].y);
+        }
+        ctx!.stroke();
+        ctx!.restore();
+      }
 
       raf = requestAnimationFrame(draw);
     }

@@ -1,5 +1,4 @@
 import GalleryGrid from '@/components/GalleryGrid';
-import MistBackground from '@/components/MistBackground';
 import type { GalleryAlbum } from '@/lib/data';
 
 const categoryRank: Record<string, number> = {
@@ -38,9 +37,8 @@ export default function GalleryPage({
   );
 
   return (
-    <section className="relative pt-32 pb-20 px-6 bg-[#0a0a0a] min-h-screen">
-      <MistBackground />
-      <div className="relative z-10 mx-auto max-w-7xl">
+    <section className="pt-32 pb-20 px-6 bg-[#0a0a0a] min-h-screen">
+      <div className="mx-auto max-w-7xl">
         <div className="flex items-center gap-6 mb-8">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#333] to-[#333]" />
           <h1 className="shrink-0 text-4xl font-semibold text-[#f5f5f0] tracking-wide">{title ?? 'Gallery'}</h1>

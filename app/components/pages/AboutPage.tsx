@@ -74,9 +74,21 @@ export default function AboutPage({
           <div className="mx-auto max-w-2xl text-center bg-[#0a0a0a]/40 backdrop-blur-[1px] rounded-lg p-8 md:p-10 transition-all duration-300 hover:brightness-110">
             <div className="mx-auto h-px w-12 bg-[#c9a227] mb-8" />
             <p className="text-2xl md:text-3xl italic text-[#f5f5f0] leading-relaxed">
-              <span className="text-[#c9a227] mr-1">&ldquo;</span>
+              <span
+                className="text-[#c9a227] mr-1 inline-block"
+                style={{
+                  textShadow: '0 0 20px rgba(201,162,39,0.4)',
+                  animation: 'quoteBreathe 4s ease-in-out infinite',
+                }}
+              >&ldquo;</span>
               {about.pullQuote.replace(/[\"\"\"\"]/g, '').trim()}
-              <span className="text-[#c9a227] ml-1">&rdquo;</span>
+              <span
+                className="text-[#c9a227] ml-1 inline-block"
+                style={{
+                  textShadow: '0 0 20px rgba(201,162,39,0.4)',
+                  animation: 'quoteBreathe 4s ease-in-out infinite 2s',
+                }}
+              >&rdquo;</span>
             </p>
             <div className="mx-auto h-px w-12 bg-[#c9a227] mt-8" />
           </div>
@@ -95,6 +107,7 @@ export default function AboutPage({
               <div
                 key={item.label}
                 className="group border-l border-[#c9a227] pl-4 transition-all duration-300 hover:border-l-[3px] hover:bg-[#c9a227]/5 hover:pl-5 rounded-r-lg"
+                style={{ transitionProperty: 'border-left-width, padding-left, background-color' }}
               >
                 <h3 className="text-xs uppercase tracking-widest text-[#a0a0a0] mb-2">{item.label}</h3>
                 {item.href ? (

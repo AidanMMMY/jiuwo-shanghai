@@ -18,6 +18,38 @@ function AnimatedTitle({ text }: { text: string }) {
   );
 }
 
+function TeaIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 14c0 3.3-2.7 6-6 6s-6-2.7-6-6V6h12v8z" />
+      <path d="M8 6c0-2.2 1.8-4 4-4s4 1.8 4 4" />
+      <path d="M14 20v4" />
+      <path d="M10 24h8" />
+    </svg>
+  );
+}
+
+function WineIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 4v6c0 2.2 1.8 4 4 4s4-1.8 4-4V4" />
+      <path d="M14 14v8" />
+      <path d="M10 22h8" />
+    </svg>
+  );
+}
+
+function ShakerIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 3h10l2 4H7l2-4z" />
+      <path d="M8 7l3 18h6l3-18" />
+      <path d="M11 12h6" />
+      <path d="M12 17h4" />
+    </svg>
+  );
+}
+
 export default function HeroCarousel({
   slides,
   title,
@@ -32,10 +64,6 @@ export default function HeroCarousel({
   const duration = slides.length * 3;
   const step = 100 / slides.length;
   const fade = 100 / duration;
-
-  function renderIntro(text: string) {
-    return text.replace(/\[\[|\]\]/g, '');
-  }
 
   return (
     <section className="relative h-screen w-full overflow-hidden" style={{ height: '100svh' }}>
@@ -87,14 +115,17 @@ export default function HeroCarousel({
         </p>
       </div>
 
-      {/* Intro */}
+      {/* Drink icons */}
       <div
-        className="z-10 px-6 text-center"
+        className="z-10 px-6"
         style={{ position: 'absolute', left: 0, right: 0, bottom: '4rem' }}
       >
-        <p className="hero-intro-fade-up text-base tracking-wide text-[#f5f5f0] md:text-lg lg:text-xl">
-          {renderIntro(intro)}
-        </p>
+        <div className="hero-intro-fade-up flex items-center justify-center gap-6">
+          <TeaIcon />
+          <WineIcon />
+          <ShakerIcon />
+          <span className="text-[#f5f5f0] text-lg tracking-widest">···</span>
+        </div>
       </div>
 
       {/* Scroll hint */}

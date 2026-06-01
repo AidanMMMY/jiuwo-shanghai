@@ -28,9 +28,19 @@ export default function ReadingProgress() {
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] h-[2px] bg-transparent">
       <div
-        className="h-full bg-gradient-to-r from-[#c9a227]/60 via-[#c9a227] to-[#c9a227]/60 transition-all duration-150"
+        className="h-full relative"
         style={{ width: `${progress}%` }}
-      />
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-[#c9a227]/60 via-[#c9a227] to-[#c9a227]/60" />
+        {/* Glow spot at the leading edge */}
+        <div
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-1 h-3 rounded-full"
+          style={{
+            background: 'rgba(201,162,39,0.8)',
+            boxShadow: '0 0 6px rgba(201,162,39,0.6), 0 0 12px rgba(201,162,39,0.3)',
+          }}
+        />
+      </div>
     </div>
   );
 }

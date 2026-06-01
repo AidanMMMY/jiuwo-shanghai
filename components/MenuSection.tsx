@@ -8,7 +8,7 @@ export default function MenuSection({ category }: { category: MenuCategory }) {
       <section id={category.category} className="mb-16 scroll-mt-44">
         {/* Category title with gold accent line */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-1 h-6 bg-[#c9a227] rounded-full" />
+          <div className="w-1 h-5 bg-[#c9a227] rounded-full" />
           <h2 className="text-2xl font-medium text-[#a0a0a0] tracking-wide">
             {category.category}
           </h2>
@@ -16,15 +16,15 @@ export default function MenuSection({ category }: { category: MenuCategory }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
           {category.items.map((item, index) => (
-            <ScrollReveal key={item.name} delay={index * 60}>
-              <div className="flex items-start gap-4 pb-6 mb-6">
+            <ScrollReveal key={item.name} delay={index * 60} effect={item.image ? 'image' : 'data'}>
+              <div className="flex items-start gap-4 pb-6 mb-6 group">
                 {item.image && (
                   <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-[#141414]">
                     <Image
                       src={item.image}
                       alt={item.name}
                       fill
-                      className="object-cover transition-transform duration-300 hover:scale-105 active:scale-[0.98]"
+                      className="object-cover transition-all duration-300 group-hover:scale-105 active:scale-[0.98] img-brightness"
                     />
                   </div>
                 )}

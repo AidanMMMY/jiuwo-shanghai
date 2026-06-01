@@ -130,16 +130,16 @@ export default function HeroCarousel({
         style={{ position: 'absolute', left: 0, right: 0, bottom: '4rem' }}
       >
         <div className="hero-intro-fade-up flex items-center justify-center gap-5">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 backdrop-blur-md border border-white/15">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#D4A838]/15 to-white/5 backdrop-blur-md border border-white/15">
             <TeaIcon />
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 backdrop-blur-md border border-white/15">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#A82A4A]/15 to-white/5 backdrop-blur-md border border-white/15">
             <WineIcon />
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 backdrop-blur-md border border-white/15">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#D87848]/15 to-white/5 backdrop-blur-md border border-white/15">
             <ShakerIcon />
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 backdrop-blur-md border border-white/15">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#D48878]/15 to-white/5 backdrop-blur-md border border-white/15">
             <LoveIcon />
           </div>
         </div>

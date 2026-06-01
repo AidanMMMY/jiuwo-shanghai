@@ -162,8 +162,8 @@ export default function HeroCarousel({
           100% { background-position: 300% 50%; }
         }
         @keyframes heroTitleShine {
-          0%   { background-position: 100% 0; }
-          100% { background-position: 0% 0; }
+          0%   { background-position: 0% 50%; }
+          100% { background-position: 400% 50%; }
         }
 
         .hero-title-breathe {
@@ -173,22 +173,22 @@ export default function HeroCarousel({
         .hero-title-shine {
           display: inline-block;
           background-image: linear-gradient(105deg,
-            #c9a227 0%,
-            #c9a227 44%,
-            #f5e6a8 48%,
-            #ffffff 50%,
-            #f5e6a8 52%,
-            #c9a227 56%,
-            #c9a227 100%);
-          background-size: 250% 100%;
-          background-position: 100% 0;
+            #8B1A4F 0%,
+            #C45A1A 17%,
+            #C9A227 34%,
+            #5A6B3A 51%,
+            #1E4A6E 68%,
+            #6B3A7A 85%,
+            #8B1A4F 100%);
+          background-size: 400% 100%;
+          background-position: 0% 50%;
           background-clip: text;
           -webkit-background-clip: text;
           color: transparent;
           -webkit-text-fill-color: transparent;
           animation:
             titleEntrance 900ms cubic-bezier(0.16, 1, 0.3, 1) 200ms both,
-            heroTitleShine 4s linear 1.6s infinite;
+            heroTitleShine 12s linear 1.6s infinite;
         }
         .hero-intro-fade-up {
           animation: heroIntroFadeUp 1400ms cubic-bezier(0.16, 1, 0.3, 1) 1000ms both;
@@ -213,7 +213,7 @@ export default function HeroCarousel({
 
         @media (prefers-reduced-motion: reduce) {
           .hero-title-breathe { animation: none !important; }
-          .hero-title-shine { animation: none !important; background-position: 100% 0; opacity: 1; transform: none; }
+          .hero-title-shine { animation: none !important; background-position: 0% 50%; opacity: 1; transform: none; }
           .hero-intro-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
           .scroll-hint { animation: none !important; }
           .rainbow-text { animation: none !important; }

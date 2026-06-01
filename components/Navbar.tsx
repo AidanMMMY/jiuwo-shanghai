@@ -66,7 +66,7 @@ export default function Navbar({
               <Link
                 key={item.href}
                 href={localizedHref}
-                className={`relative text-xs md:text-sm transition-colors duration-300 whitespace-nowrap py-1 ${
+                className={`relative text-xs md:text-sm transition-colors duration-300 whitespace-nowrap py-1 text-glow-gold ${
                   isActive
                     ? 'text-[#c9a227] font-medium'
                     : 'text-[#a0a0a0] hover:text-[#c9a227]'

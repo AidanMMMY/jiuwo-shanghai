@@ -79,35 +79,35 @@ export default function AuroraBackground() {
       {
         speed: 0.0003,
         offset: 0,
-        amplitude: 0.44,
-        baseY: 0.32,
-        thickness: 160,
+        amplitude: 0.52,
+        baseY: 0.30,
+        thickness: 280,
         noiseScale: 2.0,
-        coreColor: 'rgba(168,42,74,0.14)', // deep crimson
-        glowColor: 'rgba(212,120,72,0.07)', // amber edge
-        shadowColor: 'rgba(168,42,74,0.12)',
+        coreColor: 'rgba(168,42,74,0.10)',
+        glowColor: 'rgba(212,120,72,0.05)',
+        shadowColor: 'rgba(168,42,74,0.10)',
       },
       {
         speed: 0.00055,
         offset: 1.8,
-        amplitude: 0.50,
+        amplitude: 0.58,
         baseY: 0.50,
-        thickness: 190,
+        thickness: 320,
         noiseScale: 2.8,
-        coreColor: 'rgba(232,200,96,0.13)', // bright gold
-        glowColor: 'rgba(212,168,56,0.07)', // amber edge
-        shadowColor: 'rgba(201,162,39,0.12)',
+        coreColor: 'rgba(232,200,96,0.10)',
+        glowColor: 'rgba(212,168,56,0.05)',
+        shadowColor: 'rgba(201,162,39,0.10)',
       },
       {
         speed: 0.0002,
         offset: 3.5,
-        amplitude: 0.44,
-        baseY: 0.68,
-        thickness: 160,
+        amplitude: 0.52,
+        baseY: 0.70,
+        thickness: 280,
         noiseScale: 3.5,
-        coreColor: 'rgba(107,58,122,0.13)', // deep purple
-        glowColor: 'rgba(60,100,130,0.06)', // dark teal edge
-        shadowColor: 'rgba(90,70,120,0.10)',
+        coreColor: 'rgba(107,58,122,0.10)',
+        glowColor: 'rgba(60,100,130,0.04)',
+        shadowColor: 'rgba(90,70,120,0.08)',
       },
     ];
 
@@ -186,7 +186,7 @@ export default function AuroraBackground() {
         for (let i = 0; i < numPoints; i++) {
           const x = i * segmentWidth;
           const nx = (i / numPoints) * ribbon.noiseScale;
-          const n = fbm2D(nx + ribbon.offset + 7.3, t + scrollPhase, 3);
+          const n = fbm2D(nx + ribbon.offset + 2.0, t + scrollPhase, 3);
           const y =
             height * ribbon.baseY +
             ribbon.thickness +

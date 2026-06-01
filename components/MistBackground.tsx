@@ -2,12 +2,14 @@
 
 import { useEffect, useRef } from 'react';
 
-function hash2D(x: number, y: number): number {
-  const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
-  return n - Math.floor(n);
+// ── Simplex-like 2D noise ──────────────────────────────────────
+
+function hash(n: number): number {
+  const s = Math.sin(n * 127.1 + 311.7) * 43758.5453123;
+  return s - Math.floor(s);
 }
 
-function smoothstep(t: number): number {
+function smooth(t: number): number {
   return t * t * (3 - 2 * t);
 }
 
@@ -16,28 +18,61 @@ function noise2D(x: number, y: number): number {
   const iy = Math.floor(y);
   const fx = x - ix;
   const fy = y - iy;
-  const sx = smoothstep(fx);
-  const sy = smoothstep(fy);
-
-  const n00 = hash2D(ix, iy);
-  const n10 = hash2D(ix + 1, iy);
-  const n01 = hash2D(ix, iy + 1);
-  const n11 = hash2D(ix + 1, iy + 1);
-
-  return n00 * (1 - sx) * (1 - sy)
-    + n10 * sx * (1 - sy)
-    + n01 * (1 - sx) * sy
-    + n11 * sx * sy;
+  const u = smooth(fx);
+  const v = smooth(fy);
+  return (
+    hash(ix + iy * 374761) * (1 - u) * (1 - v) +
+    hash(ix + 1 + iy * 374761) * u * (1 - v) +
+    hash(ix + (iy + 1) * 374761) * (1 - u) * v +
+    hash(ix + 1 + (iy + 1) * 374761) * u * v
+  );
 }
 
-interface Blob {
-  baseX: number;
-  baseY: number;
-  radius: number;
-  color: [number, number, number];
-  driftSpeed: number;
-  driftOffset: number;
+function fbm(x: number, y: number, octaves: number): number {
+  let v = 0;
+  let a = 0.5;
+  let f = 1;
+  for (let i = 0; i < octaves; i++) {
+    v += a * (noise2D(x * f, y * f) * 2 - 1);
+    a *= 0.5;
+    f *= 2;
+  }
+  return v;
 }
+
+// ── Colour helpers ─────────────────────────────────────────────
+
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
+// Smooth palette: cool blue → neutral purple → warm amber → deep red
+function palette(t: number): [number, number, number] {
+  // t ∈ [0,1], wrap smoothly
+  const p = [
+    [35, 95, 140],   // cool teal
+    [70, 65, 120],   // muted purple
+    [160, 90, 45],   // warm amber
+    [145, 50, 55],   // deep red
+    [50, 110, 130],  // back toward cool
+  ];
+
+  const scaled = t * (p.length - 1);
+  const i = Math.floor(scaled) % p.length;
+  const j = (i + 1) % p.length;
+  const localT = scaled - Math.floor(scaled);
+  const st = localT * localT * (3 - 2 * localT);
+
+  return [
+    lerp(p[i][0], p[j][0], st),
+    lerp(p[i][1], p[j][1], st),
+    lerp(p[i][2], p[j][2], st),
+  ];
+}
+
+// ── Component ──────────────────────────────────────────────────
+
+const FOG_SCALE = 28; // low-res factor: 1/28th screen size
 
 export default function MistBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -52,17 +87,9 @@ export default function MistBackground() {
     let width = 0;
     let height = 0;
 
-    // Warm / cool alternating for strong contrast
-    const blobs: Blob[] = [
-      { baseX: 0.12, baseY: 0.18, radius: 0.42, color: [200, 60, 60],  driftSpeed: 0.00065, driftOffset: 0 },    // warm: red
-      { baseX: 0.78, baseY: 0.22, radius: 0.40, color: [40, 130, 170], driftSpeed: 0.00085, driftOffset: 1.5 },  // cool: cyan
-      { baseX: 0.30, baseY: 0.48, radius: 0.46, color: [220, 180, 50], driftSpeed: 0.00055, driftOffset: 3.0 },  // warm: gold
-      { baseX: 0.72, baseY: 0.52, radius: 0.44, color: [80, 60, 160],  driftSpeed: 0.00070, driftOffset: 4.5 },  // cool: deep blue
-      { baseX: 0.18, baseY: 0.78, radius: 0.40, color: [210, 80, 120], driftSpeed: 0.00060, driftOffset: 6.0 },  // warm: rose
-      { baseX: 0.85, baseY: 0.75, radius: 0.44, color: [30, 140, 150], driftSpeed: 0.00075, driftOffset: 7.5 },  // cool: teal
-      { baseX: 0.50, baseY: 0.35, radius: 0.38, color: [230, 170, 40], driftSpeed: 0.00090, driftOffset: 9.0 },  // warm: amber
-      { baseX: 0.55, baseY: 0.65, radius: 0.40, color: [60, 90, 180],  driftSpeed: 0.00050, driftOffset: 10.5 }, // cool: blue
-    ];
+    // Offscreen low-res canvas for the fog texture
+    const fogCanvas = document.createElement('canvas');
+    const fogCtx = fogCanvas.getContext('2d', { willReadFrequently: true })!;
 
     function resize() {
       width = window.innerWidth;
@@ -82,40 +109,61 @@ export default function MistBackground() {
 
     const startTime = Date.now();
     let raf = 0;
+    let frame = 0;
 
     function draw(time: number) {
       const elapsed = time - startTime;
-      ctx!.clearRect(0, 0, width, height);
+      frame++;
 
-      // Use 'screen' blend so overlapping glows merge smoothly without hard edges
-      ctx!.globalCompositeOperation = 'screen';
+      // Update fog texture every 2nd frame to save CPU
+      if (frame % 2 === 0) {
+        const fogW = Math.max(1, Math.ceil(width / FOG_SCALE));
+        const fogH = Math.max(1, Math.ceil(height / FOG_SCALE));
 
-      for (const blob of blobs) {
-        const nx = noise2D(elapsed * blob.driftSpeed + blob.driftOffset, 0);
-        const ny = noise2D(elapsed * blob.driftSpeed + blob.driftOffset + 10, 0);
+        if (fogCanvas.width !== fogW || fogCanvas.height !== fogH) {
+          fogCanvas.width = fogW;
+          fogCanvas.height = fogH;
+        }
 
-        const x = (blob.baseX + nx * 0.32) * width;
-        const y = (blob.baseY + ny * 0.26) * height;
-        const r = blob.radius * Math.max(width, height);
+        const img = fogCtx.createImageData(fogW, fogH);
+        const d = img.data;
 
-        const gradient = ctx!.createRadialGradient(x, y, 0, x, y, r);
-        // Very smooth 8-stop falloff – no perceptible banding
-        gradient.addColorStop(0,    `rgba(${blob.color[0]},${blob.color[1]},${blob.color[2]},0.09)`);
-        gradient.addColorStop(0.10, `rgba(${blob.color[0]},${blob.color[1]},${blob.color[2]},0.075)`);
-        gradient.addColorStop(0.25, `rgba(${blob.color[0]},${blob.color[1]},${blob.color[2]},0.055)`);
-        gradient.addColorStop(0.42, `rgba(${blob.color[0]},${blob.color[1]},${blob.color[2]},0.035)`);
-        gradient.addColorStop(0.60, `rgba(${blob.color[0]},${blob.color[1]},${blob.color[2]},0.018)`);
-        gradient.addColorStop(0.76, `rgba(${blob.color[0]},${blob.color[1]},${blob.color[2]},0.008)`);
-        gradient.addColorStop(0.90, `rgba(${blob.color[0]},${blob.color[1]},${blob.color[2]},0.003)`);
-        gradient.addColorStop(1,    'rgba(0,0,0,0)');
+        // Slow global drift
+        const driftX = elapsed * 0.000015;
+        const driftY = elapsed * 0.000012;
 
-        ctx!.fillStyle = gradient;
-        ctx!.beginPath();
-        ctx!.arc(x, y, r, 0, Math.PI * 2);
-        ctx!.fill();
+        for (let py = 0; py < fogH; py++) {
+          for (let px = 0; px < fogW; px++) {
+            const nx = px / fogW;
+            const ny = py / fogH;
+
+            // Two layered noises: one drives hue, one drives brightness
+            const hueNoise = fbm(nx * 1.8 + driftX, ny * 1.8 + driftY, 3);
+            const brightNoise = fbm(nx * 2.5 - driftX * 0.7, ny * 2.5 + driftY * 0.5, 2);
+
+            // Map hueNoise [-1,1] → palette position [0,1]
+            const hueT = (hueNoise + 1) * 0.5;
+            const [cr, cg, cb] = palette(hueT);
+
+            // Brightness: very subtle, keeps it "barely there"
+            const brightness = 0.35 + brightNoise * 0.25; // 0.1–0.6
+            const alpha = 0.045 + brightNoise * 0.025; // very low opacity
+
+            const idx = (py * fogW + px) * 4;
+            d[idx] = cr * brightness;
+            d[idx + 1] = cg * brightness;
+            d[idx + 2] = cb * brightness;
+            d[idx + 3] = alpha * 255;
+          }
+        }
+
+        fogCtx.putImageData(img, 0, 0);
       }
 
-      ctx!.globalCompositeOperation = 'source-over';
+      // Draw scaled fog to main canvas (bilinear interpolation = smooth)
+      ctx!.clearRect(0, 0, width, height);
+      ctx!.drawImage(fogCanvas, 0, 0, width, height);
+
       raf = requestAnimationFrame(draw);
     }
 
@@ -130,7 +178,7 @@ export default function MistBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 z-0 pointer-events-none"
-      style={{ opacity: 0.9 }}
+      style={{ opacity: 0.85 }}
       aria-hidden="true"
     />
   );

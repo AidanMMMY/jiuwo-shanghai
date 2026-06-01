@@ -50,9 +50,11 @@ interface Ribbon {
   speed: number;
   offset: number;
   amplitude: number;
-  coreColor: string;   // center hue (most saturated)
-  glowColor: string;   // transition hue toward edges
-  shadowColor: string; // shadow/glow color
+  baseY: number; // vertical centre (0–1)
+  thickness: number; // thickness in px
+  coreColor: string;
+  glowColor: string;
+  shadowColor: string;
   noiseScale: number;
 }
 
@@ -75,22 +77,37 @@ export default function AuroraBackground() {
 
     const ribbons: Ribbon[] = [
       {
-        speed: 0.0003, offset: 0, amplitude: 0.28, noiseScale: 2.0,
-        coreColor: 'rgba(232,200,96,0.12)',    // bright gold center
-        glowColor: 'rgba(212,168,56,0.07)',     // amber edges
+        speed: 0.00035,
+        offset: 0,
+        amplitude: 0.32,
+        baseY: 0.28,
+        thickness: 90,
+        noiseScale: 2.0,
+        coreColor: 'rgba(168,42,74,0.14)', // deep crimson
+        glowColor: 'rgba(212,120,72,0.07)', // amber edge
+        shadowColor: 'rgba(168,42,74,0.12)',
+      },
+      {
+        speed: 0.00045,
+        offset: 1.8,
+        amplitude: 0.38,
+        baseY: 0.52,
+        thickness: 110,
+        noiseScale: 2.8,
+        coreColor: 'rgba(232,200,96,0.13)', // bright gold
+        glowColor: 'rgba(212,168,56,0.07)', // amber edge
         shadowColor: 'rgba(201,162,39,0.12)',
       },
       {
-        speed: 0.0004, offset: 1.5, amplitude: 0.22, noiseScale: 2.8,
-        coreColor: 'rgba(216,140,80,0.10)',     // warm orange center
-        glowColor: 'rgba(192,96,104,0.05)',     // rose edges
-        shadowColor: 'rgba(212,120,72,0.10)',
-      },
-      {
-        speed: 0.00025, offset: 3.0, amplitude: 0.32, noiseScale: 3.5,
-        coreColor: 'rgba(192,96,104,0.08)',     // deep rose center
-        glowColor: 'rgba(168,42,74,0.04)',      // crimson edges
-        shadowColor: 'rgba(180,80,90,0.08)',
+        speed: 0.00028,
+        offset: 3.5,
+        amplitude: 0.34,
+        baseY: 0.76,
+        thickness: 90,
+        noiseScale: 3.5,
+        coreColor: 'rgba(107,58,122,0.13)', // deep purple
+        glowColor: 'rgba(60,100,130,0.06)', // dark teal edge
+        shadowColor: 'rgba(90,70,120,0.10)',
       },
     ];
 
@@ -122,13 +139,10 @@ export default function AuroraBackground() {
     const startTime = Date.now();
     const numPoints = 40;
 
-    function drawRibbonPath(
+    function drawSmoothTopEdge(
       c: CanvasRenderingContext2D,
       pts: { x: number; y: number }[],
-      w: number,
-      h: number,
     ) {
-      c.beginPath();
       c.moveTo(pts[0].x, pts[0].y);
       for (let i = 0; i < pts.length - 2; i++) {
         const xc = (pts[i].x + pts[i + 1].x) / 2;
@@ -141,10 +155,6 @@ export default function AuroraBackground() {
         pts[pts.length - 1].x,
         pts[pts.length - 1].y,
       );
-      c.lineTo(w, h);
-      c.lineTo(0, h);
-      c.closePath();
-      c.fill();
     }
 
     function draw(time: number) {
@@ -158,35 +168,59 @@ export default function AuroraBackground() {
       const segmentWidth = width / (numPoints - 1);
 
       for (const ribbon of ribbons) {
-        // Pre-compute all points — noise-driven, fully continuous
-        const points: { x: number; y: number }[] = [];
         const t = elapsed * ribbon.speed;
         const scrollPhase = scrollY.current * 0.001;
 
+        // ── Top edge ──
+        const topPoints: { x: number; y: number }[] = [];
         for (let i = 0; i < numPoints; i++) {
           const x = i * segmentWidth;
           const nx = (i / numPoints) * ribbon.noiseScale;
           const n = fbm2D(nx + ribbon.offset, t + scrollPhase, 3);
-          const y = height * 0.35 + n * height * ribbon.amplitude;
-          points.push({ x, y });
+          const y = height * ribbon.baseY + n * height * ribbon.amplitude;
+          topPoints.push({ x, y });
         }
 
-        // ── Warm sunset ribbon with rainbow hue per layer ──
+        // ── Bottom edge (same noise field, different offset so it moves independently) ──
+        const bottomPoints: { x: number; y: number }[] = [];
+        for (let i = 0; i < numPoints; i++) {
+          const x = i * segmentWidth;
+          const nx = (i / numPoints) * ribbon.noiseScale;
+          const n = fbm2D(nx + ribbon.offset + 7.3, t + scrollPhase, 3);
+          const y =
+            height * ribbon.baseY +
+            ribbon.thickness +
+            n * height * ribbon.amplitude * 0.55;
+          bottomPoints.push({ x, y });
+        }
+
+        // ── Draw ribbon as a closed band ──
         ctx!.save();
 
-        // Horizontal rainbow gradient: dark at edges, warm hues in the middle
-        const rainbowGrad = ctx!.createLinearGradient(0, 0, width, 0);
-        rainbowGrad.addColorStop(0, 'rgba(10,10,10,0)');
-        rainbowGrad.addColorStop(0.15, ribbon.glowColor);
-        rainbowGrad.addColorStop(0.5, ribbon.coreColor);
-        rainbowGrad.addColorStop(0.85, ribbon.glowColor);
-        rainbowGrad.addColorStop(1, 'rgba(10,10,10,0)');
-        ctx!.fillStyle = rainbowGrad;
+        const grad = ctx!.createLinearGradient(0, 0, width, 0);
+        grad.addColorStop(0, 'rgba(10,10,10,0)');
+        grad.addColorStop(0.15, ribbon.glowColor);
+        grad.addColorStop(0.5, ribbon.coreColor);
+        grad.addColorStop(0.85, ribbon.glowColor);
+        grad.addColorStop(1, 'rgba(10,10,10,0)');
+        ctx!.fillStyle = grad;
 
         ctx!.shadowColor = ribbon.shadowColor;
-        ctx!.shadowBlur = 60;
+        ctx!.shadowBlur = 55;
 
-        drawRibbonPath(ctx!, points, width, height);
+        ctx!.beginPath();
+        drawSmoothTopEdge(ctx!, topPoints);
+        // Right cap
+        ctx!.lineTo(
+          bottomPoints[bottomPoints.length - 1].x,
+          bottomPoints[bottomPoints.length - 1].y,
+        );
+        // Bottom edge (reverse, dense lineTo is smooth enough with blur)
+        for (let i = bottomPoints.length - 2; i >= 0; i--) {
+          ctx!.lineTo(bottomPoints[i].x, bottomPoints[i].y);
+        }
+        ctx!.closePath();
+        ctx!.fill();
         ctx!.restore();
       }
 

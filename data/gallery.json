@@ -1,5 +1,29 @@
 [
   {
+    "id": "our-friend-zack",
+    "title": "Our Friend Zack",
+    "titleZh": "Zack",
+    "subtitle": "The last one standing.",
+    "subtitleZh": "总能喝到最后一个。",
+    "cover": "/images/gallery/our-friend-zack/Zack-20260520-01.webp",
+    "category": "Our Friends",
+    "categoryZh": "我们的朋友",
+    "friendSocial": {
+      "instagram": "zack121391",
+      "xiaohongshu": "https://www.xiaohongshu.com/user/profile/583adb956a6a697c4e0bb01a?xsec_token=YBj32MFl66EQVY94pnLos8j9hy9ds2gfU17G6qgHHg7iA=&xsec_source=app_share&xhsshare=WeixinSession&appuid=5e1a12be00000000010040c5&apptime=1780148454&share_id=c17571e575ba4b5ea4af87068f616a1b&wechatWid=3697c9d7c2cc0e1be7e99f292fe6cc25&wechatOrigin=menu"
+    },
+    "photos": [
+      {"src": "/images/gallery/our-friend-zack/Zack-20260601-01.webp", "alt": "Zack 08", "altZh": "Zack 08"},
+      {"src": "/images/gallery/our-friend-zack/Zack-20260520-01.webp", "alt": "Zack 01", "altZh": "Zack 01"},
+      {"src": "/images/gallery/our-friend-zack/Zack-20260516-01.webp", "alt": "Zack 02", "altZh": "Zack 02"},
+      {"src": "/images/gallery/our-friend-zack/Zack-20260424-01.webp", "alt": "Zack 03", "altZh": "Zack 03"},
+      {"src": "/images/gallery/our-friend-zack/Zack-20260422-01.webp", "alt": "Zack 04", "altZh": "Zack 04"},
+      {"src": "/images/gallery/our-friend-zack/Zack-20260222-01.webp", "alt": "Zack 05", "altZh": "Zack 05"},
+      {"src": "/images/gallery/our-friend-zack/Zack-20260222-02.webp", "alt": "Zack 06", "altZh": "Zack 06"},
+      {"src": "/images/gallery/our-friend-zack/Zack-20260221-01.webp", "alt": "Zack 07", "altZh": "Zack 07"}
+    ]
+  },
+  {
     "id": "our-friend-josh-hu",
     "title": "Our Friend Josh Hu",
     "titleZh": "Josh Hu",
@@ -137,29 +161,6 @@
       {"src": "/images/gallery/weekend-trip-to-hangzhou/20260523-03.webp", "alt": "Hangzhou 03", "altZh": "杭州 03"},
       {"src": "/images/gallery/weekend-trip-to-hangzhou/20260523-02.webp", "alt": "Hangzhou 02", "altZh": "杭州 02"},
       {"src": "/images/gallery/weekend-trip-to-hangzhou/20260523-01.webp", "alt": "Hangzhou 01", "altZh": "杭州 01"}
-    ]
-  },
-  {
-    "id": "our-friend-zack",
-    "title": "Our Friend Zack",
-    "titleZh": "Zack",
-    "subtitle": "The last one standing.",
-    "subtitleZh": "总能喝到最后一个。",
-    "cover": "/images/gallery/our-friend-zack/Zack-20260520-01.webp",
-    "category": "Our Friends",
-    "categoryZh": "我们的朋友",
-    "friendSocial": {
-      "instagram": "zack121391",
-      "xiaohongshu": "https://www.xiaohongshu.com/user/profile/583adb956a6a697c4e0bb01a?xsec_token=YBj32MFl66EQVY94pnLos8j9hy9ds2gfU17G6qgHHg7iA=&xsec_source=app_share&xhsshare=WeixinSession&appuid=5e1a12be00000000010040c5&apptime=1780148454&share_id=c17571e575ba4b5ea4af87068f616a1b&wechatWid=3697c9d7c2cc0e1be7e99f292fe6cc25&wechatOrigin=menu"
-    },
-    "photos": [
-      {"src": "/images/gallery/our-friend-zack/Zack-20260520-01.webp", "alt": "Zack 01", "altZh": "Zack 01"},
-      {"src": "/images/gallery/our-friend-zack/Zack-20260516-01.webp", "alt": "Zack 02", "altZh": "Zack 02"},
-      {"src": "/images/gallery/our-friend-zack/Zack-20260424-01.webp", "alt": "Zack 03", "altZh": "Zack 03"},
-      {"src": "/images/gallery/our-friend-zack/Zack-20260422-01.webp", "alt": "Zack 04", "altZh": "Zack 04"},
-      {"src": "/images/gallery/our-friend-zack/Zack-20260222-01.webp", "alt": "Zack 05", "altZh": "Zack 05"},
-      {"src": "/images/gallery/our-friend-zack/Zack-20260222-02.webp", "alt": "Zack 06", "altZh": "Zack 06"},
-      {"src": "/images/gallery/our-friend-zack/Zack-20260221-01.webp", "alt": "Zack 07", "altZh": "Zack 07"}
     ]
   },
   {

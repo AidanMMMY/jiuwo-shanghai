@@ -53,10 +53,10 @@ export default function MistBackground() {
     let height = 0;
 
     const blobs: Blob[] = [
-      { baseX: 0.20, baseY: 0.20, radius: 0.60, color: [168, 42, 74], driftSpeed: 0.00012, driftOffset: 0 },
-      { baseX: 0.80, baseY: 0.35, radius: 0.55, color: [212, 168, 56], driftSpeed: 0.00018, driftOffset: 2.5 },
-      { baseX: 0.35, baseY: 0.65, radius: 0.65, color: [107, 58, 122], driftSpeed: 0.00010, driftOffset: 5 },
-      { baseX: 0.70, baseY: 0.80, radius: 0.50, color: [192, 96, 104], driftSpeed: 0.00015, driftOffset: 7.5 },
+      { baseX: 0.20, baseY: 0.20, radius: 0.70, color: [168, 42, 74], driftSpeed: 0.00055, driftOffset: 0 },
+      { baseX: 0.80, baseY: 0.35, radius: 0.65, color: [212, 168, 56], driftSpeed: 0.00075, driftOffset: 2.5 },
+      { baseX: 0.35, baseY: 0.65, radius: 0.75, color: [107, 58, 122], driftSpeed: 0.00045, driftOffset: 5 },
+      { baseX: 0.70, baseY: 0.80, radius: 0.60, color: [192, 96, 104], driftSpeed: 0.00060, driftOffset: 7.5 },
     ];
 
     function resize() {
@@ -86,13 +86,13 @@ export default function MistBackground() {
         const nx = noise2D(elapsed * blob.driftSpeed + blob.driftOffset, 0);
         const ny = noise2D(elapsed * blob.driftSpeed + blob.driftOffset + 10, 0);
 
-        const x = (blob.baseX + nx * 0.18) * width;
-        const y = (blob.baseY + ny * 0.14) * height;
+        const x = (blob.baseX + nx * 0.28) * width;
+        const y = (blob.baseY + ny * 0.22) * height;
         const r = blob.radius * Math.max(width, height);
 
         const gradient = ctx!.createRadialGradient(x, y, 0, x, y, r);
-        gradient.addColorStop(0, `rgba(${blob.color[0]},${blob.color[1]},${blob.color[2]},0.032)`);
-        gradient.addColorStop(0.4, `rgba(${blob.color[0]},${blob.color[1]},${blob.color[2]},0.018)`);
+        gradient.addColorStop(0, `rgba(${blob.color[0]},${blob.color[1]},${blob.color[2]},0.065)`);
+        gradient.addColorStop(0.4, `rgba(${blob.color[0]},${blob.color[1]},${blob.color[2]},0.035)`);
         gradient.addColorStop(1, 'rgba(10,10,10,0)');
 
         ctx!.fillStyle = gradient;

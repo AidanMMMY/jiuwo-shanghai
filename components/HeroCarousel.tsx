@@ -21,10 +21,9 @@ function AnimatedTitle({ text }: { text: string }) {
 function TeaIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 14c0 3.3-2.7 6-6 6s-6-2.7-6-6V6h12v8z" />
-      <path d="M8 6c0-2.2 1.8-4 4-4s4 1.8 4 4" />
-      <path d="M14 20v4" />
-      <path d="M10 24h8" />
+      <path d="M10 10h8v4c0 1.7-1.3 3-3 3s-3-1.3-3-3v-4z" />
+      <path d="M18 12c1.1 0 2 .9 2 2s-.9 2-2 2" />
+      <path d="M8 17h12" />
     </svg>
   );
 }
@@ -32,9 +31,9 @@ function TeaIcon() {
 function WineIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 4v6c0 2.2 1.8 4 4 4s4-1.8 4-4V4" />
-      <path d="M14 14v8" />
-      <path d="M10 22h8" />
+      <path d="M11 8v4c0 1.7 1.3 3 3 3s3-1.3 3-3V8" />
+      <path d="M14 15v5" />
+      <path d="M10 20h8" />
     </svg>
   );
 }
@@ -42,10 +41,10 @@ function WineIcon() {
 function ShakerIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 3h10l2 4H7l2-4z" />
-      <path d="M8 7l3 18h6l3-18" />
+      <path d="M10 7h8l1 2H9l1-2z" />
+      <path d="M9 9l2 10h6l2-10" />
       <path d="M11 12h6" />
-      <path d="M12 17h4" />
+      <path d="M11.5 15h5" />
     </svg>
   );
 }
@@ -53,12 +52,8 @@ function ShakerIcon() {
 function LoveIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <g transform="translate(-1, 2) scale(0.85)">
-        <path d="M14 24C14 24 4 18 4 10.5C4 7.46 6.46 5 9.5 5C11.24 5 12.76 5.81 14 7.03C15.24 5.81 16.76 5 18.5 5C21.54 5 24 7.46 24 10.5C24 18 14 24 14 24Z" />
-      </g>
-      <g transform="translate(6, -1) scale(0.75)">
-        <path d="M14 24C14 24 4 18 4 10.5C4 7.46 6.46 5 9.5 5C11.24 5 12.76 5.81 14 7.03C15.24 5.81 16.76 5 18.5 5C21.54 5 24 7.46 24 10.5C24 18 14 24 14 24Z" />
-      </g>
+      <path d="M10 19C10 19 4 15 4 10C4 8 5.5 6.5 7.5 6.5C8.5 6.5 9.5 7 10 8C10.5 7 11.5 6.5 12.5 6.5C14.5 6.5 16 8 16 10C16 15 10 19 10 19Z" />
+      <path d="M17 16.5C17 16.5 12 13 12 9.5C12 8 13 7 14.5 7C15.5 7 16 7.5 16.5 8C17 7.5 17.5 7 18.5 7C20 7 21 8 21 9.5C21 13 17 16.5 17 16.5Z" />
     </svg>
   );
 }

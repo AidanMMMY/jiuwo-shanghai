@@ -46,15 +46,16 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
-// Smooth palette: cool blue → neutral purple → warm amber → deep red
+// Smooth palette: bright cyan → blue → purple → warm amber → deep red
 function palette(t: number): [number, number, number] {
   // t ∈ [0,1], wrap smoothly
   const p = [
-    [35, 95, 140],   // cool teal
-    [70, 65, 120],   // muted purple
-    [160, 90, 45],   // warm amber
-    [145, 50, 55],   // deep red
-    [50, 110, 130],  // back toward cool
+    [20, 140, 185],  // bright cyan (laser-like)
+    [45, 85, 165],   // vivid blue
+    [75, 55, 125],   // purple
+    [175, 105, 30],  // warm amber
+    [165, 40, 50],   // deep red
+    [25, 130, 170],  // back toward bright cool
   ];
 
   const scaled = t * (p.length - 1);
@@ -128,9 +129,9 @@ export default function MistBackground() {
         const img = fogCtx.createImageData(fogW, fogH);
         const d = img.data;
 
-        // Slow global drift
-        const driftX = elapsed * 0.000015;
-        const driftY = elapsed * 0.000012;
+        // Faster drift for more dynamism
+        const driftX = elapsed * 0.00008;
+        const driftY = elapsed * 0.00006;
 
         for (let py = 0; py < fogH; py++) {
           for (let px = 0; px < fogW; px++) {
@@ -141,13 +142,17 @@ export default function MistBackground() {
             const hueNoise = fbm(nx * 1.8 + driftX, ny * 1.8 + driftY, 3);
             const brightNoise = fbm(nx * 2.5 - driftX * 0.7, ny * 2.5 + driftY * 0.5, 2);
 
+            // Laser streaks: thin bright bands that cut through the fog
+            const laserNoise = fbm(nx * 0.5 + driftX * 3, ny * 5 + driftY * 2, 2);
+            const laserBoost = Math.max(0, laserNoise) * 0.55;
+
             // Map hueNoise [-1,1] → palette position [0,1]
             const hueT = (hueNoise + 1) * 0.5;
             const [cr, cg, cb] = palette(hueT);
 
             // Brighter so texture and palette are visible
-            const brightness = 0.65 + brightNoise * 0.30;
-            const alpha = 0.10 + brightNoise * 0.06;
+            const brightness = (0.65 + brightNoise * 0.30) * (1 + laserBoost);
+            const alpha = (0.10 + brightNoise * 0.06) * (1 + laserBoost * 0.6);
 
             const idx = (py * fogW + px) * 4;
             d[idx] = cr * brightness;
@@ -178,7 +183,7 @@ export default function MistBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 z-0 pointer-events-none"
-      style={{ opacity: 0.85 }}
+      style={{ opacity: 1.0 }}
       aria-hidden="true"
     />
   );

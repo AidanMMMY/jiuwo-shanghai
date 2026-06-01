@@ -77,33 +77,33 @@ export default function AuroraBackground() {
 
     const ribbons: Ribbon[] = [
       {
-        speed: 0.00035,
+        speed: 0.0003,
         offset: 0,
-        amplitude: 0.32,
-        baseY: 0.28,
-        thickness: 90,
+        amplitude: 0.44,
+        baseY: 0.32,
+        thickness: 160,
         noiseScale: 2.0,
         coreColor: 'rgba(168,42,74,0.14)', // deep crimson
         glowColor: 'rgba(212,120,72,0.07)', // amber edge
         shadowColor: 'rgba(168,42,74,0.12)',
       },
       {
-        speed: 0.00045,
+        speed: 0.00055,
         offset: 1.8,
-        amplitude: 0.38,
-        baseY: 0.52,
-        thickness: 110,
+        amplitude: 0.50,
+        baseY: 0.50,
+        thickness: 190,
         noiseScale: 2.8,
         coreColor: 'rgba(232,200,96,0.13)', // bright gold
         glowColor: 'rgba(212,168,56,0.07)', // amber edge
         shadowColor: 'rgba(201,162,39,0.12)',
       },
       {
-        speed: 0.00028,
+        speed: 0.0002,
         offset: 3.5,
-        amplitude: 0.34,
-        baseY: 0.76,
-        thickness: 90,
+        amplitude: 0.44,
+        baseY: 0.68,
+        thickness: 160,
         noiseScale: 3.5,
         coreColor: 'rgba(107,58,122,0.13)', // deep purple
         glowColor: 'rgba(60,100,130,0.06)', // dark teal edge

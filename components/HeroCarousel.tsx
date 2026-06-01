@@ -34,11 +34,7 @@ export default function HeroCarousel({
   const fade = 100 / duration;
 
   function renderIntro(text: string) {
-    return text.split(/(\[\[[^\]]+\]\])/).map((part, i) =>
-      part.startsWith('[[') && part.endsWith(']]')
-        ? <span key={i} className="rainbow-text">{part.slice(2, -2)}</span>
-        : part
-    );
+    return text.replace(/\[\[|\]\]/g, '');
   }
 
   return (
@@ -157,10 +153,6 @@ export default function HeroCarousel({
           0%, 100% { opacity: 0.94; transform: scale(1); }
           50% { opacity: 1; transform: scale(1.005); }
         }
-        @keyframes rainbowFlow {
-          0%   { background-position: 0% 50%; }
-          100% { background-position: 300% 50%; }
-        }
         @keyframes heroTitleShine {
           0%   { background-position: 0% 50%; }
           100% { background-position: 400% 50%; }
@@ -196,27 +188,11 @@ export default function HeroCarousel({
         .scroll-hint {
           animation: scrollHintBounce 1.8s ease-in-out infinite;
         }
-        .rainbow-text {
-          font-weight: 600;
-          background-image: linear-gradient(60deg,
-            #ff3d6e 0%,  #ff8a2e 16%, #ffe14d 33%,
-            #2ed47a 50%, #4fb3ff 66%, #b46cff 83%,
-            #ff3d6e 100%);
-          background-size: 300% 100%;
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-          -webkit-text-fill-color: transparent;
-          animation: rainbowFlow 10s linear infinite;
-          text-shadow: 0 0 1px rgba(255, 255, 255, 0.15);
-        }
-
         @media (prefers-reduced-motion: reduce) {
           .hero-title-breathe { animation: none !important; }
           .hero-title-shine { animation: none !important; background-position: 0% 50%; opacity: 1; transform: none; }
           .hero-intro-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
           .scroll-hint { animation: none !important; }
-          .rainbow-text { animation: none !important; }
         }
       `}</style>
     </section>

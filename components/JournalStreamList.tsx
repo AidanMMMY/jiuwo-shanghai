@@ -42,7 +42,7 @@ export default function JournalStreamList({
           <div className="mt-16 text-center">
             <button
               onClick={() => setVisibleCount((prev) => prev + 20)}
-              className="group relative px-8 py-2.5 text-sm tracking-wider text-[#a0a0a0] border border-[#333] rounded-sm hover:text-[#f5f5f0] hover:border-[#c9a227] transition-all duration-300"
+              className="group relative px-8 py-2.5 text-sm tracking-wider text-[#a0a0a0] border border-[#333] rounded-sm hover:text-[#f5f5f0] hover:border-[#c9a227] transition-all duration-300 glow-gold"
             >
               <span className="relative z-10">Load more</span>
               <span className="absolute inset-0 bg-[#c9a227]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -51,7 +51,7 @@ export default function JournalStreamList({
         )}
 
         {/* Gold divider leading into Guestbook */}
-        <div className="mt-20 flex items-center gap-4">
+        <div className="mt-20 flex items-center gap-4 divider-breathe">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent to-[#c9a227]/30" />
           <div className="w-1.5 h-1.5 rounded-full bg-[#c9a227]/40" />
           <div className="flex-1 h-px bg-gradient-to-l from-transparent to-[#c9a227]/30" />

@@ -21,9 +21,10 @@ function AnimatedTitle({ text }: { text: string }) {
 function TeaIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 10h8v4c0 1.7-1.3 3-3 3s-3-1.3-3-3v-4z" />
-      <path d="M18 12c1.1 0 2 .9 2 2s-.9 2-2 2" />
-      <path d="M8 17h12" />
+      <path d="M19 14c0 2.8-2.2 5-5 5s-5-2.2-5-5V8h10v6z" />
+      <path d="M9 8c0-1.7 1.3-3 3-3h4c1.7 0 3 1.3 3 3" />
+      <path d="M14 19v3" />
+      <path d="M10 22h8" />
     </svg>
   );
 }
@@ -31,7 +32,7 @@ function TeaIcon() {
 function WineIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11 8v4c0 1.7 1.3 3 3 3s3-1.3 3-3V8" />
+      <path d="M11 7v5c0 1.7 1.3 3 3 3s3-1.3 3-3V7" />
       <path d="M14 15v5" />
       <path d="M10 20h8" />
     </svg>
@@ -41,8 +42,8 @@ function WineIcon() {
 function ShakerIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 7h8l1 2H9l1-2z" />
-      <path d="M9 9l2 10h6l2-10" />
+      <path d="M10 6h8l1.5 3H8.5L10 6z" />
+      <path d="M9 9l2.5 11h5l2.5-11" />
       <path d="M11 12h6" />
       <path d="M11.5 15h5" />
     </svg>
@@ -52,8 +53,8 @@ function ShakerIcon() {
 function LoveIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 19C10 19 4 15 4 10C4 8 5.5 6.5 7.5 6.5C8.5 6.5 9.5 7 10 8C10.5 7 11.5 6.5 12.5 6.5C14.5 6.5 16 8 16 10C16 15 10 19 10 19Z" />
-      <path d="M17 16.5C17 16.5 12 13 12 9.5C12 8 13 7 14.5 7C15.5 7 16 7.5 16.5 8C17 7.5 17.5 7 18.5 7C20 7 21 8 21 9.5C21 13 17 16.5 17 16.5Z" />
+      <path d="M10 18.5C10 18.5 5 15 5 10.5C5 8.5 6.5 7 8.5 7C9.8 7 10.7 7.6 11.5 8.5C12.3 7.6 13.2 7 14.5 7C16.5 7 18 8.5 18 10.5C18 15 10 18.5 10 18.5Z" />
+      <path d="M17 16C17 16 13 13 13 9.5C13 8 14 7 15.5 7C16.5 7 17 7.4 17.5 8C18 7.4 18.5 7 19.5 7C21 7 22 8 22 9.5C22 13 17 16 17 16Z" />
     </svg>
   );
 }

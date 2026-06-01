@@ -7,7 +7,7 @@ export default function GalleryGrid({ albums, basePath = '' }: { albums: Gallery
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {albums.map((album, index) => (
-        <ScrollReveal key={album.id} delay={index * 100} effect={index % 3 === 0 ? 'scale-in' : 'fade-up'}>
+        <ScrollReveal key={album.id} delay={index * 80} effect={index % 3 === 0 ? 'image' : 'card'}>
           <Link href={`${basePath}/gallery/${album.id}`} className="group block">
             <div className="relative">
               {/* Shadow layers */}
@@ -20,12 +20,12 @@ export default function GalleryGrid({ albums, basePath = '' }: { albums: Gallery
                 className="absolute inset-0 translate-x-1 translate-y-1 rounded-lg border border-white/10 bg-[#262626] shadow-md transition-all duration-500 group-hover:translate-x-1.5 group-hover:translate-y-1.5"
               />
               {/* Main card */}
-              <div className="relative aspect-square overflow-hidden rounded-lg">
+              <div className="relative aspect-square overflow-hidden rounded-lg shadow-card shadow-card-hover">
                 <Image
                   src={album.cover}
                   alt={album.title}
                   fill
-                  className="object-cover transition-all duration-500 group-hover:scale-105 active:scale-[0.98] active:brightness-110"
+                  className="object-cover transition-all duration-500 group-hover:scale-105 active:scale-[0.98] active:brightness-110 img-brightness"
                 />
                 <div className="absolute inset-0 bg-black/30 transition-colors duration-500 group-hover:bg-black/10" />
                 {/* Photo count badge */}

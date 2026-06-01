@@ -2,14 +2,14 @@
 
 import { useEffect, useRef } from 'react';
 
-// ── Noise ───────────────────────────────────────────────────────
+// ── 2D value noise ──────────────────────────────────────────────
 
-function hash(n: number): number {
-  const s = Math.sin(n * 127.1 + 311.7) * 43758.5453123;
-  return s - Math.floor(s);
+function hash2D(x: number, y: number): number {
+  const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
+  return n - Math.floor(n);
 }
 
-function smooth(t: number): number {
+function smoothstep(t: number): number {
   return t * t * (3 - 2 * t);
 }
 
@@ -18,39 +18,43 @@ function noise2D(x: number, y: number): number {
   const iy = Math.floor(y);
   const fx = x - ix;
   const fy = y - iy;
-  const u = smooth(fx);
-  const v = smooth(fy);
-  return (
-    hash(ix + iy * 374761) * (1 - u) * (1 - v) +
-    hash(ix + 1 + iy * 374761) * u * (1 - v) +
-    hash(ix + (iy + 1) * 374761) * (1 - u) * v +
-    hash(ix + 1 + (iy + 1) * 374761) * u * v
-  );
+  const sx = smoothstep(fx);
+  const sy = smoothstep(fy);
+
+  const n00 = hash2D(ix, iy);
+  const n10 = hash2D(ix + 1, iy);
+  const n01 = hash2D(ix, iy + 1);
+  const n11 = hash2D(ix + 1, iy + 1);
+
+  return n00 * (1 - sx) * (1 - sy)
+    + n10 * sx * (1 - sy)
+    + n01 * (1 - sx) * sy
+    + n11 * sx * sy;
 }
 
-function fbm(x: number, y: number, octaves: number): number {
-  let v = 0;
-  let a = 0.5;
-  let f = 1;
+function fbm2D(x: number, y: number, octaves: number): number {
+  let val = 0;
+  let amp = 0.5;
+  let freq = 1;
   for (let i = 0; i < octaves; i++) {
-    v += a * (noise2D(x * f, y * f) * 2 - 1);
-    a *= 0.5;
-    f *= 2;
+    val += amp * ((noise2D(x * freq, y * freq) - 0.5) * 2);
+    amp *= 0.5;
+    freq *= 2;
   }
-  return v;
+  return val;
 }
 
 // ── Ribbon config ───────────────────────────────────────────────
 
 interface Ribbon {
-  baseY: number;
   speed: number;
   offset: number;
   amplitude: number;
-  color: string;
-  glow: string;
+  baseY: number;
   thickness: number;
-  blur: number;
+  color: string;
+  shadowColor: string;
+  noiseScale: number;
 }
 
 export default function MistBackground() {
@@ -66,15 +70,38 @@ export default function MistBackground() {
     let width = 0;
     let height = 0;
 
-    // 7 laser ribbons: warm / cool alternating, fast & thin
+    // 6 aurora ribbons: thick, overlapping, warm / cool mix
     const ribbons: Ribbon[] = [
-      { baseY: 0.12, speed: 0.0009,  offset: 0,    amplitude: 0.42, color: 'rgba(20,160,200,0.28)',  glow: 'rgba(20,160,200,0.15)',  thickness: 3, blur: 50 },
-      { baseY: 0.24, speed: 0.0012,  offset: 1.2,  amplitude: 0.38, color: 'rgba(210,60,50,0.24)',   glow: 'rgba(210,60,50,0.12)',   thickness: 3, blur: 45 },
-      { baseY: 0.38, speed: 0.0007,  offset: 2.5,  amplitude: 0.45, color: 'rgba(230,190,35,0.22)',  glow: 'rgba(230,190,35,0.10)',  thickness: 3, blur: 40 },
-      { baseY: 0.52, speed: 0.0010,  offset: 3.8,  amplitude: 0.40, color: 'rgba(45,80,190,0.26)',   glow: 'rgba(45,80,190,0.13)',   thickness: 3, blur: 48 },
-      { baseY: 0.65, speed: 0.0008,  offset: 5.1,  amplitude: 0.44, color: 'rgba(200,80,60,0.23)',   glow: 'rgba(200,80,60,0.11)',   thickness: 3, blur: 42 },
-      { baseY: 0.78, speed: 0.0011,  offset: 6.4,  amplitude: 0.36, color: 'rgba(30,150,160,0.25)',  glow: 'rgba(30,150,160,0.12)',  thickness: 3, blur: 46 },
-      { baseY: 0.90, speed: 0.0006,  offset: 7.7,  amplitude: 0.48, color: 'rgba(210,150,30,0.22)',  glow: 'rgba(210,150,30,0.10)',  thickness: 3, blur: 40 },
+      {
+        speed: 0.00035, offset: 0,    amplitude: 0.48, baseY: 0.18,
+        thickness: 320, noiseScale: 2.2,
+        color: 'rgba(168,42,74,0.07)',    shadowColor: 'rgba(168,42,74,0.08)',
+      },
+      {
+        speed: 0.00050, offset: 1.5,  amplitude: 0.55, baseY: 0.32,
+        thickness: 360, noiseScale: 2.8,
+        color: 'rgba(20,140,180,0.06)',   shadowColor: 'rgba(20,140,180,0.07)',
+      },
+      {
+        speed: 0.00040, offset: 3.0,  amplitude: 0.52, baseY: 0.46,
+        thickness: 340, noiseScale: 2.5,
+        color: 'rgba(220,180,40,0.06)',   shadowColor: 'rgba(220,180,40,0.07)',
+      },
+      {
+        speed: 0.00055, offset: 4.5,  amplitude: 0.50, baseY: 0.58,
+        thickness: 380, noiseScale: 3.0,
+        color: 'rgba(45,80,170,0.06)',    shadowColor: 'rgba(45,80,170,0.07)',
+      },
+      {
+        speed: 0.00030, offset: 6.0,  amplitude: 0.45, baseY: 0.72,
+        thickness: 300, noiseScale: 2.0,
+        color: 'rgba(200,80,60,0.06)',    shadowColor: 'rgba(200,80,60,0.07)',
+      },
+      {
+        speed: 0.00045, offset: 7.5,  amplitude: 0.50, baseY: 0.86,
+        thickness: 340, noiseScale: 2.6,
+        color: 'rgba(30,150,160,0.06)',   shadowColor: 'rgba(30,150,160,0.07)',
+      },
     ];
 
     function resize() {
@@ -95,60 +122,65 @@ export default function MistBackground() {
 
     const startTime = Date.now();
     let raf = 0;
-    const numPoints = 50;
+    const numPoints = 36;
 
     function draw(time: number) {
       const elapsed = time - startTime;
       ctx!.clearRect(0, 0, width, height);
+      ctx!.fillStyle = '#0a0a0a';
+      ctx!.fillRect(0, 0, width, height);
 
       const segmentWidth = width / (numPoints - 1);
 
-      for (const r of ribbons) {
-        // Build ribbon path points with layered sine waves for rhythm
-        const points: { x: number; y: number }[] = [];
-        const t = elapsed * r.speed;
+      for (const ribbon of ribbons) {
+        const t = elapsed * ribbon.speed;
 
+        // Top edge
+        const topPoints: { x: number; y: number }[] = [];
         for (let i = 0; i < numPoints; i++) {
           const x = i * segmentWidth;
-          const phase = t + r.offset + i * 0.55;
-
-          // Primary wave + secondary harmonic = organic rhythm
-          const wave1 = Math.sin(phase) * r.amplitude;
-          const wave2 = Math.sin(phase * 1.7 + 1.3) * r.amplitude * 0.35;
-          const wave3 = Math.cos(phase * 0.6 + 2.1) * r.amplitude * 0.15;
-
-          const y = height * r.baseY + (wave1 + wave2 + wave3) * height * 0.5;
-          points.push({ x, y });
+          const nx = (i / numPoints) * ribbon.noiseScale;
+          const n = fbm2D(nx + ribbon.offset, t, 3);
+          const y = height * ribbon.baseY + n * height * ribbon.amplitude;
+          topPoints.push({ x, y });
         }
 
-        // Glow layer (wider, softer)
+        // Bottom edge
+        const bottomPoints: { x: number; y: number }[] = [];
+        for (let i = 0; i < numPoints; i++) {
+          const x = i * segmentWidth;
+          const nx = (i / numPoints) * ribbon.noiseScale;
+          const n = fbm2D(nx + ribbon.offset + 1.8, t, 3);
+          const y = height * ribbon.baseY + ribbon.thickness + n * height * ribbon.amplitude * 0.5;
+          bottomPoints.push({ x, y });
+        }
+
+        // Draw ribbon band
         ctx!.save();
-        ctx!.strokeStyle = r.glow;
-        ctx!.lineWidth = r.thickness * 4;
-        ctx!.lineCap = 'round';
-        ctx!.lineJoin = 'round';
-        ctx!.shadowColor = r.glow;
-        ctx!.shadowBlur = r.blur;
-        ctx!.beginPath();
-        ctx!.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length; i++) {
-          ctx!.lineTo(points[i].x, points[i].y);
-        }
-        ctx!.stroke();
-        ctx!.restore();
+        ctx!.shadowColor = ribbon.shadowColor;
+        ctx!.shadowBlur = 70;
+        ctx!.fillStyle = ribbon.color;
 
-        // Core layer (thin, bright)
-        ctx!.save();
-        ctx!.strokeStyle = r.color;
-        ctx!.lineWidth = r.thickness;
-        ctx!.lineCap = 'round';
-        ctx!.lineJoin = 'round';
         ctx!.beginPath();
-        ctx!.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length; i++) {
-          ctx!.lineTo(points[i].x, points[i].y);
+        ctx!.moveTo(topPoints[0].x, topPoints[0].y);
+        for (let i = 0; i < topPoints.length - 2; i++) {
+          const xc = (topPoints[i].x + topPoints[i + 1].x) / 2;
+          const yc = (topPoints[i].y + topPoints[i + 1].y) / 2;
+          ctx!.quadraticCurveTo(topPoints[i].x, topPoints[i].y, xc, yc);
         }
-        ctx!.stroke();
+        ctx!.quadraticCurveTo(
+          topPoints[topPoints.length - 2].x,
+          topPoints[topPoints.length - 2].y,
+          topPoints[topPoints.length - 1].x,
+          topPoints[topPoints.length - 1].y,
+        );
+        // Bottom edge reverse
+        ctx!.lineTo(bottomPoints[bottomPoints.length - 1].x, bottomPoints[bottomPoints.length - 1].y);
+        for (let i = bottomPoints.length - 2; i >= 0; i--) {
+          ctx!.lineTo(bottomPoints[i].x, bottomPoints[i].y);
+        }
+        ctx!.closePath();
+        ctx!.fill();
         ctx!.restore();
       }
 
@@ -166,7 +198,7 @@ export default function MistBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 z-0 pointer-events-none"
-      style={{ opacity: 1.0 }}
+      style={{ opacity: 0.75 }}
       aria-hidden="true"
     />
   );

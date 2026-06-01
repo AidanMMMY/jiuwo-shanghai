@@ -30,13 +30,16 @@ export default function ScrollReveal({
   delay = 0,
   className = '',
   effect = 'fade-up',
+  threshold,
 }: {
   children: React.ReactNode;
   delay?: number;
   className?: string;
-  effect?: 'fade-up' | 'fade-in' | 'scale-in';
+  effect?: 'fade-up' | 'fade-in' | 'scale-in' | 'title' | 'text' | 'image' | 'card' | 'data';
+  threshold?: number;
 }) {
-  const { ref, visible } = useScrollReveal();
+  const defaultThreshold = effect === 'title' || effect === 'image' ? 0.15 : 0.05;
+  const { ref, visible } = useScrollReveal(threshold ?? defaultThreshold);
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -49,8 +52,20 @@ export default function ScrollReveal({
 
   const isVisible = visible || reducedMotion;
 
+  // Map effect names to CSS utility classes
+  const effectClassMap: Record<string, string> = {
+    title: 'reveal-title',
+    text: 'reveal-text',
+    image: 'reveal-image',
+    card: 'reveal-card',
+    data: 'reveal-data',
+  };
+
+  const isLegacy = ['fade-up', 'fade-in', 'scale-in'].includes(effect);
+  const newEffectClass = effectClassMap[effect] || '';
+
   const getTransform = () => {
-    if (reducedMotion) return 'none';
+    if (reducedMotion || !isLegacy) return 'none';
     switch (effect) {
       case 'fade-up':
         return isVisible ? 'translateY(0)' : 'translateY(24px)';
@@ -64,10 +79,10 @@ export default function ScrollReveal({
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ease-out ${className}`}
+      className={`${isLegacy ? 'transition-all duration-700 ease-out' : ''} ${newEffectClass} ${isVisible && !isLegacy ? 'reveal-visible' : ''} ${className}`}
       style={{
-        opacity: isVisible ? 1 : 0,
-        transform: getTransform(),
+        opacity: isLegacy ? (isVisible ? 1 : 0) : undefined,
+        transform: isLegacy ? getTransform() : undefined,
         transitionDelay: reducedMotion ? '0ms' : `${delay}ms`,
       }}
     >

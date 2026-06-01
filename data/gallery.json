@@ -3,8 +3,8 @@
     "id": "our-friend-zack",
     "title": "Our Friend Zack",
     "titleZh": "Zack",
-    "subtitle": "The last one standing.",
-    "subtitleZh": "总能喝到最后一个。",
+    "subtitle": "Falls in love with every sunset.",
+    "subtitleZh": "会为每一杯酒、每一个人心动。",
     "cover": "/images/gallery/our-friend-zack/Zack-20260520-01.webp",
     "category": "Our Friends",
     "categoryZh": "我们的朋友",
@@ -21,6 +21,23 @@
       {"src": "/images/gallery/our-friend-zack/Zack-20260222-01.webp", "alt": "Zack 05", "altZh": "Zack 05"},
       {"src": "/images/gallery/our-friend-zack/Zack-20260222-02.webp", "alt": "Zack 06", "altZh": "Zack 06"},
       {"src": "/images/gallery/our-friend-zack/Zack-20260221-01.webp", "alt": "Zack 07", "altZh": "Zack 07"}
+    ]
+  },
+  {
+    "id": "our-friend-df",
+    "title": "Our Friend D.F",
+    "titleZh": "豆腐",
+    "subtitle": "Brings the vibe wherever he goes.",
+    "subtitleZh": "有他在，气氛永远在线。",
+    "cover": "/images/gallery/our-friend-df/20260524-05.webp",
+    "category": "Our Friends",
+    "categoryZh": "我们的朋友",
+    "photos": [
+      {"src": "/images/gallery/our-friend-df/20260524-05.webp", "alt": "D.F 01", "altZh": "D.F 01"},
+      {"src": "/images/gallery/our-friend-df/20260524-04.webp", "alt": "D.F 02", "altZh": "D.F 02"},
+      {"src": "/images/gallery/our-friend-df/20260524-03.webp", "alt": "D.F 03", "altZh": "D.F 03"},
+      {"src": "/images/gallery/our-friend-df/20260524-02.webp", "alt": "D.F 04", "altZh": "D.F 04"},
+      {"src": "/images/gallery/our-friend-df/20260524-01.webp", "alt": "D.F 05", "altZh": "D.F 05"}
     ]
   },
   {
@@ -68,23 +85,6 @@
       {"src": "/images/gallery/our-friend-pp/PP-20260529-03.webp", "alt": "PP 03", "altZh": "PP 03"},
       {"src": "/images/gallery/our-friend-pp/PP-20260529-02.webp", "alt": "PP 04", "altZh": "PP 04"},
       {"src": "/images/gallery/our-friend-pp/PP-20260529-01.webp", "alt": "PP 05", "altZh": "PP 05"}
-    ]
-  },
-  {
-    "id": "our-friend-df",
-    "title": "Our Friend D.F",
-    "titleZh": "豆腐",
-    "subtitle": "Small in size, big in spirit.",
-    "subtitleZh": "小小个子，大大能量。",
-    "cover": "/images/gallery/our-friend-df/20260524-05.webp",
-    "category": "Our Friends",
-    "categoryZh": "我们的朋友",
-    "photos": [
-      {"src": "/images/gallery/our-friend-df/20260524-05.webp", "alt": "D.F 01", "altZh": "D.F 01"},
-      {"src": "/images/gallery/our-friend-df/20260524-04.webp", "alt": "D.F 02", "altZh": "D.F 02"},
-      {"src": "/images/gallery/our-friend-df/20260524-03.webp", "alt": "D.F 03", "altZh": "D.F 03"},
-      {"src": "/images/gallery/our-friend-df/20260524-02.webp", "alt": "D.F 04", "altZh": "D.F 04"},
-      {"src": "/images/gallery/our-friend-df/20260524-01.webp", "alt": "D.F 05", "altZh": "D.F 05"}
     ]
   },
   {

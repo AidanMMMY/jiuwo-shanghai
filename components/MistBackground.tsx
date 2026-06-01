@@ -72,7 +72,7 @@ function palette(t: number): [number, number, number] {
 
 // ── Component ──────────────────────────────────────────────────
 
-const FOG_SCALE = 28; // low-res factor: 1/28th screen size
+const FOG_SCALE = 18; // low-res factor: finer texture
 
 export default function MistBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -145,9 +145,9 @@ export default function MistBackground() {
             const hueT = (hueNoise + 1) * 0.5;
             const [cr, cg, cb] = palette(hueT);
 
-            // Brightness: very subtle, keeps it "barely there"
-            const brightness = 0.35 + brightNoise * 0.25; // 0.1–0.6
-            const alpha = 0.045 + brightNoise * 0.025; // very low opacity
+            // Brighter so texture and palette are visible
+            const brightness = 0.65 + brightNoise * 0.30;
+            const alpha = 0.10 + brightNoise * 0.06;
 
             const idx = (py * fogW + px) * 4;
             d[idx] = cr * brightness;

@@ -120,11 +120,17 @@ export default function HeroCarousel({
         className="z-10 px-6"
         style={{ position: 'absolute', left: 0, right: 0, bottom: '4rem' }}
       >
-        <div className="hero-intro-fade-up flex items-center justify-center gap-6">
-          <TeaIcon />
-          <WineIcon />
-          <ShakerIcon />
-          <span className="text-[#f5f5f0] text-lg tracking-widest">···</span>
+        <div className="hero-intro-fade-up flex items-center justify-center gap-5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 backdrop-blur-md border border-white/15">
+            <TeaIcon />
+          </div>
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 backdrop-blur-md border border-white/15">
+            <WineIcon />
+          </div>
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 backdrop-blur-md border border-white/15">
+            <ShakerIcon />
+          </div>
+          <span className="text-[#f5f5f0]/60 text-lg tracking-widest ml-1">···</span>
         </div>
       </div>
 
@@ -196,13 +202,13 @@ export default function HeroCarousel({
         .hero-title-shine {
           display: inline-block;
           background-image: linear-gradient(105deg,
-            #8B1A4F 0%,
-            #C45A1A 17%,
-            #C9A227 34%,
-            #5A6B3A 51%,
-            #1E4A6E 68%,
-            #6B3A7A 85%,
-            #8B1A4F 100%);
+            #A82A4A 0%,
+            #D48878 17%,
+            #D4A838 34%,
+            #E8C860 51%,
+            #D87848 68%,
+            #C06068 85%,
+            #A82A4A 100%);
           background-size: 400% 100%;
           background-position: 0% 50%;
           background-clip: text;

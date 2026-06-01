@@ -1,8 +1,10 @@
 import HeroCarousel from '@/components/HeroCarousel';
 import JournalStream from '@/components/JournalStream';
 import GuestbookHook from '@/components/GuestbookHook';
+import WeatherVibe from '@/components/WeatherVibe';
 import type { HeroSlide, JournalEntry, SiteData } from '@/lib/data';
 import type { GuestbookEntry, GuestbookHookLabels } from '@/lib/guestbook';
+import type { WeatherData, WeatherRecommendation } from '@/lib/weather';
 
 export default function HomePage({
   site,
@@ -13,6 +15,9 @@ export default function HomePage({
   guestbookTotal,
   guestbookLabels,
   guestbookHref,
+  weather,
+  weatherRec,
+  isZh,
 }: {
   site: SiteData;
   slides: HeroSlide[];
@@ -22,10 +27,14 @@ export default function HomePage({
   guestbookTotal: number;
   guestbookLabels: GuestbookHookLabels;
   guestbookHref: string;
+  weather?: WeatherData | null;
+  weatherRec?: WeatherRecommendation | null;
+  isZh?: boolean;
 }) {
   return (
     <>
       <HeroCarousel slides={slides} title={site.name} tagline={site.tagline} intro={site.intro} />
+      <WeatherVibe weather={weather ?? null} recommendation={weatherRec ?? null} isZh={isZh} />
       <JournalStream entries={entries} title={journalTitle} />
       <GuestbookHook
         entries={guestbookEntries}

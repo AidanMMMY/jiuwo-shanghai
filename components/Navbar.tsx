@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import type { NavItem } from '@/lib/data';
 
 export default function Navbar({
@@ -14,6 +14,9 @@ export default function Navbar({
   nav: NavItem[];
 }) {
   const [scrolled, setScrolled] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
+  const [logoPulse, setLogoPulse] = useState(false);
+  const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
   const isZh = pathname.startsWith('/zh');
 
@@ -23,6 +26,63 @@ export default function Navbar({
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const toggleDarkroom = useCallback(() => {
+    const isDarkroom = document.body.classList.toggle('darkroom');
+    localStorage.setItem('jiuwo-darkroom', isDarkroom ? 'true' : 'false');
+
+    // Flash effect
+    const flash = document.createElement('div');
+    flash.className = 'darkroom-flash';
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 400);
+
+    // Intro text (only when entering darkroom)
+    if (isDarkroom) {
+      const intro = document.createElement('div');
+      intro.className = 'darkroom-intro';
+      intro.innerHTML = `<p>The lights are off. The chairs are up.<br>This is JIUWO after 2am.</p>`;
+      document.body.appendChild(intro);
+      setTimeout(() => intro.remove(), 4200);
+    }
+  }, []);
+
+  const handleLogoClick = useCallback(() => {
+    setLogoPulse(true);
+    setTimeout(() => setLogoPulse(false), 100);
+
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+    }
+
+    if (newCount >= 5) {
+      setClickCount(0);
+      toggleDarkroom();
+    } else {
+      clickTimerRef.current = setTimeout(() => {
+        setClickCount(0);
+      }, 1000);
+    }
+  }, [clickCount, toggleDarkroom]);
+
+  useEffect(() => {
+    // Restore darkroom state on mount
+    const saved = localStorage.getItem('jiuwo-darkroom');
+    if (saved === 'true') {
+      document.body.classList.add('darkroom');
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (clickTimerRef.current) {
+        clearTimeout(clickTimerRef.current);
+      }
+    };
   }, []);
 
   const otherHref = isZh
@@ -45,9 +105,21 @@ export default function Navbar({
         <Link
           href={isZh ? '/zh' : '/'}
           className="flex items-center gap-2.5 text-lg font-medium tracking-wide text-[#f5f5f0] hover:text-[#c9a227] transition-colors duration-300 shrink-0 group"
+          onClick={(e) => {
+            // Only trigger counter on homepage
+            if (pathname === '/' || pathname === '/zh') {
+              e.preventDefault();
+              handleLogoClick();
+            }
+          }}
         >
           <div className="relative w-8 h-8">
-            <Image src="/images/logo.png" alt="logo" fill className="object-contain transition-transform duration-300 group-hover:scale-110" />
+            <Image
+              src="/images/logo.png"
+              alt="logo"
+              fill
+              className={`object-contain transition-transform duration-100 ${logoPulse ? 'scale-110' : 'scale-100'}`}
+            />
           </div>
           <span className="hidden sm:inline">{name}</span>
         </Link>

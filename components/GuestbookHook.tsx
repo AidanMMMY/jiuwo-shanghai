@@ -78,6 +78,20 @@ export default function GuestbookHook({
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
             </Link>
           </div>
+
+          {/* After Hours hidden entry */}
+          <div className="darkroom-hidden text-center pb-6 hidden"
+            data-zh="给夜班留句话"
+            data-en="Leave a message for the night shift"
+          >
+            <Link
+              href={`${href}?write=1`}
+              className="inline-flex items-center gap-2 text-xs tracking-wider text-[#666] hover:text-[#a0a0a0] transition-colors duration-300"
+            >
+              <span>Leave a message for the night shift</span>
+              <span>→</span>
+            </Link>
+          </div>
         </div>
       </div>
     </section>

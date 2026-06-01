@@ -426,3 +426,129 @@ a:not([class*="no-link-style"]) {
         }
     }
 }
+
+/* ── After Hours Darkroom Mode ── */
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+/* Flash overlay for transition */
+.darkroom-flash {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: white;
+    pointer-events: none;
+    animation: darkroomFlash 0.3s ease-out forwards;
+}
+
+@keyframes darkroomFlash {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Darkroom intro text */
+.darkroom-intro {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #030303;
+    pointer-events: none;
+    animation: darkroomIntroFade 4s ease-in-out forwards;
+}
+
+.darkroom-intro p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.875rem;
+    color: #a0a0a0;
+    letter-spacing: 0.1em;
+    text-align: center;
+    padding: 0 2rem;
+}
+
+@keyframes darkroomIntroFade {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+}
+
+/* Darkroom theme overrides */
+body.darkroom {
+    background-color: #030303;
+    color: #e8e8d0;
+}
+
+body.darkroom .ambient-light::before,
+body.darkroom .ambient-light::after,
+body.darkroom .ambient-light-blob {
+    opacity: 0;
+}
+
+body.darkroom img,
+body.darkroom [style*="background-image"] {
+    filter: grayscale(100%) contrast(1.3) !important;
+}
+
+body.darkroom h1,
+body.darkroom h2,
+body.darkroom h3,
+body.darkroom p,
+body.darkroom span,
+body.darkroom a,
+body.darkroom div {
+    font-family: 'Space Mono', monospace;
+}
+
+body.darkroom [class*="text-[#c9a227]"],
+body.darkroom [class*="text-[#c9a227]"] {
+    color: #a0a0a0 !important;
+}
+
+body.darkroom [class*="bg-[#c9a227]"] {
+    background-color: #a0a0a0 !important;
+}
+
+body.darkroom [class*="border-[#c9a227]"] {
+    border-color: #a0a0a0 !important;
+}
+
+body.darkroom .shadow-card {
+    box-shadow: 0 1px 2px rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.5);
+}
+
+body.darkroom .shadow-card-hover:hover {
+    box-shadow: 0 2px 4px rgba(255,255,255,0.1), 0 8px 24px rgba(0,0,0,0.6);
+}
+
+/* Hide decorative gold gradients in darkroom */
+body.darkroom [class*="via-[#c9a227]"] {
+    --tw-gradient-to: transparent;
+    --tw-gradient-stops: var(--tw-gradient-from), #a0a0a0, var(--tw-gradient-to);
+}
+
+/* Show hidden elements in darkroom */
+body.darkroom .darkroom-hidden {
+    display: block !important;
+}
+
+/* Scrollbar in darkroom */
+body.darkroom::-webkit-scrollbar {
+    width: 2px;
+}
+body.darkroom::-webkit-scrollbar-track {
+    background: #030303;
+}
+body.darkroom::-webkit-scrollbar-thumb {
+    background: #555;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .darkroom-flash,
+    .darkroom-intro {
+        animation: none;
+        opacity: 0;
+        visibility: hidden;
+    }
+}

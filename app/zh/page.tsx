@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import HomePage from '@/app/components/pages/HomePage';
 import { getHeroSlides, getJournalEntriesZh, getSiteDataZh } from '@/lib/data';
+import { getShanghaiWeather, getWeatherRecommendation } from '@/lib/weather';
 import { listEntries, countEntries } from '@/lib/guestbook';
 import type { GuestbookHookLabels } from '@/lib/guestbook';
 
@@ -22,13 +23,16 @@ const guestbookLabels: GuestbookHookLabels = {
 };
 
 export default async function Page() {
-  const [site, slides, entries, guestbookEntries, guestbookTotal] = await Promise.all([
+  const [site, slides, entries, guestbookEntries, guestbookTotal, weather] = await Promise.all([
     getSiteDataZh(),
     getHeroSlides(),
     getJournalEntriesZh(),
     listEntries(10),
     countEntries(),
+    getShanghaiWeather(),
   ]);
+
+  const weatherRec = weather ? getWeatherRecommendation(weather.code, true) : null;
 
   return (
     <HomePage
@@ -40,6 +44,8 @@ export default async function Page() {
       guestbookTotal={guestbookTotal}
       guestbookLabels={guestbookLabels}
       guestbookHref="/zh/guestbook"
+      weather={weather}
+      weatherRec={weatherRec}
     />
   );
 }

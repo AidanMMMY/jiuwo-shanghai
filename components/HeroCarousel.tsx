@@ -59,6 +59,45 @@ function LoveIcon() {
   );
 }
 
+/* ── After Hours Icons ── */
+function LockIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="6" y="11" width="16" height="13" rx="2" />
+      <path d="M9 11V7a5 5 0 0110 0v4" />
+    </svg>
+  );
+}
+
+function ChairIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 22h12" />
+      <path d="M10 22V12a4 4 0 018 0v10" />
+      <path d="M10 12h8" />
+    </svg>
+  );
+}
+
+function EmptyGlassIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 7v8c0 1.7 1.3 3 3 3s3-1.3 3-3V7" />
+      <path d="M14 18v4" />
+      <path d="M10 22h8" />
+      <path d="M12 11h4" opacity="0.3" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.5A9 9 0 1111.5 6a7 7 0 0010.5 10.5z" />
+    </svg>
+  );
+}
+
 export default function HeroCarousel({
   slides,
   title,
@@ -102,8 +141,11 @@ export default function HeroCarousel({
         className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
         style={{ paddingBottom: '8rem' }}
       >
-        <div className="hero-title-breathe">
+        <div className="hero-title-breathe hero-normal-title">
           <AnimatedTitle text={title} />
+        </div>
+        <div className="hero-title-breathe hero-darkroom-title hidden">
+          <AnimatedTitle text="JIUWO — After Hours" />
         </div>
         <p
           className="mt-5 text-xl md:text-2xl lg:text-3xl tracking-wide text-[#f5f5f0]"
@@ -129,7 +171,7 @@ export default function HeroCarousel({
         className="z-10 px-6"
         style={{ position: 'absolute', left: 0, right: 0, bottom: '4rem' }}
       >
-        <div className="hero-intro-fade-up flex items-center justify-center gap-5">
+        <div className="hero-intro-fade-up flex items-center justify-center gap-5 hero-normal-icons">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#D4A838]/15 to-white/5 backdrop-blur-md border border-white/15">
             <TeaIcon />
           </div>
@@ -141,6 +183,20 @@ export default function HeroCarousel({
           </div>
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#D48878]/15 to-white/5 backdrop-blur-md border border-white/15">
             <LoveIcon />
+          </div>
+        </div>
+        <div className="hero-intro-fade-up flex items-center justify-center gap-5 hero-darkroom-icons hidden">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#666]/15 to-white/5 backdrop-blur-md border border-white/15">
+            <LockIcon />
+          </div>
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#666]/15 to-white/5 backdrop-blur-md border border-white/15">
+            <ChairIcon />
+          </div>
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#666]/15 to-white/5 backdrop-blur-md border border-white/15">
+            <EmptyGlassIcon />
+          </div>
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#666]/15 to-white/5 backdrop-blur-md border border-white/15">
+            <MoonIcon />
           </div>
         </div>
       </div>
@@ -242,6 +298,12 @@ export default function HeroCarousel({
           .hero-intro-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
           .scroll-hint { animation: none !important; }
         }
+
+        /* ── After Hours Darkroom Overrides ── */
+        body.darkroom .hero-normal-title,
+        body.darkroom .hero-normal-icons { display: none !important; }
+        body.darkroom .hero-darkroom-title,
+        body.darkroom .hero-darkroom-icons { display: flex !important; }
       `}</style>
     </section>
   );

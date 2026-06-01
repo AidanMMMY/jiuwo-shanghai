@@ -62,28 +62,28 @@ export function getWeatherRecommendation(
     { en: WeatherRecommendation; zh: WeatherRecommendation }
   > = {
     clear: {
-      en: { weather, drink: 'Gin & Tonic / White Wine', vibe: 'Terrace seats, catching the last light of the day' },
-      zh: { weather, drink: '金汤力 / 白葡萄酒', vibe: '露台座位，赶最后一缕天光' },
+      en: { weather, drink: 'Gin & Tonic / White Wine', vibe: 'Outdoor seats on the street, watching the city walk by' },
+      zh: { weather, drink: '金汤力 / 白葡萄酒', vibe: '沿街外摆，看路人走过' },
     },
     cloudy: {
-      en: { weather, drink: 'Peated Whisky', vibe: 'The leftmost bar stool, watching the bartender work' },
-      zh: { weather, drink: '泥煤威士忌', vibe: '吧台最左边的位子，看调酒师工作' },
+      en: { weather, drink: 'Peated Whisky', vibe: 'The bar counter, close enough to hear the shaker' },
+      zh: { weather, drink: '泥煤威士忌', vibe: '吧台，近到能听见摇酒壶的声音' },
     },
     fog: {
-      en: { weather, drink: 'Hot Tea / Low-ABV', vibe: 'The corner single sofa, hidden from sight' },
-      zh: { weather, drink: '热茶 / 低度酒', vibe: '角落里的单人沙发，躲起来' },
+      en: { weather, drink: 'Hot Tea / Low-ABV', vibe: 'The wall-facing seat, your own little corner' },
+      zh: { weather, drink: '热茶 / 低度酒', vibe: '靠墙的位置，自己的小角落' },
     },
     rain: {
-      en: { weather, drink: 'Hot Toddy / Rock Oolong', vibe: 'The high table by the window, listening to the rain' },
-      zh: { weather, drink: '热托蒂 / 岩茶', vibe: '靠窗的高脚台，听雨' },
+      en: { weather, drink: 'Hot Toddy / Rock Oolong', vibe: 'The window seat, rain tapping the glass' },
+      zh: { weather, drink: '热托蒂 / 岩茶', vibe: '靠窗口，雨敲在玻璃上' },
     },
     storm: {
-      en: { weather, drink: 'Short Drink (shoot it)', vibe: 'Center of the bar, closest to the door' },
-      zh: { weather, drink: '短饮鸡尾酒（一口干）', vibe: '吧台正中央，离门口最近' },
+      en: { weather, drink: 'Short Drink (shoot it)', vibe: 'The deepest seat inside, away from the storm' },
+      zh: { weather, drink: '短饮鸡尾酒（一口干）', vibe: '室内最深处，躲开雷声' },
     },
     snow: {
-      en: { weather, drink: 'Mulled Wine', vibe: 'The deepest corner, back against the wall' },
-      zh: { weather, drink: '热红酒', vibe: '室内最深处，背靠墙' },
+      en: { weather, drink: 'Mulled Wine', vibe: 'The deepest seat inside, back to the wall' },
+      zh: { weather, drink: '热红酒', vibe: '室内最深处，背靠着墙' },
     },
   };
 

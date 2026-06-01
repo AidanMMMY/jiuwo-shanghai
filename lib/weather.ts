@@ -62,8 +62,8 @@ export function getWeatherRecommendation(
     { en: WeatherRecommendation; zh: WeatherRecommendation }
   > = {
     clear: {
-      en: { weather, drink: 'Gin & Tonic / White Wine', vibe: 'Terrace seats, golden hour before 7pm' },
-      zh: { weather, drink: '金汤力 / 白葡萄酒', vibe: '露台座位，下午7点前的 golden hour' },
+      en: { weather, drink: 'Gin & Tonic / White Wine', vibe: 'Terrace seats, catching the last light of the day' },
+      zh: { weather, drink: '金汤力 / 白葡萄酒', vibe: '露台座位，赶最后一缕天光' },
     },
     cloudy: {
       en: { weather, drink: 'Peated Whisky', vibe: 'The leftmost bar stool, watching the bartender work' },

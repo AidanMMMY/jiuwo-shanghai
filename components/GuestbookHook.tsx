@@ -17,9 +17,9 @@ export default function GuestbookHook({
     <section className="bg-[#0a0a0a] px-6 py-16 md:py-24">
       <div className="mx-auto max-w-5xl">
         {/* Card container with subtle depth */}
-        <div className="relative rounded-lg border border-[#1f1f1f] bg-[#0e0e0e] overflow-hidden">
+        <div className="relative rounded-lg border-gradient bg-[#0e0e0e] overflow-hidden shadow-card shadow-card-hover">
           {/* Top gold accent line */}
-          <div className="h-px bg-gradient-to-r from-transparent via-[#c9a227]/60 to-transparent" />
+          <div className="h-px bg-gradient-to-r from-transparent via-[#c9a227]/60 to-transparent divider-breathe" />
 
           <Link href={href} className="block">
             {/* Header */}
@@ -41,10 +41,11 @@ export default function GuestbookHook({
               <div className="px-6 md:px-10 pb-8">
                 <div className="rounded-md border border-[#1a1a1a] bg-[#0a0a0a]/60 p-6 md:p-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5">
-                    {entries.map((entry) => (
+                    {entries.map((entry, index) => (
                       <div
                         key={entry.id}
                         className="flex items-start gap-3 group"
+                        style={{ animationDelay: `${index * 80}ms` }}
                       >
                         <StampIcon
                           stamp={entry.stamp as StampId}

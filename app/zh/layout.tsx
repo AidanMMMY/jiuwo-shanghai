@@ -28,8 +28,12 @@ export default async function ZhLayout({
 
   return (
     <div className={`${inter.variable} font-sans antialiased`}>
+      {/* Ambient light layer */}
+      <div className="ambient-light" aria-hidden="true">
+        <div className="ambient-light-blob" />
+      </div>
       <Navbar name={site.name} nav={site.nav} />
-      <main className="pt-0 min-h-screen">{children}</main>
+      <main className="pt-0 min-h-screen relative z-10">{children}</main>
       <Footer site={site} />
       <BackToTop />
       <ReadingProgress />

@@ -27,13 +27,13 @@ export default async function ZhLayout({
   const site = await getSiteDataZh();
 
   return (
-    <div className={`${inter.variable} font-sans antialiased flex flex-col min-h-[100dvh]`}>
+    <div className={`${inter.variable} font-sans antialiased`}>
       {/* Ambient light layer */}
       <div className="ambient-light" aria-hidden="true">
         <div className="ambient-light-blob" />
       </div>
       <Navbar name={site.name} nav={site.nav} />
-      <main className="flex-1 relative z-10">{children}</main>
+      <main className="pt-0 min-h-screen relative z-10">{children}</main>
       <Footer site={site} />
       <BackToTop />
       <ReadingProgress />

@@ -1,5 +1,90 @@
 [
   {
+    "id": "our-friend-agnosia",
+    "title": "Our Friend AGNOSIA",
+    "titleZh": "勺子",
+    "subtitle": "Born this way.",
+    "subtitleZh": "生而如此。",
+    "cover": "/images/gallery/our-friend-agnosia/agnosia-20260602-14.webp",
+    "category": "Our Friends",
+    "categoryZh": "我们的朋友",
+    "friendSocial": {
+      "xiaohongshu": "https://xhslink.com/m/2sIJY8XmmGL"
+    },
+    "photos": [
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-14.webp",
+        "alt": "AGNOSIA 14",
+        "altZh": "AGNOSIA 14"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-13.webp",
+        "alt": "AGNOSIA 13",
+        "altZh": "AGNOSIA 13"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-12.webp",
+        "alt": "AGNOSIA 12",
+        "altZh": "AGNOSIA 12"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-11.webp",
+        "alt": "AGNOSIA 11",
+        "altZh": "AGNOSIA 11"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-10.webp",
+        "alt": "AGNOSIA 10",
+        "altZh": "AGNOSIA 10"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-09.webp",
+        "alt": "AGNOSIA 09",
+        "altZh": "AGNOSIA 09"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-08.webp",
+        "alt": "AGNOSIA 08",
+        "altZh": "AGNOSIA 08"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-07.webp",
+        "alt": "AGNOSIA 07",
+        "altZh": "AGNOSIA 07"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-06.webp",
+        "alt": "AGNOSIA 06",
+        "altZh": "AGNOSIA 06"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-05.webp",
+        "alt": "AGNOSIA 05",
+        "altZh": "AGNOSIA 05"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-04.webp",
+        "alt": "AGNOSIA 04",
+        "altZh": "AGNOSIA 04"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-03.webp",
+        "alt": "AGNOSIA 03",
+        "altZh": "AGNOSIA 03"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-02.webp",
+        "alt": "AGNOSIA 02",
+        "altZh": "AGNOSIA 02"
+      },
+      {
+        "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-01.webp",
+        "alt": "AGNOSIA 01",
+        "altZh": "AGNOSIA 01"
+      }
+    ]
+  },
+  {
     "id": "our-friend-dex",
     "title": "Our Friend Dex",
     "titleZh": "Dex",

@@ -17,6 +17,7 @@ const bodoni = Bodoni_Moda({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://jiuwoshanghai.net"),
+  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
   title: {
     template: "%s | JIUWO",
     default: "JIUWO — Shanghai Wine & Cocktail Bar",

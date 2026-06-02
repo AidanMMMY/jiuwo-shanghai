@@ -62,13 +62,17 @@ export default function MenuNav({ categories }: { categories: MenuCategory[] }) 
 
   return (
     <nav className="sticky top-16 z-40 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-[#222] py-4 mb-12">
+      {/* Hide scrollbar for the scroll container */}
+      <style>{`.menu-nav-hide-scroll::-webkit-scrollbar { display: none; }`}</style>
       <div className="mx-auto max-w-7xl px-6">
         <div
           ref={navRef}
-          className="relative flex gap-6 overflow-x-auto px-2"
+          className="menu-nav-hide-scroll relative flex gap-6 overflow-x-auto px-2"
           style={{
             WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
             maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
           }}
         >
           {/* Sliding indicator */}

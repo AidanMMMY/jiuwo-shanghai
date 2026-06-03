@@ -130,6 +130,9 @@ body::before {
 */
 
 /* ── Ambient Warm Light Layer ── */
+/* DISABLED: Safari iOS viewport bug — fixed overlay prevents content
+   from extending behind the bottom toolbar.
+   Re-enable once Safari fixes the compositing issue.
 .ambient-light {
   position: fixed;
   inset: 0;

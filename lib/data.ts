@@ -259,6 +259,17 @@ const siteDataSchema = z.object({
     weibo: z.string().optional(),
     xiaohongshu: z.string().optional(),
   }),
+  specialEvent: z.object({
+    enabled: z.boolean(),
+    label: z.string(),
+    labelZh: z.string(),
+    title: z.string(),
+    titleZh: z.string(),
+    date: z.string(),
+    dateZh: z.string(),
+    hero: z.string(),
+    heroEn: z.string(),
+  }).optional(),
 });
 
 const heroSlideSchema = z.object({

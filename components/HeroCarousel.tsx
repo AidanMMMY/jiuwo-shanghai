@@ -173,7 +173,7 @@ export default function HeroCarousel({
       {specialEvent && (
         <div
           className="z-10 flex justify-center pointer-events-none"
-          style={{ position: 'absolute', left: 0, right: 0, bottom: '7rem' }}
+          style={{ position: 'absolute', left: 0, right: 0, bottom: '10rem' }}
         >
           <Link
             href={specialEvent.href || '/special'}
@@ -183,10 +183,10 @@ export default function HeroCarousel({
               animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 1200ms forwards',
             }}
           >
-            {/* Rotating border glow */}
-            <div className="event-border-glow" aria-hidden="true" />
+            {/* Aurora background */}
+            <div className="event-aurora-bg" aria-hidden="true" />
             {/* Content */}
-            <div className="event-inner-pulse relative rounded-xl px-6 py-3.5 inline-flex flex-col items-center gap-2 transition-transform duration-300 group-hover:-translate-y-0.5">
+            <div className="relative rounded-xl bg-black/50 px-6 py-3.5 inline-flex flex-col items-center gap-2 transition-transform duration-300 group-hover:-translate-y-0.5">
               {/* Line 1: hero text with shimmer */}
               <span className="text-xs md:text-sm tracking-wider event-text-shimmer">
                 {specialEvent.hero}
@@ -222,7 +222,7 @@ export default function HeroCarousel({
         <p className="hero-intro-fade-up text-xs md:text-sm uppercase tracking-[0.3em] text-[#c9a227]/70"
           style={{ opacity: 0, animation: 'heroIntroFadeUp 1400ms cubic-bezier(0.16, 1, 0.3, 1) 1000ms both' }}
         >
-          BAR <span className="mx-1.5">•</span> SHANGHAI
+          BAR <span className="mx-1.5">•</span> JULU RD <span className="mx-1.5">•</span> SHANGHAI
         </p>
       </div>
 
@@ -290,32 +290,37 @@ export default function HeroCarousel({
           0%   { background-position: 200% 50%; }
           100% { background-position: -200% 50%; }
         }
-        @keyframes rotateBorderGlow {
-          0%   { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        @keyframes eventInnerPulse {
-          0%, 100% { background-color: rgba(0,0,0,0.55); }
-          50% { background-color: rgba(0,0,0,0.38); }
+        @keyframes auroraDrift {
+          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+          25%  { transform: translate(4%, -3%) rotate(1.5deg) scale(1.05); }
+          50%  { transform: translate(-2%, 4%) rotate(-1deg) scale(1.02); }
+          75%  { transform: translate(3%, 2%) rotate(0.5deg) scale(1.04); }
         }
         .event-entry-wrapper {
           position: relative;
           border-radius: 0.75rem;
           overflow: hidden;
         }
-        .event-border-glow {
+        .event-aurora-bg {
           position: absolute;
-          inset: -1px;
+          inset: 0;
           border-radius: inherit;
-          background: conic-gradient(from 0deg, transparent 0deg, rgba(201,162,39,0.55) 35deg, rgba(201,162,39,0.2) 70deg, transparent 100deg);
-          animation: rotateBorderGlow 3.5s linear infinite;
+          overflow: hidden;
           z-index: 0;
           pointer-events: none;
         }
-        .event-inner-pulse {
-          position: relative;
-          z-index: 1;
-          animation: eventInnerPulse 2.5s ease-in-out infinite;
+        .event-aurora-bg::before {
+          content: '';
+          position: absolute;
+          inset: -60%;
+          background:
+            radial-gradient(ellipse 50% 35% at 25% 45%, rgba(201,162,39,0.10) 0%, transparent 55%),
+            radial-gradient(ellipse 45% 30% at 75% 35%, rgba(212,120,72,0.07) 0%, transparent 55%),
+            radial-gradient(ellipse 55% 40% at 50% 75%, rgba(168,42,74,0.06) 0%, transparent 55%),
+            radial-gradient(ellipse 40% 25% at 65% 60%, rgba(212,168,56,0.05) 0%, transparent 55%);
+          background-size: 180% 180%;
+          animation: auroraDrift 12s ease-in-out infinite;
+          filter: blur(14px);
         }
         .event-text-shimmer {
           background-image: linear-gradient(105deg,
@@ -406,8 +411,7 @@ export default function HeroCarousel({
           .scroll-hint { animation: none !important; }
           .event-text-shimmer { animation: none !important; background-image: none !important; color: #c9a227 !important; -webkit-text-fill-color: #c9a227 !important; }
           .event-name-shimmer { animation: none !important; background-image: none !important; color: #c9a227 !important; -webkit-text-fill-color: #c9a227 !important; }
-          .event-border-glow { animation: none !important; background: rgba(201,162,39,0.15) !important; }
-          .event-inner-pulse { animation: none !important; background-color: rgba(0,0,0,0.55) !important; }
+          .event-aurora-bg::before { animation: none !important; transform: none !important; }
         }
 
         /* ── After Hours Darkroom Overrides ── */

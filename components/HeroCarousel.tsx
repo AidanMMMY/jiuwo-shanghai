@@ -173,7 +173,7 @@ export default function HeroCarousel({
       {specialEvent && (
         <div
           className="z-10 flex justify-center pointer-events-none"
-          style={{ position: 'absolute', left: 0, right: 0, bottom: '10rem' }}
+          style={{ position: 'absolute', left: 0, right: 0, bottom: '13rem' }}
         >
           <Link
             href={specialEvent.href || '/special'}

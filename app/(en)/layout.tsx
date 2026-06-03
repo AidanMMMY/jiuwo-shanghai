@@ -27,13 +27,13 @@ export default async function EnLayout({
   const site = await getSiteData();
 
   return (
-    <div className={`${inter.variable} font-sans antialiased`}>
+    <div className={`${inter.variable} font-sans antialiased flex flex-col min-h-[100dvh]`}>
       {/* Ambient light layer */}
       <div className="ambient-light" aria-hidden="true">
         <div className="ambient-light-blob" />
       </div>
       <Navbar name={site.name} nav={site.nav} />
-      <main className="pt-0 min-h-[100lvh] relative z-10">{children}</main>
+      <main className="flex-1 relative z-10">{children}</main>
       <Footer site={site} />
       <BackToTop />
       <ReadingProgress />

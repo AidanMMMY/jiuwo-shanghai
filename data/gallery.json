@@ -1,5 +1,72 @@
 [
   {
+    "id": "our-friend-morris",
+    "title": "Our Friend Morris",
+    "titleZh": "莫里斯",
+    "subtitle": "Sharp gaze, softer smile.",
+    "subtitleZh": "眼神锋利，笑却温柔。",
+    "cover": "/images/gallery/our-friend-morris/morris-20260602-11.webp",
+    "category": "Our Friends",
+    "categoryZh": "我们的朋友",
+    "photos": [
+      {
+        "src": "/images/gallery/our-friend-morris/morris-20260602-11.webp",
+        "alt": "Morris 11",
+        "altZh": "Morris 11"
+      },
+      {
+        "src": "/images/gallery/our-friend-morris/morris-20260602-10.webp",
+        "alt": "Morris 10",
+        "altZh": "Morris 10"
+      },
+      {
+        "src": "/images/gallery/our-friend-morris/morris-20260602-09.webp",
+        "alt": "Morris 09",
+        "altZh": "Morris 09"
+      },
+      {
+        "src": "/images/gallery/our-friend-morris/morris-20260602-08.webp",
+        "alt": "Morris 08",
+        "altZh": "Morris 08"
+      },
+      {
+        "src": "/images/gallery/our-friend-morris/morris-20260602-07.webp",
+        "alt": "Morris 07",
+        "altZh": "Morris 07"
+      },
+      {
+        "src": "/images/gallery/our-friend-morris/morris-20260602-06.webp",
+        "alt": "Morris 06",
+        "altZh": "Morris 06"
+      },
+      {
+        "src": "/images/gallery/our-friend-morris/morris-20260602-05.webp",
+        "alt": "Morris 05",
+        "altZh": "Morris 05"
+      },
+      {
+        "src": "/images/gallery/our-friend-morris/morris-20260602-04.webp",
+        "alt": "Morris 04",
+        "altZh": "Morris 04"
+      },
+      {
+        "src": "/images/gallery/our-friend-morris/morris-20260602-03.webp",
+        "alt": "Morris 03",
+        "altZh": "Morris 03"
+      },
+      {
+        "src": "/images/gallery/our-friend-morris/morris-20260602-02.webp",
+        "alt": "Morris 02",
+        "altZh": "Morris 02"
+      },
+      {
+        "src": "/images/gallery/our-friend-morris/morris-20260602-01.webp",
+        "alt": "Morris 01",
+        "altZh": "Morris 01"
+      }
+    ]
+  },
+  {
     "id": "our-friend-agnosia",
     "title": "Our Friend AGNOSIA",
     "titleZh": "勺子",

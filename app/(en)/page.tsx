@@ -28,7 +28,7 @@ export default async function Page() {
     getShanghaiWeather(),
   ]);
 
-  const weatherRec = weather ? getWeatherRecommendation(weather.code, false) : null;
+  const weatherRec = weather ? getWeatherRecommendation(weather.code, weather.temp, weather.humidity, false) : null;
 
   return (
     <HomePage

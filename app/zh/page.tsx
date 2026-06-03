@@ -32,7 +32,7 @@ export default async function Page() {
     getShanghaiWeather(),
   ]);
 
-  const weatherRec = weather ? getWeatherRecommendation(weather.code, true) : null;
+  const weatherRec = weather ? getWeatherRecommendation(weather.code, weather.temp, weather.humidity, true) : null;
 
   return (
     <HomePage

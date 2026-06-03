@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import type { HeroSlide } from '@/lib/data';
 
 function AnimatedTitle({ text }: { text: string }) {
@@ -109,7 +110,7 @@ export default function HeroCarousel({
   title: string;
   tagline: string;
   intro: string;
-  specialEvent?: { hero: string; hostName?: string };
+  specialEvent?: { hero: string; hostName?: string; href?: string };
 }) {
   const duration = slides.length * 3;
   const step = 100 / slides.length;
@@ -167,10 +168,15 @@ export default function HeroCarousel({
           {tagline}
         </p>
 
-        {/* Special Event Entry — dual-line B */}
+        {/* Special Event Entry — clickable */}
         {specialEvent && (
-          <span
-            className="mt-12 inline-flex flex-col items-center gap-2"
+          <Link
+            href={specialEvent.href || '/special'}
+            className="event-entry mt-10 inline-flex flex-col items-center gap-2 cursor-pointer group
+              px-6 py-3.5 rounded-xl
+              bg-white/[0.035] border border-[#c9a227]/10
+              transition-all duration-300
+              hover:bg-white/[0.07] hover:border-[#c9a227]/25 hover:-translate-y-0.5"
             style={{
               opacity: 0,
               animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 1200ms forwards',
@@ -180,20 +186,25 @@ export default function HeroCarousel({
             <span className="text-xs md:text-sm tracking-wider event-text-shimmer">
               {specialEvent.hero}
             </span>
-            {/* Line 2: host name with dual lines */}
+            {/* Line 2: host name with dual lines + arrow */}
             {specialEvent.hostName && (
               <span className="inline-flex items-center gap-3">
-                <span className="event-line" />
+                <span className="event-line group-hover:w-12 md:group-hover:w-20 transition-all duration-300" />
                 <span
-                  className="text-xl md:text-2xl tracking-[0.22em] event-name-shimmer"
+                  className="text-xl md:text-2xl tracking-[0.22em] event-name-shimmer group-hover:drop-shadow-[0_0_10px_rgba(201,162,39,0.45)] transition-all duration-300"
                   style={{ fontFamily: 'var(--font-bodoni), Georgia, serif' }}
                 >
                   {specialEvent.hostName}
                 </span>
-                <span className="event-line event-line-r" />
+                <span className="event-line event-line-r group-hover:w-12 md:group-hover:w-20 transition-all duration-300" />
               </span>
             )}
-          </span>
+            {/* Click hint — always visible, not hover-only */}
+            <span className="mt-1 inline-flex items-center gap-1.5 text-[10px] md:text-xs tracking-[0.2em] text-[#c9a227]/80 group-hover:text-[#c9a227] transition-colors duration-300">
+              <span className="event-arrow inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+              <span>VIEW DETAILS</span>
+            </span>
+          </Link>
         )}
       </div>
 
@@ -202,31 +213,31 @@ export default function HeroCarousel({
         className="z-10 px-6"
         style={{ position: 'absolute', left: 0, right: 0, bottom: '4rem' }}
       >
-        <div className="hero-intro-fade-up flex items-center justify-center gap-5 hero-normal-icons">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#D4A838]/15 to-white/5 backdrop-blur-md border border-white/15">
+        <div className="hero-intro-fade-up flex items-center justify-center gap-5 hero-normal-icons pointer-events-none select-none">
+          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
             <TeaIcon />
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#A82A4A]/15 to-white/5 backdrop-blur-md border border-white/15">
+          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
             <WineIcon />
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#D87848]/15 to-white/5 backdrop-blur-md border border-white/15">
+          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
             <ShakerIcon />
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#D48878]/15 to-white/5 backdrop-blur-md border border-white/15">
+          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
             <LoveIcon />
           </div>
         </div>
-        <div className="hero-intro-fade-up flex items-center justify-center gap-5 hero-darkroom-icons hidden">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#666]/15 to-white/5 backdrop-blur-md border border-white/15">
+        <div className="hero-intro-fade-up flex items-center justify-center gap-5 hero-darkroom-icons hidden pointer-events-none select-none">
+          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
             <LockIcon />
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#666]/15 to-white/5 backdrop-blur-md border border-white/15">
+          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
             <ChairIcon />
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#666]/15 to-white/5 backdrop-blur-md border border-white/15">
+          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
             <EmptyGlassIcon />
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-t from-[#666]/15 to-white/5 backdrop-blur-md border border-white/15">
+          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
             <MoonIcon />
           </div>
         </div>

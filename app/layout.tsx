@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Bodoni_Moda } from "next/font/google";
+import { Inter, Bodoni_Moda, Space_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -15,8 +15,14 @@ const bodoni = Bodoni_Moda({
   weight: ["400", "500", "700", "800"],
 });
 
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  variable: "--font-space-mono",
+  weight: ["400", "700"],
+});
+
 export const metadata: Metadata = {
-  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
+  viewport: "width=device-width, initial-scale=1",
   metadataBase: new URL("https://jiuwoshanghai.net"),
   title: {
     template: "%s | JIUWO",
@@ -84,7 +90,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${bodoni.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${bodoni.variable} ${spaceMono.variable} font-sans antialiased`}>
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){function apply(){var dark=window.matchMedia('(prefers-color-scheme: dark)').matches;var href=dark?'/images/logo-for-dark.png':'/images/logo-for-light.png';document.querySelectorAll('link[rel="icon"]').forEach(function(el){el.parentNode.removeChild(el);});var link=document.createElement('link');link.rel='icon';link.href=href;document.head.appendChild(link);}apply();var mq=window.matchMedia('(prefers-color-scheme: dark)');mq.addEventListener?mq.addEventListener('change',apply):mq.addListener(apply);})();`,

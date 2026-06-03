@@ -110,7 +110,7 @@ export default function HeroCarousel({
   title: string;
   tagline: string;
   intro: string;
-  specialEvent?: { hero: string };
+  specialEvent?: { label: string; title: string; hero: string };
   specialEventHref?: string;
 }) {
   const duration = slides.length * 3;
@@ -169,19 +169,35 @@ export default function HeroCarousel({
           {tagline}
         </p>
 
-        {/* Special Event Entry */}
+        {/* Special Event Entry — Floating Seal */}
         {specialEvent && specialEventHref && (
           <a
             href={specialEventHref}
-            className="mt-6 inline-flex items-center gap-3 text-xs md:text-sm tracking-wider text-[#a0a0a0] hover:text-[#c9a227] transition-all duration-500 group"
+            className="mt-7 inline-flex items-center gap-3 group"
             style={{
               opacity: 0,
-              animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 1200ms forwards',
+              animation: 'sealEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 1200ms forwards',
             }}
           >
-            <span className="block w-6 md:w-10 h-px bg-gradient-to-r from-transparent to-[#c9a227]/40 group-hover:to-[#c9a227]/70 transition-all duration-500" />
-            <span>{specialEvent.hero}</span>
-            <span className="block w-6 md:w-10 h-px bg-gradient-to-l from-transparent to-[#c9a227]/40 group-hover:to-[#c9a227]/70 transition-all duration-500" />
+            {/* Seal circle */}
+            <span
+              className="relative flex h-9 w-9 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-full border border-[#c9a227]/45 bg-[#c9a227]/[0.06] backdrop-blur-sm group-hover:border-[#c9a227]/75 group-hover:bg-[#c9a227]/[0.10] transition-all duration-700 seal-glow"
+            >
+              <span
+                className="text-[#c9a227] text-base md:text-lg leading-none seal-star"
+              >
+                ✦
+              </span>
+            </span>
+            {/* Label + Title */}
+            <span className="flex flex-col items-start leading-tight">
+              <span className="text-[11px] md:text-xs tracking-[0.18em] uppercase text-[#c9a227]/70 group-hover:text-[#c9a227]/90 transition-colors duration-500">
+                {specialEvent.label}
+              </span>
+              <span className="text-xs md:text-sm tracking-wider text-[#a0a0a0] group-hover:text-[#c9a227] transition-colors duration-500">
+                {specialEvent.title}
+              </span>
+            </span>
           </a>
         )}
       </div>
@@ -281,6 +297,18 @@ export default function HeroCarousel({
           0%   { background-position: 0% 50%; }
           100% { background-position: 400% 50%; }
         }
+        @keyframes sealEntrance {
+          0%   { opacity: 0; transform: translateY(10px) scale(0.92); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes sealGlow {
+          0%, 100% { box-shadow: 0 0 10px rgba(201,162,39,0.08), 0 0 1px rgba(201,162,39,0.14); }
+          50%      { box-shadow: 0 0 20px rgba(201,162,39,0.18), 0 0 3px rgba(201,162,39,0.25); }
+        }
+        @keyframes sealStar {
+          0%, 100% { opacity: 0.7; transform: scale(1); }
+          50%      { opacity: 1; transform: scale(1.12); }
+        }
 
         .hero-title-breathe {
           animation: titleBreathe 5s ease-in-out infinite;
@@ -312,11 +340,21 @@ export default function HeroCarousel({
         .scroll-hint {
           animation: scrollHintBounce 1.8s ease-in-out infinite;
         }
+        .seal-glow {
+          box-shadow: 0 0 14px rgba(201,162,39,0.12), 0 0 2px rgba(201,162,39,0.18);
+          animation: sealGlow 3.2s ease-in-out infinite;
+        }
+        .seal-star {
+          animation: sealStar 3.2s ease-in-out infinite;
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .hero-title-breathe { animation: none !important; }
           .hero-title-shine { animation: none !important; background-position: 0% 50%; opacity: 1; transform: none; }
           .hero-intro-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
           .scroll-hint { animation: none !important; }
+          .seal-glow { animation: none !important; }
+          .seal-star { animation: none !important; opacity: 1 !important; transform: none !important; }
         }
 
         /* ── After Hours Darkroom Overrides ── */

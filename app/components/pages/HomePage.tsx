@@ -33,7 +33,14 @@ export default function HomePage({
 }) {
   return (
     <>
-      <HeroCarousel slides={slides} title={site.name} tagline={site.tagline} intro={site.intro} />
+      <HeroCarousel
+        slides={slides}
+        title={site.name}
+        tagline={site.tagline}
+        intro={site.intro}
+        specialEvent={site.specialEvent?.enabled ? site.specialEvent : undefined}
+        specialEventHref={site.specialEvent?.enabled ? (isZh ? '/zh/special' : '/special') : undefined}
+      />
       <WeatherVibe weather={weather ?? null} recommendation={weatherRec ?? null} isZh={isZh} />
       <JournalStream entries={entries} title={journalTitle} />
       <GuestbookHook

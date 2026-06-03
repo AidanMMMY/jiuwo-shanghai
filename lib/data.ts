@@ -19,6 +19,17 @@ export type SiteData = {
     weibo?: string;
     xiaohongshu?: string;
   };
+  specialEvent?: {
+    enabled: boolean;
+    label: string;
+    labelZh: string;
+    title: string;
+    titleZh: string;
+    date: string;
+    dateZh: string;
+    hero: string;
+    heroEn: string;
+  };
 };
 
 export type HeroSlide = {
@@ -95,7 +106,23 @@ export type AboutData = {
 };
 
 function localizeSite(site: SiteData): SiteData {
-  return { ...site, name: site.nameZh, tagline: site.taglineZh, intro: site.introZh, nav: site.nav.map((n) => ({ ...n, label: n.labelZh })) };
+  const zh: SiteData = {
+    ...site,
+    name: site.nameZh,
+    tagline: site.taglineZh,
+    intro: site.introZh,
+    nav: site.nav.map((n) => ({ ...n, label: n.labelZh })),
+  };
+  if (site.specialEvent) {
+    zh.specialEvent = {
+      ...site.specialEvent,
+      label: site.specialEvent.labelZh,
+      title: site.specialEvent.titleZh,
+      date: site.specialEvent.dateZh,
+      hero: site.specialEvent.hero,
+    };
+  }
+  return zh;
 }
 
 function localizeHero(slides: HeroSlide[]): HeroSlide[] {

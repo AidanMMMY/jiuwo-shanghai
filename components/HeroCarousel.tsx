@@ -103,11 +103,15 @@ export default function HeroCarousel({
   title,
   tagline,
   intro,
+  specialEvent,
+  specialEventHref,
 }: {
   slides: HeroSlide[];
   title: string;
   tagline: string;
   intro: string;
+  specialEvent?: { hero: string };
+  specialEventHref?: string;
 }) {
   const duration = slides.length * 3;
   const step = 100 / slides.length;
@@ -164,6 +168,22 @@ export default function HeroCarousel({
         >
           {tagline}
         </p>
+
+        {/* Special Event Entry */}
+        {specialEvent && specialEventHref && (
+          <a
+            href={specialEventHref}
+            className="mt-6 inline-flex items-center gap-3 text-xs md:text-sm tracking-wider text-[#a0a0a0] hover:text-[#c9a227] transition-all duration-500 group"
+            style={{
+              opacity: 0,
+              animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 1200ms forwards',
+            }}
+          >
+            <span className="block w-6 md:w-10 h-px bg-gradient-to-r from-transparent to-[#c9a227]/40 group-hover:to-[#c9a227]/70 transition-all duration-500" />
+            <span>{specialEvent.hero}</span>
+            <span className="block w-6 md:w-10 h-px bg-gradient-to-l from-transparent to-[#c9a227]/40 group-hover:to-[#c9a227]/70 transition-all duration-500" />
+          </a>
+        )}
       </div>
 
       {/* Drink icons */}

@@ -11,6 +11,17 @@
     { "label": "Menu", "href": "/menu", "labelZh": "酒单" },
     { "label": "About", "href": "/about", "labelZh": "我们" }
   ],
+  "specialEvent": {
+    "enabled": true,
+    "label": "This Friday",
+    "labelZh": "本周五",
+    "title": "Guest Bartender Takeover",
+    "titleZh": "一日店长接管",
+    "date": "Friday, June 6 · 8pm – late",
+    "dateZh": "6月6日 周五 · 晚8点至深夜",
+    "hero": "✦ 本周五 · 一日店长 ✦",
+    "heroEn": "✦ This Friday · Guest Bartender ✦"
+  },
   "social": {
     "instagram": "https://instagram.com",
     "weibo": "https://weibo.com",

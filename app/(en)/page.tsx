@@ -42,6 +42,7 @@ export default async function Page() {
       guestbookHref="/guestbook"
       weather={weather}
       weatherRec={weatherRec}
+      isZh={false}
     />
   );
 }

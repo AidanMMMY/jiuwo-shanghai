@@ -186,7 +186,7 @@ export default function HeroCarousel({
             {/* Aurora background */}
             <div className="event-aurora-bg" aria-hidden="true" />
             {/* Content */}
-            <div className="relative rounded-xl bg-black/50 px-6 py-3.5 inline-flex flex-col items-center gap-2 transition-transform duration-300 group-hover:-translate-y-0.5">
+            <div className="relative rounded-xl bg-white/5 backdrop-blur-md border border-[#c9a227]/20 px-6 py-3.5 inline-flex flex-col items-center gap-2 transition-all duration-300 group-hover:border-[#c9a227]/50 group-hover:shadow-[0_0_24px_rgba(201,162,39,0.12),inset_0_0_20px_rgba(201,162,39,0.04)]">
               {/* Line 1: hero text with shimmer */}
               <span className="text-xs md:text-sm tracking-wider event-text-shimmer">
                 {specialEvent.hero}
@@ -318,11 +318,11 @@ export default function HeroCarousel({
           position: absolute;
           inset: -80%;
           background:
-            radial-gradient(ellipse 35% 28% at 50% 50%, rgba(245,240,230,0.18) 0%, transparent 50%),
-            radial-gradient(ellipse 50% 35% at 25% 40%, rgba(201,162,39,0.22) 0%, transparent 55%),
-            radial-gradient(ellipse 45% 32% at 75% 30%, rgba(200,90,110,0.14) 0%, transparent 55%),
-            radial-gradient(ellipse 55% 42% at 45% 72%, rgba(140,60,100,0.12) 0%, transparent 55%),
-            radial-gradient(ellipse 42% 28% at 68% 58%, rgba(212,140,80,0.12) 0%, transparent 55%);
+            radial-gradient(ellipse 30% 24% at 50% 50%, rgba(220,230,245,0.16) 0%, transparent 50%),
+            radial-gradient(ellipse 50% 35% at 30% 38%, rgba(72,205,180,0.18) 0%, transparent 55%),
+            radial-gradient(ellipse 45% 32% at 72% 32%, rgba(140,120,220,0.14) 0%, transparent 55%),
+            radial-gradient(ellipse 55% 42% at 42% 70%, rgba(72,160,205,0.12) 0%, transparent 55%),
+            radial-gradient(ellipse 42% 28% at 68% 60%, rgba(180,100,160,0.10) 0%, transparent 55%);
           background-size: 200% 200%;
           animation: auroraDrift 10s ease-in-out infinite, auroraBreathe 5s ease-in-out infinite;
           filter: blur(20px);

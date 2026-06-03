@@ -296,6 +296,10 @@ export default function HeroCarousel({
           50%  { transform: translate(-2%, 4%) rotate(-1deg) scale(1.02); }
           75%  { transform: translate(3%, 2%) rotate(0.5deg) scale(1.04); }
         }
+        @keyframes auroraBreathe {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
+        }
         .event-entry-wrapper {
           position: relative;
           border-radius: 0.75rem;
@@ -312,24 +316,25 @@ export default function HeroCarousel({
         .event-aurora-bg::before {
           content: '';
           position: absolute;
-          inset: -60%;
+          inset: -80%;
           background:
-            radial-gradient(ellipse 50% 35% at 25% 45%, rgba(201,162,39,0.10) 0%, transparent 55%),
-            radial-gradient(ellipse 45% 30% at 75% 35%, rgba(212,120,72,0.07) 0%, transparent 55%),
-            radial-gradient(ellipse 55% 40% at 50% 75%, rgba(168,42,74,0.06) 0%, transparent 55%),
-            radial-gradient(ellipse 40% 25% at 65% 60%, rgba(212,168,56,0.05) 0%, transparent 55%);
-          background-size: 180% 180%;
-          animation: auroraDrift 12s ease-in-out infinite;
-          filter: blur(14px);
+            radial-gradient(ellipse 35% 28% at 50% 50%, rgba(245,240,230,0.18) 0%, transparent 50%),
+            radial-gradient(ellipse 50% 35% at 25% 40%, rgba(201,162,39,0.22) 0%, transparent 55%),
+            radial-gradient(ellipse 45% 32% at 75% 30%, rgba(200,90,110,0.14) 0%, transparent 55%),
+            radial-gradient(ellipse 55% 42% at 45% 72%, rgba(140,60,100,0.12) 0%, transparent 55%),
+            radial-gradient(ellipse 42% 28% at 68% 58%, rgba(212,140,80,0.12) 0%, transparent 55%);
+          background-size: 200% 200%;
+          animation: auroraDrift 10s ease-in-out infinite, auroraBreathe 5s ease-in-out infinite;
+          filter: blur(20px);
         }
         .event-text-shimmer {
           background-image: linear-gradient(105deg,
-            #a0a0a0 0%,
-            #c9a227 25%,
-            #dfc050 38%,
-            #c9a227 50%,
-            #a0a0a0 75%,
-            #a0a0a0 100%);
+            #707070 0%,
+            #a0a0a0 18%,
+            #e8e0d0 35%,
+            #c8c0b0 50%,
+            #a0a0a0 72%,
+            #707070 100%);
           background-size: 200% 100%;
           background-clip: text;
           -webkit-background-clip: text;
@@ -340,12 +345,12 @@ export default function HeroCarousel({
         }
         .event-name-shimmer {
           background-image: linear-gradient(105deg,
-            #c9a227 0%,
-            #dfc050 20%,
-            #f5e090 37%,
-            #dfc050 50%,
-            #c9a227 70%,
-            #c9a227 100%);
+            #8a7a6a 0%,
+            #b0a898 18%,
+            #f5f0e8 35%,
+            #d8d0c0 50%,
+            #b0a898 72%,
+            #8a7a6a 100%);
           background-size: 200% 100%;
           background-clip: text;
           -webkit-background-clip: text;

@@ -94,6 +94,9 @@ body {
 }
 
 /* ── Film Grain Texture ── */
+/* DISABLED: Safari iOS viewport bug — body::before fixed overlay
+   prevents content from extending behind the bottom toolbar.
+   Re-enable once Safari fixes the compositing issue.
 body::before {
   content: '';
   position: fixed;
@@ -124,6 +127,7 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   body::before { animation: none; }
 }
+*/
 
 /* ── Ambient Warm Light Layer ── */
 .ambient-light {

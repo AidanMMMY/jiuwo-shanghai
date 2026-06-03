@@ -139,7 +139,7 @@ export default function HeroCarousel({
         </div>
       ))}
 
-      {/* Title & Tagline */}
+      {/* Title & Tagline — name/tagline position locked */}
       <div
         className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
         style={{ paddingBottom: '8rem' }}
@@ -167,80 +167,63 @@ export default function HeroCarousel({
         >
           {tagline}
         </p>
+      </div>
 
-        {/* Special Event Entry — clickable */}
-        {specialEvent && (
+      {/* Special Event Entry — absolute positioned below title/tagline */}
+      {specialEvent && (
+        <div
+          className="z-10 flex justify-center pointer-events-none"
+          style={{ position: 'absolute', left: 0, right: 0, bottom: '7rem' }}
+        >
           <Link
             href={specialEvent.href || '/special'}
-            className="event-entry mt-10 inline-flex flex-col items-center gap-2 cursor-pointer group
-              px-6 py-3.5 rounded-xl
-              bg-white/[0.035] border border-[#c9a227]/10
-              transition-all duration-300
-              hover:bg-white/[0.07] hover:border-[#c9a227]/25 hover:-translate-y-0.5"
+            className="event-entry-wrapper pointer-events-auto cursor-pointer group"
             style={{
               opacity: 0,
               animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 1200ms forwards',
             }}
           >
-            {/* Line 1: hero text with shimmer */}
-            <span className="text-xs md:text-sm tracking-wider event-text-shimmer">
-              {specialEvent.hero}
-            </span>
-            {/* Line 2: host name with dual lines + arrow */}
-            {specialEvent.hostName && (
-              <span className="inline-flex items-center gap-3">
-                <span className="event-line group-hover:w-12 md:group-hover:w-20 transition-all duration-300" />
-                <span
-                  className="text-xl md:text-2xl tracking-[0.22em] event-name-shimmer group-hover:drop-shadow-[0_0_10px_rgba(201,162,39,0.45)] transition-all duration-300"
-                  style={{ fontFamily: 'var(--font-bodoni), Georgia, serif' }}
-                >
-                  {specialEvent.hostName}
-                </span>
-                <span className="event-line event-line-r group-hover:w-12 md:group-hover:w-20 transition-all duration-300" />
+            {/* Rotating border glow */}
+            <div className="event-border-glow" aria-hidden="true" />
+            {/* Content */}
+            <div className="event-inner-pulse relative rounded-xl px-6 py-3.5 inline-flex flex-col items-center gap-2 transition-transform duration-300 group-hover:-translate-y-0.5">
+              {/* Line 1: hero text with shimmer */}
+              <span className="text-xs md:text-sm tracking-wider event-text-shimmer">
+                {specialEvent.hero}
               </span>
-            )}
-            {/* Click hint — always visible, not hover-only */}
-            <span className="mt-1 inline-flex items-center gap-1.5 text-[10px] md:text-xs tracking-[0.2em] text-[#c9a227]/80 group-hover:text-[#c9a227] transition-colors duration-300">
-              <span className="event-arrow inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
-              <span>VIEW DETAILS</span>
-            </span>
+              {/* Line 2: host name with dual lines + arrow */}
+              {specialEvent.hostName && (
+                <span className="inline-flex items-center gap-3">
+                  <span className="event-line group-hover:w-12 md:group-hover:w-20 transition-all duration-300" />
+                  <span
+                    className="text-xl md:text-2xl tracking-[0.22em] event-name-shimmer group-hover:drop-shadow-[0_0_10px_rgba(201,162,39,0.45)] transition-all duration-300"
+                    style={{ fontFamily: 'var(--font-bodoni), Georgia, serif' }}
+                  >
+                    {specialEvent.hostName}
+                  </span>
+                  <span className="event-line event-line-r group-hover:w-12 md:group-hover:w-20 transition-all duration-300" />
+                </span>
+              )}
+              {/* Click hint */}
+              <span className="mt-1 inline-flex items-center gap-1.5 text-[10px] md:text-xs tracking-[0.2em] text-[#c9a227]/80 group-hover:text-[#c9a227] transition-colors duration-300">
+                <span className="event-arrow inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+                <span>VIEW DETAILS</span>
+              </span>
+            </div>
           </Link>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Drink icons */}
+      {/* Subtitle: BAR • SHANGHAI */}
       <div
-        className="z-10 px-6"
+        className="z-10 flex justify-center pointer-events-none select-none"
         style={{ position: 'absolute', left: 0, right: 0, bottom: '4rem' }}
       >
-        <div className="hero-intro-fade-up flex items-center justify-center gap-5 hero-normal-icons pointer-events-none select-none">
-          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
-            <TeaIcon />
-          </div>
-          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
-            <WineIcon />
-          </div>
-          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
-            <ShakerIcon />
-          </div>
-          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
-            <LoveIcon />
-          </div>
-        </div>
-        <div className="hero-intro-fade-up flex items-center justify-center gap-5 hero-darkroom-icons hidden pointer-events-none select-none">
-          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
-            <LockIcon />
-          </div>
-          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
-            <ChairIcon />
-          </div>
-          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
-            <EmptyGlassIcon />
-          </div>
-          <div className="flex items-center justify-center opacity-20 md:h-11 md:w-11 md:rounded-full md:bg-white/[0.04] md:opacity-35">
-            <MoonIcon />
-          </div>
-        </div>
+        <p className="hero-intro-fade-up text-xs md:text-sm uppercase tracking-[0.3em] text-[#c9a227]/70"
+          style={{ opacity: 0, animation: 'heroIntroFadeUp 1400ms cubic-bezier(0.16, 1, 0.3, 1) 1000ms both' }}
+        >
+          BAR <span className="mx-1.5">•</span> SHANGHAI
+        </p>
       </div>
 
       {/* Scroll hint */}
@@ -306,6 +289,33 @@ export default function HeroCarousel({
         @keyframes eventTextShimmer {
           0%   { background-position: 200% 50%; }
           100% { background-position: -200% 50%; }
+        }
+        @keyframes rotateBorderGlow {
+          0%   { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes eventInnerPulse {
+          0%, 100% { background-color: rgba(0,0,0,0.55); }
+          50% { background-color: rgba(0,0,0,0.38); }
+        }
+        .event-entry-wrapper {
+          position: relative;
+          border-radius: 0.75rem;
+          overflow: hidden;
+        }
+        .event-border-glow {
+          position: absolute;
+          inset: -1px;
+          border-radius: inherit;
+          background: conic-gradient(from 0deg, transparent 0deg, rgba(201,162,39,0.55) 35deg, rgba(201,162,39,0.2) 70deg, transparent 100deg);
+          animation: rotateBorderGlow 3.5s linear infinite;
+          z-index: 0;
+          pointer-events: none;
+        }
+        .event-inner-pulse {
+          position: relative;
+          z-index: 1;
+          animation: eventInnerPulse 2.5s ease-in-out infinite;
         }
         .event-text-shimmer {
           background-image: linear-gradient(105deg,
@@ -396,6 +406,8 @@ export default function HeroCarousel({
           .scroll-hint { animation: none !important; }
           .event-text-shimmer { animation: none !important; background-image: none !important; color: #c9a227 !important; -webkit-text-fill-color: #c9a227 !important; }
           .event-name-shimmer { animation: none !important; background-image: none !important; color: #c9a227 !important; -webkit-text-fill-color: #c9a227 !important; }
+          .event-border-glow { animation: none !important; background: rgba(201,162,39,0.15) !important; }
+          .event-inner-pulse { animation: none !important; background-color: rgba(0,0,0,0.55) !important; }
         }
 
         /* ── After Hours Darkroom Overrides ── */

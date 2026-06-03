@@ -430,7 +430,6 @@ a:not([class*="no-link-style"]) {
 }
 
 /* ── After Hours Darkroom Mode ── */
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
 /* Flash overlay for transition */
 .darkroom-flash {
@@ -461,7 +460,7 @@ a:not([class*="no-link-style"]) {
 }
 
 .darkroom-intro p {
-    font-family: 'Space Mono', monospace;
+    font-family: var(--font-space-mono), monospace;
     font-size: 0.875rem;
     color: #a0a0a0;
     letter-spacing: 0.1em;
@@ -500,7 +499,7 @@ body.darkroom p,
 body.darkroom span,
 body.darkroom a,
 body.darkroom div {
-    font-family: 'Space Mono', monospace;
+    font-family: var(--font-space-mono), monospace;
 }
 
 body.darkroom [class*="text-[#c9a227]"],

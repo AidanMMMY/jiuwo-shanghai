@@ -25,6 +25,7 @@ export type SiteData = {
     labelZh: string;
     title: string;
     titleZh: string;
+    hostName?: string;
     date: string;
     dateZh: string;
     hero: string;
@@ -120,6 +121,7 @@ function localizeSite(site: SiteData): SiteData {
       title: site.specialEvent.titleZh,
       date: site.specialEvent.dateZh,
       hero: site.specialEvent.hero,
+      hostName: site.specialEvent.hostName,
     };
   }
   return zh;
@@ -265,6 +267,7 @@ const siteDataSchema = z.object({
     labelZh: z.string(),
     title: z.string(),
     titleZh: z.string(),
+    hostName: z.string().optional(),
     date: z.string(),
     dateZh: z.string(),
     hero: z.string(),

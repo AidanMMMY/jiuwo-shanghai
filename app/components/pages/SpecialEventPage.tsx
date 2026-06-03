@@ -58,8 +58,8 @@ export default function SpecialEventPage({
             <div className="space-y-6 text-base md:text-lg text-[#a0a0a0] leading-relaxed text-left">
               {/* Generic event placeholder — owner fills in via site.json later */}
               <p>
-                One night only. Our bar counter belongs to a special guest —
-                different hands, different rhythm, different stories.
+                One night only. Our space belongs to a special guest —
+                different face, different rhythm, different stories.
                 Come early for a seat at the bar. Stay late for the conversation.
               </p>
             </div>

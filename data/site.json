@@ -15,12 +15,13 @@
     "enabled": true,
     "label": "This Friday",
     "labelZh": "本周五",
-    "title": "Guest Bartender Takeover",
+    "title": "One Night Host",
     "titleZh": "一日店长接管",
-    "date": "Friday, June 6 · 8pm – late",
-    "dateZh": "6月6日 周五 · 晚8点至深夜",
+    "hostName": "Owen",
+    "date": "Friday, June 5 · 8pm – late",
+    "dateZh": "6月5日 周五 · 晚8点至深夜",
     "hero": "✦ 本周五 · 一日店长 ✦",
-    "heroEn": "✦ This Friday · Guest Bartender ✦"
+    "heroEn": "✦ This Friday · One Night Host ✦"
   },
   "social": {
     "instagram": "https://instagram.com",

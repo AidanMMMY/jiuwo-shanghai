@@ -12,7 +12,7 @@ export default async function Page() {
 
   if (!site.specialEvent?.enabled) {
     return (
-      <main className="bg-[#0a0a0a] min-h-screen flex items-center justify-center">
+      <main className="bg-[#0a0a0a] min-h-[100lvh] flex items-center justify-center">
         <p className="text-[#a0a0a0]">暂无特别活动。</p>
       </main>
     );

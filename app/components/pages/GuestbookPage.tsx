@@ -58,7 +58,7 @@ export default function GuestbookPage({
   }, []);
 
   return (
-    <main className="bg-[#0a0a0a] min-h-screen">
+    <main className="bg-[#0a0a0a] min-h-[100lvh]">
       {/* Header */}
       <section className="px-6 pt-20 pb-8 md:pt-28 md:pb-12">
         <div className="mx-auto max-w-2xl text-center">

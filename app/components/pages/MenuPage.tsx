@@ -12,7 +12,7 @@ export default function MenuPage({
   subtitle?: string;
 }) {
   return (
-    <div className="pt-24 pb-20 bg-[#0a0a0a] min-h-screen">
+    <div className="pt-24 pb-20 bg-[#0a0a0a] min-h-[100lvh]">
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex items-center gap-6 mb-4">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#333] to-[#333]" />

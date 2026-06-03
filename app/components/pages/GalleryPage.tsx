@@ -37,7 +37,7 @@ export default function GalleryPage({
   );
 
   return (
-    <section className="pt-32 pb-20 px-6 bg-[#0a0a0a] min-h-screen">
+    <section className="pt-32 pb-20 px-6 bg-[#0a0a0a] min-h-[100lvh]">
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center gap-6 mb-8">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#333] to-[#333]" />

@@ -15,7 +15,7 @@ export default function GalleryAlbumPage({
   locale?: 'en' | 'zh';
 }) {
   return (
-    <section className="pt-32 pb-20 px-6 bg-[#0a0a0a] min-h-screen">
+    <section className="pt-32 pb-20 px-6 bg-[#0a0a0a] min-h-[100lvh]">
       <div className="mx-auto max-w-7xl">
         <Link
           href={backHref ?? '/gallery'}

@@ -15,7 +15,7 @@ export default function SpecialEventPage({
   backHref: string;
 }) {
   return (
-    <main className="relative bg-[#0a0a0a] min-h-screen">
+    <main className="relative bg-[#0a0a0a] min-h-[100lvh]">
       {/* Hero block */}
       <section className="relative z-10 w-full">
         <div className="flex flex-col items-center justify-center px-6 pt-32 md:pt-40 pb-12 text-center">

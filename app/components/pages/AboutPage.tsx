@@ -23,7 +23,7 @@ export default function AboutPage({
   const firstParagraphRest = firstParagraph?.slice(1) ?? '';
 
   return (
-    <main className="relative bg-[#0a0a0a] min-h-screen">
+    <main className="relative bg-[#0a0a0a] min-h-[100lvh]">
       <AuroraBackground />
 
       {/* Hero block */}

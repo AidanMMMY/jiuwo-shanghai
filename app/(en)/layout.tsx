@@ -33,7 +33,7 @@ export default async function EnLayout({
         <div className="ambient-light-blob" />
       </div>
       <Navbar name={site.name} nav={site.nav} />
-      <main className="pt-0 min-h-[100svh] relative z-10">{children}</main>
+      <main className="pt-0 min-h-[100lvh] relative z-10">{children}</main>
       <Footer site={site} />
       <BackToTop />
       <ReadingProgress />

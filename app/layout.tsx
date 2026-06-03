@@ -22,6 +22,7 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
+  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
   metadataBase: new URL("https://jiuwoshanghai.net"),
   title: {
     template: "%s | JIUWO",

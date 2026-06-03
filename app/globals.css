@@ -84,11 +84,15 @@
 }
 
 html {
+    min-height: 100%;
+    min-height: -webkit-fill-available;
     scroll-behavior: smooth;
     background-color: var(--background);
 }
 
 body {
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
     background-color: var(--background);
     color: var(--foreground);
     padding-bottom: env(safe-area-inset-bottom, 0px);

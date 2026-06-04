@@ -55,7 +55,7 @@ export default function SpecialEventPage({
   };
 
   return (
-    <div className="relative bg-[#0a0a0a] flex justify-center h-[100dvh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16">
+    <div className="relative bg-[#0a0a0a] flex justify-center h-[100vh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16">
       {/* Poster container - portrait orientation */}
       <div className="relative w-full md:max-w-lg h-full overflow-hidden">
         {/* Background image - shifted down so head is lower, title sits above */}

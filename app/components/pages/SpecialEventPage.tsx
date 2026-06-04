@@ -211,8 +211,8 @@ export default function SpecialEventPage({
       {/* RSVP List */}
       <div className="w-full md:max-w-lg mx-auto px-6 py-12 border-t border-[#222]">
         <h2
-          className="text-xl text-[#f5f5f0] tracking-[0.15em] mb-6"
-          style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
+          className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
+          style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
         >
           {isZh ? '谁来啦' : "Who's Coming"}
         </h2>

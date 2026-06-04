@@ -1,5 +1,13 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
+
+interface RsvpEntry {
+  name: string;
+  timestamp: number;
+}
 
 interface SpecialEvent {
   label: string;
@@ -54,10 +62,44 @@ export default function SpecialEventPage({
     FRI: '周五', SAT: '周六', SUN: '周日',
   };
 
+  const [showModal, setShowModal] = useState(false);
+  const [nameInput, setNameInput] = useState('');
+  const [entries, setEntries] = useState<RsvpEntry[]>([]);
+
+  const storageKey = 'jiuwo-rsvp-20260605';
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) setEntries(JSON.parse(raw));
+    } catch {
+      // ignore
+    }
+  }, [storageKey]);
+
+  const handleSubmit = () => {
+    const trimmed = nameInput.trim();
+    if (!trimmed) return;
+    const next = [...entries, { name: trimmed, timestamp: Date.now() }];
+    setEntries(next);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+    setNameInput('');
+    setShowModal(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSubmit();
+    if (e.key === 'Escape') setShowModal(false);
+  };
+
   return (
-    <div className="relative bg-[#0a0a0a] flex justify-center h-[100vh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16">
-      {/* Poster container - portrait orientation */}
-      <div className="relative w-full md:max-w-lg h-full overflow-hidden">
+    <div className="relative bg-[#0a0a0a]">
+      {/* Poster section */}
+      <div className="relative w-full md:max-w-lg mx-auto h-[100vh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16 overflow-hidden">
         {/* Background image - shifted down so head is lower, title sits above */}
         <Image
           src="/images/events/event-20260605-2.webp"
@@ -110,6 +152,7 @@ export default function SpecialEventPage({
             {/* CTA Button */}
             <button
               type="button"
+              onClick={() => setShowModal(true)}
               className="mt-4 px-6 py-2.5 border border-[#c9a227] text-[#c9a227] bg-[#0a0a0a]/50 text-xs tracking-[0.3em] font-medium rounded-full animate-pulse-scale hover:bg-[#c9a227] hover:text-[#0a0a0a] transition-colors duration-300"
             >
               {isZh ? '我要来' : 'I WANNA COME'}
@@ -164,6 +207,76 @@ export default function SpecialEventPage({
           </div>
         </div>
       </div>
+
+      {/* RSVP List */}
+      <div className="w-full md:max-w-lg mx-auto px-6 py-12 border-t border-[#222]">
+        <h2
+          className="text-xl text-[#f5f5f0] tracking-[0.15em] mb-6"
+          style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
+        >
+          {isZh ? '谁来啦' : "Who's Coming"}
+        </h2>
+        {entries.length === 0 ? (
+          <p className="text-sm text-[#666] tracking-wider italic">
+            {isZh ? '还没人来，做第一个！' : 'No one yet. Be the first!'}
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {entries.map((entry, i) => (
+              <p key={i} className="text-sm text-[#f5f5f0]/90 tracking-wider">
+                <span className="text-[#c9a227]">{entry.name}</span>
+                {' '}
+                {isZh ? '要来' : 'is coming'}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="bg-[#0a0a0a] border border-[#c9a227]/50 rounded-lg px-8 py-8 max-w-sm w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3
+              className="text-lg text-[#f5f5f0] tracking-[0.15em] mb-8 text-center"
+              style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
+            >
+              {isZh ? '你叫？' : "Who's Coming?"}
+            </h3>
+            <input
+              type="text"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={isZh ? '你的名字' : 'Your name'}
+              autoFocus
+              className="bg-transparent border-b border-[#c9a227]/50 text-[#f5f5f0] text-center tracking-wider placeholder:text-[#666] focus:border-[#c9a227] outline-none px-2 py-3 w-full mb-8"
+            />
+            <div className="flex gap-3 justify-center">
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="px-5 py-2 text-xs tracking-[0.2em] text-[#888] hover:text-[#f5f5f0] transition-colors"
+              >
+                {isZh ? '取消' : 'CANCEL'}
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="px-6 py-2 border border-[#c9a227] text-[#c9a227] text-xs tracking-[0.2em] font-medium rounded-full hover:bg-[#c9a227] hover:text-[#0a0a0a] transition-colors duration-300"
+              >
+                {isZh ? '提交' : 'SUBMIT'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

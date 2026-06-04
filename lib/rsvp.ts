@@ -1,4 +1,5 @@
 import { neon } from '@neondatabase/serverless';
+import { createHash } from 'crypto';
 
 // Lazy env check — don't break the build if env var is missing in dev
 function getSql() {
@@ -18,12 +19,9 @@ function getEnv(name: string): string | undefined {
   }
 }
 
-export async function hashIp(ip: string): Promise<string> {
+export function hashIp(ip: string): string {
   const salt = getEnv('IP_HASH_SALT') || 'default-salt';
-  const data = new TextEncoder().encode(ip + salt);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return createHash('sha256').update(ip + salt).digest('hex');
 }
 
 export interface RsvpEntry {

@@ -67,6 +67,7 @@ export default function SpecialEventPage({
   const [nameInput, setNameInput] = useState('');
   const [entries, setEntries] = useState<RsvpEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitError, setSubmitError] = useState('');
 
   const storageKey = 'jiuwo-rsvp-20260605';
   const eventSlug = 'event-20260605';
@@ -117,6 +118,7 @@ export default function SpecialEventPage({
   const handleSubmit = async () => {
     const trimmed = nameInput.trim();
     if (!trimmed) return;
+    setSubmitError('');
     try {
       const res = await fetch('/api/rsvp', {
         method: 'POST',
@@ -127,9 +129,13 @@ export default function SpecialEventPage({
         await fetchEntries();
         setNameInput('');
         setShowModal(false);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setSubmitError(data.error || 'Something went wrong. Please try again.');
       }
     } catch (err) {
       console.error('RSVP submit failed:', err);
+      setSubmitError('Network error. Please check your connection and try again.');
     }
   };
 
@@ -194,7 +200,7 @@ export default function SpecialEventPage({
             {/* CTA Button */}
             <button
               type="button"
-              onClick={() => setShowModal(true)}
+              onClick={() => { setShowModal(true); setSubmitError(''); }}
               className="mt-4 px-6 py-2.5 border border-[#c9a227] text-[#c9a227] bg-[#0a0a0a]/50 text-xs tracking-[0.3em] font-medium rounded-full animate-pulse-scale hover:bg-[#c9a227] hover:text-[#0a0a0a] transition-colors duration-300"
             >
               {isZh ? '我要来' : 'I WANNA COME'}
@@ -283,7 +289,7 @@ export default function SpecialEventPage({
       {showModal && (
         <div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4"
-          onClick={() => setShowModal(false)}
+          onClick={() => { setShowModal(false); setSubmitError(''); }}
         >
           <div
             className="bg-[#0a0a0a] border border-[#c9a227]/50 rounded-lg px-8 py-8 max-w-sm w-full"
@@ -298,16 +304,21 @@ export default function SpecialEventPage({
             <input
               type="text"
               value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
+              onChange={(e) => { setNameInput(e.target.value); setSubmitError(''); }}
               onKeyDown={handleKeyDown}
               placeholder={isZh ? '你的名字' : 'Your name'}
               autoFocus
-              className="bg-transparent border-b border-[#c9a227]/50 text-[#f5f5f0] text-center tracking-wider placeholder:text-[#666] focus:border-[#c9a227] outline-none px-2 py-3 w-full mb-8"
+              className="bg-transparent border-b border-[#c9a227]/50 text-[#f5f5f0] text-center tracking-wider placeholder:text-[#666] focus:border-[#c9a227] outline-none px-2 py-3 w-full"
             />
-            <div className="flex gap-3 justify-center">
+            {submitError && (
+              <p className="text-xs text-red-400/80 text-center tracking-wider mt-2 mb-6">
+                {submitError}
+              </p>
+            )}
+            <div className={`flex gap-3 justify-center ${submitError ? '' : 'mt-8'}`}>
               <button
                 type="button"
-                onClick={() => setShowModal(false)}
+                onClick={() => { setShowModal(false); setSubmitError(''); }}
                 className="px-5 py-2 text-xs tracking-[0.2em] text-[#888] hover:text-[#f5f5f0] transition-colors"
               >
                 {isZh ? '取消' : 'CANCEL'}

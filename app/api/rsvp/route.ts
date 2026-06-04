@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     // IP rate limit
     const ip = getClientIp(req);
-    const ipHash = await hashIp(ip);
+    const ipHash = hashIp(ip);
     const recentCount = await recentCountForRsvpIp(ipHash, 60);
     if (recentCount >= 5) {
       return NextResponse.json(

@@ -1,10 +1,42 @@
-import ScrollReveal from '@/components/ScrollReveal';
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface SpecialEvent {
   label: string;
   title: string;
+  hostName?: string;
   date: string;
+  isZh?: boolean;
+}
+
+function extractMonthDay(dateStr: string, isZh?: boolean): string {
+  if (isZh) {
+    const match = dateStr.match(/(\d+)月(\d+)日/);
+    if (match) return `${match[1].padStart(2, '0')}/${match[2].padStart(2, '0')}`;
+  } else {
+    const match = dateStr.match(/([A-Za-z]+)\s+(\d+)/);
+    if (match) {
+      return `${match[1].substring(0, 3)} ${parseInt(match[2], 10)}`;
+    }
+  }
+  return 'Jun 5';
+}
+
+function extractWeekday(dateStr: string, isZh?: boolean): string {
+  if (isZh) {
+    const match = dateStr.match(/周([一二三四五六日])/);
+    if (match) {
+      const map: Record<string, string> = {
+        '一': 'MON', '二': 'TUE', '三': 'WED', '四': 'THU',
+        '五': 'FRI', '六': 'SAT', '日': 'SUN',
+      };
+      return map[match[1]] || 'FRI';
+    }
+  } else {
+    const match = dateStr.match(/^([A-Za-z]+)/);
+    if (match) return match[1].substring(0, 3).toUpperCase();
+  }
+  return 'FRI';
 }
 
 export default function SpecialEventPage({
@@ -14,82 +46,113 @@ export default function SpecialEventPage({
   event: SpecialEvent;
   backHref: string;
 }) {
+  const isZh = event.isZh;
+  const monthDay = extractMonthDay(event.date, isZh);
+  const weekday = extractWeekday(event.date, isZh);
+  const weekdayZh: Record<string, string> = {
+    MON: '周一', TUE: '周二', WED: '周三', THU: '周四',
+    FRI: '周五', SAT: '周六', SUN: '周日',
+  };
+
   return (
-    <main className="relative bg-[#0a0a0a] min-h-[100lvh]">
-      {/* Hero block */}
-      <section className="relative z-10 w-full">
-        <div className="flex flex-col items-center justify-center px-6 pt-32 md:pt-40 pb-12 text-center">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-8 h-px bg-gradient-to-r from-transparent to-[#c9a227]/60" />
-            <span className="text-xs uppercase tracking-[0.3em] text-[#c9a227]">
-              {event.label}
-            </span>
-            <div className="w-8 h-px bg-gradient-to-l from-transparent to-[#c9a227]/60" />
+    <div className="relative bg-[#0a0a0a] flex justify-center h-[calc(100dvh-4rem)] mt-16">
+      {/* Poster container - portrait orientation */}
+      <div className="relative w-full md:max-w-lg h-full overflow-hidden">
+        {/* Background image - shifted down so head is lower, title sits above */}
+        <Image
+          src="/images/events/event-20260605-2.webp"
+          alt={event.title}
+          fill
+          className="object-cover object-[center_35%]"
+          priority
+          sizes="(max-width: 768px) 100vw, 512px"
+        />
+
+        {/* Top gradient: fades image into black background */}
+        <div className="absolute top-0 left-0 right-0 h-[35%] bg-gradient-to-b from-black via-black/80 to-transparent" />
+
+        {/* Gradient overlays for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-40% to-black/70" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20" />
+
+        {/* Content overlay */}
+        <div className="absolute inset-0 flex flex-col px-6 py-4">
+
+          {/* Back link */}
+          <Link
+            href={backHref}
+            className="self-start text-xs tracking-[0.2em] text-[#f5f5f0]/50 hover:text-[#c9a227] transition-colors duration-300 z-20"
+          >
+            ← {isZh ? '返回' : 'BACK'}
+          </Link>
+
+          {/* Top: Main title - single line, smaller; Owen below in gold, larger */}
+          <div className="text-center pt-6">
+            <h1
+              className="text-[1.6rem] leading-[1] md:text-[2rem] text-[#f5f5f0] tracking-[0.12em]"
+              style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
+            >
+              {isZh ? '一日店长' : 'ONE NIGHT HOST'}
+            </h1>
+
+            {event.hostName && (
+              <p
+                className="text-[2.5rem] md:text-[3.2rem] text-[#c9a227] mt-2 italic"
+                style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 400 }}
+              >
+                {event.hostName}
+              </p>
+            )}
           </div>
 
-          <ScrollReveal effect="title">
-            <h1
-              className="text-4xl md:text-6xl lg:text-7xl font-medium tracking-wide text-[#f5f5f0]"
-              style={{
-                fontFamily: 'var(--font-bodoni), Georgia, serif',
-                textShadow: '0 0 40px rgba(201,162,39,0.2), 0 0 80px rgba(201,162,39,0.08)',
-              }}
-            >
-              {event.title}
-            </h1>
-          </ScrollReveal>
-        </div>
-      </section>
+          {/* Flexible space - pushes bottom content down, keeps face clear */}
+          <div className="flex-1" />
 
-      {/* Details */}
-      <section className="relative z-10 px-6 pb-20">
-        <div className="mx-auto max-w-2xl text-center">
-          <ScrollReveal>
-            <div className="inline-flex items-center gap-2 text-sm text-[#a0a0a0] border border-[#222] rounded-full px-5 py-2.5 mb-10">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9a227" strokeWidth="2" strokeLinecap="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path d="M16 2v4M8 2v4M3 10h18" />
-              </svg>
-              <span>{event.date}</span>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal effect="text" delay={100}>
-            <div className="space-y-6 text-base md:text-lg text-[#a0a0a0] leading-relaxed text-left">
-              {/* Generic event placeholder — owner fills in via site.json later */}
-              <p>
-                One night only. Our space belongs to a special guest —
-                different face, different rhythm, different stories.
-                Come early for a seat at the bar. Stay late for the conversation.
+          {/* Bottom: Description + Date + Venue */}
+          <div className="w-full pb-2 mb-10">
+            {/* Description - left aligned, same left edge as date */}
+            <div className="text-left mb-2 max-w-[280px]">
+              <p className="text-lg text-[#f5f5f0] leading-[1.4] font-bold mb-1">
+                {isZh ? '法网之夜' : 'The Night of Roland Garros'}
+              </p>
+              <p className="text-base text-[#f5f5f0]/85 leading-[1.6] whitespace-pre-line">
+                {isZh
+                  ? '在啾喔群分享一张自己的网球日常照片，换法网特色鸡尾酒一杯。'
+                  : 'Share a tennis photo in the group, get a French Open-themed cocktail on the house.'
+                }
               </p>
             </div>
-          </ScrollReveal>
-        </div>
-      </section>
 
-      {/* Pull quote style divider */}
-      <section className="relative z-10 px-6 pb-16">
-        <ScrollReveal>
-          <div className="mx-auto max-w-2xl text-center">
-            <div className="mx-auto h-px w-12 bg-[#c9a227] mb-8 divider-breathe" />
-            <p className="text-xl md:text-2xl italic text-[#f5f5f0]/80">
-              The bar is your stage for one night.
-            </p>
-            <div className="mx-auto h-px w-12 bg-[#c9a227] mt-8 divider-breathe" />
+            {/* Date + Venue */}
+            <div className="flex justify-between items-end">
+              <div>
+                <p
+                  className="text-[3rem] leading-[0.85] md:text-[3.5rem] text-[#f5f5f0] tracking-tight"
+                  style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
+                >
+                  {monthDay}
+                </p>
+                <p className="text-xs text-[#f5f5f0]/70 tracking-[0.25em] mt-1">
+                  {isZh
+                    ? `${weekdayZh[weekday] || weekday}晚在巨鹿路397号`
+                    : `${weekday} NIGHT @ Julu Rd. 397`
+                  }
+                </p>
+              </div>
+
+              <div className="flex flex-col items-end">
+                <Image
+                  src="/images/logo-with-words-light.png"
+                  alt="JIUWO"
+                  width={48}
+                  height={80}
+                  className="mb-1 opacity-70"
+                />
+              </div>
+            </div>
           </div>
-        </ScrollReveal>
-      </section>
-
-      {/* Back link */}
-      <section className="relative z-10 px-6 pb-24 text-center">
-        <Link
-          href={backHref}
-          className="inline-flex items-center gap-2 text-sm tracking-wider text-[#a0a0a0] hover:text-[#c9a227] transition-colors duration-300"
-        >
-          <span>←</span>
-          <span>Back to the night</span>
-        </Link>
-      </section>
-    </main>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -23,7 +23,9 @@ export default async function Page() {
       event={{
         label: site.specialEvent.label,
         title: site.specialEvent.title,
+        hostName: site.specialEvent.hostName,
         date: site.specialEvent.date,
+        isZh: true,
       }}
       backHref="/zh"
     />

@@ -63,7 +63,7 @@ export default function SpecialEventPage({
           src="/images/events/event-20260605-2.webp"
           alt={event.title}
           fill
-          className="object-cover object-[center_10%]"
+          className="object-cover object-[center_5%]"
           priority
           sizes="(max-width: 768px) 100vw, 512px"
         />
@@ -92,7 +92,7 @@ export default function SpecialEventPage({
           {/* Top: Main title - single line, smaller; Owen below in gold, larger */}
           <div className="text-center pt-6">
             <h1
-              className="text-[1.6rem] leading-[1] md:text-[2rem] text-[#f5f5f0] tracking-[0.12em]"
+              className="text-[1.4rem] leading-[1] md:text-[1.8rem] text-[#f5f5f0] tracking-[0.12em]"
               style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
             >
               {isZh ? '一日店长' : 'ONE NIGHT HOST'}
@@ -100,7 +100,7 @@ export default function SpecialEventPage({
 
             {event.hostName && (
               <p
-                className="text-[2.5rem] md:text-[3.2rem] text-[#c9a227] mt-2 italic"
+                className="text-[2.5rem] md:text-[3.2rem] text-[#c9a227] mt-1 italic"
                 style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 400 }}
               >
                 {event.hostName}
@@ -110,7 +110,7 @@ export default function SpecialEventPage({
             {/* CTA Button */}
             <button
               type="button"
-              className="mt-6 px-8 py-3 border border-[#c9a227] text-[#c9a227] bg-[#0a0a0a]/50 text-xs tracking-[0.3em] font-medium rounded-full animate-pulse-scale hover:bg-[#c9a227] hover:text-[#0a0a0a] transition-colors duration-300"
+              className="mt-4 px-6 py-2.5 border border-[#c9a227] text-[#c9a227] bg-[#0a0a0a]/50 text-xs tracking-[0.3em] font-medium rounded-full animate-pulse-scale hover:bg-[#c9a227] hover:text-[#0a0a0a] transition-colors duration-300"
             >
               {isZh ? '我要来' : 'I WANNA COME'}
             </button>
@@ -120,7 +120,7 @@ export default function SpecialEventPage({
           <div className="flex-1" />
 
           {/* Bottom: Description + Date + Venue */}
-          <div className="w-full pb-2 mb-10">
+          <div className="w-full pb-2 mb-6">
             {/* Description - left aligned, same left edge as date */}
             <div className="text-left mb-2 max-w-[280px]">
               <p className="text-lg text-[#f5f5f0] leading-[1.4] font-bold mb-1">

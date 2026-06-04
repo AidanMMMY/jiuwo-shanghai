@@ -55,7 +55,7 @@ export default function SpecialEventPage({
   };
 
   return (
-    <div className="relative bg-[#0a0a0a] flex justify-center h-[calc(100dvh-4rem)] mt-16">
+    <div className="relative bg-[#0a0a0a] flex justify-center h-[100dvh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16">
       {/* Poster container - portrait orientation */}
       <div className="relative w-full md:max-w-lg h-full overflow-hidden">
         {/* Background image - shifted down so head is lower, title sits above */}
@@ -76,7 +76,7 @@ export default function SpecialEventPage({
         <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20" />
 
         {/* Content overlay */}
-        <div className="absolute inset-0 flex flex-col px-6 py-4">
+        <div className="absolute inset-0 flex flex-col px-6 pt-20 pb-4 md:pt-4 md:pb-4">
 
           {/* Back link */}
           <Link
@@ -103,6 +103,14 @@ export default function SpecialEventPage({
                 {event.hostName}
               </p>
             )}
+
+            {/* CTA Button */}
+            <button
+              type="button"
+              className="mt-6 px-8 py-3 border border-[#c9a227] text-[#c9a227] bg-[#0a0a0a]/50 text-xs tracking-[0.3em] font-medium rounded-full animate-pulse-scale hover:bg-[#c9a227] hover:text-[#0a0a0a] transition-colors duration-300"
+            >
+              {isZh ? '我要来' : 'I WANNA COME'}
+            </button>
           </div>
 
           {/* Flexible space - pushes bottom content down, keeps face clear */}

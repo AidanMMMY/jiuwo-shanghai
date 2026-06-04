@@ -31,6 +31,66 @@ function extractMonthDay(dateStr: string, isZh?: boolean): string {
   return 'Jun 5';
 }
 
+function extractDominantColor(imageUrl: string): Promise<string> {
+  return new Promise((resolve) => {
+    const img = document.createElement('img');
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+      const size = 64;
+      canvas.width = size;
+      canvas.height = size;
+      ctx.drawImage(img, 0, 0, size, size);
+
+      const data = ctx.getImageData(0, 0, size, size).data;
+      let r = 0, g = 0, b = 0, count = 0;
+
+      // Sample every 4th pixel for performance
+      for (let i = 0; i < data.length; i += 16) {
+        const pr = data[i];
+        const pg = data[i + 1];
+        const pb = data[i + 2];
+        const alpha = data[i + 3];
+        if (alpha < 128) continue;
+
+        const brightness = pr * 0.299 + pg * 0.587 + pb * 0.114;
+        if (brightness < 40) continue; // Skip too-dark pixels
+
+        // Skip near-grayscale
+        const max = Math.max(pr, pg, pb);
+        const min = Math.min(pr, pg, pb);
+        if (max > 0 && (max - min) / max < 0.15) continue;
+
+        r += pr;
+        g += pg;
+        b += pb;
+        count++;
+      }
+
+      if (count === 0) {
+        // Fallback: average all non-transparent pixels
+        for (let i = 0; i < data.length; i += 4) {
+          if (data[i + 3] < 128) continue;
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+          count++;
+        }
+      }
+
+      if (count === 0) {
+        resolve('#c9a227');
+        return;
+      }
+
+      resolve(`rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`);
+    };
+    img.onerror = () => resolve('#c9a227');
+    img.src = imageUrl;
+  });
+}
+
 function extractWeekday(dateStr: string, isZh?: boolean): string {
   if (isZh) {
     const match = dateStr.match(/周([一二三四五六日])/);
@@ -68,6 +128,7 @@ export default function SpecialEventPage({
   const [entries, setEntries] = useState<RsvpEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitError, setSubmitError] = useState('');
+  const [themeColor, setThemeColor] = useState('rgb(201, 162, 39)'); // default gold
 
   const storageKey = 'jiuwo-rsvp-20260605';
   const eventSlug = 'event-20260605';
@@ -84,6 +145,11 @@ export default function SpecialEventPage({
       setLoading(false);
     }
   };
+
+  // Extract theme color from poster for desktop ambient glow
+  useEffect(() => {
+    extractDominantColor('/images/events/event-20260605-2.webp').then(setThemeColor).catch(() => {});
+  }, []);
 
   // Migrate any localStorage entries to the database on first load
   useEffect(() => {
@@ -146,6 +212,14 @@ export default function SpecialEventPage({
 
   return (
     <div className="relative bg-[#0a0a0a]">
+      {/* Desktop ambient glow — extracted from poster theme color */}
+      <div
+        className="hidden md:block absolute inset-0 pointer-events-none z-0"
+        style={{
+          background: `radial-gradient(ellipse at 50% 35%, ${themeColor}18 0%, ${themeColor}0a 30%, transparent 65%)`,
+        }}
+      />
+
       {/* Poster section */}
       <div className="relative w-full md:max-w-lg mx-auto h-[100vh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16 overflow-hidden">
         {/* Background image - shifted down so head is lower, title sits above */}

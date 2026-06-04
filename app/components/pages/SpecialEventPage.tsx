@@ -59,19 +59,20 @@ export default function SpecialEventPage({
       {/* Poster container - portrait orientation */}
       <div className="relative w-full md:max-w-lg h-full overflow-hidden">
         {/* Background image - shifted down so head is lower, title sits above */}
-        <div className="absolute inset-x-0 -top-4 -bottom-12">
-          <Image
-            src="/images/events/event-20260605-2.webp"
-            alt={event.title}
-            fill
-            className="object-cover object-[center_10%]"
-            priority
-            sizes="(max-width: 768px) 100vw, 512px"
-          />
-        </div>
+        <Image
+          src="/images/events/event-20260605-2.webp"
+          alt={event.title}
+          fill
+          className="object-cover object-[center_10%]"
+          priority
+          sizes="(max-width: 768px) 100vw, 512px"
+        />
 
         {/* Top gradient: fades image into black background */}
         <div className="absolute top-0 left-0 right-0 h-[35%] bg-gradient-to-b from-black via-black/80 to-transparent" />
+
+        {/* Bottom gradient: fades image into page background */}
+        <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent pointer-events-none" />
 
         {/* Gradient overlays for text readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-40% to-black/70" />

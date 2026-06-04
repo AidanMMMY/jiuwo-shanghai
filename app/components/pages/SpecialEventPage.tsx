@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 interface RsvpEntry {
+  id: number;
   name: string;
-  timestamp: number;
+  created_at: string;
 }
 
 interface SpecialEvent {
@@ -65,30 +66,71 @@ export default function SpecialEventPage({
   const [showModal, setShowModal] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [entries, setEntries] = useState<RsvpEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const storageKey = 'jiuwo-rsvp-20260605';
+  const eventSlug = 'event-20260605';
 
-  useEffect(() => {
+  // Load entries from API
+  const fetchEntries = async () => {
     try {
-      const raw = localStorage.getItem(storageKey);
-      if (raw) setEntries(JSON.parse(raw));
-    } catch {
-      // ignore
+      const res = await fetch(`/api/rsvp?event=${eventSlug}`);
+      const data = await res.json();
+      if (data.entries) setEntries(data.entries);
+    } catch (err) {
+      console.error('Failed to fetch RSVP entries:', err);
+    } finally {
+      setLoading(false);
     }
-  }, [storageKey]);
+  };
 
-  const handleSubmit = () => {
+  // Migrate any localStorage entries to the database on first load
+  useEffect(() => {
+    const migrateLocalStorage = async () => {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return;
+        const localEntries = JSON.parse(raw) as { name: string; timestamp?: number }[];
+        if (!Array.isArray(localEntries) || localEntries.length === 0) return;
+
+        // Post each local entry to the API
+        for (const entry of localEntries) {
+          if (!entry.name?.trim()) continue;
+          await fetch('/api/rsvp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: entry.name.trim(), eventSlug }),
+          });
+        }
+
+        // Clear localStorage after successful migration
+        localStorage.removeItem(storageKey);
+      } catch {
+        // ignore
+      }
+    };
+
+    migrateLocalStorage().then(fetchEntries);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSubmit = async () => {
     const trimmed = nameInput.trim();
     if (!trimmed) return;
-    const next = [...entries, { name: trimmed, timestamp: Date.now() }];
-    setEntries(next);
     try {
-      localStorage.setItem(storageKey, JSON.stringify(next));
-    } catch {
-      // ignore
+      const res = await fetch('/api/rsvp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: trimmed, eventSlug }),
+      });
+      if (res.ok) {
+        await fetchEntries();
+        setNameInput('');
+        setShowModal(false);
+      }
+    } catch (err) {
+      console.error('RSVP submit failed:', err);
     }
-    setNameInput('');
-    setShowModal(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -216,14 +258,18 @@ export default function SpecialEventPage({
         >
           {isZh ? '谁来啦' : "Who's Coming"}
         </h2>
-        {entries.length === 0 ? (
+        {loading ? (
+          <p className="text-sm text-[#666] tracking-wider italic">
+            {isZh ? '加载中…' : 'Loading…'}
+          </p>
+        ) : entries.length === 0 ? (
           <p className="text-sm text-[#666] tracking-wider italic">
             {isZh ? '还没人来，做第一个！' : 'No one yet. Be the first!'}
           </p>
         ) : (
           <div className="flex flex-col gap-3">
-            {entries.map((entry, i) => (
-              <p key={i} className="text-sm text-[#f5f5f0]/90 tracking-wider">
+            {entries.map((entry) => (
+              <p key={entry.id} className="text-sm text-[#f5f5f0]/90 tracking-wider">
                 <span className="text-[#c9a227]">{entry.name}</span>
                 {' '}
                 {isZh ? '要来' : 'is coming'}

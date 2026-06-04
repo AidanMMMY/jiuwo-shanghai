@@ -63,7 +63,7 @@ export default function SpecialEventPage({
           src="/images/events/event-20260605-2.webp"
           alt={event.title}
           fill
-          className="object-cover object-[center_20%]"
+          className="object-cover object-[center_10%]"
           priority
           sizes="(max-width: 768px) 100vw, 512px"
         />

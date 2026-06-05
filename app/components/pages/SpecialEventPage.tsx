@@ -351,13 +351,15 @@ export default function SpecialEventPage({
           </p>
         ) : (
           <div className="flex flex-col gap-3">
-            {entries.map((entry) => (
-              <p key={entry.id} className="text-sm text-[#f5f5f0]/90 tracking-wider">
-                <span className="text-[#c9a227]">{entry.name}</span>
-                {' '}
-                {isZh ? '要来' : 'is coming'}
-              </p>
-            ))}
+            {entries
+              .filter((entry, index, self) => index === self.findIndex((e) => e.name === entry.name))
+              .map((entry) => (
+                <p key={entry.id} className="text-sm text-[#f5f5f0]/90 tracking-wider">
+                  <span className="text-[#c9a227]">{entry.name}</span>
+                  {' '}
+                  {isZh ? '要来' : 'is coming'}
+                </p>
+              ))}
           </div>
         )}
       </div>

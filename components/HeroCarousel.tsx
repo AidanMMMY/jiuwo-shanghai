@@ -223,7 +223,7 @@ export default function HeroCarousel({
               {/* Aurora background */}
               <div className="event-aurora-bg" aria-hidden="true" />
               {/* Content */}
-              <div className="relative rounded-xl bg-[#0f0f0f]/80 border border-[#c9a227]/20 px-6 py-3.5 inline-flex flex-col items-center gap-2">
+              <div className="relative rounded-xl bg-[#0f0f0f]/60 border border-[#c9a227]/20 px-6 py-3.5 inline-flex flex-col items-center gap-2">
                 {/* Line 1: hero text with shimmer */}
                 <span className="text-xs md:text-sm tracking-wider event-text-shimmer">
                   {specialEvent.hero}

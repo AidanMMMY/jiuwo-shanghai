@@ -128,8 +128,11 @@ export default function JournalEntryWithLikes({
             className={
               entry.coverAspect === 'tall'
                 ? 'max-w-full max-h-[66vh] w-auto h-auto rounded-lg object-contain block transition-transform duration-500 ease-out group-hover:scale-[1.02]'
-                : 'w-full h-auto rounded-lg block transition-transform duration-500 ease-out group-hover:scale-[1.02]'
+                : entry.coverAspect === 'square'
+                  ? 'aspect-square object-cover block transition-transform duration-500 ease-out group-hover:scale-[1.02]'
+                  : 'w-full h-auto rounded-lg block transition-transform duration-500 ease-out group-hover:scale-[1.02]'
             }
+            style={entry.coverAspect === 'square' ? { objectPosition: '40% center' } : undefined}
           />
           <button
             onClick={async (e) => {

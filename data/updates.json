@@ -6,7 +6,8 @@
     "date": "2025-01-12",
     "cover": "/images/journal/20250112.webp",
     "content": "Can't believe it's been this long. Will you come back? See you then.",
-    "contentZh": "竟然这么久了。还会回来吗？等你。"
+    "contentZh": "竟然这么久了。还会回来吗？等你。",
+    "coverAspect": "square"
   },
   {
     "slug": "thankful",

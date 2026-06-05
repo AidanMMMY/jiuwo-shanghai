@@ -1,5 +1,14 @@
 [
   {
+    "slug": "with-you",
+    "title": "With You",
+    "titleZh": "与你们",
+    "date": "2026-06-05",
+    "cover": "/images/journal/20260605-01.webp",
+    "content": "Glad you're here. Let's make this last.",
+    "contentZh": "你来了，就好。让此刻，慢些走。"
+  },
+  {
     "slug": "cheers-to-that",
     "title": "Cheers to That",
     "titleZh": "干杯吧",

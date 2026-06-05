@@ -25,9 +25,9 @@ export default function GalleryGrid({ albums, basePath = '' }: { albums: Gallery
                   src={album.cover}
                   alt={album.title}
                   fill
-                  className="object-cover transition-all duration-500 group-hover:scale-105 active:scale-[0.98] active:brightness-110 img-brightness"
+                  className="object-cover will-change-transform transition-transform duration-500 group-hover:scale-105 active:scale-[0.98]"
                 />
-                <div className="absolute inset-0 bg-black/30 transition-colors duration-500 group-hover:bg-black/10" />
+                <div className="absolute inset-0 bg-black/30 opacity-100 transition-opacity duration-500 group-hover:opacity-40" />
                 {/* Photo count badge */}
                 <div className="absolute top-3 right-3 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium tracking-wide text-[#f5f5f0] tabular-nums backdrop-blur-sm">
                   {album.photos.length}

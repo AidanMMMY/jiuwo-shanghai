@@ -416,15 +416,6 @@ a:not([class*="no-link-style"]) {
         text-shadow: 0 0 12px rgba(201,162,39,0.3);
     }
 
-    /* ── Image Brightness Hover ── */
-    .img-brightness {
-        transition: filter 300ms ease, transform 300ms ease;
-    }
-    .group:hover .img-brightness,
-    .img-brightness:hover {
-        filter: brightness(1.08);
-    }
-
     @media (prefers-reduced-motion: reduce) {
         .reveal-title, .reveal-text, .reveal-image, .reveal-card, .reveal-data {
             opacity: 1;

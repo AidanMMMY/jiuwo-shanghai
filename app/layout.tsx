@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Bodoni_Moda, Space_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import OrientLock from "@/components/OrientLock";
 import "./globals.css";
 
 const inter = Inter({
@@ -96,6 +97,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${bodoni.variable} ${spaceMono.variable} font-sans antialiased`}>
+        <OrientLock />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){function apply(){var dark=window.matchMedia('(prefers-color-scheme: dark)').matches;var href=dark?'/images/logo-for-dark.png':'/images/logo-for-light.png';document.querySelectorAll('link[rel="icon"]').forEach(function(el){el.parentNode.removeChild(el);});var link=document.createElement('link');link.rel='icon';link.href=href;document.head.appendChild(link);}apply();var mq=window.matchMedia('(prefers-color-scheme: dark)');mq.addEventListener?mq.addEventListener('change',apply):mq.addListener(apply);})();`,

@@ -1,5 +1,14 @@
 [
   {
+    "slug": "cheers-to-that",
+    "title": "Cheers to That",
+    "titleZh": "干杯吧",
+    "date": "2023-03-04",
+    "cover": "/images/journal/20230304-01.webp",
+    "content": "We are here, we are home, we are glad to have each other.",
+    "contentZh": "我们在，到家了，有彼此在，挺好。"
+  },
+  {
     "slug": "overshot",
     "title": "Overshot",
     "titleZh": "飞过头了",

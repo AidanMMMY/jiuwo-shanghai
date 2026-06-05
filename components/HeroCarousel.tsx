@@ -187,7 +187,7 @@ export default function HeroCarousel({
               {/* Aurora background */}
               <div className="event-aurora-bg" aria-hidden="true" />
               {/* Content */}
-              <div className="relative rounded-xl bg-[#0f0f0f]/80 border border-[#c9a227]/20 px-6 py-3.5 inline-flex flex-col items-center gap-2 transition-all duration-300 group-hover:border-[#c9a227]/50 group-hover:shadow-[0_0_24px_rgba(201,162,39,0.12),inset_0_0_20px_rgba(201,162,39,0.04)]">
+              <div className="relative rounded-xl bg-[#0f0f0f]/40 border border-[#c9a227]/20 px-6 py-3.5 inline-flex flex-col items-center gap-2 transition-all duration-300 group-hover:border-[#c9a227]/50 group-hover:shadow-[0_0_24px_rgba(201,162,39,0.12),inset_0_0_20px_rgba(201,162,39,0.04)]">
                 {/* Line 1: hero text with shimmer */}
                 <span className="text-xs md:text-sm tracking-wider event-text-shimmer">
                   {specialEvent.hero}
@@ -330,7 +330,7 @@ export default function HeroCarousel({
           75%  { transform: translate(3%, 2%) rotate(0.5deg) scale(1.04); }
         }
         @keyframes auroraBreathe {
-          0%, 100% { opacity: 0.6; }
+          0%, 100% { opacity: 0.35; }
           50% { opacity: 1; }
         }
         .event-entry-wrapper {

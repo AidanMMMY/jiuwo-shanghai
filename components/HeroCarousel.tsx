@@ -411,13 +411,13 @@ export default function HeroCarousel({
         .hero-title-shine {
           display: inline-block;
           background-image: linear-gradient(105deg,
-            #A82A4A 0%,
-            #D48878 17%,
-            #D4A838 34%,
-            #E8C860 51%,
-            #D87848 68%,
-            #C06068 85%,
-            #A82A4A 100%);
+            #C85060 0%,
+            #E8A898 17%,
+            #E8C050 34%,
+            #F5E088 51%,
+            #E89860 68%,
+            #D88088 85%,
+            #C85060 100%);
           background-size: 400% 100%;
           background-position: 0% 50%;
           background-clip: text;

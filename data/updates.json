@@ -1,5 +1,14 @@
 [
   {
+    "slug": "big-night",
+    "title": "Big Night",
+    "titleZh": "大夜",
+    "date": "2026-06-06",
+    "cover": "/images/journal/20260606-01.webp",
+    "content": "Pink pigs at the door. No one kept a straight face. Small place, big night.",
+    "contentZh": "门口粉猪，没人绷住。小地方，大晚上。"
+  },
+  {
     "slug": "miss-you-already",
     "title": "Miss You Already",
     "titleZh": "念",

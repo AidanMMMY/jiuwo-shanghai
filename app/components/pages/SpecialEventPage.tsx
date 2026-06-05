@@ -216,7 +216,10 @@ export default function SpecialEventPage({
       <div
         className="hidden md:block absolute inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse at 50% 35%, ${themeColor}18 0%, ${themeColor}0a 30%, transparent 65%)`,
+          background: `
+            radial-gradient(ellipse 50% 50% at 50% 38%, ${themeColor}35 0%, ${themeColor}18 30%, ${themeColor}08 55%, transparent 80%),
+            radial-gradient(ellipse 80% 80% at 50% 45%, ${themeColor}15 0%, ${themeColor}06 40%, transparent 70%)
+          `,
         }}
       />
 

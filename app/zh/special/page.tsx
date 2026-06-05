@@ -1,33 +1,24 @@
 import type { Metadata } from 'next';
-import SpecialEventPage from '@/app/components/pages/SpecialEventPage';
-import { getSiteDataZh } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: '特别活动',
-  description: '啾喔一夜特别活动。一日店长接管吧台。',
+  description: '敬请期待。',
 };
 
-export default async function Page() {
-  const site = await getSiteDataZh();
-
-  if (!site.specialEvent?.enabled) {
-    return (
-      <main className="bg-[#0a0a0a] min-h-[100lvh] flex items-center justify-center">
-        <p className="text-[#a0a0a0]">暂无特别活动。</p>
-      </main>
-    );
-  }
-
+export default function Page() {
   return (
-    <SpecialEventPage
-      event={{
-        label: site.specialEvent.label,
-        title: site.specialEvent.title,
-        hostName: site.specialEvent.hostName,
-        date: site.specialEvent.date,
-        isZh: true,
-      }}
-      backHref="/zh"
-    />
+    <main className="bg-[#0a0a0a] min-h-[100lvh] flex items-center justify-center">
+      <div className="text-center px-6">
+        <p
+          className="text-2xl md:text-3xl text-[#c9a227] tracking-[0.15em] mb-4"
+          style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
+        >
+          Coming Soon
+        </p>
+        <p className="text-sm text-[#a0a0a0] tracking-wider">
+          精彩即将呈现，敬请期待。
+        </p>
+      </div>
+    </main>
   );
 }

@@ -1,33 +1,24 @@
 import type { Metadata } from 'next';
-import SpecialEventPage from '@/app/components/pages/SpecialEventPage';
-import { getSiteData } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: 'Special Event',
-  description: 'A special night at JIUWO. One-night guest bartender takeover.',
+  description: 'Coming soon at JIUWO.',
 };
 
-export default async function Page() {
-  const site = await getSiteData();
-
-  if (!site.specialEvent?.enabled) {
-    return (
-      <main className="bg-[#0a0a0a] min-h-[100lvh] flex items-center justify-center">
-        <p className="text-[#a0a0a0]">No special event at this time.</p>
-      </main>
-    );
-  }
-
+export default function Page() {
   return (
-    <SpecialEventPage
-      event={{
-        label: site.specialEvent.label,
-        title: site.specialEvent.title,
-        hostName: site.specialEvent.hostName,
-        date: site.specialEvent.date,
-        isZh: false,
-      }}
-      backHref="/"
-    />
+    <main className="bg-[#0a0a0a] min-h-[100lvh] flex items-center justify-center">
+      <div className="text-center px-6">
+        <p
+          className="text-2xl md:text-3xl text-[#c9a227] tracking-[0.15em] mb-4"
+          style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
+        >
+          Coming Soon
+        </p>
+        <p className="text-sm text-[#a0a0a0] tracking-wider">
+          Something special is brewing. Stay tuned.
+        </p>
+      </div>
+    </main>
   );
 }

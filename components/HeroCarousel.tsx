@@ -142,7 +142,7 @@ export default function HeroCarousel({
       {/* Title & Tagline — name/tagline position locked */}
       <div
         className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
-        style={{ paddingBottom: '14rem' }}
+        style={{ paddingBottom: '18rem' }}
       >
         <div className="hero-title-breathe hero-normal-title">
           <AnimatedTitle text={title} />
@@ -173,7 +173,7 @@ export default function HeroCarousel({
       {specialEvent && (
         <div
           className="z-10 flex justify-center pointer-events-none"
-          style={{ position: 'absolute', left: 0, right: 0, bottom: '13rem' }}
+          style={{ position: 'absolute', left: 0, right: 0, bottom: '11rem' }}
         >
           {specialEvent.href ? (
             <Link

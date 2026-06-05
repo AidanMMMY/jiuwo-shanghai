@@ -1,5 +1,14 @@
 [
   {
+    "slug": "thankful",
+    "title": "Thankful",
+    "titleZh": "感恩",
+    "date": "2025-03-13",
+    "cover": "/images/journal/20250313-01.webp",
+    "content": "Special birthday, special companies.",
+    "contentZh": "特别的日子，有你们在，就好。"
+  },
+  {
     "slug": "with-you",
     "title": "With You",
     "titleZh": "与你们",

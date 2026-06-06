@@ -24,10 +24,10 @@ export default function PastEventsGrid({
             {t('PAST EVENTS', '往期活动')}
           </p>
           <h1
-            className="text-3xl md:text-4xl text-[#f5f5f0] tracking-[0.08em]"
-            style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
+            className="text-xl md:text-2xl text-[#a0a0a0] tracking-[0.06em]"
+            style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 400 }}
           >
-            {t('Memories from JIUWO', '啾喔回忆录')}
+            {t('Memories', '回忆')}
           </h1>
         </div>
 

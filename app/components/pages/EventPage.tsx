@@ -129,7 +129,7 @@ export default function EventPage({
         />
 
         {/* Top gradient: fades image into black background */}
-        <div className="absolute top-0 left-0 right-0 h-[35%] bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[35%] bg-gradient-to-b from-black via-black/80 to-transparent" />
 
         {/* Bottom gradient: fades image into page background */}
         <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent pointer-events-none" />

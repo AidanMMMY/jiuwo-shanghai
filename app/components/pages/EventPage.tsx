@@ -180,7 +180,7 @@ export default function EventPage({
         </div>
 
         {/* Poster section */}
-        <div className="relative z-[2] w-full md:max-w-lg mx-auto h-[100dvh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16 overflow-hidden">
+        <div className="relative z-[2] w-full md:max-w-lg mx-auto h-[100dvh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16 overflow-hidden" style={{ minHeight: '-webkit-fill-available' }}>
         {/* Background image */}
         <Image
           src={event.poster}
@@ -194,15 +194,15 @@ export default function EventPage({
         {/* Top gradient: fades image into black background */}
         <div className="absolute top-0 left-0 right-0 h-[35%] bg-gradient-to-b from-black via-black/80 to-transparent" />
 
-        {/* Bottom gradient: fades image into page background */}
-        <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent pointer-events-none" />
+        {/* Bottom gradient: subtle fade at the very edge for text readability */}
+        <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent pointer-events-none" />
 
         {/* Gradient overlays for text readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-40% to-[#0a0a0a]/70" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/20 via-transparent to-[#0a0a0a]/20" />
 
         {/* Content overlay */}
-        <div className="absolute inset-0 flex flex-col px-6 pt-20 pb-4 md:pt-4 md:pb-4">
+        <div className="absolute inset-0 flex flex-col px-6 pt-20 pb-0 md:pt-4 md:pb-4">
 
           {/* Back link */}
           <Link
@@ -246,7 +246,7 @@ export default function EventPage({
           <div className="flex-1" />
 
           {/* Bottom: Description + Date + Venue */}
-          <div className="w-full pb-2 mb-6">
+          <div className="w-full pb-2">
             {/* Description */}
             <div className="text-left mb-2 max-w-[280px]">
               {subtitle && (

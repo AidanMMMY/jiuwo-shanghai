@@ -115,6 +115,7 @@ export type EventItem = {
   descriptionZh: string;
   subtitle: string;
   subtitleZh: string;
+  cover?: string;
   poster: string;
   venue: string;
   venueZh: string;
@@ -440,6 +441,7 @@ const eventItemSchema = z.object({
   descriptionZh: z.string(),
   subtitle: z.string(),
   subtitleZh: z.string(),
+  cover: z.string().optional(),
   poster: z.string(),
   venue: z.string(),
   venueZh: z.string(),

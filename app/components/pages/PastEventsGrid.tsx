@@ -50,24 +50,15 @@ export default function PastEventsGrid({
                 href={`${basePath}/${event.slug}`}
                 className="group block"
               >
-                {/* Poster */}
+                {/* Cover image — uses event.cover, falls back to event.poster */}
                 <div className="relative aspect-[3/4] overflow-hidden rounded-lg mb-4 bg-[#0e0e0e]">
                   <Image
-                    src={event.poster}
+                    src={event.cover || event.poster}
                     alt={t(event.title, event.titleZh)}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 256px"
                   />
-                  {/* Subtitle overlay on image */}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-8 pb-3 px-3">
-                    <p
-                      className="text-sm md:text-base text-[#f5f5f0] leading-tight tracking-[0.04em]"
-                      style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
-                    >
-                      {t(event.subtitle, event.subtitleZh)}
-                    </p>
-                  </div>
                   {/* Hover overlay */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
                   {/* Border glow on hover */}
@@ -90,6 +81,9 @@ export default function PastEventsGrid({
                       {event.hostName}
                     </p>
                   )}
+                  <p className="text-xs text-[#808080] mt-1.5 leading-relaxed line-clamp-2">
+                    {t(event.subtitle, event.subtitleZh)}
+                  </p>
                 </div>
               </Link>
             ))}

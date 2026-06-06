@@ -40,5 +40,5 @@ export default async function Page({
   const event = await getEventBySlugZh(slug);
   if (!event) notFound();
 
-  return <EventPage event={event} backHref="/zh" isZh={true} />;
+  return <EventPage event={event} backHref="/zh/special" isZh={true} />;
 }

@@ -40,5 +40,5 @@ export default async function Page({
   const event = await getEventBySlug(slug);
   if (!event) notFound();
 
-  return <EventPage event={event} backHref="/" isZh={false} />;
+  return <EventPage event={event} backHref="/special" isZh={false} />;
 }

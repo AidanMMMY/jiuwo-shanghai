@@ -13,6 +13,7 @@ export default function JournalCard({ entry, basePath = '' }: { entry: JournalEn
             src={entry.cover}
             alt={entry.title}
             fill
+            sizes="(max-width: 768px) 100vw, 768px"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         </div>

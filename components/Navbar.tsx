@@ -118,6 +118,7 @@ export default function Navbar({
               src="/images/logo.png"
               alt="logo"
               fill
+              sizes="32px"
               className={`object-contain transition-transform duration-100 ${logoPulse ? 'scale-110' : 'scale-100'}`}
             />
           </div>

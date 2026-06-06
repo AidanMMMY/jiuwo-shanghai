@@ -239,6 +239,7 @@ export default function Lightbox({
                       src={p.src}
                       alt={p.alt}
                       fill
+                      sizes="(max-width: 768px) 100vw, 80vw"
                       className="object-contain"
                       priority={i === selectedIndex}
                     />

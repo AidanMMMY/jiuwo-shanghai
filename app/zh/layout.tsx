@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BackToTop from "@/components/BackToTop";
 import ReadingProgress from "@/components/ReadingProgress";
 import { getSiteDataZh } from "@/lib/data";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteDataZh();
@@ -27,7 +21,7 @@ export default async function ZhLayout({
   const site = await getSiteDataZh();
 
   return (
-    <div className={`${inter.variable} font-sans antialiased flex flex-col min-h-[100dvh]`}>
+    <div className="font-sans antialiased flex flex-col min-h-[100dvh]">
       {/* Ambient light layer */}
       <div className="ambient-light" aria-hidden="true">
         <div className="ambient-light-blob" />

@@ -97,7 +97,7 @@ function PhotoCard({
       className="relative aspect-square overflow-hidden rounded-lg cursor-pointer select-none overflow-hidden"
       onClick={handleClick}
     >
-      <Image src={photo.src} alt={photo.alt} fill className="object-cover transition-all duration-500 active:scale-[0.98] active:brightness-110" />
+      <Image src={photo.src} alt={photo.alt} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover transition-all duration-500 active:scale-[0.98] active:brightness-110" />
 
       {/* Double-click heart animation */}
       {showHeart && (

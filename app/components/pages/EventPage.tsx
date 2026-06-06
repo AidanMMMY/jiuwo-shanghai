@@ -180,7 +180,7 @@ export default function EventPage({
         </div>
 
         {/* Poster section */}
-        <div className="relative z-[2] w-full md:max-w-lg mx-auto h-[100vh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16 overflow-hidden">
+        <div className="relative z-[2] w-full md:max-w-lg mx-auto h-[100dvh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16 overflow-hidden">
         {/* Background image */}
         <Image
           src={event.poster}

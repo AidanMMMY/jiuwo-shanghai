@@ -24,6 +24,7 @@ export default function MenuSection({ category }: { category: MenuCategory }) {
                       src={item.image}
                       alt={item.name}
                       fill
+                      sizes="64px"
                       className="object-cover transition-all duration-300 group-hover:scale-105 active:scale-[0.98] img-brightness"
                     />
                   </div>

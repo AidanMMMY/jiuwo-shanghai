@@ -26,6 +26,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: "#0a0a0a",
 };
 
 export const metadata: Metadata = {
@@ -83,6 +84,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/images/logo-for-light.png",
+    apple: "/images/logo-for-light.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "JIUWO",
+    statusBarStyle: "black",
   },
   verification: {
     google: "google-site-verification-code",

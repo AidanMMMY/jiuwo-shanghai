@@ -25,6 +25,7 @@ export default function GalleryGrid({ albums, basePath = '' }: { albums: Gallery
                   src={album.cover}
                   alt={album.title}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="object-cover will-change-transform transition-transform duration-500 group-hover:scale-105 active:scale-[0.98]"
                 />
                 <div className="absolute inset-0 bg-black/30 opacity-100 transition-opacity duration-500 group-hover:opacity-40" />

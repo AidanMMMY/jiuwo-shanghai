@@ -130,37 +130,45 @@ export default function EventPage({
     [entries]
   );
 
-  // Compute stable positions for floating names (desktop glow)
-  const floatingNames = useMemo(
-    () =>
-      dedupedEntries.map((entry, i) => ({
+  // Side names — allow repeats for density; static positions; breathing via CSS only
+  const sideNames = useMemo(() => {
+    interface NamePos {
+      id: number;
+      name: string;
+      x: number;
+      y: number;
+      delay: number;
+      duration: number;
+      size: number;
+    }
+    const left: NamePos[] = [];
+    const right: NamePos[] = [];
+
+    entries.forEach((entry, i) => {
+      const base = {
         id: entry.id,
         name: entry.name,
-        x: 5 + nameHash(entry.name, 1) * 90,            // 5–95%
-        y: 8 + nameHash(entry.name, 2) * 84,             // 8–92%
-        delay: (i * 1.3) % 14,                            // 0–14s stagger
-        duration: 9 + nameHash(entry.name, 3) * 10,       // 9–19s
-        size: 0.7 + nameHash(entry.name, 4) * 1.6,       // 0.7–2.3rem
-      })),
-    [dedupedEntries]
-  );
-
-  // Split into left / right side columns for desktop gutter placement
-  const sideNames = useMemo(() => {
-    const left: typeof floatingNames = [];
-    const right: typeof floatingNames = [];
-    floatingNames.forEach((n, i) => {
-      const clone = { ...n };
+        delay: (i * 0.9) % 18,
+        duration: 13 + (entry.id * 3) % 10,
+        size: 0.9 + nameHash(entry.name, 3) * 1.4,
+      };
       if (i % 2 === 0) {
-        clone.x = 2 + nameHash(n.name, 5) * 26;   // 2–28%
-        left.push(clone);
+        left.push({
+          ...base,
+          x: 2 + nameHash(entry.name, 5) * 26,
+          y: 4 + nameHash(entry.name, 7) * 88,
+        });
       } else {
-        clone.x = 72 + nameHash(n.name, 6) * 26;   // 72–98%
-        right.push(clone);
+        right.push({
+          ...base,
+          x: 72 + nameHash(entry.name, 6) * 26,
+          y: 4 + nameHash(entry.name, 8) * 88,
+        });
       }
     });
+
     return { left, right };
-  }, [floatingNames]);
+  }, [entries]);
 
   return (
     <div className="relative bg-[#0a0a0a]">
@@ -172,7 +180,7 @@ export default function EventPage({
         </div>
 
         {/* Poster section */}
-        <div className="relative z-[1] w-full md:max-w-lg mx-auto h-[100vh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16 overflow-hidden">
+        <div className="relative z-[2] w-full md:max-w-lg mx-auto h-[100vh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16 overflow-hidden">
         {/* Background image */}
         <Image
           src={event.poster}
@@ -285,15 +293,15 @@ export default function EventPage({
 
       {/* Side floating names — desktop only, in left/right gutters */}
       {showRetrospective && (
-        <div className="hidden md:block absolute inset-0 z-[2] pointer-events-none overflow-hidden" aria-hidden="true">
+        <div className="hidden md:block absolute inset-0 z-[1] pointer-events-none overflow-hidden" aria-hidden="true">
           {sideNames.left.map((n) => (
             <span
               key={n.id}
-              className="absolute whitespace-nowrap side-name text-[#c9a227] select-none"
+              className="absolute whitespace-nowrap side-name select-none"
               style={{
                 left: `${n.x}%`,
                 top: `${n.y}%`,
-                fontSize: `${n.size * 0.9}rem`,
+                fontSize: `${n.size * 1.3}rem`,
                 animationDelay: `${n.delay}s`,
                 animationDuration: `${n.duration}s`,
               }}
@@ -304,11 +312,11 @@ export default function EventPage({
           {sideNames.right.map((n) => (
             <span
               key={n.id}
-              className="absolute whitespace-nowrap side-name text-[#c9a227] select-none"
+              className="absolute whitespace-nowrap side-name select-none"
               style={{
                 left: `${n.x}%`,
                 top: `${n.y}%`,
-                fontSize: `${n.size * 0.9}rem`,
+                fontSize: `${n.size * 1.3}rem`,
                 animationDelay: `${n.delay}s`,
                 animationDuration: `${n.duration}s`,
               }}
@@ -428,41 +436,52 @@ export default function EventPage({
       <style>{`
         @keyframes sideGlowDrift {
           0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-          25%  { transform: translate(3%, -2%) rotate(1deg) scale(1.06); }
-          50%  { transform: translate(-2%, 3%) rotate(-0.5deg) scale(1.03); }
-          75%  { transform: translate(2%, 1%) rotate(0.5deg) scale(1.05); }
+          20%  { transform: translate(4%, -3%) rotate(1.5deg) scale(1.08); }
+          40%  { transform: translate(-1%, 4%) rotate(-0.8deg) scale(1.04); }
+          60%  { transform: translate(-3%, -1%) rotate(1deg) scale(1.06); }
+          80%  { transform: translate(2%, 2%) rotate(-1.2deg) scale(1.03); }
         }
         @keyframes sideGlowBreathe {
-          0%, 100% { opacity: 0.55; }
-          50% { opacity: 0.9; }
+          0%, 100% { opacity: 0.45; }
+          30%  { opacity: 0.95; }
+          60%  { opacity: 0.6; }
+          80%  { opacity: 0.88; }
+        }
+        @keyframes sideGlowShimmer {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
         }
         @keyframes nameFadeFloat {
-          0%, 100% { opacity: 0.06; transform: translateY(0); }
-          20%  { opacity: 0.6; transform: translateY(-4px); }
-          40%  { opacity: 0.18; transform: translateY(2px); }
-          60%  { opacity: 0.5; transform: translateY(-2px); }
-          80%  { opacity: 0.1; transform: translateY(0); }
+          0%, 100% { opacity: 0; transform: scale(0.88); filter: blur(3.5px); }
+          18%      { opacity: 0.35; transform: scale(1.04); filter: blur(0px); }
+          35%      { opacity: 0.40; transform: scale(1.06); filter: blur(0px); }
+          55%      { opacity: 0.25; transform: scale(1); filter: blur(1px); }
+          75%      { opacity: 0.08; transform: scale(0.94); filter: blur(2.5px); }
         }
         .event-side-glow {
           background:
-            radial-gradient(ellipse 60% 50% at 50% 50%, rgba(201,162,39,0.20) 0%, transparent 50%),
-            radial-gradient(ellipse 50% 35% at 30% 45%, rgba(210,120,80,0.12) 0%, transparent 55%),
-            radial-gradient(ellipse 55% 40% at 70% 48%, rgba(190,80,100,0.10) 0%, transparent 55%),
-            radial-gradient(ellipse 40% 30% at 50% 40%, rgba(220,180,60,0.15) 0%, transparent 60%),
-            radial-gradient(ellipse 70% 60% at 50% 50%, rgba(201,162,39,0.08) 0%, transparent 65%);
-          animation: sideGlowDrift 12s ease-in-out infinite, sideGlowBreathe 5s ease-in-out infinite;
-          filter: blur(35px);
+            radial-gradient(ellipse 65% 55% at 50% 50%, rgba(201,162,39,0.28) 0%, transparent 45%),
+            radial-gradient(ellipse 50% 38% at 32% 45%, rgba(220,140,80,0.18) 0%, transparent 50%),
+            radial-gradient(ellipse 55% 42% at 68% 48%, rgba(200,90,110,0.15) 0%, transparent 50%),
+            radial-gradient(ellipse 45% 32% at 48% 38%, rgba(240,200,70,0.20) 0%, transparent 55%),
+            radial-gradient(ellipse 75% 65% at 50% 52%, rgba(201,162,39,0.10) 0%, transparent 60%);
+          background-size: 150% 150%;
+          animation: sideGlowDrift 10s ease-in-out infinite, sideGlowBreathe 4s ease-in-out infinite, sideGlowShimmer 15s ease-in-out infinite;
+          filter: blur(40px);
         }
         .side-name {
-          font-family: var(--font-bodoni), Georgia, serif;
-          font-weight: 400;
-          letter-spacing: 0.06em;
-          animation: nameFadeFloat 12s ease-in-out infinite;
-          will-change: opacity, transform;
+          font-family: var(--font-inter), system-ui, sans-serif;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          font-style: italic;
+          color: rgba(201,162,39,0.40);
+          animation: nameFadeFloat 14s ease-in-out infinite backwards;
+          will-change: opacity, transform, filter;
+          backface-visibility: hidden;
         }
         @media (prefers-reduced-motion: reduce) {
           .event-side-glow { animation: none !important; }
-          .side-name { animation: none !important; opacity: 0.3 !important; }
+          .side-name { animation: none !important; opacity: 0.3 !important; filter: blur(1px) !important; }
         }
       `}</style>
 

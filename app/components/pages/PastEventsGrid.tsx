@@ -51,18 +51,19 @@ export default function PastEventsGrid({
                 className="group block"
               >
                 {/* Cover image — uses event.cover, falls back to event.poster */}
-                <div className="relative aspect-[3/4] overflow-hidden rounded-lg mb-4 bg-[#0e0e0e]">
+                <div className="relative overflow-hidden rounded-lg mb-4 bg-[#0e0e0e]">
                   <Image
                     src={event.cover || event.poster}
                     alt={t(event.title, event.titleZh)}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    width={800}
+                    height={600}
+                    className="w-full h-auto transition-transform duration-500 group-hover:scale-105"
                     sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 256px"
                   />
                   {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 pointer-events-none" />
                   {/* Border glow on hover */}
-                  <div className="absolute inset-0 rounded-lg border border-transparent group-hover:border-[#c9a227]/30 transition-all duration-300" />
+                  <div className="absolute inset-0 rounded-lg border border-transparent group-hover:border-[#c9a227]/30 transition-all duration-300 pointer-events-none" />
                 </div>
 
                 {/* Event info */}

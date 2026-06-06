@@ -1,14 +1,15 @@
 import { MetadataRoute } from 'next';
-import { getJournalEntries, getGalleryAlbums } from '@/lib/data';
+import { getJournalEntries, getGalleryAlbums, getEvents } from '@/lib/data';
 
 const BASE_URL = 'https://jiuwoshanghai.net';
 
-const STATIC_ROUTES = ['', '/about', '/menu', '/gallery', '/guestbook'];
+const STATIC_ROUTES = ['', '/about', '/menu', '/gallery', '/guestbook', '/special'];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [entries, albums] = await Promise.all([
+  const [entries, albums, events] = await Promise.all([
     getJournalEntries(),
     getGalleryAlbums(),
+    getEvents(),
   ]);
 
   const pages: MetadataRoute.Sitemap = [];
@@ -68,6 +69,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       alternates: {
         languages: {
           'zh-CN': `${BASE_URL}/zh/gallery/${album.id}`,
+        },
+      },
+    });
+  }
+
+  // Special event pages
+  for (const event of events) {
+    pages.push({
+      url: `${BASE_URL}/special/${event.slug}`,
+      lastModified: new Date(event.date),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+      alternates: {
+        languages: {
+          'zh-CN': `${BASE_URL}/zh/special/${event.slug}`,
         },
       },
     });

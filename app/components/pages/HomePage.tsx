@@ -18,6 +18,7 @@ export default function HomePage({
   weather,
   weatherRec,
   isZh,
+  specialEventCard,
 }: {
   site: SiteData;
   slides: HeroSlide[];
@@ -30,6 +31,7 @@ export default function HomePage({
   weather?: WeatherData | null;
   weatherRec?: WeatherRecommendation | null;
   isZh?: boolean;
+  specialEventCard?: { hero: string; hostName?: string; href?: string };
 }) {
   return (
     <>
@@ -38,7 +40,8 @@ export default function HomePage({
         title={site.name}
         tagline={site.tagline}
         intro={site.intro}
-        specialEvent={site.specialEvent?.enabled ? { hero: isZh ? site.specialEvent.hero : site.specialEvent.heroEn, hostName: site.specialEvent.hostName } : undefined}
+        specialEvent={specialEventCard}
+        isZh={isZh}
       />
       <WeatherVibe weather={weather ?? null} recommendation={weatherRec ?? null} isZh={isZh} />
       <JournalStream entries={entries} title={journalTitle} />

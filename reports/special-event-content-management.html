@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JIUWO Special Event 模块 — 内容管理指南</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --border: #222;
+    --text: #f5f5f0;
+    --muted: #a0a0a0;
+    --dim: #666;
+    --gold: #c9a227;
+    --code-bg: #1a1a1a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.7;
+    padding: 2rem;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-family: Georgia, 'Bodoni Moda', serif;
+    font-size: 2.2rem;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+    margin-bottom: 0.25rem;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  h2 {
+    font-family: Georgia, 'Bodoni Moda', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin: 2.8rem 0 1rem;
+    letter-spacing: 0.03em;
+  }
+  h3 {
+    font-size: 1.05rem;
+    color: var(--text);
+    margin: 1.8rem 0 0.6rem;
+    letter-spacing: 0.05em;
+  }
+  h3 .num {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--bg);
+    font-size: 0.75rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    line-height: 1.5rem;
+    text-align: center;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+  p, li { color: #d0d0d0; font-size: 0.95rem; }
+  strong { color: var(--text); }
+  ul, ol { padding-left: 1.5rem; margin: 0.5rem 0 1rem; }
+  li { margin: 0.35rem 0; }
+  a { color: var(--gold); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    background: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem 1.4rem;
+    overflow-x: auto;
+    margin: 0.8rem 0 1.2rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    color: #c0c0c0;
+    white-space: pre;
+  }
+  .key { color: var(--gold); }
+  .str { color: #7eb77f; }
+  .comment { color: #555; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    color: var(--gold);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  td { color: #c0c0c0; }
+  td:first-child code { font-size: 0.82em; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem 1.5rem;
+    margin: 1rem 0 1.5rem;
+  }
+  .card p { margin: 0.3rem 0; }
+  .card .path {
+    color: var(--dim);
+    font-size: 0.82rem;
+    font-family: 'Space Mono', 'Courier New', monospace;
+  }
+  .section-label {
+    display: inline-block;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 0.15em 0.7em;
+    border-radius: 100px;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  .flow {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 0.8rem 0;
+  }
+  .flow-step {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    color: #c0c0c0;
+  }
+  .flow-arrow { color: var(--gold); font-size: 1.1rem; }
+  .highlight-box {
+    background: rgba(201, 162, 39, 0.06);
+    border-left: 3px solid var(--gold);
+    padding: 0.8rem 1.2rem;
+    margin: 1rem 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .highlight-box p { margin: 0.2rem 0; }
+  @media (max-width: 640px) {
+    body { padding: 1.2rem; }
+    h1 { font-size: 1.7rem; }
+    pre { padding: 0.8rem 1rem; font-size: 0.78rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Special Event 模块 — 内容管理指南</h1>
+<p class="subtitle">JIUWO Shanghai · 2026-06-06 · Module Design</p>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>1. 核心原则</h2>
+
+<p>新模块下，一切围绕 <code>data/events.json</code> 展开。<strong>只需要改一个 JSON 数组 + 上传海报图</strong>，路由和页面全部由代码动态生成，无需碰任何 <code>.tsx</code> 文件。</p>
+
+<div class="card">
+  <p><span class="path">data/events.json</span></p>
+  <p style="margin-top:0.3rem;">&larr; 所有活动的<b>唯一数据源</b>（新建 / 修改 / 归档都在这里）</p>
+  <p style="margin-top:0.6rem;"><span class="path">data/site.json</span></p>
+  <p style="margin-top:0.3rem;">&larr; 只控制首页入口<b>开关</b> + 无活动时的<b>fallback 文案</b></p>
+  <p style="margin-top:0.6rem;"><span class="path">public/images/events/</span></p>
+  <p style="margin-top:0.3rem;">&larr; 海报图文件夹（按 slug 命名，小写扩展名）</p>
+  <p style="margin-top:0.6rem;"><span class="path">app/(en)/special/[slug]/page.tsx</span></p>
+  <p style="margin-top:0.3rem;">&larr; 动态路由，<b>无需手动创建</b></p>
+</div>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>2. 文件结构总览</h2>
+
+<pre><code><span class="comment"># 数据层</span>
+data/
+  events<span class="key">.</span>json          <span class="comment">← 所有活动的唯一数据源</span>
+  site<span class="key">.</span>json            <span class="comment">← 入口开关 + fallback 文案</span>
+
+<span class="comment"># 路由（动态生成，无需手动创建）</span>
+app/
+  (en)/special/<span class="key">[slug]</span>/page<span class="key">.</span>tsx   <span class="comment">← EN 活动详情页</span>
+  zh/special/<span class="key">[slug]</span>/page<span class="key">.</span>tsx     <span class="comment">← ZH 活动详情页</span>
+  (en)/special/page<span class="key">.</span>tsx          <span class="comment">← 入口网关（自动判断跳哪个）</span>
+  zh/special/page<span class="key">.</span>tsx
+
+<span class="comment"># 图片</span>
+public/images/events/
+  event-20260605<span class="key">.</span>webp      <span class="comment">← 按 slug 命名，小写扩展名</span>
+  event-20260718<span class="key">.</span>webp      <span class="comment">← 下一个活动</span></code></pre>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>3. 日常操作指南</h2>
+
+<!-- 场景一 -->
+<h3><span class="num">1</span> 发布一个新活动</h3>
+
+<p><strong>Step 1：</strong>上传海报图到 <code>public/images/events/</code>（建议 3:4 竖版，<code>.webp</code> 或 <code>.jpg</code>，<strong>小写扩展名</strong>）</p>
+
+<p><strong>Step 2：</strong>在 <code>data/events.json</code> 的 <code>events</code> 数组<strong>最前面</strong>插入新对象：</p>
+
+<pre><code>{
+  <span class="key">"slug"</span>: <span class="str">"event-20260718"</span>,
+  <span class="key">"title"</span>: <span class="str">"One Night Host"</span>,
+  <span class="key">"titleZh"</span>: <span class="str">"一日店长接管"</span>,
+  <span class="key">"label"</span>: <span class="str">"July 18"</span>,
+  <span class="key">"labelZh"</span>: <span class="str">"7月18日"</span>,
+  <span class="key">"hostName"</span>: <span class="str">"Alex"</span>,
+  <span class="key">"date"</span>: <span class="str">"2026-07-18"</span>,
+  <span class="key">"dateDisplay"</span>: <span class="str">"Saturday, July 18 · 8pm"</span>,
+  <span class="key">"dateDisplayZh"</span>: <span class="str">"7月18日 周六 · 晚8点"</span>,
+  <span class="key">"description"</span>: <span class="str">"Guest bartender Alex from Tokyo …"</span>,
+  <span class="key">"descriptionZh"</span>: <span class="str">"来自东京的客座调酒师 Alex …"</span>,
+  <span class="key">"subtitle"</span>: <span class="str">"Tokyo Meets Shanghai"</span>,
+  <span class="key">"subtitleZh"</span>: <span class="str">"东京遇见上海"</span>,
+  <span class="key">"poster"</span>: <span class="str">"/images/events/event-20260718.webp"</span>,
+  <span class="key">"venue"</span>: <span class="str">"Julu Rd. 397"</span>,
+  <span class="key">"venueZh"</span>: <span class="str">"巨鹿路397号"</span>,
+  <span class="key">"rsvpEnabled"</span>: <span class="key">true</span>,
+  <span class="key">"retrospective"</span>: <span class="str">""</span>,
+  <span class="key">"retrospectiveZh"</span>: <span class="str">""</span>,
+  <span class="key">"retrospectivePhotos"</span>: []
+}</code></pre>
+
+<div class="highlight-box">
+  <p><strong>系统自动行为：</strong></p>
+  <p>→ <code>/special</code> 自动 redirect 到 <code>/special/event-20260718</code></p>
+  <p>→ 首页 HeroCarousel 卡片显示「July 18」+「Alex」，可点击进入详情</p>
+  <p>→ RSVP 系统自动使用新 slug <code>event-20260718</code> 创建独立报名表</p>
+  <p>→ Sitemap 自动包含新页面</p>
+</div>
+
+<p><strong>Step 3：</strong>确认 <code>data/site.json</code> 中 <code>specialEvent.enabled = true</code>，然后 <code>git commit + push</code> → Vercel 自动部署。</p>
+
+<div class="highlight-box" style="border-left-color: #888;">
+  <p><strong>⚠️ 注意事项：</strong></p>
+  <p>· <code>date</code> 必须是 <code>YYYY-MM-DD</code> 格式，这是判定 upcoming/past 的<b>唯一依据</b></p>
+  <p>· <code>slug</code> 建议遵循 <code>event-YYYYMMDD</code> 或 <code>event-YYYYMMDD-hostname</code> 约定</p>
+  <p>· <code>poster</code> 图片建议 3:4 竖版，<b>必须小写扩展名</b>（否则构建失败）</p>
+</div>
+
+<hr>
+
+<!-- 场景二 -->
+<h3><span class="num">2</span> 活动结束后添加回顾内容</h3>
+
+<p>活动日期一过，系统<strong>自动</strong>将状态从 upcoming 切换为 past。此时编辑 <code>events.json</code> 中对应活动的 <code>retrospective</code> 字段：</p>
+
+<pre><code>{
+  <span class="key">"slug"</span>: <span class="str">"event-20260605"</span>,
+  <span class="comment">// …其他字段不变…</span>
+  <span class="key">"retrospective"</span>: <span class="str">"What a night! Owen brought the energy of Roland Garros to JIUWO. The tennis crowd showed up in full force, and the French Open-themed cocktails were a hit. 🎾🍸"</span>,
+  <span class="key">"retrospectiveZh"</span>: <span class="str">"难忘的一晚！Owen 把法网的热情带到了啾喔。网球圈的朋友们齐聚一堂，法网主题鸡尾酒大受欢迎。🎾🍸"</span>,
+  <span class="key">"retrospectivePhotos"</span>: [
+    <span class="str">"/images/events/event-20260605-recap-1.webp"</span>,
+    <span class="str">"/images/events/event-20260605-recap-2.webp"</span>,
+    <span class="str">"/images/events/event-20260605-recap-3.webp"</span>
+  ]
+}</code></pre>
+
+<div class="highlight-box">
+  <p><strong>系统自动行为：</strong></p>
+  <p>→ RSVP 报名按钮消失 → 之前报名的人显示为「到场的朋友」名单（只读）</p>
+  <p>→ <code>retrospective</code> 内容在「活动回顾」区域展示</p>
+  <p>→ <code>retrospectivePhotos</code> 以 2 列网格展示</p>
+  <p>→ 该活动自动出现在 <code>/special</code> 往期回顾网格中</p>
+</div>
+
+<hr>
+
+<!-- 场景三 -->
+<h3><span class="num">3</span> 活动已结束但还没写回顾</h3>
+
+<p>这是<strong>过渡状态</strong>，无需任何操作：</p>
+<ul>
+  <li>活动日期过了 → 自动判定为 past</li>
+  <li>页面显示历史 RSVP 名单（谁来了）</li>
+  <li><strong>不显示</strong>回顾内容区域（因为 <code>retrospective</code> 还是空字符串）</li>
+</ul>
+<p>等你有空时，直接编辑 <code>events.json</code> 加上回顾内容即可，<strong>无需改其他文件</strong>。</p>
+
+<hr>
+
+<!-- 场景四 -->
+<h3><span class="num">4</span> 临时关闭首页入口</h3>
+
+<p>如果一段时间内没有 upcoming 活动，有两种选择：</p>
+
+<p><strong>A. 完全关闭（不展示卡片）</strong></p>
+<p>编辑 <code>data/site.json</code>：</p>
+<pre><code><span class="key">"specialEvent"</span>: {
+  <span class="key">"enabled"</span>: <span class="key">false</span>,
+  …
+}</code></pre>
+<p>HeroCarousel 完全不渲染 special event 卡片，首页恢复纯 hero 模式。</p>
+
+<p><strong>B. 展示往期回顾入口</strong></p>
+<pre><code><span class="key">"specialEvent"</span>: {
+  <span class="key">"enabled"</span>: <span class="key">true</span>,
+  <span class="key">"heroFallback"</span>: <span class="str">"Past Events Memories"</span>,
+  <span class="key">"heroFallbackZh"</span>: <span class="str">"往期活动回顾"</span>,
+  …
+}</code></pre>
+<p>首页卡片显示「Past Events Memories」+「VIEW DETAILS」，点击进入往期回顾列表。</p>
+
+<hr>
+
+<!-- 场景五 -->
+<h3><span class="num">5</span> 某个活动不需要 RSVP</h3>
+
+<p>创建活动时设置 <code>"rsvpEnabled": false</code>，活动页面不渲染报名按钮和名单区域，只展示海报和活动信息。</p>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>4. 字段对照表</h2>
+
+<table>
+<thead>
+  <tr><th>字段</th><th>用途</th><th>何时需要修改</th></tr>
+</thead>
+<tbody>
+  <tr><td><code>slug</code></td><td>URL 路径 + RSVP 标识 + localStorage key</td><td>创建时确定，之后不变</td></tr>
+  <tr><td><code>title</code> / <code>titleZh</code></td><td>活动标题（海报上的大字）</td><td>创建时确定</td></tr>
+  <tr><td><code>label</code> / <code>labelZh</code></td><td>首页卡片第一行文字</td><td>创建时确定</td></tr>
+  <tr><td><code>hostName</code></td><td>嘉宾名（首页卡片第二行 + 海报金色大字）</td><td>创建时确定</td></tr>
+  <tr><td><code>date</code></td><td>ISO 日期 <code>YYYY-MM-DD</code></td><td>创建时确定，<strong>判定 upcoming/past 的唯一依据</strong></td></tr>
+  <tr><td><code>dateDisplay</code> / <code>dateDisplayZh</code></td><td>海报底部日期展示文字</td><td>创建时确定</td></tr>
+  <tr><td><code>description</code> / <code>descriptionZh</code></td><td>活动描述正文</td><td>创建时确定</td></tr>
+  <tr><td><code>subtitle</code> / <code>subtitleZh</code></td><td>描述区粗体副标题</td><td>创建时确定</td></tr>
+  <tr><td><code>poster</code></td><td>海报图路径</td><td>创建时确定</td></tr>
+  <tr><td><code>venue</code> / <code>venueZh</code></td><td>场地信息</td><td>一般不变</td></tr>
+  <tr><td><code>rsvpEnabled</code></td><td>是否开放报名</td><td>创建时确定；活动结束后可改为 <code>false</code></td></tr>
+  <tr><td><code>retrospective</code> / <code>retrospectiveZh</code></td><td>回顾文案</td><td><strong>活动结束后追加</strong></td></tr>
+  <tr><td><code>retrospectivePhotos</code></td><td>回顾照片数组</td><td><strong>活动结束后追加</strong></td></tr>
+</tbody>
+</table>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>5. 入口路由逻辑</h2>
+
+<div class="flow">
+  <span class="flow-step">首页 HeroCarousel 卡片</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-step">site.specialEvent.enabled?</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-step">有 upcoming?</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-step" style="background:rgba(201,162,39,0.08);border-color:#c9a227;">
+    <strong>是</strong> → /special/{slug}<br><small>活动详情 + RSVP</small>
+  </span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-step">
+    <strong>否</strong> → /special<br><small>往期回顾列表</small>
+  </span>
+</div>
+
+<div class="card" style="margin-top:1.5rem;">
+  <p><code>/special</code> 的智能网关逻辑：</p>
+  <p style="margin-top:0.5rem;">1. 查询 <code>events.json</code> 中所有 <code>date >= today</code> 的活动</p>
+  <p>2. 若有 → <code>permanentRedirect(/special/{slug})</code></p>
+  <p>3. 若无 → 渲染 <code>PastEventsGrid</code>（往期回顾卡片网格）</p>
+</div>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>6. 日常维护速查</h2>
+
+<table>
+<thead>
+  <tr><th>操作</th><th>步骤</th></tr>
+</thead>
+<tbody>
+  <tr>
+    <td><span class="section-label">新增活动</span></td>
+    <td>
+      ① 上传海报 → <code>public/images/events/</code><br>
+      ② <code>events.json</code> 数组最前面插入新对象<br>
+      ③ 确认 <code>site.json</code> 中 <code>enabled: true</code><br>
+      ④ <code>git commit + push</code> → Vercel 自动部署
+    </td>
+  </tr>
+  <tr>
+    <td><span class="section-label">活动结束</span></td>
+    <td>
+      ① <strong>不用动</strong>（自动变 past，首页入口自动消失）<br>
+      ② 想加回顾 → 编辑 <code>retrospective</code> 字段 + 上传回顾照片
+    </td>
+  </tr>
+  <tr>
+    <td><span class="section-label">修改已有活动</span></td>
+    <td>
+      直接改 <code>events.json</code> 中对应该活动的对象<br>
+      Vercel 自动部署生效
+    </td>
+  </tr>
+  <tr>
+    <td><span class="section-label">删除活动</span></td>
+    <td>
+      从 <code>events.json</code> 数组中移除该对象即可<br>
+      （建议保留记录，宁可删也不要留错误数据）
+    </td>
+  </tr>
+  <tr>
+    <td><span class="section-label">临时关闭入口</span></td>
+    <td>
+      <code>site.json</code> → <code>specialEvent.enabled: false</code>
+    </td>
+  </tr>
+</tbody>
+</table>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>7. 页面渲染模式对照</h2>
+
+<table>
+<thead>
+  <tr><th>条件</th><th>渲染模式</th><th>显示内容</th></tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>isUpcoming + rsvpEnabled</code></td>
+    <td><span class="section-label">RSVP 模式</span></td>
+    <td>海报 + 标题/嘉宾 +「我要来」按钮 + 报名名单 + RSVP modal</td>
+  </tr>
+  <tr>
+    <td><code>isUpcoming + !rsvpEnabled</code></td>
+    <td>纯展示模式</td>
+    <td>海报 + 标题/嘉宾 + 日期场地（无 RSVP 区域）</td>
+  </tr>
+  <tr>
+    <td><code>!isUpcoming + 有 retrospective</code></td>
+    <td><span class="section-label">回顾模式</span></td>
+    <td>海报 +「到场的朋友」名单 + 回顾文章 + 回顾照片网格</td>
+  </tr>
+  <tr>
+    <td><code>!isUpcoming + 无 retrospective</code></td>
+    <td>过渡模式</td>
+    <td>海报 +「到场的朋友」名单（回顾区域不渲染）</td>
+  </tr>
+</tbody>
+</table>
+
+<hr>
+
+<p style="color:var(--dim);font-size:0.85rem;text-align:center;margin-top:3rem;">
+  Generated 2026-06-06 · JIUWO Module Design · <a href="https://jiuwoshanghai.net">jiuwoshanghai.net</a>
+</p>
+
+</body>
+</html>

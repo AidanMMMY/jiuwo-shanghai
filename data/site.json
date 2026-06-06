@@ -13,15 +13,10 @@
   ],
   "specialEvent": {
     "enabled": true,
-    "label": "This Friday",
-    "labelZh": "本周五",
-    "title": "One Night Host",
-    "titleZh": "一日店长接管",
-    "hostName": "Coming Soon",
-    "date": "",
-    "dateZh": "",
-    "hero": "往期活动回顾",
-    "heroEn": "Past Events Memories"
+    "heroFallback": "Past Events Memories",
+    "heroFallbackZh": "往期活动回顾",
+    "hostFallback": "Coming Soon",
+    "hostFallbackZh": "敬请期待"
   },
   "social": {
     "instagram": "https://instagram.com",

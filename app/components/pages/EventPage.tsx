@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import type { EventItemResolved } from '@/lib/data';
 
 interface RsvpEntry {
   id: number;
@@ -10,67 +11,36 @@ interface RsvpEntry {
   created_at: string;
 }
 
-interface SpecialEvent {
-  label: string;
-  title: string;
-  hostName?: string;
-  date: string;
-  isZh?: boolean;
-}
-
-function extractMonthDay(dateStr: string, isZh?: boolean): string {
-  if (isZh) {
-    const match = dateStr.match(/(\d+)月(\d+)日/);
-    if (match) return `${match[1].padStart(2, '0')}/${match[2].padStart(2, '0')}`;
-  } else {
-    const match = dateStr.match(/([A-Za-z]+)\s+(\d+)/);
-    if (match) {
-      return `${match[1].substring(0, 3)} ${parseInt(match[2], 10)}`;
-    }
-  }
-  return 'Jun 5';
-}
-
-function extractWeekday(dateStr: string, isZh?: boolean): string {
-  if (isZh) {
-    const match = dateStr.match(/周([一二三四五六日])/);
-    if (match) {
-      const map: Record<string, string> = {
-        '一': 'MON', '二': 'TUE', '三': 'WED', '四': 'THU',
-        '五': 'FRI', '六': 'SAT', '日': 'SUN',
-      };
-      return map[match[1]] || 'FRI';
-    }
-  } else {
-    const match = dateStr.match(/^([A-Za-z]+)/);
-    if (match) return match[1].substring(0, 3).toUpperCase();
-  }
-  return 'FRI';
-}
-
-export default function SpecialEventPage({
+export default function EventPage({
   event,
   backHref,
+  isZh,
 }: {
-  event: SpecialEvent;
+  event: EventItemResolved;
   backHref: string;
+  isZh: boolean;
 }) {
-  const isZh = event.isZh;
-  const monthDay = extractMonthDay(event.date, isZh);
-  const weekday = extractWeekday(event.date, isZh);
-  const weekdayZh: Record<string, string> = {
-    MON: '周一', TUE: '周二', WED: '周三', THU: '周四',
-    FRI: '周五', SAT: '周六', SUN: '周日',
-  };
+  const t = (en: string, zh: string) => (isZh ? zh : en);
+
+  const title = t(event.title, event.titleZh);
+  const hostName = event.hostName;
+  const dateDisplay = t(event.dateDisplay, event.dateDisplayZh);
+  const description = t(event.description, event.descriptionZh);
+  const subtitle = t(event.subtitle, event.subtitleZh);
+  const venue = t(event.venue, event.venueZh);
+  const retrospective = t(event.retrospective || '', event.retrospectiveZh || '');
+
+  const showRsvp = event.isUpcoming && event.rsvpEnabled;
+  const showRetrospective = !event.isUpcoming;
+
+  const storageKey = `jiuwo-rsvp-${event.slug}`;
+  const eventSlug = event.slug;
 
   const [showModal, setShowModal] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [entries, setEntries] = useState<RsvpEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitError, setSubmitError] = useState('');
-
-  const storageKey = 'jiuwo-rsvp-20260605';
-  const eventSlug = 'event-20260605';
 
   // Load entries from API
   const fetchEntries = async () => {
@@ -131,11 +101,11 @@ export default function SpecialEventPage({
         setShowModal(false);
       } else {
         const data = await res.json().catch(() => ({}));
-        setSubmitError(data.error || 'Something went wrong. Please try again.');
+        setSubmitError(data.error || t('Something went wrong. Please try again.', '出错了，请稍后再试。'));
       }
     } catch (err) {
       console.error('RSVP submit failed:', err);
-      setSubmitError('Network error. Please check your connection and try again.');
+      setSubmitError(t('Network error. Please check your connection and try again.', '网络错误，请检查连接后重试。'));
     }
   };
 
@@ -148,10 +118,10 @@ export default function SpecialEventPage({
     <div className="relative bg-[#0a0a0a]">
       {/* Poster section */}
       <div className="relative w-full md:max-w-lg mx-auto h-[100vh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16 overflow-hidden">
-        {/* Background image - shifted down so head is lower, title sits above */}
+        {/* Background image */}
         <Image
-          src="/images/events/event-20260605-2.webp"
-          alt={event.title}
+          src={event.poster}
+          alt={title}
           fill
           className="object-cover object-[center_5%]"
           priority
@@ -176,53 +146,56 @@ export default function SpecialEventPage({
             href={backHref}
             className="self-start text-xs tracking-[0.2em] text-[#f5f5f0]/50 hover:text-[#c9a227] transition-colors duration-300 z-20"
           >
-            ← {isZh ? '返回' : 'BACK'}
+            ← {t('BACK', '返回')}
           </Link>
 
-          {/* Top: Main title - single line, smaller; Owen below in gold, larger */}
+          {/* Top: Main title + host name */}
           <div className="text-center pt-6">
             <h1
               className="text-[1.4rem] leading-[1] md:text-[1.8rem] text-[#f5f5f0] tracking-[0.12em]"
               style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
             >
-              {isZh ? '一日店长' : 'ONE NIGHT HOST'}
+              {title}
             </h1>
 
-            {event.hostName && (
+            {hostName && (
               <p
                 className="text-[2.5rem] md:text-[3.2rem] text-[#c9a227] mt-1 italic"
                 style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 400 }}
               >
-                {event.hostName}
+                {hostName}
               </p>
             )}
 
-            {/* CTA Button */}
-            <button
-              type="button"
-              onClick={() => { setShowModal(true); setSubmitError(''); }}
-              className="mt-4 px-6 py-2.5 border border-[#c9a227] text-[#c9a227] bg-[#0a0a0a]/50 text-xs tracking-[0.3em] font-medium rounded-full animate-pulse-scale hover:bg-[#c9a227] hover:text-[#0a0a0a] transition-colors duration-300"
-            >
-              {isZh ? '我要来' : 'I WANNA COME'}
-            </button>
+            {/* CTA Button — only for upcoming events with RSVP enabled */}
+            {showRsvp && (
+              <button
+                type="button"
+                onClick={() => { setShowModal(true); setSubmitError(''); }}
+                className="mt-4 px-6 py-2.5 border border-[#c9a227] text-[#c9a227] bg-[#0a0a0a]/50 text-xs tracking-[0.3em] font-medium rounded-full animate-pulse-scale hover:bg-[#c9a227] hover:text-[#0a0a0a] transition-colors duration-300"
+              >
+                {t('I WANNA COME', '我要来')}
+              </button>
+            )}
           </div>
 
-          {/* Flexible space - pushes bottom content down, keeps face clear */}
+          {/* Flexible space - pushes bottom content down */}
           <div className="flex-1" />
 
           {/* Bottom: Description + Date + Venue */}
           <div className="w-full pb-2 mb-6">
-            {/* Description - left aligned, same left edge as date */}
+            {/* Description */}
             <div className="text-left mb-2 max-w-[280px]">
-              <p className="text-lg text-[#f5f5f0] leading-[1.4] font-bold mb-1">
-                {isZh ? '法网之夜' : 'The Night of Roland Garros'}
-              </p>
-              <p className="text-base text-[#f5f5f0]/85 leading-[1.6] whitespace-pre-line">
-                {isZh
-                  ? '在啾喔群分享一张自己的网球日常照片，换法网特色鸡尾酒一杯。'
-                  : 'Share a tennis photo in the group, get a French Open-themed cocktail on the house.'
-                }
-              </p>
+              {subtitle && (
+                <p className="text-lg text-[#f5f5f0] leading-[1.4] font-bold mb-1">
+                  {subtitle}
+                </p>
+              )}
+              {description && (
+                <p className="text-base text-[#f5f5f0]/85 leading-[1.6] whitespace-pre-line">
+                  {description}
+                </p>
+              )}
             </div>
 
             {/* Date + Venue */}
@@ -232,14 +205,13 @@ export default function SpecialEventPage({
                   className="text-[3rem] leading-[0.85] md:text-[3.5rem] text-[#f5f5f0] tracking-tight"
                   style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
                 >
-                  {monthDay}
+                  {dateDisplay}
                 </p>
-                <p className="text-xs text-[#f5f5f0]/70 tracking-[0.25em] mt-1">
-                  {isZh
-                    ? `${weekdayZh[weekday] || weekday}晚在巨鹿路397号`
-                    : `${weekday} NIGHT @ Julu Rd. 397`
-                  }
-                </p>
+                {venue && (
+                  <p className="text-xs text-[#f5f5f0]/70 tracking-[0.25em] mt-1">
+                    {venue}
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-col items-end">
@@ -256,36 +228,102 @@ export default function SpecialEventPage({
         </div>
       </div>
 
-      {/* RSVP List */}
-      <div className="w-full md:max-w-lg mx-auto px-6 py-12 border-t border-[#222]">
-        <h2
-          className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
-          style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
-        >
-          {isZh ? '谁来啦' : "Who's Coming"}
-        </h2>
-        {loading ? (
-          <p className="text-sm text-[#666] tracking-wider italic">
-            {isZh ? '加载中…' : 'Loading…'}
-          </p>
-        ) : entries.length === 0 ? (
-          <p className="text-sm text-[#666] tracking-wider italic">
-            {isZh ? '还没人来，做第一个！' : 'No one yet. Be the first!'}
-          </p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {entries
-              .filter((entry, index, self) => index === self.findIndex((e) => e.name === entry.name))
-              .map((entry) => (
-                <p key={entry.id} className="text-sm text-[#f5f5f0]/90 tracking-wider">
-                  <span className="text-[#c9a227]">{entry.name}</span>
-                  {' '}
-                  {isZh ? '要来' : 'is coming'}
-                </p>
+      {/* RSVP List — for upcoming events with RSVP */}
+      {showRsvp && (
+        <div className="w-full md:max-w-lg mx-auto px-6 py-12 border-t border-[#222]">
+          <h2
+            className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
+            style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
+          >
+            {t("Who's Coming", '谁来啦')}
+          </h2>
+          {loading ? (
+            <p className="text-sm text-[#666] tracking-wider italic">
+              {t('Loading…', '加载中…')}
+            </p>
+          ) : entries.length === 0 ? (
+            <p className="text-sm text-[#666] tracking-wider italic">
+              {t("No one yet. Be the first!", '还没人来，做第一个！')}
+            </p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {entries
+                .filter((entry, index, self) => index === self.findIndex((e) => e.name === entry.name))
+                .map((entry) => (
+                  <p key={entry.id} className="text-sm text-[#f5f5f0]/90 tracking-wider">
+                    <span className="text-[#c9a227]">{entry.name}</span>
+                    {' '}
+                    {t('is coming', '要来')}
+                  </p>
+                ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Retrospective section — for past events */}
+      {showRetrospective && (
+        <div className="w-full md:max-w-lg mx-auto px-6 py-12 border-t border-[#222]">
+          {/* Past RSVP list (read-only) */}
+          <h2
+            className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
+            style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
+          >
+            {t("Who Came", '到场的朋友')}
+          </h2>
+          {loading ? (
+            <p className="text-sm text-[#666] tracking-wider italic">
+              {t('Loading…', '加载中…')}
+            </p>
+          ) : entries.length === 0 ? (
+            <p className="text-sm text-[#666] tracking-wider italic">
+              {t('No RSVPs for this event.', '暂无报名记录。')}
+            </p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {entries
+                .filter((entry, index, self) => index === self.findIndex((e) => e.name === entry.name))
+                .map((entry) => (
+                  <p key={entry.id} className="text-sm text-[#f5f5f0]/90 tracking-wider">
+                    <span className="text-[#c9a227]">{entry.name}</span>
+                  </p>
+                ))}
+            </div>
+          )}
+
+          {/* Retrospective content */}
+          {retrospective && (
+            <div className="mt-12 pt-12 border-t border-[#222]">
+              <h2
+                className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
+                style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
+              >
+                {t('Recap', '活动回顾')}
+              </h2>
+              <div className="text-sm text-[#d0d0d0] leading-relaxed whitespace-pre-line tracking-wider">
+                {retrospective}
+              </div>
+            </div>
+          )}
+
+          {/* Retrospective photos */}
+          {event.retrospectivePhotos && event.retrospectivePhotos.length > 0 && (
+            <div className="mt-8 grid grid-cols-2 gap-3">
+              {event.retrospectivePhotos.map((photo, i) => (
+                <div key={i} className="relative aspect-[3/4] overflow-hidden rounded-lg">
+                  <Image
+                    src={photo}
+                    alt={t(`Recap photo ${i + 1}`, `回顾照片 ${i + 1}`)}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 256px"
+                  />
+                </div>
               ))}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Modal */}
       {showModal && (
@@ -301,14 +339,14 @@ export default function SpecialEventPage({
               className="text-lg text-[#f5f5f0] tracking-[0.15em] mb-8 text-center"
               style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
             >
-              {isZh ? '你叫？' : "Who's Coming?"}
+              {t("Who's Coming?", '你叫？')}
             </h3>
             <input
               type="text"
               value={nameInput}
               onChange={(e) => { setNameInput(e.target.value); setSubmitError(''); }}
               onKeyDown={handleKeyDown}
-              placeholder={isZh ? '你的名字' : 'Your name'}
+              placeholder={t('Your name', '你的名字')}
               autoFocus
               className="bg-transparent border-b border-[#c9a227]/50 text-[#f5f5f0] text-center tracking-wider placeholder:text-[#666] focus:border-[#c9a227] outline-none px-2 py-3 w-full"
             />
@@ -323,14 +361,14 @@ export default function SpecialEventPage({
                 onClick={() => { setShowModal(false); setSubmitError(''); }}
                 className="px-5 py-2 text-xs tracking-[0.2em] text-[#888] hover:text-[#f5f5f0] transition-colors"
               >
-                {isZh ? '取消' : 'CANCEL'}
+                {t('CANCEL', '取消')}
               </button>
               <button
                 type="button"
                 onClick={handleSubmit}
                 className="px-6 py-2 border border-[#c9a227] text-[#c9a227] text-xs tracking-[0.2em] font-medium rounded-full hover:bg-[#c9a227] hover:text-[#0a0a0a] transition-colors duration-300"
               >
-                {isZh ? '提交' : 'SUBMIT'}
+                {t('SUBMIT', '提交')}
               </button>
             </div>
           </div>

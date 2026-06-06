@@ -1,24 +1,24 @@
 import type { Metadata } from 'next';
+import { permanentRedirect } from 'next/navigation';
+import PastEventsGrid from '@/app/components/pages/PastEventsGrid';
+import { getUpcomingEventsZh, getPastEventsZh } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: '特别活动',
-  description: '敬请期待。',
+  description: 'JIUWO 啾喔的特别活动与美好回忆。',
 };
 
-export default function Page() {
-  return (
-    <main className="bg-[#0a0a0a] min-h-[100lvh] flex items-center justify-center">
-      <div className="text-center px-6">
-        <p
-          className="text-2xl md:text-3xl text-[#c9a227] tracking-[0.15em] mb-4"
-          style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
-        >
-          Coming Soon
-        </p>
-        <p className="text-sm text-[#a0a0a0] tracking-wider">
-          精彩即将呈现，敬请期待。
-        </p>
-      </div>
-    </main>
-  );
+export default async function Page() {
+  const [upcomingEvents, pastEvents] = await Promise.all([
+    getUpcomingEventsZh(),
+    getPastEventsZh(),
+  ]);
+
+  // If there's an upcoming event, redirect to its detail page
+  if (upcomingEvents.length > 0) {
+    return permanentRedirect(`/zh/special/${upcomingEvents[0].slug}`);
+  }
+
+  // Otherwise, show past events archive
+  return <PastEventsGrid events={pastEvents} isZh={true} />;
 }

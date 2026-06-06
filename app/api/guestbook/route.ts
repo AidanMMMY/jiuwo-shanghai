@@ -74,10 +74,12 @@ export async function POST(req: NextRequest) {
       ipHash,
     });
 
-    // Fire-and-forget email
+    // Send email notification (await so Vercel serverless doesn't freeze before it completes)
     const fullEntry = await getEntryById(entry.id);
     if (fullEntry) {
-      sendGuestbookNotification(fullEntry).catch(() => {});
+      await sendGuestbookNotification(fullEntry).catch((err) => {
+        console.error('[guestbook] Notification failed:', err);
+      });
     }
 
     return NextResponse.json(entry, { status: 201 });

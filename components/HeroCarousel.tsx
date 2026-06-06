@@ -105,12 +105,14 @@ export default function HeroCarousel({
   tagline,
   intro,
   specialEvent,
+  isZh,
 }: {
   slides: HeroSlide[];
   title: string;
   tagline: string;
   intro: string;
   specialEvent?: { hero: string; hostName?: string; href?: string };
+  isZh?: boolean;
 }) {
   const duration = slides.length * 3;
   const step = 100 / slides.length;
@@ -249,14 +251,16 @@ export default function HeroCarousel({
 
       {/* Subtitle: BAR • SHANGHAI */}
       <div
-        className="z-10 flex justify-center pointer-events-none select-none"
+        className="z-10 flex justify-center pointer-events-none"
         style={{ position: 'absolute', left: 0, right: 0, bottom: '4rem' }}
       >
-        <p className="hero-intro-fade-up text-xs md:text-sm uppercase tracking-[0.3em] text-[#c9a227]/70"
+        <Link
+          href={isZh ? '/zh/about' : '/about'}
+          className="hero-intro-fade-up pointer-events-auto text-xs md:text-sm uppercase tracking-[0.3em] text-[#c9a227]/70 hover:text-[#c9a227] transition-colors duration-300"
           style={{ opacity: 0, animation: 'heroIntroFadeUp 1400ms cubic-bezier(0.16, 1, 0.3, 1) 1000ms both' }}
         >
           BAR <span className="mx-1.5">•</span> JULU RD <span className="mx-1.5">•</span> SHANGHAI
-        </p>
+        </Link>
       </div>
 
       {/* Scroll hint */}

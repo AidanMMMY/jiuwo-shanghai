@@ -21,15 +21,10 @@ export type SiteData = {
   };
   specialEvent?: {
     enabled: boolean;
-    label: string;
-    labelZh: string;
-    title: string;
-    titleZh: string;
-    hostName?: string;
-    date: string;
-    dateZh: string;
-    hero: string;
-    heroEn: string;
+    heroFallback: string;
+    heroFallbackZh: string;
+    hostFallback?: string;
+    hostFallbackZh?: string;
   };
 };
 
@@ -106,6 +101,33 @@ export type AboutData = {
   heroImage: string;
 };
 
+export type EventItem = {
+  slug: string;
+  title: string;
+  titleZh: string;
+  label: string;
+  labelZh: string;
+  hostName?: string;
+  date: string;
+  dateDisplay: string;
+  dateDisplayZh: string;
+  description: string;
+  descriptionZh: string;
+  subtitle: string;
+  subtitleZh: string;
+  poster: string;
+  venue: string;
+  venueZh: string;
+  rsvpEnabled: boolean;
+  retrospective?: string;
+  retrospectiveZh?: string;
+  retrospectivePhotos?: string[];
+};
+
+export type EventItemResolved = EventItem & {
+  isUpcoming: boolean;
+};
+
 function localizeSite(site: SiteData): SiteData {
   const zh: SiteData = {
     ...site,
@@ -117,11 +139,8 @@ function localizeSite(site: SiteData): SiteData {
   if (site.specialEvent) {
     zh.specialEvent = {
       ...site.specialEvent,
-      label: site.specialEvent.labelZh,
-      title: site.specialEvent.titleZh,
-      date: site.specialEvent.dateZh,
-      hero: site.specialEvent.hero,
-      hostName: site.specialEvent.hostName,
+      heroFallback: site.specialEvent.heroFallbackZh,
+      hostFallback: site.specialEvent.hostFallbackZh,
     };
   }
   return zh;
@@ -160,6 +179,19 @@ function localizeAbout(about: AboutData): AboutData {
     address: about.addressZh,
     story: about.storyZh,
     pullQuote: about.pullQuoteZh,
+  };
+}
+
+function localizeEvent(event: EventItem): EventItem {
+  return {
+    ...event,
+    title: event.titleZh,
+    label: event.labelZh,
+    dateDisplay: event.dateDisplayZh,
+    description: event.descriptionZh,
+    subtitle: event.subtitleZh,
+    venue: event.venueZh,
+    retrospective: event.retrospectiveZh,
   };
 }
 
@@ -240,6 +272,57 @@ export async function getAboutDataZh(): Promise<AboutData> {
   return localizeAbout(about);
 }
 
+// ── Event data loaders ──
+
+function isEventUpcoming(eventDate: string): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const d = new Date(eventDate + 'T00:00:00');
+  return d >= today;
+}
+
+export async function getEvents(): Promise<EventItemResolved[]> {
+  const data = await readAndValidateJson('events.json', eventsDataSchema);
+  return data.events
+    .map((e) => ({ ...e, isUpcoming: isEventUpcoming(e.date) }))
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+export async function getEventsZh(): Promise<EventItemResolved[]> {
+  const events = await getEvents();
+  return events.map((e) => ({ ...localizeEvent(e), isUpcoming: e.isUpcoming }));
+}
+
+export async function getUpcomingEvents(): Promise<EventItemResolved[]> {
+  const events = await getEvents();
+  return events.filter((e) => e.isUpcoming);
+}
+
+export async function getUpcomingEventsZh(): Promise<EventItemResolved[]> {
+  const events = await getEventsZh();
+  return events.filter((e) => e.isUpcoming);
+}
+
+export async function getPastEvents(): Promise<EventItemResolved[]> {
+  const events = await getEvents();
+  return events.filter((e) => !e.isUpcoming);
+}
+
+export async function getPastEventsZh(): Promise<EventItemResolved[]> {
+  const events = await getEventsZh();
+  return events.filter((e) => !e.isUpcoming);
+}
+
+export async function getEventBySlug(slug: string): Promise<EventItemResolved | undefined> {
+  const events = await getEvents();
+  return events.find((e) => e.slug === slug);
+}
+
+export async function getEventBySlugZh(slug: string): Promise<EventItemResolved | undefined> {
+  const events = await getEventsZh();
+  return events.find((e) => e.slug === slug);
+}
+
 // ── Zod schemas for runtime validation ──
 
 const navItemSchema = z.object({
@@ -263,15 +346,10 @@ const siteDataSchema = z.object({
   }),
   specialEvent: z.object({
     enabled: z.boolean(),
-    label: z.string(),
-    labelZh: z.string(),
-    title: z.string(),
-    titleZh: z.string(),
-    hostName: z.string().optional(),
-    date: z.string(),
-    dateZh: z.string(),
-    hero: z.string(),
-    heroEn: z.string(),
+    heroFallback: z.string(),
+    heroFallbackZh: z.string(),
+    hostFallback: z.string().optional(),
+    hostFallbackZh: z.string().optional(),
   }).optional(),
 });
 
@@ -346,6 +424,33 @@ const aboutDataSchema = z.object({
   pullQuote: z.string(),
   pullQuoteZh: z.string(),
   heroImage: z.string(),
+});
+
+const eventItemSchema = z.object({
+  slug: z.string().min(1),
+  title: z.string(),
+  titleZh: z.string(),
+  label: z.string(),
+  labelZh: z.string(),
+  hostName: z.string().optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+  dateDisplay: z.string(),
+  dateDisplayZh: z.string(),
+  description: z.string(),
+  descriptionZh: z.string(),
+  subtitle: z.string(),
+  subtitleZh: z.string(),
+  poster: z.string(),
+  venue: z.string(),
+  venueZh: z.string(),
+  rsvpEnabled: z.boolean(),
+  retrospective: z.string().optional(),
+  retrospectiveZh: z.string().optional(),
+  retrospectivePhotos: z.array(z.string()).optional(),
+});
+
+const eventsDataSchema = z.object({
+  events: z.array(eventItemSchema),
 });
 
 async function readAndValidateJson<T>(filename: string, schema: z.ZodSchema<T>): Promise<T> {

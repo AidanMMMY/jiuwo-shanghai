@@ -1,0 +1,26 @@
+{
+  "events": [
+    {
+      "slug": "event-20260605",
+      "title": "One Night Host",
+      "titleZh": "一日店长接管",
+      "label": "This Friday",
+      "labelZh": "本周五",
+      "hostName": "Owen",
+      "date": "2026-06-05",
+      "dateDisplay": "Friday, June 5 · 7pm",
+      "dateDisplayZh": "6月5日 周五 · 晚7点",
+      "description": "Share a tennis photo in the group, get a French Open-themed cocktail on the house.",
+      "descriptionZh": "在啾喔群分享一张自己的网球日常照片，换法网特色鸡尾酒一杯。",
+      "subtitle": "The Night of Roland Garros",
+      "subtitleZh": "法网之夜",
+      "poster": "/images/events/event-20260605-2.webp",
+      "venue": "Julu Rd. 397",
+      "venueZh": "巨鹿路397号",
+      "rsvpEnabled": true,
+      "retrospective": "",
+      "retrospectiveZh": "",
+      "retrospectivePhotos": []
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import HomePage from '@/app/components/pages/HomePage';
-import { getHeroSlides, getJournalEntries, getSiteData } from '@/lib/data';
+import { getHeroSlides, getJournalEntries, getSiteData, getUpcomingEvents } from '@/lib/data';
 import { getShanghaiWeather, getWeatherRecommendation } from '@/lib/weather';
 import { listEntries, countEntries } from '@/lib/guestbook';
 import type { GuestbookHookLabels } from '@/lib/guestbook';
@@ -19,16 +19,31 @@ const guestbookLabels: GuestbookHookLabels = {
 };
 
 export default async function Page() {
-  const [site, slides, entries, guestbookEntries, guestbookTotal, weather] = await Promise.all([
+  const [site, slides, entries, guestbookEntries, guestbookTotal, weather, upcomingEvents] = await Promise.all([
     getSiteData(),
     getHeroSlides(),
     getJournalEntries(),
     listEntries(10),
     countEntries(),
     getShanghaiWeather(),
+    getUpcomingEvents(),
   ]);
 
   const weatherRec = weather ? getWeatherRecommendation(weather.code, weather.temp, weather.humidity, false) : null;
+
+  const upcomingEvent = upcomingEvents.length > 0 ? upcomingEvents[0] : null;
+
+  const specialEventCard = site.specialEvent?.enabled
+    ? {
+        hero: upcomingEvent
+          ? upcomingEvent.label
+          : site.specialEvent.heroFallback,
+        hostName: upcomingEvent?.hostName,
+        href: upcomingEvent
+          ? `/special/${upcomingEvent.slug}`
+          : '/special',
+      }
+    : undefined;
 
   return (
     <HomePage
@@ -43,6 +58,7 @@ export default async function Page() {
       weather={weather}
       weatherRec={weatherRec}
       isZh={false}
+      specialEventCard={specialEventCard}
     />
   );
 }

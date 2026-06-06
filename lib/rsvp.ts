@@ -37,7 +37,7 @@ export async function ensureRsvpTable(): Promise<void> {
     CREATE TABLE IF NOT EXISTS rsvp_entries (
       id SERIAL PRIMARY KEY,
       name VARCHAR(50) NOT NULL,
-      event_slug VARCHAR(50) NOT NULL DEFAULT 'event-20260605',
+      event_slug VARCHAR(50) NOT NULL,
       ip_hash VARCHAR(64) NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )

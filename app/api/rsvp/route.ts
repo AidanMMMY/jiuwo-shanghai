@@ -19,7 +19,10 @@ function getClientIp(req: NextRequest): string {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const eventSlug = searchParams.get('event') || 'event-20260605';
+    const eventSlug = searchParams.get('event');
+    if (!eventSlug) {
+      return NextResponse.json({ error: 'event parameter is required' }, { status: 400 });
+    }
     const entries = await listRsvpEntries(eventSlug);
     return NextResponse.json({ entries });
   } catch (error: unknown) {
@@ -33,9 +36,12 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, eventSlug = 'event-20260605' } = body;
+    const { name, eventSlug } = body;
 
     // Validation
+    if (!eventSlug || typeof eventSlug !== 'string') {
+      return NextResponse.json({ error: 'eventSlug is required' }, { status: 400 });
+    }
     if (!name || typeof name !== 'string' || name.trim().length === 0 || name.trim().length > 50) {
       return NextResponse.json({ error: 'Name must be 1-50 characters' }, { status: 400 });
     }

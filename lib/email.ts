@@ -85,8 +85,9 @@ Admin: ${adminLink}
       text: plainText,
       html,
     });
+    console.log(`[guestbook] Email sent for "${entry.name}" (id=${entry.id})`);
   } catch (err) {
     console.error('[guestbook] Resend error:', err);
-    // fire-and-forget: don't throw, entry already saved
+    // don't throw, entry already saved
   }
 }

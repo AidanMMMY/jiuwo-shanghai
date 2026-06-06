@@ -130,9 +130,8 @@ export default function JournalEntryWithLikes({
             fill
             sizes="(max-width: 768px) 100vw, 768px"
             className={`block transition-transform duration-500 ease-out group-hover:scale-[1.02] ${
-              entry.coverAspect === 'tall' ? 'object-contain' : 'object-cover'
+              entry.coverAspect === 'tall' || entry.coverAspect === 'square' ? 'object-contain' : 'object-cover'
             }`}
-            style={entry.coverAspect === 'square' ? { objectPosition: '40% center' } : undefined}
           />
           <button
             onClick={async (e) => {

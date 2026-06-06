@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { EventItemResolved } from '@/lib/data';
 
 interface RsvpEntry {
@@ -113,6 +113,37 @@ export default function EventPage({
     if (e.key === 'Enter') handleSubmit();
     if (e.key === 'Escape') setShowModal(false);
   };
+
+  // Deterministic hash for name positioning (avoids hydration mismatch)
+  function nameHash(str: string, seed: number): number {
+    let hash = seed;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash % 1000) / 1000;
+  }
+
+  // Deduplicated entries for floating names
+  const dedupedEntries = useMemo(
+    () => entries.filter((e, i, self) => i === self.findIndex((x) => x.name === e.name)),
+    [entries]
+  );
+
+  // Compute stable positions for floating names (desktop glow)
+  const floatingNames = useMemo(
+    () =>
+      dedupedEntries.map((entry, i) => ({
+        id: entry.id,
+        name: entry.name,
+        x: 5 + nameHash(entry.name, 1) * 90,            // 5–95%
+        y: 8 + nameHash(entry.name, 2) * 84,             // 8–92%
+        delay: (i * 1.3) % 14,                            // 0–14s stagger
+        duration: 9 + nameHash(entry.name, 3) * 10,       // 9–19s
+        size: 0.7 + nameHash(entry.name, 4) * 1.6,       // 0.7–2.3rem
+      })),
+    [dedupedEntries]
+  );
 
   return (
     <div className="relative bg-[#0a0a0a]">
@@ -263,37 +294,69 @@ export default function EventPage({
 
       {/* Retrospective section — for past events */}
       {showRetrospective && (
-        <div className="w-full md:max-w-lg mx-auto px-6 py-12 border-t border-[#222]">
-          {/* Past RSVP list (read-only) */}
-          <h2
-            className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
-            style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
-          >
-            {t("Who Came", '到场的朋友')}
-          </h2>
-          {loading ? (
-            <p className="text-sm text-[#666] tracking-wider italic">
-              {t('Loading…', '加载中…')}
+        <>
+          {/* ─── Desktop: Full-width glow + floating names ─── */}
+          <div className="hidden md:block relative w-full overflow-hidden py-24 md:py-36 border-t border-[#222]">
+            {/* Aurora glow background */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+              <div className="absolute inset-[-50%] aurora-glow-bg" />
+            </div>
+
+            {/* Floating names */}
+            <div className="relative w-full" style={{ minHeight: '260px' }}>
+              {floatingNames.map((n) => (
+                <span
+                  key={n.id}
+                  className="absolute whitespace-nowrap floating-name text-[#c9a227] select-none"
+                  style={{
+                    left: `${n.x}%`,
+                    top: `${n.y}%`,
+                    fontSize: `${n.size}rem`,
+                    animationDelay: `${n.delay}s`,
+                    animationDuration: `${n.duration}s`,
+                  }}
+                >
+                  {n.name}
+                </span>
+              ))}
+            </div>
+
+            {/* Section label */}
+            <p className="text-center text-[10px] tracking-[0.25em] text-[#c9a227]/40 mt-4">
+              {t('Who Came', '到场的朋友')}
             </p>
-          ) : entries.length === 0 ? (
-            <p className="text-sm text-[#666] tracking-wider italic">
-              {t('No RSVPs for this event.', '暂无报名记录。')}
-            </p>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {entries
-                .filter((entry, index, self) => index === self.findIndex((e) => e.name === entry.name))
-                .map((entry) => (
+          </div>
+
+          {/* ─── Mobile: Simple list ─── */}
+          <div className="md:hidden w-full max-w-lg mx-auto px-6 py-12 border-t border-[#222]">
+            <h2
+              className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
+              style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
+            >
+              {t("Who Came", '到场的朋友')}
+            </h2>
+            {loading ? (
+              <p className="text-sm text-[#666] tracking-wider italic">
+                {t('Loading…', '加载中…')}
+              </p>
+            ) : entries.length === 0 ? (
+              <p className="text-sm text-[#666] tracking-wider italic">
+                {t('No RSVPs for this event.', '暂无报名记录。')}
+              </p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {dedupedEntries.map((entry) => (
                   <p key={entry.id} className="text-sm text-[#f5f5f0]/90 tracking-wider">
                     <span className="text-[#c9a227]">{entry.name}</span>
                   </p>
                 ))}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
 
-          {/* Retrospective content */}
+          {/* ─── Retrospective content (centered, shared) ─── */}
           {retrospective && (
-            <div className="mt-12 pt-12 border-t border-[#222]">
+            <div className="w-full md:max-w-lg mx-auto px-6 pt-8 md:pt-12 border-t border-[#222] md:border-t-0">
               <h2
                 className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
                 style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
@@ -306,9 +369,9 @@ export default function EventPage({
             </div>
           )}
 
-          {/* Retrospective photos */}
+          {/* ─── Retrospective photos (centered, shared) ─── */}
           {event.retrospectivePhotos && event.retrospectivePhotos.length > 0 && (
-            <div className="mt-8 grid grid-cols-2 gap-3">
+            <div className="w-full md:max-w-lg mx-auto px-6 mt-8 grid grid-cols-2 gap-3">
               {event.retrospectivePhotos.map((photo, i) => (
                 <div key={i} className="relative aspect-[3/4] overflow-hidden rounded-lg">
                   <Image
@@ -322,8 +385,58 @@ export default function EventPage({
               ))}
             </div>
           )}
-        </div>
+        </>
       )}
+
+      {/* Animations for glow + floating names */}
+      <style>{`
+        @keyframes auroraGlowDrift {
+          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+          25%  { transform: translate(3%, -2%) rotate(1deg) scale(1.04); }
+          50%  { transform: translate(-2%, 3%) rotate(-0.5deg) scale(1.02); }
+          75%  { transform: translate(2%, 1%) rotate(0.5deg) scale(1.03); }
+        }
+        @keyframes auroraGlowBreathe {
+          0%, 100% { opacity: 0.35; }
+          50% { opacity: 0.7; }
+        }
+        @keyframes nameFadeFloat {
+          0%, 100% { opacity: 0.05; transform: translateY(0); }
+          20%  { opacity: 0.55; transform: translateY(-4px); }
+          40%  { opacity: 0.15; transform: translateY(2px); }
+          60%  { opacity: 0.45; transform: translateY(-2px); }
+          80%  { opacity: 0.08; transform: translateY(0); }
+        }
+        .aurora-glow-bg::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background:
+            radial-gradient(ellipse 35% 30% at 45% 50%, rgba(201,162,39,0.18) 0%, transparent 50%),
+            radial-gradient(ellipse 40% 35% at 25% 40%, rgba(201,180,80,0.14) 0%, transparent 55%),
+            radial-gradient(ellipse 45% 38% at 70% 55%, rgba(180,140,60,0.12) 0%, transparent 55%),
+            radial-gradient(ellipse 35% 28% at 55% 35%, rgba(220,200,140,0.10) 0%, transparent 50%),
+            radial-gradient(ellipse 30% 25% at 40% 60%, rgba(201,162,39,0.08) 0%, transparent 50%);
+          background-size: 180% 180%;
+          animation: auroraGlowDrift 14s ease-in-out infinite, auroraGlowBreathe 7s ease-in-out infinite;
+          filter: blur(28px);
+        }
+        .aurora-glow-bg {
+          animation: auroraGlowBreathe 7s ease-in-out infinite;
+        }
+        .floating-name {
+          font-family: var(--font-bodoni), Georgia, serif;
+          font-weight: 400;
+          letter-spacing: 0.06em;
+          animation: nameFadeFloat 12s ease-in-out infinite;
+          will-change: opacity, transform;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .aurora-glow-bg::before { animation: none !important; }
+          .aurora-glow-bg { animation: none !important; }
+          .floating-name { animation: none !important; opacity: 0.3 !important; }
+        }
+      `}</style>
 
       {/* Modal */}
       {showModal && (

@@ -2,7 +2,8 @@
 
 import Image from 'next/image';
 import { useState, useCallback, useRef, useEffect } from 'react';
-import Lightbox from './Lightbox';
+import dynamic from 'next/dynamic';
+const Lightbox = dynamic(() => import('./Lightbox'), { ssr: false });
 import LikeButton from './LikeButton';
 import ScrollReveal from './ScrollReveal';
 

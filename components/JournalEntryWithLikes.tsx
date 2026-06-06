@@ -118,20 +118,21 @@ export default function JournalEntryWithLikes({
 
       {/* Cover image with hover zoom */}
       <div className="flex justify-center mb-8">
-        <div className={`relative overflow-hidden rounded-lg ${entry.coverAspect === 'tall' ? 'inline-block' : 'w-full'}`}>
+        <div className={`relative overflow-hidden rounded-lg ${
+          entry.coverAspect === 'tall'
+            ? 'w-full h-[66vh]'
+            : entry.coverAspect === 'square'
+              ? 'w-full aspect-square'
+              : 'w-full aspect-[16/10]'
+        }`}>
           <Image
             src={entry.cover}
             alt={entry.title}
-            width={0}
-            height={0}
-            sizes="100vw"
-            className={
-              entry.coverAspect === 'tall'
-                ? 'max-w-full max-h-[66vh] w-auto h-auto rounded-lg object-contain block transition-transform duration-500 ease-out group-hover:scale-[1.02]'
-                : entry.coverAspect === 'square'
-                  ? 'w-full aspect-square object-cover rounded-lg block transition-transform duration-500 ease-out group-hover:scale-[1.02]'
-                  : 'w-full h-auto rounded-lg block transition-transform duration-500 ease-out group-hover:scale-[1.02]'
-            }
+            fill
+            sizes="(max-width: 768px) 100vw, 768px"
+            className={`block transition-transform duration-500 ease-out group-hover:scale-[1.02] ${
+              entry.coverAspect === 'tall' ? 'object-contain' : 'object-cover'
+            }`}
             style={entry.coverAspect === 'square' ? { objectPosition: '40% center' } : undefined}
           />
           <button

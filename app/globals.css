@@ -93,6 +93,11 @@ body {
     color: var(--foreground);
 }
 
+/* Eliminate 300ms tap delay on mobile */
+a, button, [role="button"] {
+    touch-action: manipulation;
+}
+
 /* ── Film Grain Texture ── */
 /* DISABLED: Safari iOS viewport bug — body::before fixed overlay
    prevents content from extending behind the bottom toolbar.

@@ -145,7 +145,7 @@ export default function HeroCarousel({
       {/* Title & Tagline — name/tagline position locked */}
       <div
         className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
-        style={{ paddingBottom: '18rem' }}
+        style={{ paddingBottom: 'clamp(10rem, 25vh, 18rem)' }}
       >
         <div className="hero-title-breathe hero-normal-title">
           <AnimatedTitle text={title} />
@@ -176,7 +176,7 @@ export default function HeroCarousel({
       {specialEvent && (
         <div
           className="z-10 flex justify-center pointer-events-none"
-          style={{ position: 'absolute', left: 0, right: 0, bottom: '11rem' }}
+          style={{ position: 'absolute', left: 0, right: 0, bottom: 'clamp(7rem, 14vh, 12rem)' }}
         >
           {specialEvent.href ? (
             <Link
@@ -253,7 +253,7 @@ export default function HeroCarousel({
       {/* Subtitle: BAR • SHANGHAI */}
       <div
         className="z-10 flex justify-center pointer-events-none"
-        style={{ position: 'absolute', left: 0, right: 0, bottom: '4rem' }}
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 'clamp(2rem, 6vh, 5rem)' }}
       >
         <Link
           href={isZh ? '/zh/about' : '/about'}
@@ -267,7 +267,7 @@ export default function HeroCarousel({
       {/* Scroll hint */}
       <div
         className="scroll-hint z-10 flex justify-center"
-        style={{ position: 'absolute', left: 0, right: 0, bottom: '1rem' }}
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 'clamp(0.5rem, 1.5vh, 1.5rem)' }}
         aria-hidden="true"
       >
         <svg

@@ -145,10 +145,34 @@ export default function EventPage({
     [dedupedEntries]
   );
 
+  // Split into left / right side columns for desktop gutter placement
+  const sideNames = useMemo(() => {
+    const left: typeof floatingNames = [];
+    const right: typeof floatingNames = [];
+    floatingNames.forEach((n, i) => {
+      const clone = { ...n };
+      if (i % 2 === 0) {
+        clone.x = 2 + nameHash(n.name, 5) * 26;   // 2–28%
+        left.push(clone);
+      } else {
+        clone.x = 72 + nameHash(n.name, 6) * 26;   // 72–98%
+        right.push(clone);
+      }
+    });
+    return { left, right };
+  }, [floatingNames]);
+
   return (
     <div className="relative bg-[#0a0a0a]">
-      {/* Poster section */}
-      <div className="relative w-full md:max-w-lg mx-auto h-[100vh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16 overflow-hidden">
+      {/* Full-width glow wrapper — desktop only */}
+      <div className="relative w-full overflow-hidden">
+        {/* Warm radial glow spreading from poster center */}
+        <div className="hidden md:block absolute inset-0 pointer-events-none z-0" aria-hidden="true">
+          <div className="absolute inset-[-40%] event-side-glow" />
+        </div>
+
+        {/* Poster section */}
+        <div className="relative z-[1] w-full md:max-w-lg mx-auto h-[100vh] mt-0 md:h-[calc(100dvh-4rem)] md:mt-16 overflow-hidden">
         {/* Background image */}
         <Image
           src={event.poster}
@@ -259,7 +283,44 @@ export default function EventPage({
         </div>
       </div>
 
-      {/* RSVP List — for upcoming events with RSVP */}
+      {/* Side floating names — desktop only, in left/right gutters */}
+      {showRetrospective && (
+        <div className="hidden md:block absolute inset-0 z-[2] pointer-events-none overflow-hidden" aria-hidden="true">
+          {sideNames.left.map((n) => (
+            <span
+              key={n.id}
+              className="absolute whitespace-nowrap side-name text-[#c9a227] select-none"
+              style={{
+                left: `${n.x}%`,
+                top: `${n.y}%`,
+                fontSize: `${n.size * 0.9}rem`,
+                animationDelay: `${n.delay}s`,
+                animationDuration: `${n.duration}s`,
+              }}
+            >
+              {n.name}
+            </span>
+          ))}
+          {sideNames.right.map((n) => (
+            <span
+              key={n.id}
+              className="absolute whitespace-nowrap side-name text-[#c9a227] select-none"
+              style={{
+                left: `${n.x}%`,
+                top: `${n.y}%`,
+                fontSize: `${n.size * 0.9}rem`,
+                animationDelay: `${n.delay}s`,
+                animationDuration: `${n.duration}s`,
+              }}
+            >
+              {n.name}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+
+    {/* RSVP List — for upcoming events with RSVP */}
       {showRsvp && (
         <div className="w-full md:max-w-lg mx-auto px-6 py-12 border-t border-[#222]">
           <h2
@@ -295,34 +356,9 @@ export default function EventPage({
       {/* Retrospective section — for past events */}
       {showRetrospective && (
         <>
-          {/* ─── Desktop: Full-width glow + floating names ─── */}
-          <div className="hidden md:block relative w-full overflow-hidden py-24 md:py-36 border-t border-[#222]">
-            {/* Aurora glow background */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-              <div className="absolute inset-[-50%] aurora-glow-bg" />
-            </div>
-
-            {/* Floating names */}
-            <div className="relative w-full" style={{ minHeight: '260px' }}>
-              {floatingNames.map((n) => (
-                <span
-                  key={n.id}
-                  className="absolute whitespace-nowrap floating-name text-[#c9a227] select-none"
-                  style={{
-                    left: `${n.x}%`,
-                    top: `${n.y}%`,
-                    fontSize: `${n.size}rem`,
-                    animationDelay: `${n.delay}s`,
-                    animationDuration: `${n.duration}s`,
-                  }}
-                >
-                  {n.name}
-                </span>
-              ))}
-            </div>
-
-            {/* Section label */}
-            <p className="text-center text-[10px] tracking-[0.25em] text-[#c9a227]/40 mt-4">
+          {/* ─── Desktop: Section label (names now float on sides of poster) ─── */}
+          <div className="hidden md:block w-full border-t border-[#222] pt-24">
+            <p className="text-center text-[10px] tracking-[0.25em] text-[#c9a227]/40">
               {t('Who Came', '到场的朋友')}
             </p>
           </div>
@@ -388,43 +424,36 @@ export default function EventPage({
         </>
       )}
 
-      {/* Animations for glow + floating names */}
+      {/* Animations for warm radial glow + side floating names */}
       <style>{`
-        @keyframes auroraGlowDrift {
+        @keyframes sideGlowDrift {
           0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-          25%  { transform: translate(3%, -2%) rotate(1deg) scale(1.04); }
-          50%  { transform: translate(-2%, 3%) rotate(-0.5deg) scale(1.02); }
-          75%  { transform: translate(2%, 1%) rotate(0.5deg) scale(1.03); }
+          25%  { transform: translate(3%, -2%) rotate(1deg) scale(1.06); }
+          50%  { transform: translate(-2%, 3%) rotate(-0.5deg) scale(1.03); }
+          75%  { transform: translate(2%, 1%) rotate(0.5deg) scale(1.05); }
         }
-        @keyframes auroraGlowBreathe {
-          0%, 100% { opacity: 0.35; }
-          50% { opacity: 0.7; }
+        @keyframes sideGlowBreathe {
+          0%, 100% { opacity: 0.55; }
+          50% { opacity: 0.9; }
         }
         @keyframes nameFadeFloat {
-          0%, 100% { opacity: 0.05; transform: translateY(0); }
-          20%  { opacity: 0.55; transform: translateY(-4px); }
-          40%  { opacity: 0.15; transform: translateY(2px); }
-          60%  { opacity: 0.45; transform: translateY(-2px); }
-          80%  { opacity: 0.08; transform: translateY(0); }
+          0%, 100% { opacity: 0.06; transform: translateY(0); }
+          20%  { opacity: 0.6; transform: translateY(-4px); }
+          40%  { opacity: 0.18; transform: translateY(2px); }
+          60%  { opacity: 0.5; transform: translateY(-2px); }
+          80%  { opacity: 0.1; transform: translateY(0); }
         }
-        .aurora-glow-bg::before {
-          content: '';
-          position: absolute;
-          inset: 0;
+        .event-side-glow {
           background:
-            radial-gradient(ellipse 35% 30% at 45% 50%, rgba(201,162,39,0.18) 0%, transparent 50%),
-            radial-gradient(ellipse 40% 35% at 25% 40%, rgba(201,180,80,0.14) 0%, transparent 55%),
-            radial-gradient(ellipse 45% 38% at 70% 55%, rgba(180,140,60,0.12) 0%, transparent 55%),
-            radial-gradient(ellipse 35% 28% at 55% 35%, rgba(220,200,140,0.10) 0%, transparent 50%),
-            radial-gradient(ellipse 30% 25% at 40% 60%, rgba(201,162,39,0.08) 0%, transparent 50%);
-          background-size: 180% 180%;
-          animation: auroraGlowDrift 14s ease-in-out infinite, auroraGlowBreathe 7s ease-in-out infinite;
-          filter: blur(28px);
+            radial-gradient(ellipse 60% 50% at 50% 50%, rgba(201,162,39,0.20) 0%, transparent 50%),
+            radial-gradient(ellipse 50% 35% at 30% 45%, rgba(210,120,80,0.12) 0%, transparent 55%),
+            radial-gradient(ellipse 55% 40% at 70% 48%, rgba(190,80,100,0.10) 0%, transparent 55%),
+            radial-gradient(ellipse 40% 30% at 50% 40%, rgba(220,180,60,0.15) 0%, transparent 60%),
+            radial-gradient(ellipse 70% 60% at 50% 50%, rgba(201,162,39,0.08) 0%, transparent 65%);
+          animation: sideGlowDrift 12s ease-in-out infinite, sideGlowBreathe 5s ease-in-out infinite;
+          filter: blur(35px);
         }
-        .aurora-glow-bg {
-          animation: auroraGlowBreathe 7s ease-in-out infinite;
-        }
-        .floating-name {
+        .side-name {
           font-family: var(--font-bodoni), Georgia, serif;
           font-weight: 400;
           letter-spacing: 0.06em;
@@ -432,9 +461,8 @@ export default function EventPage({
           will-change: opacity, transform;
         }
         @media (prefers-reduced-motion: reduce) {
-          .aurora-glow-bg::before { animation: none !important; }
-          .aurora-glow-bg { animation: none !important; }
-          .floating-name { animation: none !important; opacity: 0.3 !important; }
+          .event-side-glow { animation: none !important; }
+          .side-name { animation: none !important; opacity: 0.3 !important; }
         }
       `}</style>
 

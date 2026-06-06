@@ -19,6 +19,28 @@ function HeartIcon({ filled, className }: { filled: boolean; className?: string 
   );
 }
 
+function LikeButton({
+  liked, loaded, count, animating, onClick,
+}: {
+  liked: boolean; loaded: boolean; count: number; animating: boolean;
+  onClick: (e: React.MouseEvent) => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`absolute bottom-3 right-3 z-10 inline-flex items-center gap-1 rounded-full bg-black/40 backdrop-blur-sm px-2.5 py-1.5 text-xs transition-all hover:bg-black/60 ${
+        liked ? 'text-[#c9a227]' : 'text-white/80'
+      }`}
+    >
+      <HeartIcon
+        filled={liked}
+        className={`w-3.5 h-3.5 transition-transform ${animating ? 'scale-125' : 'scale-100'}`}
+      />
+      <span className="tabular-nums">{loaded ? count : '—'}</span>
+    </button>
+  );
+}
+
 export default function JournalEntryWithLikes({
   entry,
 }: {
@@ -89,6 +111,29 @@ export default function JournalEntryWithLikes({
     }
   }, [doLike]);
 
+  const handleLikeClick = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setAnimating(true);
+    setTimeout(() => setAnimating(false), 300);
+    const nextLiked = !liked;
+    setLiked(nextLiked);
+    setCount((prev) => (nextLiked ? prev + 1 : prev - 1));
+    try {
+      const res = await fetch('/api/likes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetType: 'journal', targetId: entry.slug }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      setLiked(data.liked);
+      setCount(data.count);
+    } catch {
+      setLiked((prev) => !prev);
+      setCount((prev) => (liked ? prev + 1 : prev - 1));
+    }
+  }, [entry.slug, liked]);
+
   return (
     <article
       className="relative select-none group"
@@ -117,56 +162,32 @@ export default function JournalEntryWithLikes({
 
       {/* Cover image with hover zoom */}
       <div className="flex justify-center mb-8">
-        <div className={`relative overflow-hidden rounded-lg ${
-          entry.coverAspect === 'tall'
-            ? 'w-full h-[66vh]'
-            : entry.coverAspect === 'square'
-              ? 'w-full aspect-square'
-              : 'w-full aspect-[16/10]'
-        }`}>
-          <Image
-            src={entry.cover}
-            alt={entry.title}
-            fill
-            sizes="(max-width: 768px) 100vw, 768px"
-            className={`block transition-transform duration-500 ease-out group-hover:scale-[1.02] ${
-              entry.coverAspect === 'tall' || entry.coverAspect === 'square' ? 'object-contain' : 'object-cover'
-            }`}
-          />
-          <button
-            onClick={async (e) => {
-              e.stopPropagation();
-              setAnimating(true);
-              setTimeout(() => setAnimating(false), 300);
-              const nextLiked = !liked;
-              setLiked(nextLiked);
-              setCount((prev) => (nextLiked ? prev + 1 : prev - 1));
-              try {
-                const res = await fetch('/api/likes', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ targetType: 'journal', targetId: entry.slug }),
-                });
-                if (!res.ok) throw new Error('Failed');
-                const data = await res.json();
-                setLiked(data.liked);
-                setCount(data.count);
-              } catch {
-                setLiked((prev) => !prev);
-                setCount((prev) => (liked ? prev + 1 : prev - 1));
-              }
-            }}
-            className={`absolute bottom-3 right-3 z-10 inline-flex items-center gap-1 rounded-full bg-black/40 backdrop-blur-sm px-2.5 py-1.5 text-xs transition-all hover:bg-black/60 ${
-              liked ? 'text-[#c9a227]' : 'text-white/80'
-            }`}
-          >
-            <HeartIcon
-              filled={liked}
-              className={`w-3.5 h-3.5 transition-transform ${animating ? 'scale-125' : 'scale-100'}`}
+        {entry.coverAspect === 'tall' || entry.coverAspect === 'square' ? (
+          <div className={`relative overflow-hidden rounded-lg w-full ${
+            entry.coverAspect === 'tall' ? 'h-[66vh]' : 'aspect-square'
+          }`}>
+            <Image
+              src={entry.cover}
+              alt={entry.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 768px"
+              className="block object-contain transition-transform duration-500 ease-out group-hover:scale-[1.02]"
             />
-            <span className="tabular-nums">{loaded ? count : '—'}</span>
-          </button>
-        </div>
+            <LikeButton liked={liked} loaded={loaded} count={count} animating={animating} onClick={handleLikeClick} />
+          </div>
+        ) : (
+          <div className="relative overflow-hidden rounded-lg w-full">
+            <Image
+              src={entry.cover}
+              alt={entry.title}
+              width={1200}
+              height={800}
+              sizes="(max-width: 768px) 100vw, 768px"
+              className="block w-full h-auto transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+            />
+            <LikeButton liked={liked} loaded={loaded} count={count} animating={animating} onClick={handleLikeClick} />
+          </div>
+        )}
       </div>
 
       <div

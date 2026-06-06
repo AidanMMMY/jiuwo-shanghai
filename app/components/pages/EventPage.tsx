@@ -129,7 +129,7 @@ export default function EventPage({
         />
 
         {/* Top gradient: fades image into black background */}
-        <div className="absolute top-0 left-0 right-0 h-[35%] bg-gradient-to-b from-black via-black/80 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[35%] bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent" />
 
         {/* Bottom gradient: fades image into page background */}
         <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent pointer-events-none" />
@@ -202,7 +202,7 @@ export default function EventPage({
             <div className="flex justify-between items-end">
               <div>
                 <p
-                  className="text-[3rem] leading-[0.85] md:text-[3.5rem] text-[#f5f5f0] tracking-tight"
+                  className="text-[2.4rem] leading-[0.85] md:text-[2.8rem] text-[#f5f5f0] tracking-tight"
                   style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
                 >
                   {dateDisplay}

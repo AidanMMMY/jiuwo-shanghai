@@ -98,6 +98,13 @@ a, button, [role="button"] {
     touch-action: manipulation;
 }
 
+/* Keyboard focus styles for mobile accessibility */
+:focus-visible {
+    outline: 2px solid #c9a227;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
 /* ── Film Grain Texture ── */
 /* DISABLED: Safari iOS viewport bug — body::before fixed overlay
    prevents content from extending behind the bottom toolbar.
@@ -429,6 +436,182 @@ a:not([class*="no-link-style"]) {
             transition: none;
         }
     }
+}
+
+/* ── Hero Carousel & Shared Animations ── */
+
+@keyframes taglineShimmer {
+    0%, 5% { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+    85%, 100% { -webkit-mask-position: 0% 0; mask-position: 0% 0; }
+}
+@keyframes heroIntroFadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scrollHintBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+@keyframes titleEntrance {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes taglineEntrance {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes titleBreathe {
+    0%, 100% { opacity: 0.94; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.005); }
+}
+@keyframes heroTitleShine {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 400% 50%; }
+}
+@keyframes eventTextShimmer {
+    0%   { background-position: 200% 50%; }
+    100% { background-position: -200% 50%; }
+}
+@keyframes auroraDrift {
+    0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    25%  { transform: translate(4%, -3%) rotate(1.5deg) scale(1.05); }
+    50%  { transform: translate(-2%, 4%) rotate(-1deg) scale(1.02); }
+    75%  { transform: translate(3%, 2%) rotate(0.5deg) scale(1.04); }
+}
+@keyframes auroraBreathe {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 1; }
+}
+@keyframes sealGlow {
+    0%, 100% { box-shadow: 0 0 14px rgba(201,162,39,0.12), 0 0 2px rgba(201,162,39,0.18); }
+    50% { box-shadow: 0 0 24px rgba(201,162,39,0.22), 0 0 6px rgba(201,162,39,0.28); }
+}
+@keyframes sealStar {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.08); }
+}
+@keyframes quoteBreathe {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+.event-entry-wrapper {
+    position: relative;
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+.event-aurora-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+.event-aurora-bg::before {
+    content: '';
+    position: absolute;
+    inset: -80%;
+    background:
+        radial-gradient(ellipse 30% 24% at 50% 50%, rgba(245,235,220,0.22) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 35% at 30% 38%, rgba(201,162,39,0.24) 0%, transparent 55%),
+        radial-gradient(ellipse 45% 32% at 72% 32%, rgba(210,130,90,0.20) 0%, transparent 55%),
+        radial-gradient(ellipse 55% 42% at 42% 70%, rgba(190,80,100,0.16) 0%, transparent 55%),
+        radial-gradient(ellipse 42% 28% at 68% 60%, rgba(200,150,60,0.14) 0%, transparent 55%);
+    background-size: 200% 200%;
+    animation: auroraDrift 10s ease-in-out infinite, auroraBreathe 5s ease-in-out infinite;
+    filter: blur(20px);
+}
+.event-text-shimmer {
+    background-image: linear-gradient(105deg,
+        #707070 0%,
+        #a0a0a0 18%,
+        #e8e0d0 35%,
+        #c8c0b0 50%,
+        #a0a0a0 72%,
+        #707070 100%);
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: eventTextShimmer 5s linear infinite;
+    animation-delay: 2s;
+}
+.event-name-shimmer {
+    background-image: linear-gradient(105deg,
+        #8a7a6a 0%,
+        #b0a898 18%,
+        #f5f0e8 35%,
+        #d8d0c0 50%,
+        #b0a898 72%,
+        #8a7a6a 100%);
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: eventTextShimmer 6s linear infinite;
+    animation-delay: 2.5s;
+}
+.event-line {
+    height: 1.5px;
+    width: 2rem;
+    background: linear-gradient(to right, rgba(201,162,39,0.05), rgba(201,162,39,0.3), rgba(201,162,39,0.7));
+}
+.event-line-r {
+    background: linear-gradient(to left, rgba(201,162,39,0.05), rgba(201,162,39,0.3), rgba(201,162,39,0.7));
+}
+@media (min-width: 768px) {
+    .event-line, .event-line-r { width: 3.5rem; }
+}
+
+.hero-title-breathe {
+    animation: titleBreathe 5s ease-in-out infinite;
+    animation-delay: 1.2s;
+}
+.hero-title-shine {
+    display: inline-block;
+    background-image: linear-gradient(105deg,
+        #C85060 0%,
+        #E8A898 17%,
+        #E8C050 34%,
+        #F5E088 51%,
+        #E89860 68%,
+        #D88088 85%,
+        #C85060 100%);
+    background-size: 400% 100%;
+    background-position: 0% 50%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation:
+        titleEntrance 900ms cubic-bezier(0.16, 1, 0.3, 1) 200ms both,
+        heroTitleShine 12s linear 1.6s infinite;
+}
+.hero-intro-fade-up {
+    animation: heroIntroFadeUp 1400ms cubic-bezier(0.16, 1, 0.3, 1) 1000ms both;
+}
+.scroll-hint {
+    animation: scrollHintBounce 1.8s ease-in-out infinite;
+}
+.seal-glow {
+    box-shadow: 0 0 14px rgba(201,162,39,0.12), 0 0 2px rgba(201,162,39,0.18);
+    animation: sealGlow 3.2s ease-in-out infinite;
+}
+.seal-star {
+    animation: sealStar 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-title-breathe { animation: none !important; }
+    .hero-title-shine { animation: none !important; background-position: 0% 50%; opacity: 1; transform: none; }
+    .hero-intro-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
+    .scroll-hint { animation: none !important; }
+    .event-text-shimmer { animation: none !important; background-image: none !important; color: #c9a227 !important; -webkit-text-fill-color: #c9a227 !important; }
+    .event-name-shimmer { animation: none !important; background-image: none !important; color: #c9a227 !important; -webkit-text-fill-color: #c9a227 !important; }
+    .event-aurora-bg::before { animation: none !important; transform: none !important; }
 }
 
 /* ── After Hours Darkroom Mode ── */

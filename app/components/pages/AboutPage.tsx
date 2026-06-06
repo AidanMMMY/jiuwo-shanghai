@@ -1,5 +1,6 @@
 import AuroraBackground from '@/components/AuroraBackground';
 import ScrollReveal from '@/components/ScrollReveal';
+import MapEmbed from '@/components/MapEmbed';
 import type { AboutData } from '@/lib/data';
 
 export default function AboutPage({
@@ -130,18 +131,7 @@ export default function AboutPage({
       <section className="relative z-10 px-6 pb-24">
         <ScrollReveal>
           <div className="mx-auto max-w-3xl">
-            <div className="aspect-video w-full rounded-lg overflow-hidden border border-[#c9a22733] transition-all duration-300 hover:border-[#c9a22766] hover:shadow-[0_0_20px_rgba(201,162,39,0.1)]">
-              <iframe
-                src={about.mapEmbedUrl}
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title={labels.mapTitle}
-              />
-            </div>
+            <MapEmbed src={about.mapEmbedUrl} title={labels.mapTitle} />
           </div>
         </ScrollReveal>
       </section>

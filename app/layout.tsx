@@ -13,7 +13,7 @@ const inter = Inter({
 const bodoni = Bodoni_Moda({
   subsets: ["latin"],
   variable: "--font-bodoni",
-  weight: ["400", "500", "700", "800"],
+  weight: ["400", "700"],
 });
 
 const spaceMono = Space_Mono({
@@ -80,6 +80,12 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
+    },
+  },
+  alternates: {
+    languages: {
+      'en': 'https://jiuwoshanghai.net',
+      'zh-Hans': 'https://jiuwoshanghai.net/zh',
     },
   },
   icons: {

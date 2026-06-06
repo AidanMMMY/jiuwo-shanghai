@@ -62,7 +62,7 @@ export default function HeroCarousel({
 
       {/* Title & Tagline — name/tagline position locked */}
       <div
-        className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
+        className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center"
         style={{ paddingBottom: 'clamp(10rem, 25vh, 18rem)' }}
       >
         <div className="hero-title-breathe hero-normal-title">

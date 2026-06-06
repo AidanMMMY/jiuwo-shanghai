@@ -15,8 +15,8 @@ export default function GalleryAlbumPage({
   locale?: 'en' | 'zh';
 }) {
   return (
-    <section className="pt-32 pb-20 px-6 bg-[#0a0a0a] min-h-[100lvh]">
-      <div className="mx-auto max-w-7xl">
+    <section className="pt-32 pb-20 px-4 bg-[#0a0a0a] min-h-[100lvh]">
+      <div className="mx-auto">
         <Link
           href={backHref ?? '/gallery'}
           className="group inline-flex items-center gap-2 text-sm text-[#a0a0a0] hover:text-[#c9a227] transition-colors"

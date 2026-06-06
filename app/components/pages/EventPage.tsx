@@ -202,7 +202,7 @@ export default function EventPage({
         <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/20 via-transparent to-[#0a0a0a]/20" />
 
         {/* Content overlay */}
-        <div className="absolute inset-0 flex flex-col px-6 pt-20 pb-0 md:pt-4 md:pb-4">
+        <div className="absolute inset-0 flex flex-col px-4 pt-20 pb-0 md:pt-4 md:pb-4">
 
           {/* Back link */}
           <Link
@@ -330,7 +330,7 @@ export default function EventPage({
 
     {/* RSVP List — for upcoming events with RSVP */}
       {showRsvp && (
-        <div className="w-full md:max-w-lg mx-auto px-6 py-12 border-t border-[#222]">
+        <div className="w-full md:max-w-lg mx-auto px-4 py-12 border-t border-[#222]">
           <h2
             className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
             style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
@@ -372,7 +372,7 @@ export default function EventPage({
           </div>
 
           {/* ─── Mobile: Simple list ─── */}
-          <div className="md:hidden w-full max-w-lg mx-auto px-6 py-12 border-t border-[#222]">
+          <div className="md:hidden w-full max-w-lg mx-auto px-4 py-12 border-t border-[#222]">
             <h2
               className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
               style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
@@ -400,7 +400,7 @@ export default function EventPage({
 
           {/* ─── Retrospective content (centered, shared) ─── */}
           {retrospective && (
-            <div className="w-full md:max-w-lg mx-auto px-6 pt-8 md:pt-12 border-t border-[#222] md:border-t-0">
+            <div className="w-full md:max-w-lg mx-auto px-4 pt-8 md:pt-12 border-t border-[#222] md:border-t-0">
               <h2
                 className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
                 style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
@@ -415,7 +415,7 @@ export default function EventPage({
 
           {/* ─── Retrospective photos (centered, shared) ─── */}
           {event.retrospectivePhotos && event.retrospectivePhotos.length > 0 && (
-            <div className="w-full md:max-w-lg mx-auto px-6 mt-8 grid grid-cols-2 gap-3">
+            <div className="w-full md:max-w-lg mx-auto px-4 mt-8 grid grid-cols-2 gap-3">
               {event.retrospectivePhotos.map((photo, i) => (
                 <div key={i} className="relative aspect-[3/4] overflow-hidden rounded-lg">
                   <Image

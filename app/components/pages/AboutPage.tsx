@@ -29,7 +29,7 @@ export default function AboutPage({
 
       {/* Hero block */}
       <section className="relative z-10 w-full">
-        <div className="flex flex-col items-center justify-center px-6 pt-32 md:pt-40 pb-20 md:pb-24 text-center">
+        <div className="flex flex-col items-center justify-center px-4 pt-32 md:pt-40 pb-20 md:pb-24 text-center">
           <h1
             className="text-5xl md:text-7xl font-medium tracking-widest text-[#f5f5f0] uppercase"
             style={{ textShadow: '0 0 40px rgba(201,162,39,0.3), 0 0 80px rgba(201,162,39,0.1)' }}
@@ -43,7 +43,7 @@ export default function AboutPage({
       </section>
 
       {/* Story block */}
-      <section className="relative z-10 px-6 pt-20 md:pt-24 pb-20 md:pb-28">
+      <section className="relative z-10 px-4 pt-20 md:pt-24 pb-20 md:pb-28">
         <div className="mx-auto max-w-2xl">
           <div className="bg-[#0a0a0a]/60 backdrop-blur-[2px] rounded-lg p-8 md:p-10 space-y-8 text-lg md:text-xl text-[#a0a0a0] leading-relaxed">
             {firstParagraph && (
@@ -70,7 +70,7 @@ export default function AboutPage({
       </section>
 
       {/* Pull quote */}
-      <section className="relative z-10 px-6 py-12 md:py-16">
+      <section className="relative z-10 px-4 py-12 md:py-16">
         <ScrollReveal>
           <div className="mx-auto max-w-2xl text-center bg-[#0a0a0a]/40 backdrop-blur-[1px] rounded-lg p-8 md:p-10 transition-all duration-300 hover:brightness-110">
             <div className="mx-auto h-px w-12 bg-[#c9a227] mb-8" />
@@ -97,9 +97,9 @@ export default function AboutPage({
       </section>
 
       {/* Info block: hours / email / address */}
-      <section className="relative z-10 px-6 py-16 md:py-20">
+      <section className="relative z-10 px-4 py-16 md:py-20">
         <ScrollReveal>
-          <div className="mx-auto max-w-3xl grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
+          <div className="mx-auto max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
             {[
               { label: labels.hours, value: about.hours },
               { label: labels.email, value: about.email, href: `mailto:${about.email}` },
@@ -128,9 +128,9 @@ export default function AboutPage({
       </section>
 
       {/* Map block */}
-      <section className="relative z-10 px-6 pb-24">
+      <section className="relative z-10 px-4 pb-24">
         <ScrollReveal>
-          <div className="mx-auto max-w-3xl">
+          <div className="mx-auto max-w-4xl">
             <MapEmbed src={about.mapEmbedUrl} title={labels.mapTitle} />
           </div>
         </ScrollReveal>

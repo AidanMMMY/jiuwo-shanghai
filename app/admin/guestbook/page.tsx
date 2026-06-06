@@ -28,7 +28,7 @@ export default async function Page({ searchParams }: PageProps) {
   }
 
   return (
-    <main className="bg-[#0a0a0a] min-h-[100lvh] px-6 py-12">
+    <main className="bg-[#0a0a0a] min-h-[100lvh] px-4 py-12">
       <div className="mx-auto max-w-3xl">
         <h1 className="text-2xl text-[#f5f5f0] mb-8">Guestbook Admin</h1>
 

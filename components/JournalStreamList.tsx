@@ -19,8 +19,8 @@ export default function JournalStreamList({
   const hasMore = visibleCount < entries.length;
 
   return (
-    <section className="py-20 px-6 bg-[#0a0a0a]">
-      <div className="mx-auto max-w-3xl">
+    <section className="py-20 px-4 bg-[#0a0a0a]">
+      <div className="mx-auto max-w-4xl">
         {/* Section header with decorative lines */}
         <div className="flex items-center gap-6 mb-14">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#333] to-[#333]" />

@@ -16,8 +16,8 @@ export default async function JournalPage({
   const contentHtml = await markdownToHtml(entry.content);
 
   return (
-    <article className="pt-24 pb-20 px-6 bg-[#0a0a0a] min-h-[100lvh]">
-      <div className="mx-auto max-w-3xl">
+    <article className="pt-24 pb-20 px-4 bg-[#0a0a0a] min-h-[100lvh]">
+      <div className="mx-auto max-w-4xl">
         <Link href={backHref} className="text-sm text-[#a0a0a0] hover:text-[#c9a227] transition-colors">
           {backLabel ?? '← Back to home'}
         </Link>

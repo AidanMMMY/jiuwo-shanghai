@@ -101,7 +101,7 @@ export function StampPanel({
 
       {/* Panel */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a] border-t border-[#c9a22733] max-h-[90vh] overflow-y-auto">
-        <div className="mx-auto max-w-2xl px-6 py-8">
+        <div className="mx-auto max-w-2xl px-4 py-8">
           {/* Close button */}
           <div className="flex justify-end mb-4">
             <button

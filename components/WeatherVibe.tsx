@@ -14,8 +14,8 @@ export default function WeatherVibe({ weather, recommendation, isZh = false }: W
   const spotLabel = isZh ? '坐这儿' : 'Sit here';
 
   return (
-    <section className="px-6 pt-20 pb-4 bg-[#0a0a0a]">
-      <div className="mx-auto max-w-3xl">
+    <section className="px-4 pt-20 pb-4 bg-[#0a0a0a]">
+      <div className="mx-auto max-w-4xl">
         <div className="relative rounded-lg border border-[#1a1a1a] bg-[#0e0e0e] p-6 md:p-8 overflow-hidden">
           {/* Subtle ambient glow */}
           <div

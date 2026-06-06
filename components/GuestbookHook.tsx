@@ -14,8 +14,8 @@ export default function GuestbookHook({
   href: string;
 }) {
   return (
-    <section className="bg-[#0a0a0a] px-6 py-16 md:py-24">
-      <div className="mx-auto max-w-5xl">
+    <section className="bg-[#0a0a0a] px-4 py-16 md:py-24">
+      <div className="mx-auto max-w-6xl">
         {/* Card container with subtle depth */}
         <div className="relative rounded-lg border-gradient bg-[#0e0e0e] overflow-hidden shadow-card shadow-card-hover">
           {/* Top gold accent line */}

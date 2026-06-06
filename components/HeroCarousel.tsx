@@ -19,98 +19,16 @@ function AnimatedTitle({ text }: { text: string }) {
   );
 }
 
-function TeaIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 14c0 2.8-2.2 5-5 5s-5-2.2-5-5V8h10v6z" />
-      <path d="M9 8c0-1.7 1.3-3 3-3h4c1.7 0 3 1.3 3 3" />
-      <path d="M14 19v3" />
-      <path d="M10 22h8" />
-    </svg>
-  );
-}
-
-function WineIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11 7v5c0 1.7 1.3 3 3 3s3-1.3 3-3V7" />
-      <path d="M14 15v5" />
-      <path d="M10 20h8" />
-    </svg>
-  );
-}
-
-function ShakerIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 6h8l1.5 3H8.5L10 6z" />
-      <path d="M9 9l2.5 11h5l2.5-11" />
-      <path d="M11 12h6" />
-      <path d="M11.5 15h5" />
-    </svg>
-  );
-}
-
-function LoveIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 18.5C10 18.5 5 15 5 10.5C5 8.5 6.5 7 8.5 7C9.8 7 10.7 7.6 11.5 8.5C12.3 7.6 13.2 7 14.5 7C16.5 7 18 8.5 18 10.5C18 15 10 18.5 10 18.5Z" />
-      <path d="M17 16C17 16 13 13 13 9.5C13 8 14 7 15.5 7C16.5 7 17 7.4 17.5 8C18 7.4 18.5 7 19.5 7C21 7 22 8 22 9.5C22 13 17 16 17 16Z" />
-    </svg>
-  );
-}
-
-/* ── After Hours Icons ── */
-function LockIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="6" y="11" width="16" height="13" rx="2" />
-      <path d="M9 11V7a5 5 0 0110 0v4" />
-    </svg>
-  );
-}
-
-function ChairIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8 22h12" />
-      <path d="M10 22V12a4 4 0 018 0v10" />
-      <path d="M10 12h8" />
-    </svg>
-  );
-}
-
-function EmptyGlassIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11 7v8c0 1.7 1.3 3 3 3s3-1.3 3-3V7" />
-      <path d="M14 18v4" />
-      <path d="M10 22h8" />
-      <path d="M12 11h4" opacity="0.3" />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#f5f5f0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 16.5A9 9 0 1111.5 6a7 7 0 0010.5 10.5z" />
-    </svg>
-  );
-}
-
 export default function HeroCarousel({
   slides,
   title,
   tagline,
-  intro,
   specialEvent,
   isZh,
 }: {
   slides: HeroSlide[];
   title: string;
   tagline: string;
-  intro: string;
   specialEvent?: { hero: string; hostName?: string; href?: string };
   isZh?: boolean;
 }) {

@@ -39,7 +39,6 @@ export default function HomePage({
         slides={slides}
         title={site.name}
         tagline={site.tagline}
-        intro={site.intro}
         specialEvent={specialEventCard}
         isZh={isZh}
       />

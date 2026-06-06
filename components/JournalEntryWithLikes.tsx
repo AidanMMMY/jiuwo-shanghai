@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import LikeButton from './LikeButton';
 
 function HeartIcon({ filled, className }: { filled: boolean; className?: string }) {
   return (

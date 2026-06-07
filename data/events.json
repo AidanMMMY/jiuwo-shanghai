@@ -15,13 +15,22 @@
       "subtitle": "The Night of Roland Garros",
       "subtitleZh": "法网之夜",
       "cover": "/images/events/event-20260605-cover.webp",
-      "poster": "/images/events/event-20260605-2.webp",
+      "poster": "/images/events/event-20260605-poster.webp",
       "venue": "Julu Rd. 397",
       "venueZh": "巨鹿路397号",
       "rsvpEnabled": true,
       "retrospective": "",
       "retrospectiveZh": "",
-      "retrospectivePhotos": []
+      "retrospectivePhotos": [
+        "/images/events/event-20260605-recap-01.webp",
+        "/images/events/event-20260605-recap-02.webp",
+        "/images/events/event-20260605-recap-03.webp",
+        "/images/events/event-20260605-recap-04.webp",
+        "/images/events/event-20260605-recap-05.webp",
+        "/images/events/event-20260605-recap-06.webp",
+        "/images/events/event-20260605-recap-07.webp",
+        "/images/events/event-20260605-recap-08.webp"
+      ]
     }
   ]
 }

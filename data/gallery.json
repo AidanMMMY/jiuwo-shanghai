@@ -1,5 +1,65 @@
 [
   {
+    "id": "our-friend-dex",
+    "title": "Our Friend Dex",
+    "titleZh": "Dex",
+    "subtitle": "Quiet presence, warm heart.",
+    "subtitleZh": "话不多，心很热。",
+    "cover": "/images/gallery/our-friend-dex/Dex-20260607-01.webp",
+    "category": "Our Friends",
+    "categoryZh": "我们的朋友",
+    "friendSocial": {
+      "instagram": "dex0912f"
+    },
+    "photos": [
+      {
+        "src": "/images/gallery/our-friend-dex/Dex-20260607-01.webp",
+        "alt": "Dex 09",
+        "altZh": "Dex 09"
+      },
+      {
+        "src": "/images/gallery/our-friend-dex/Dex-20260529-01.webp",
+        "alt": "Dex 08",
+        "altZh": "Dex 08"
+      },
+      {
+        "src": "/images/gallery/our-friend-dex/Dex-20260522-01.webp",
+        "alt": "Dex 07",
+        "altZh": "Dex 07"
+      },
+      {
+        "src": "/images/gallery/our-friend-dex/Dex-20260515-01.webp",
+        "alt": "Dex 01",
+        "altZh": "Dex 01"
+      },
+      {
+        "src": "/images/gallery/our-friend-dex/Dex-20260515-02.webp",
+        "alt": "Dex 02",
+        "altZh": "Dex 02"
+      },
+      {
+        "src": "/images/gallery/our-friend-dex/Dex-20260515-03.webp",
+        "alt": "Dex 03",
+        "altZh": "Dex 03"
+      },
+      {
+        "src": "/images/gallery/our-friend-dex/Dex-20260515-04.webp",
+        "alt": "Dex 04",
+        "altZh": "Dex 04"
+      },
+      {
+        "src": "/images/gallery/our-friend-dex/Dex-20260515-05.webp",
+        "alt": "Dex 05",
+        "altZh": "Dex 05"
+      },
+      {
+        "src": "/images/gallery/our-friend-dex/Dex-20260515-06.webp",
+        "alt": "Dex 06",
+        "altZh": "Dex 06"
+      }
+    ]
+  },
+  {
     "id": "our-friend-morris",
     "title": "Our Friend Morris",
     "titleZh": "莫里斯",
@@ -148,61 +208,6 @@
         "src": "/images/gallery/our-friend-agnosia/agnosia-20260602-01.webp",
         "alt": "AGNOSIA 01",
         "altZh": "AGNOSIA 01"
-      }
-    ]
-  },
-  {
-    "id": "our-friend-dex",
-    "title": "Our Friend Dex",
-    "titleZh": "Dex",
-    "subtitle": "Quiet presence, warm heart.",
-    "subtitleZh": "话不多，心很热。",
-    "cover": "/images/gallery/our-friend-dex/Dex-20260529-01.webp",
-    "category": "Our Friends",
-    "categoryZh": "我们的朋友",
-    "friendSocial": {
-      "instagram": "dex0912f"
-    },
-    "photos": [
-      {
-        "src": "/images/gallery/our-friend-dex/Dex-20260529-01.webp",
-        "alt": "Dex 08",
-        "altZh": "Dex 08"
-      },
-      {
-        "src": "/images/gallery/our-friend-dex/Dex-20260522-01.webp",
-        "alt": "Dex 07",
-        "altZh": "Dex 07"
-      },
-      {
-        "src": "/images/gallery/our-friend-dex/Dex-20260515-01.webp",
-        "alt": "Dex 01",
-        "altZh": "Dex 01"
-      },
-      {
-        "src": "/images/gallery/our-friend-dex/Dex-20260515-02.webp",
-        "alt": "Dex 02",
-        "altZh": "Dex 02"
-      },
-      {
-        "src": "/images/gallery/our-friend-dex/Dex-20260515-03.webp",
-        "alt": "Dex 03",
-        "altZh": "Dex 03"
-      },
-      {
-        "src": "/images/gallery/our-friend-dex/Dex-20260515-04.webp",
-        "alt": "Dex 04",
-        "altZh": "Dex 04"
-      },
-      {
-        "src": "/images/gallery/our-friend-dex/Dex-20260515-05.webp",
-        "alt": "Dex 05",
-        "altZh": "Dex 05"
-      },
-      {
-        "src": "/images/gallery/our-friend-dex/Dex-20260515-06.webp",
-        "alt": "Dex 06",
-        "altZh": "Dex 06"
       }
     ]
   },

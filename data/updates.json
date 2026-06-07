@@ -1,5 +1,14 @@
 [
   {
+    "slug": "full-house",
+    "title": "Full House",
+    "titleZh": "人很多",
+    "date": "2022-08-27",
+    "cover": "/images/journal/20220827-01.webp",
+    "content": "Full house, drinks flowing.",
+    "contentZh": "人很多，酒够喝。"
+  },
+  {
     "slug": "big-night",
     "title": "Big Night",
     "titleZh": "大夜",

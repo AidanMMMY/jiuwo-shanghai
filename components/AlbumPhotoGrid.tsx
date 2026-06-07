@@ -2,19 +2,13 @@
 
 import Image from 'next/image';
 import { useState, useCallback, useRef, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-const Lightbox = dynamic(() => import('./Lightbox'), { ssr: false });
 import LikeButton from './LikeButton';
 import ScrollReveal from './ScrollReveal';
 
 function PhotoCard({
   photo,
-  idx,
-  onOpen,
 }: {
   photo: { src: string; alt: string };
-  idx: number;
-  onOpen: (originRect?: DOMRect) => void;
 }) {
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(0);
@@ -23,7 +17,6 @@ function PhotoCard({
   const [animating, setAnimating] = useState(false);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clickCount = useRef(0);
-  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch(`/api/likes?type=${encodeURIComponent('photo')}&id=${encodeURIComponent(photo.src)}`)
@@ -80,8 +73,6 @@ function PhotoCard({
     clickCount.current += 1;
     if (clickCount.current === 1) {
       clickTimer.current = setTimeout(() => {
-        const rect = cardRef.current?.getBoundingClientRect();
-        onOpen(rect);
         clickCount.current = 0;
       }, 300);
     } else if (clickCount.current === 2) {
@@ -90,11 +81,10 @@ function PhotoCard({
       clickCount.current = 0;
       handleDoubleClickLike();
     }
-  }, [onOpen, handleDoubleClickLike]);
+  }, [handleDoubleClickLike]);
 
   return (
     <div
-      ref={cardRef}
       className="relative aspect-square overflow-hidden rounded-lg cursor-pointer select-none"
       onClick={handleClick}
     >
@@ -137,31 +127,13 @@ export default function AlbumPhotoGrid({
 }: {
   photos: { src: string; alt: string }[];
 }) {
-  const [lightboxState, setLightboxState] = useState<{ index: number; originRect?: DOMRect } | null>(null);
-
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {photos.map((photo, idx) => (
-          <ScrollReveal key={idx} delay={idx * 60}>
-            <PhotoCard
-              key={idx}
-              photo={photo}
-              idx={idx}
-              onOpen={(rect) => setLightboxState({ index: idx, originRect: rect })}
-            />
-          </ScrollReveal>
-        ))}
-      </div>
-      {lightboxState !== null && (
-        <Lightbox
-          photos={photos}
-          currentIndex={lightboxState.index}
-          onClose={() => setLightboxState(null)}
-          onIndexChange={(index) => setLightboxState((prev) => prev ? { ...prev, index } : null)}
-          originRect={lightboxState.originRect}
-        />
-      )}
-    </>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {photos.map((photo, idx) => (
+        <ScrollReveal key={idx} delay={idx * 60}>
+          <PhotoCard key={idx} photo={photo} />
+        </ScrollReveal>
+      ))}
+    </div>
   );
 }

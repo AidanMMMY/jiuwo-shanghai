@@ -146,7 +146,7 @@ export default function HeroCarousel({
               {/* Content */}
               <div className="relative rounded-xl bg-[#0f0f0f]/60 border border-[#c9a227]/20 px-6 py-3.5 inline-flex flex-col items-center gap-2">
                 {/* Line 1: hero text with shimmer */}
-                <span className="text-sm md:text-base tracking-wider event-text-shimmer">
+                <span className="text-base md:text-lg tracking-wider event-text-shimmer">
                   {specialEvent.hero}
                 </span>
                 {/* Line 2: host name with dual lines + arrow */}

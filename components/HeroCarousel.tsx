@@ -112,8 +112,11 @@ export default function HeroCarousel({
             <div className={`relative rounded-xl px-6 py-3.5 inline-flex flex-col items-center gap-2 transition-all duration-300 ${
               specialEvent.isUpcoming === false
                 ? 'bg-black/40 backdrop-blur-md border border-white/10 shadow-none group-hover:bg-black/50 group-hover:border-white/20'
-                : 'bg-[#0f0f0f]/30 border border-[#c9a227]/20 shadow-[0_0_18px_rgba(201,162,39,0.08),inset_0_0_16px_rgba(201,162,39,0.05)] group-hover:border-[#c9a227]/50 group-hover:shadow-[0_0_24px_rgba(201,162,39,0.12),inset_0_0_20px_rgba(201,162,39,0.06)]'
-            }`}>
+                : 'border border-[#c9a227]/20 shadow-[0_0_18px_rgba(201,162,39,0.08),inset_0_0_16px_rgba(201,162,39,0.05)] group-hover:border-[#c9a227]/50 group-hover:shadow-[0_0_24px_rgba(201,162,39,0.12),inset_0_0_20px_rgba(201,162,39,0.06)]'
+            }`}
+            style={specialEvent.isUpcoming !== false ? {
+              backgroundColor: 'rgba(15, 15, 15, 0.30)',
+            } : undefined}>
               {/* Line 1: hero text */}
               <span className={`text-base md:text-lg tracking-wider ${
                 specialEvent.isUpcoming === false

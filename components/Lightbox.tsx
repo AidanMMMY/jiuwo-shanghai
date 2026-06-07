@@ -67,10 +67,11 @@ export default function Lightbox({
 }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     startIndex: currentIndex,
-    loop: true,
+    loop: photos.length >= 3,
   });
 
   const [selectedIndex, setSelectedIndex] = useState(currentIndex);
+  const [emblaReady, setEmblaReady] = useState(false);
   const [showContent, setShowContent] = useState(!originRect);
   const flyingRef = useRef<HTMLImageElement>(null);
   const [bgOpacity, setBgOpacity] = useState(originRect ? 0 : 1);
@@ -101,6 +102,14 @@ export default function Lightbox({
     setIsZoomed(false);
     emblaApi?.reInit({ watchDrag: true });
   }, [selectedIndex, scale, posX, emblaApi]);
+
+  // ── embla initialization guard ──
+  useEffect(() => {
+    if (!emblaApi) return;
+    // 延迟标记 ready，确保 loop 模式的 clone slides 初始化完成
+    const timer = setTimeout(() => setEmblaReady(true), 400);
+    return () => clearTimeout(timer);
+  }, [emblaApi]);
 
   // ── first-time hint ──
   const [showSwipeHint, setShowSwipeHint] = useState(() => {
@@ -139,13 +148,13 @@ export default function Lightbox({
     return () => { anim.cancel(); clearTimeout(fallback); };
   }, [originRect]);
 
-  // ── sync embla → parent ──
+  // ── sync embla → parent (only after initialization) ──
   const onSelect = useCallback(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || !emblaReady) return;
     const index = emblaApi.selectedScrollSnap();
     setSelectedIndex(index);
     onIndexChange(index);
-  }, [emblaApi, onIndexChange]);
+  }, [emblaApi, emblaReady, onIndexChange]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -155,11 +164,11 @@ export default function Lightbox({
     };
   }, [emblaApi, onSelect]);
 
-  // ── sync parent currentIndex → embla ──
+  // ── sync parent currentIndex → embla (only after initialization) ──
   useEffect(() => {
-    if (!emblaApi || emblaApi.selectedScrollSnap() === currentIndex) return;
+    if (!emblaApi || !emblaReady || emblaApi.selectedScrollSnap() === currentIndex) return;
     emblaApi.scrollTo(currentIndex);
-  }, [emblaApi, currentIndex]);
+  }, [emblaApi, emblaReady, currentIndex]);
 
   // ── keyboard ──
   const handleKeyDown = useCallback(

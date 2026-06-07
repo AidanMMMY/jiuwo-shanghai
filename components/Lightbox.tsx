@@ -65,13 +65,8 @@ export default function Lightbox({
   onIndexChange: (index: number) => void;
   originRect?: DOMRect;
 }) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    startIndex: currentIndex,
-    loop: false,
-  });
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
 
-  const [selectedIndex, setSelectedIndex] = useState(currentIndex);
-  const [emblaReady, setEmblaReady] = useState(false);
   const [showContent, setShowContent] = useState(!originRect);
   const flyingRef = useRef<HTMLImageElement>(null);
   const [bgOpacity, setBgOpacity] = useState(originRect ? 0 : 1);
@@ -100,15 +95,16 @@ export default function Lightbox({
     posX.set(0);
     posY.set(0);
     setIsZoomed(false);
-  }, [selectedIndex, scale, posX]);
+  }, [currentIndex, scale, posX, posY]);
 
-  // ── embla initialization guard ──
+  // ── scroll to correct photo once embla is ready ──
   useEffect(() => {
     if (!emblaApi) return;
-    // 短暂延迟确保 Embla 完成内部初始化
-    const timer = setTimeout(() => setEmblaReady(true), 50);
-    return () => clearTimeout(timer);
-  }, [emblaApi]);
+    const raf = requestAnimationFrame(() => {
+      emblaApi.scrollTo(currentIndex);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [emblaApi, currentIndex]);
 
   // ── first-time hint ──
   const [showSwipeHint, setShowSwipeHint] = useState(() => {
@@ -147,13 +143,12 @@ export default function Lightbox({
     return () => { anim.cancel(); clearTimeout(fallback); };
   }, [originRect]);
 
-  // ── sync embla → parent (only after initialization) ──
+  // ── sync embla → parent ──
   const onSelect = useCallback(() => {
-    if (!emblaApi || !emblaReady) return;
+    if (!emblaApi) return;
     const index = emblaApi.selectedScrollSnap();
-    setSelectedIndex(index);
     onIndexChange(index);
-  }, [emblaApi, emblaReady, onIndexChange]);
+  }, [emblaApi, onIndexChange]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -162,12 +157,6 @@ export default function Lightbox({
       emblaApi.off('select', onSelect);
     };
   }, [emblaApi, onSelect]);
-
-  // ── sync parent currentIndex → embla (only after initialization) ──
-  useEffect(() => {
-    if (!emblaApi || !emblaReady || emblaApi.selectedScrollSnap() === currentIndex) return;
-    emblaApi.scrollTo(currentIndex);
-  }, [emblaApi, emblaReady, currentIndex]);
 
   // ── keyboard ──
   const handleKeyDown = useCallback(
@@ -184,7 +173,7 @@ export default function Lightbox({
       if (e.key === 'ArrowLeft') emblaApi?.scrollPrev();
       if (e.key === 'ArrowRight') emblaApi?.scrollNext();
     },
-    [onClose, emblaApi, isZoomed, scale, posX]
+    [onClose, emblaApi, isZoomed, scale, posX, posY]
   );
 
   useEffect(() => {
@@ -342,7 +331,7 @@ export default function Lightbox({
      Render
      ────────────────────────────────────────── */
 
-  const photo = photos[selectedIndex];
+  const photo = photos[currentIndex];
   if (!photo) return null;
 
   return (
@@ -398,7 +387,7 @@ export default function Lightbox({
           >
             <div className="flex h-full">
               {photos.map((p, i) => {
-                const isActive = i === selectedIndex;
+                const isActive = i === currentIndex;
                 return (
                   <div
                     key={`${p.src}-${i}`}
@@ -418,7 +407,7 @@ export default function Lightbox({
                         fill
                         sizes="100vw"
                         className="object-contain"
-                        priority={Math.abs(i - selectedIndex) <= 1}
+                        priority={Math.abs(i - currentIndex) <= 1}
                         draggable={false}
                       />
                     </motion.div>
@@ -463,7 +452,7 @@ export default function Lightbox({
           {!isZoomed && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-4 rounded-full bg-black/40 backdrop-blur-md px-5 py-2">
               <p className="text-xs text-[#a0a0a0] tabular-nums">
-                {selectedIndex + 1} / {photos.length}
+                {currentIndex + 1} / {photos.length}
               </p>
               <LikeButton targetType="photo" targetId={photo.src} />
             </div>

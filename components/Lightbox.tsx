@@ -3,7 +3,12 @@
 import Image from 'next/image';
 import { useEffect, useCallback, useState, useRef } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
+import { motion, useMotionValue } from 'framer-motion';
 import LikeButton from './LikeButton';
+
+/* ─────────────────────────────────────────────
+   FLIP open animation helpers
+   ───────────────────────────────────────────── */
 
 function getCenterRect(): DOMRect {
   const w = window.innerWidth;
@@ -37,6 +42,207 @@ function animateFlip(
   );
 }
 
+/* ─────────────────────────────────────────────
+   Zoom overlay — pinch / double-tap / pan
+   ───────────────────────────────────────────── */
+
+function dist(t1: React.Touch, t2: React.Touch) {
+  const dx = t1.clientX - t2.clientX;
+  const dy = t1.clientY - t2.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+interface ZoomState {
+  src: string;
+  alt: string;
+}
+
+function ZoomOverlay({
+  zoom,
+  onClose,
+}: {
+  zoom: ZoomState;
+  onClose: () => void;
+}) {
+  const scale = useMotionValue(1);
+  const posX = useMotionValue(0);
+  const posY = useMotionValue(0);
+  // ── gesture refs ──
+  const pinchStart = useRef({ dist: 0, scale: 1, posX: 0, posY: 0, midX: 0, midY: 0 });
+  const panRef = useRef({ active: false, lastX: 0, lastY: 0, posX: 0, posY: 0 });
+  const lastTap = useRef(0);
+
+  const reset = useCallback(() => {
+    scale.set(1);
+    posX.set(0);
+    posY.set(0);
+  }, [scale, posX, posY]);
+
+  const snapToScale = useCallback(
+    (target: number, originX: number, originY: number) => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      // zoom toward tap origin
+      const tx = (w / 2 - originX) * (target - 1);
+      const ty = (h / 2 - originY) * (target - 1);
+      scale.set(target);
+      posX.set(tx);
+      posY.set(ty);
+    },
+    [scale, posX, posY]
+  );
+
+  /* ── touch handlers ── */
+  const onTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      const currentScale = scale.get();
+      const currentPosX = posX.get();
+      const currentPosY = posY.get();
+
+      if (e.touches.length >= 2) {
+        pinchStart.current = {
+          dist: dist(e.touches[0], e.touches[1]),
+          scale: currentScale,
+          posX: currentPosX,
+          posY: currentPosY,
+          midX: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+          midY: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+        };
+      } else if (e.touches.length === 1) {
+        // double-tap detection
+        const now = Date.now();
+        if (now - lastTap.current < 300) {
+          if (currentScale > 1.05) {
+            reset();
+          } else {
+            snapToScale(2.5, e.touches[0].clientX, e.touches[0].clientY);
+          }
+          lastTap.current = 0;
+          return;
+        }
+        lastTap.current = now;
+
+        // pan start (only when zoomed)
+        if (currentScale > 1.05) {
+          panRef.current = {
+            active: true,
+            lastX: e.touches[0].clientX,
+            lastY: e.touches[0].clientY,
+            posX: currentPosX,
+            posY: currentPosY,
+          };
+        }
+      }
+    },
+    [scale, posX, posY, reset, snapToScale]
+  );
+
+  const onTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      // pinch
+      if (e.touches.length >= 2 && pinchStart.current.dist > 0) {
+        const newDist = dist(e.touches[0], e.touches[1]);
+        const ratio = newDist / pinchStart.current.dist;
+        const newScale = Math.max(1, Math.min(4, pinchStart.current.scale * ratio));
+
+        const newMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const newMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        const dmx = newMidX - pinchStart.current.midX;
+        const dmy = newMidY - pinchStart.current.midY;
+
+        scale.set(newScale);
+        posX.set(pinchStart.current.posX + dmx);
+        posY.set(pinchStart.current.posY + dmy);
+        return;
+      }
+
+      // pan
+      if (panRef.current.active && e.touches.length === 1) {
+        const dx = e.touches[0].clientX - panRef.current.lastX;
+        const dy = e.touches[0].clientY - panRef.current.lastY;
+        posX.set(panRef.current.posX + dx);
+        posY.set(panRef.current.posY + dy);
+        return;
+      }
+    },
+    [scale, posX, posY]
+  );
+
+  const onTouchEnd = useCallback(() => {
+    pinchStart.current.dist = 0;
+    panRef.current.active = false;
+
+    // snap back if below threshold
+    const s = scale.get();
+    if (s < 1.05) {
+      reset();
+    }
+  }, [scale, reset]);
+
+  // click on backdrop → close zoom (if not zoomed in)
+  const handleBackdropClick = useCallback(() => {
+    if (scale.get() < 1.1) {
+      onClose();
+    }
+  }, [scale, onClose]);
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[110] bg-black/98"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      onClick={handleBackdropClick}
+    >
+      <motion.div
+        className="absolute inset-0 touch-none"
+        style={{
+          scale,
+          x: posX,
+          y: posY,
+        }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        <Image
+          src={zoom.src}
+          alt={zoom.alt}
+          fill
+          sizes="100vw"
+          className="object-contain"
+          priority
+          draggable={false}
+        />
+      </motion.div>
+
+      {/* Close button */}
+      <button
+        className="absolute top-[4.5rem] right-4 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm text-[#f5f5f0] hover:bg-[#c9a227]/20 hover:text-[#c9a227] transition-colors"
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
+        aria-label="关闭"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M1 1l14 14M15 1L1 15" />
+        </svg>
+      </button>
+
+      {/* Hint */}
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 text-xs text-[#a0a0a0]/50 pointer-events-none select-none">
+        双击或捏合缩放 · 下滑关闭
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Main Lightbox
+   ───────────────────────────────────────────── */
+
 export default function Lightbox({
   photos,
   currentIndex,
@@ -60,10 +266,15 @@ export default function Lightbox({
   const flyingRef = useRef<HTMLImageElement>(null);
   const [bgOpacity, setBgOpacity] = useState(originRect ? 0 : 1);
 
+  // Zoom state
+  const [zoom, setZoom] = useState<ZoomState | null>(null);
+
   // Swipe-to-dismiss state
-  const [dragOffset, setDragOffset] = useState(0);
+  const dismissY = useMotionValue(0);
+  const dismissOpacity = useMotionValue(1);
   const touchStartY = useRef(0);
   const touchStartTime = useRef(0);
+  const [dismissing, setDismissing] = useState(false);
 
   // First-time hint
   const [showSwipeHint, setShowSwipeHint] = useState(() => {
@@ -100,6 +311,12 @@ export default function Lightbox({
     return () => anim.cancel();
   }, [originRect]);
 
+  // On zoom change → enable/disable Embla drag
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.reInit({ watchDrag: !zoom });
+  }, [emblaApi, zoom]);
+
   // Sync embla selection to parent
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -116,7 +333,7 @@ export default function Lightbox({
     };
   }, [emblaApi, onSelect]);
 
-  // Sync parent currentIndex to embla (when keyboard nav triggers)
+  // Sync parent currentIndex to embla
   useEffect(() => {
     if (!emblaApi || emblaApi.selectedScrollSnap() === currentIndex) return;
     emblaApi.scrollTo(currentIndex);
@@ -125,11 +342,15 @@ export default function Lightbox({
   // Keyboard navigation
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        if (zoom) { setZoom(null); return; }
+        onClose();
+      }
+      if (zoom) return; // no carousel nav when zoomed
       if (e.key === 'ArrowLeft') emblaApi?.scrollPrev();
       if (e.key === 'ArrowRight') emblaApi?.scrollNext();
     },
-    [onClose, emblaApi]
+    [onClose, emblaApi, zoom]
   );
 
   useEffect(() => {
@@ -137,7 +358,7 @@ export default function Lightbox({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  // Prevent body scroll when open
+  // Prevent body scroll
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -145,41 +366,65 @@ export default function Lightbox({
     };
   }, []);
 
-  // Touch handlers for swipe-to-dismiss
+  /* ── swipe-to-dismiss touch handlers ── */
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (zoom || e.touches.length !== 1) return;
     touchStartY.current = e.touches[0].clientY;
     touchStartTime.current = Date.now();
-  }, []);
+    setDismissing(true);
+  }, [zoom]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (zoom || !dismissing || e.touches.length !== 1) return;
     const delta = e.touches[0].clientY - touchStartY.current;
     if (delta > 0) {
-      setDragOffset(delta);
+      dismissY.set(delta * 0.6);
+      dismissOpacity.set(Math.max(0.2, 1 - delta / 600));
     }
-  }, []);
+  }, [zoom, dismissing, dismissY, dismissOpacity]);
 
   const handleTouchEnd = useCallback(() => {
-    const delta = dragOffset;
+    if (zoom || !dismissing) return;
+    setDismissing(false);
+    const delta = dismissY.get();
     const duration = Date.now() - touchStartTime.current;
     const velocity = delta / (duration || 1);
 
     if (delta > 100 || velocity > 0.5) {
       onClose();
     } else {
-      setDragOffset(0);
+      dismissY.set(0);
+      dismissOpacity.set(1);
     }
-  }, [dragOffset, onClose]);
+  }, [zoom, dismissing, dismissY, dismissOpacity, onClose]);
+
+  /* ── double-tap on carousel image → enter zoom ── */
+  const lastSlideTap = useRef(0);
+  const handleSlideDoubleTap = useCallback(
+    (e: React.TouchEvent, photo: { src: string; alt: string }) => {
+      const now = Date.now();
+      if (now - lastSlideTap.current < 300) {
+        setZoom({ src: photo.src, alt: photo.alt });
+        lastSlideTap.current = 0;
+        return;
+      }
+      lastSlideTap.current = now;
+    },
+    []
+  );
 
   const photo = photos[selectedIndex];
   if (!photo) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex flex-col transition-colors duration-300"
+    <motion.div
+      className="fixed inset-0 z-[100] flex flex-col"
       style={{ backgroundColor: `rgba(0,0,0,${bgOpacity * 0.95})` }}
-      onClick={showContent ? onClose : undefined}
+      animate={{ backgroundColor: `rgba(0,0,0,${bgOpacity * 0.95})` }}
+      transition={{ duration: 0.3 }}
+      onClick={showContent && !zoom ? onClose : undefined}
     >
-      {/* Flying image */}
+      {/* Flying image (FLIP) */}
       {!showContent && originRect && (
         <img
           ref={flyingRef}
@@ -195,22 +440,21 @@ export default function Lightbox({
         />
       )}
 
-      {/* Swipe-to-dismiss wrapper */}
-      <div
+      {/* Main content */}
+      <motion.div
+        className="flex-1 flex flex-col min-h-0"
         style={{
-          transform: dragOffset > 0 ? `translateY(${dragOffset * 0.4}px)` : undefined,
-          opacity: dragOffset > 0 ? Math.max(0.2, 1 - dragOffset / 500) : undefined,
-          transition: dragOffset === 0 ? 'transform 0.3s ease-out, opacity 0.3s ease-out' : undefined,
+          y: dismissY,
+          opacity: dismissOpacity,
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Content - only show after animation */}
-        <div className={`flex-1 flex flex-col ${showContent ? 'opacity-100' : 'opacity-0'} transition-opacity duration-150`}>
+        <div className={`flex-1 flex flex-col min-h-0 ${showContent ? 'opacity-100' : 'opacity-0'} transition-opacity duration-150`}>
           {/* Close button */}
           <button
-            className="absolute top-4 right-4 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm text-[#f5f5f0] hover:bg-[#c9a227]/20 hover:text-[#c9a227] transition-colors"
+            className="absolute top-[4.5rem] right-4 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm text-[#f5f5f0] hover:bg-[#c9a227]/20 hover:text-[#c9a227] transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               onClose();
@@ -225,23 +469,26 @@ export default function Lightbox({
           {/* Carousel */}
           <div
             ref={emblaRef}
-            className="flex-1 overflow-hidden cursor-grab active:cursor-grabbing"
+            className="flex-1 min-h-0 overflow-hidden cursor-grab active:cursor-grabbing"
             onClick={(e) => e.stopPropagation()}
+            style={{ overflow: zoom ? 'visible' : 'hidden' }}
           >
             <div className="flex h-full">
               {photos.map((p, i) => (
                 <div
                   key={`${p.src}-${i}`}
                   className="flex-[0_0_100%] min-w-0 h-full flex items-center justify-center px-4"
+                  onTouchStart={(e) => handleSlideDoubleTap(e, p)}
                 >
-                  <div className="relative w-full h-[80vh]">
+                  <div className="relative w-full h-[75vh] md:h-[82vh]">
                     <Image
                       src={p.src}
                       alt={p.alt}
                       fill
                       sizes="(max-width: 768px) 100vw, 80vw"
                       className="object-contain"
-                      priority={i === selectedIndex}
+                      priority={Math.abs(i - selectedIndex) <= 1}
+                      draggable={false}
                     />
                   </div>
                 </div>
@@ -250,7 +497,7 @@ export default function Lightbox({
           </div>
 
           {/* Prev / Next buttons (desktop) */}
-          {photos.length > 1 && (
+          {photos.length > 1 && !zoom && (
             <>
               <button
                 className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-10 items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm text-[#f5f5f0] hover:bg-[#c9a227]/20 hover:text-[#c9a227] transition-colors"
@@ -281,20 +528,30 @@ export default function Lightbox({
 
           {/* Swipe hint */}
           {showSwipeHint && (
-            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 text-xs text-[#a0a0a0]/60 animate-[fadeInDown_0.5s_ease-out]">
+            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 text-xs text-[#a0a0a0]/60 pointer-events-none select-none">
               滑动切换照片 · 下滑关闭
             </div>
           )}
 
           {/* Bottom bar */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-4 rounded-full bg-black/40 backdrop-blur-md px-5 py-2">
-            <p className="text-xs text-[#a0a0a0] tabular-nums">
-              {selectedIndex + 1} / {photos.length}
-            </p>
-            <LikeButton targetType="photo" targetId={photo.src} />
-          </div>
+          {!zoom && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-4 rounded-full bg-black/40 backdrop-blur-md px-5 py-2">
+              <p className="text-xs text-[#a0a0a0] tabular-nums">
+                {selectedIndex + 1} / {photos.length}
+              </p>
+              <LikeButton targetType="photo" targetId={photo.src} />
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+
+      {/* Zoom overlay */}
+      {zoom && (
+        <ZoomOverlay
+          zoom={zoom}
+          onClose={() => setZoom(null)}
+        />
+      )}
+    </motion.div>
   );
 }

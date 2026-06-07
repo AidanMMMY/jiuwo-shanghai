@@ -192,7 +192,7 @@ export default function EventPage({
         />
 
         {/* Top gradient: fades image into black background */}
-        <div className="absolute top-0 left-0 right-0 h-[35%] bg-gradient-to-b from-black via-black/80 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[35%] bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent" />
 
         {/* Bottom gradient: subtle fade at the very edge for text readability */}
         <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent pointer-events-none" />
@@ -364,35 +364,49 @@ export default function EventPage({
       {/* Retrospective section — for past events */}
       {showRetrospective && (
         <>
-          {/* ─── Desktop: Section label (names now float on sides of poster) ─── */}
-          <div className="hidden md:block w-full border-t border-[#222] pt-24">
-            <p className="text-center text-[10px] tracking-[0.25em] text-[#c9a227]/40">
-              {t('Who Came', '到场的朋友')}
-            </p>
+          {/* ─── Desktop: Gold divider + count ─── */}
+          <div className="hidden md:block w-full pt-24">
+            <div className="flex items-center gap-6 max-w-lg mx-auto px-4">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#c9a227]/30 to-transparent" />
+              <p className="text-[10px] tracking-[0.25em] text-[#c9a227]/40 shrink-0">
+                {t('Who Came', '到场的朋友')}
+                {!loading && dedupedEntries.length > 0 && (
+                  <span className="ml-1 text-[#c9a227]/60">· {dedupedEntries.length}</span>
+                )}
+              </p>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#c9a227]/30 to-transparent" />
+            </div>
           </div>
 
-          {/* ─── Mobile: Simple list ─── */}
-          <div className="md:hidden w-full max-w-lg mx-auto px-4 py-12 border-t border-[#222]">
-            <h2
-              className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
-              style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
-            >
-              {t("Who Came", '到场的朋友')}
-            </h2>
+          {/* ─── Mobile: Flowing name cloud ─── */}
+          <div className="md:hidden w-full max-w-lg mx-auto px-4 py-12">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#c9a227]/20 to-transparent" />
+              <p className="text-[10px] tracking-[0.25em] text-[#c9a227]/40 shrink-0">
+                {t('Who Came', '到场的朋友')}
+                {!loading && dedupedEntries.length > 0 && (
+                  <span className="ml-1 text-[#c9a227]/60">· {dedupedEntries.length}</span>
+                )}
+              </p>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#c9a227]/20 to-transparent" />
+            </div>
             {loading ? (
-              <p className="text-sm text-[#666] tracking-wider italic">
+              <p className="text-center text-sm text-[#666] tracking-wider italic">
                 {t('Loading…', '加载中…')}
               </p>
             ) : entries.length === 0 ? (
-              <p className="text-sm text-[#666] tracking-wider italic">
+              <p className="text-center text-sm text-[#666] tracking-wider italic">
                 {t('No RSVPs for this event.', '暂无报名记录。')}
               </p>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-wrap justify-center gap-2.5">
                 {dedupedEntries.map((entry) => (
-                  <p key={entry.id} className="text-sm text-[#f5f5f0]/90 tracking-wider">
-                    <span className="text-[#c9a227]">{entry.name}</span>
-                  </p>
+                  <span
+                    key={entry.id}
+                    className="inline-block border border-[#c9a227]/15 rounded-full px-3.5 py-1.5 text-sm text-[#c9a227] tracking-wider hover:border-[#c9a227]/40 hover:bg-[#c9a227]/5 transition-colors duration-300"
+                  >
+                    {entry.name}
+                  </span>
                 ))}
               </div>
             )}

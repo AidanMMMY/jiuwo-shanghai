@@ -29,7 +29,7 @@ export default function HeroCarousel({
   slides: HeroSlide[];
   title: string;
   tagline: string;
-  specialEvent?: { hero: string; hostName?: string; href?: string };
+  specialEvent?: { hero: string; hostName?: string; href: string };
   isZh?: boolean;
 }) {
   const duration = slides.length * 3;
@@ -96,75 +96,42 @@ export default function HeroCarousel({
           className="z-10 flex justify-center pointer-events-none"
           style={{ position: 'absolute', left: 0, right: 0, bottom: 'clamp(8rem, 16vh, 14rem)' }}
         >
-          {specialEvent.href ? (
-            <Link
-              href={specialEvent.href}
-              className="event-entry-wrapper pointer-events-auto cursor-pointer group"
-              style={{
-                opacity: 0,
-                animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 1200ms forwards',
-              }}
-            >
-              {/* Aurora background */}
-              <div className="event-aurora-bg" aria-hidden="true" />
-              {/* Content */}
-              <div className="relative rounded-xl bg-[#0f0f0f]/08 border border-[#c9a227]/20 px-6 py-3.5 inline-flex flex-col items-center gap-2 shadow-[0_0_18px_rgba(201,162,39,0.08),inset_0_0_16px_rgba(201,162,39,0.05)] transition-all duration-300 group-hover:border-[#c9a227]/50 group-hover:shadow-[0_0_24px_rgba(201,162,39,0.12),inset_0_0_20px_rgba(201,162,39,0.06)]">
-                {/* Line 1: hero text with shimmer */}
-                <span className="text-base md:text-lg tracking-wider event-text-shimmer">
-                  {specialEvent.hero}
-                </span>
-                {/* Line 2: host name with dual lines + arrow */}
-                {specialEvent.hostName && (
-                  <span className="inline-flex items-center gap-3">
-                    <span className="event-line group-hover:w-12 md:group-hover:w-20 transition-all duration-300" />
-                    <span
-                      className="text-xl md:text-2xl tracking-[0.22em] event-name-shimmer group-hover:drop-shadow-[0_0_10px_rgba(201,162,39,0.45)] transition-all duration-300"
-                      style={{ fontFamily: 'var(--font-bodoni), Georgia, serif' }}
-                    >
-                      {specialEvent.hostName}
-                    </span>
-                    <span className="event-line event-line-r group-hover:w-12 md:group-hover:w-20 transition-all duration-300" />
+          <Link
+            href={specialEvent.href}
+            className="event-entry-wrapper pointer-events-auto cursor-pointer group"
+            style={{
+              opacity: 0,
+              animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 1200ms forwards',
+            }}
+          >
+            {/* Aurora background */}
+            <div className="event-aurora-bg" aria-hidden="true" />
+            {/* Content */}
+            <div className="relative rounded-xl bg-[#0f0f0f]/08 border border-[#c9a227]/20 px-6 py-3.5 inline-flex flex-col items-center gap-2 shadow-[0_0_18px_rgba(201,162,39,0.08),inset_0_0_16px_rgba(201,162,39,0.05)] transition-all duration-300 group-hover:border-[#c9a227]/50 group-hover:shadow-[0_0_24px_rgba(201,162,39,0.12),inset_0_0_20px_rgba(201,162,39,0.06)]">
+              {/* Line 1: hero text with shimmer */}
+              <span className="text-base md:text-lg tracking-wider event-text-shimmer">
+                {specialEvent.hero}
+              </span>
+              {/* Line 2: host name with dual lines + arrow */}
+              {specialEvent.hostName && (
+                <span className="inline-flex items-center gap-3">
+                  <span className="event-line group-hover:w-12 md:group-hover:w-20 transition-all duration-300" />
+                  <span
+                    className="text-xl md:text-2xl tracking-[0.22em] event-name-shimmer group-hover:drop-shadow-[0_0_10px_rgba(201,162,39,0.45)] transition-all duration-300"
+                    style={{ fontFamily: 'var(--font-bodoni), Georgia, serif' }}
+                  >
+                    {specialEvent.hostName}
                   </span>
-                )}
-                {/* Click hint */}
-                <span className="mt-1 inline-flex items-center gap-1.5 text-[10px] md:text-xs tracking-[0.2em] text-[#c9a227]/80 group-hover:text-[#c9a227] transition-colors duration-300">
-                  <span className="event-arrow inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
-                  <span>VIEW DETAILS</span>
+                  <span className="event-line event-line-r group-hover:w-12 md:group-hover:w-20 transition-all duration-300" />
                 </span>
-              </div>
-            </Link>
-          ) : (
-            <div
-              className="event-entry-wrapper group"
-              style={{
-                opacity: 0,
-                animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 1200ms forwards',
-              }}
-            >
-              {/* Aurora background */}
-              <div className="event-aurora-bg" aria-hidden="true" />
-              {/* Content */}
-              <div className="relative rounded-xl bg-[#0f0f0f]/60 border border-[#c9a227]/20 px-6 py-3.5 inline-flex flex-col items-center gap-2">
-                {/* Line 1: hero text with shimmer */}
-                <span className="text-base md:text-lg tracking-wider event-text-shimmer">
-                  {specialEvent.hero}
-                </span>
-                {/* Line 2: host name with dual lines + arrow */}
-                {specialEvent.hostName && (
-                  <span className="inline-flex items-center gap-3">
-                    <span className="event-line" />
-                    <span
-                      className="text-xl md:text-2xl tracking-[0.22em] event-name-shimmer"
-                      style={{ fontFamily: 'var(--font-bodoni), Georgia, serif' }}
-                    >
-                      {specialEvent.hostName}
-                    </span>
-                    <span className="event-line event-line-r" />
-                  </span>
-                )}
-              </div>
+              )}
+              {/* Click hint */}
+              <span className="mt-1 inline-flex items-center gap-1.5 text-[10px] md:text-xs tracking-[0.2em] text-[#c9a227]/80 group-hover:text-[#c9a227] transition-colors duration-300">
+                <span className="event-arrow inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+                <span>VIEW DETAILS</span>
+              </span>
             </div>
-          )}
+          </Link>
         </div>
       )}
 

@@ -140,11 +140,7 @@ export default function HeroCarousel({
                 </span>
               )}
               {/* Click hint */}
-              <span className={`mt-1 inline-flex items-center gap-1.5 text-[10px] md:text-xs tracking-[0.2em] transition-colors duration-300 ${
-                specialEvent.isUpcoming === false
-                  ? 'text-white/50 group-hover:text-white/80'
-                  : 'text-[#c9a227]/80 group-hover:text-[#c9a227]'
-              }`}>
+              <span className={`mt-1 inline-flex items-center gap-1.5 text-[10px] md:text-xs tracking-[0.2em] text-[#c9a227]/80 group-hover:text-[#c9a227] transition-colors duration-300`}>
                 <span className="event-arrow inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
                 <span>VIEW DETAILS</span>
               </span>

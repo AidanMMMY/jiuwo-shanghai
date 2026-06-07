@@ -560,8 +560,8 @@ a:not([class*="no-link-style"]) {
     animation: eventTextBreathe 3s ease-in-out infinite;
 }
 @keyframes eventTextBreathe {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 0.75; }
 }
 .event-line {
     height: 1.5px;

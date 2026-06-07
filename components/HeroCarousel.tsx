@@ -94,7 +94,7 @@ export default function HeroCarousel({
       {specialEvent && (
         <div
           className="z-10 flex justify-center pointer-events-none"
-          style={{ position: 'absolute', left: 0, right: 0, bottom: 'clamp(7rem, 14vh, 12rem)' }}
+          style={{ position: 'absolute', left: 0, right: 0, bottom: 'clamp(8rem, 16vh, 14rem)' }}
         >
           {specialEvent.href ? (
             <Link
@@ -146,7 +146,7 @@ export default function HeroCarousel({
               {/* Content */}
               <div className="relative rounded-xl bg-[#0f0f0f]/60 border border-[#c9a227]/20 px-6 py-3.5 inline-flex flex-col items-center gap-2">
                 {/* Line 1: hero text with shimmer */}
-                <span className="text-xs md:text-sm tracking-wider event-text-shimmer">
+                <span className="text-sm md:text-base tracking-wider event-text-shimmer">
                   {specialEvent.hero}
                 </span>
                 {/* Line 2: host name with dual lines + arrow */}
@@ -171,7 +171,7 @@ export default function HeroCarousel({
       {/* Subtitle: BAR • SHANGHAI */}
       <div
         className="z-10 flex justify-center pointer-events-none"
-        style={{ position: 'absolute', left: 0, right: 0, bottom: 'clamp(2rem, 6vh, 5rem)' }}
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 'clamp(3rem, 7vh, 6rem)' }}
       >
         <Link
           href={isZh ? '/zh/about' : '/about'}

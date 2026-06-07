@@ -429,16 +429,20 @@ export default function EventPage({
 
           {/* ─── Retrospective photos (centered, shared) ─── */}
           {event.retrospectivePhotos && event.retrospectivePhotos.length > 0 && (
-            <div className="w-full md:max-w-4xl mx-auto px-4 mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+            <div className="w-full md:max-w-6xl mx-auto px-4 mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
               {event.retrospectivePhotos.map((photo, i) => (
-                <div key={i} className="relative aspect-square overflow-hidden rounded-lg">
+                <div key={i} className="group relative aspect-square overflow-hidden rounded-lg bg-[#0e0e0e]">
                   <Image
                     src={photo}
                     alt={t(`Recap photo ${i + 1}`, `回顾照片 ${i + 1}`)}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                     sizes="(max-width: 768px) 50vw, 25vw"
                   />
+                  {/* Hover glow border */}
+                  <div className="absolute inset-0 rounded-lg border border-transparent group-hover:border-[#c9a227]/25 transition-all duration-300 pointer-events-none" />
+                  {/* Hover subtle overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
                 </div>
               ))}
             </div>

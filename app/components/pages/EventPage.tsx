@@ -265,13 +265,13 @@ export default function EventPage({
             <div className="flex justify-between items-end">
               <div>
                 <p
-                  className="text-[2.4rem] leading-[0.85] md:text-[2.8rem] text-[#f5f5f0] tracking-tight"
+                  className="text-[2rem] leading-[0.9] md:text-[2.5rem] text-[#f5f5f0] tracking-tight"
                   style={{ fontFamily: 'var(--font-bodoni), Georgia, serif', fontWeight: 700 }}
                 >
                   {dateDisplay}
                 </p>
                 {venue && (
-                  <p className="text-xs text-[#f5f5f0]/70 tracking-[0.25em] mt-1">
+                  <p className="text-xs text-[#f5f5f0]/70 tracking-[0.25em] mt-2">
                     {venue}
                   </p>
                 )}

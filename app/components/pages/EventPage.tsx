@@ -429,7 +429,7 @@ export default function EventPage({
 
           {/* ─── Retrospective photos (centered, shared) ─── */}
           {event.retrospectivePhotos && event.retrospectivePhotos.length > 0 && (
-            <div className="w-full md:max-w-lg mx-auto px-4 mt-8 grid grid-cols-2 gap-3">
+            <div className="w-full md:max-w-4xl mx-auto px-4 mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
               {event.retrospectivePhotos.map((photo, i) => (
                 <div key={i} className="relative aspect-square overflow-hidden rounded-lg">
                   <Image
@@ -437,7 +437,7 @@ export default function EventPage({
                     alt={t(`Recap photo ${i + 1}`, `回顾照片 ${i + 1}`)}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 768px) 50vw, 256px"
+                    sizes="(max-width: 768px) 50vw, 25vw"
                   />
                 </div>
               ))}

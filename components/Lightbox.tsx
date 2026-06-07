@@ -134,7 +134,9 @@ export default function Lightbox({
     const targetRect = getCenterRect();
     const anim = animateFlip(originRect, targetRect, flyingRef.current, 400);
     anim.onfinish = () => setShowContent(true);
-    return () => anim.cancel();
+    // 兜底：如果动画 onfinish 因任何原因没触发，600ms 后强制显示内容
+    const fallback = setTimeout(() => setShowContent(true), 600);
+    return () => { anim.cancel(); clearTimeout(fallback); };
   }, [originRect]);
 
   // ── sync embla → parent ──
@@ -412,7 +414,7 @@ export default function Lightbox({
                         alt={p.alt}
                         fill
                         sizes="100vw"
-                        className="object-cover"
+                        className="object-contain"
                         priority={Math.abs(i - selectedIndex) <= 1}
                         draggable={false}
                       />

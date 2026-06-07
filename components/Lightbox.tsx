@@ -180,7 +180,10 @@ function ZoomOverlay({
   }, [scale, reset]);
 
   // click on backdrop → close zoom (if not zoomed in)
+  // ignore clicks within 400ms of mount to avoid the double-tap click that opened us
+  const mountedAt = useRef(Date.now());
   const handleBackdropClick = useCallback(() => {
+    if (Date.now() - mountedAt.current < 400) return;
     if (scale.get() < 1.1) {
       onClose();
     }
@@ -404,6 +407,7 @@ export default function Lightbox({
     (e: React.TouchEvent, photo: { src: string; alt: string }) => {
       const now = Date.now();
       if (now - lastSlideTap.current < 300) {
+        e.preventDefault(); // suppress synthesized click
         setZoom({ src: photo.src, alt: photo.alt });
         lastSlideTap.current = 0;
         return;

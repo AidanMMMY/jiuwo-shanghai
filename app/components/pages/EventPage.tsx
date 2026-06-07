@@ -400,10 +400,14 @@ export default function EventPage({
               </p>
             ) : (
               <div className="flex flex-wrap justify-center gap-2.5">
-                {dedupedEntries.map((entry) => (
+                {dedupedEntries.map((entry, i) => (
                   <span
                     key={entry.id}
-                    className="inline-block border border-[#c9a227]/15 rounded-full px-3.5 py-1.5 text-sm text-[#c9a227] tracking-wider hover:border-[#c9a227]/40 hover:bg-[#c9a227]/5 transition-colors duration-300"
+                    className="pill-breathe inline-block border border-[#c9a227]/15 rounded-full px-3.5 py-1.5 text-sm text-[#c9a227] tracking-wider hover:border-[#c9a227]/40 hover:bg-[#c9a227]/5 transition-colors duration-300"
+                    style={{
+                      animationDelay: `${(i * 0.7) % 8}s`,
+                      animationDuration: `${3.5 + (i % 4) * 1.2}s`,
+                    }}
                   >
                     {entry.name}
                   </span>
@@ -429,7 +433,19 @@ export default function EventPage({
 
           {/* ─── Retrospective photos (centered, shared) ─── */}
           {event.retrospectivePhotos && event.retrospectivePhotos.length > 0 && (
-            <div className="w-full md:max-w-6xl mx-auto px-4 mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+            <>
+              {/* Section header — matches Who Came style */}
+              <div className="w-full md:max-w-6xl mx-auto px-4 mt-12">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#c9a227]/20 to-transparent" />
+                  <p className="text-[10px] tracking-[0.25em] text-[#c9a227]/40 shrink-0">
+                    {t('Glimpses', '掠影')}
+                  </p>
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#c9a227]/20 to-transparent" />
+                </div>
+              </div>
+
+              <div className="w-full md:max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
               {event.retrospectivePhotos.map((photo, i) => (
                 <div key={i} className="group relative aspect-square overflow-hidden rounded-lg bg-[#0e0e0e]">
                   <Image
@@ -446,6 +462,7 @@ export default function EventPage({
                 </div>
               ))}
             </div>
+            </>
           )}
         </>
       )}
@@ -476,6 +493,10 @@ export default function EventPage({
           55%      { opacity: 0.25; transform: scale(1); filter: blur(1px); }
           75%      { opacity: 0.08; transform: scale(0.94); filter: blur(2.5px); }
         }
+        @keyframes pillBreathe {
+          0%, 100% { opacity: 0.45; }
+          50%      { opacity: 0.85; }
+        }
         .event-side-glow {
           background:
             radial-gradient(ellipse 65% 55% at 50% 50%, rgba(201,162,39,0.28) 0%, transparent 45%),
@@ -497,9 +518,14 @@ export default function EventPage({
           will-change: opacity, transform, filter;
           backface-visibility: hidden;
         }
+        .pill-breathe {
+          animation: pillBreathe 4s ease-in-out infinite;
+          will-change: opacity;
+        }
         @media (prefers-reduced-motion: reduce) {
           .event-side-glow { animation: none !important; }
           .side-name { animation: none !important; opacity: 0.3 !important; filter: blur(1px) !important; }
+          .pill-breathe { animation: none !important; opacity: 0.6 !important; }
         }
       `}</style>
 

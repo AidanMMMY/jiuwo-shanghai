@@ -431,7 +431,7 @@ export default function EventPage({
           {event.retrospectivePhotos && event.retrospectivePhotos.length > 0 && (
             <div className="w-full md:max-w-lg mx-auto px-4 mt-8 grid grid-cols-2 gap-3">
               {event.retrospectivePhotos.map((photo, i) => (
-                <div key={i} className="relative aspect-[3/4] overflow-hidden rounded-lg">
+                <div key={i} className="relative aspect-square overflow-hidden rounded-lg">
                   <Image
                     src={photo}
                     alt={t(`Recap photo ${i + 1}`, `回顾照片 ${i + 1}`)}

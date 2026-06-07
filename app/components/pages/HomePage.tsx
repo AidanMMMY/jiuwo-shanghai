@@ -31,7 +31,7 @@ export default function HomePage({
   weather?: WeatherData | null;
   weatherRec?: WeatherRecommendation | null;
   isZh?: boolean;
-  specialEventCard?: { hero: string; hostName?: string; href: string };
+  specialEventCard?: { hero: string; hostName?: string; href: string; isUpcoming?: boolean };
 }) {
   return (
     <>

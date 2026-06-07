@@ -42,6 +42,7 @@ export default async function Page() {
         href: upcomingEvent
           ? `/special/${upcomingEvent.slug}`
           : '/special',
+        isUpcoming: !!upcomingEvent,
       }
     : undefined;
 

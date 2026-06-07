@@ -556,6 +556,13 @@ a:not([class*="no-link-style"]) {
     animation: eventTextShimmer 6s linear infinite;
     animation-delay: 2.5s;
 }
+.event-text-breathe {
+    animation: eventTextBreathe 3s ease-in-out infinite;
+}
+@keyframes eventTextBreathe {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
 .event-line {
     height: 1.5px;
     width: 2rem;

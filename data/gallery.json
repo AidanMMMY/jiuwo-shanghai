@@ -5,7 +5,7 @@
     "titleZh": "Dex",
     "subtitle": "Quiet presence, warm heart.",
     "subtitleZh": "话不多，心很热。",
-    "cover": "/images/gallery/our-friend-dex/Dex-20260607-01.webp",
+    "cover": "/images/gallery/our-friend-dex/Dex-20260529-01.webp",
     "category": "Our Friends",
     "categoryZh": "我们的朋友",
     "friendSocial": {
@@ -13,14 +13,14 @@
     },
     "photos": [
       {
-        "src": "/images/gallery/our-friend-dex/Dex-20260607-01.webp",
-        "alt": "Dex 09",
-        "altZh": "Dex 09"
-      },
-      {
         "src": "/images/gallery/our-friend-dex/Dex-20260529-01.webp",
         "alt": "Dex 08",
         "altZh": "Dex 08"
+      },
+      {
+        "src": "/images/gallery/our-friend-dex/Dex-20260607-01.webp",
+        "alt": "Dex 09",
+        "altZh": "Dex 09"
       },
       {
         "src": "/images/gallery/our-friend-dex/Dex-20260522-01.webp",

@@ -67,7 +67,7 @@ export default function Lightbox({
 }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     startIndex: currentIndex,
-    loop: photos.length >= 3,
+    loop: false,
   });
 
   const [selectedIndex, setSelectedIndex] = useState(currentIndex);
@@ -100,14 +100,13 @@ export default function Lightbox({
     posX.set(0);
     posY.set(0);
     setIsZoomed(false);
-    emblaApi?.reInit({ watchDrag: true });
-  }, [selectedIndex, scale, posX, emblaApi]);
+  }, [selectedIndex, scale, posX]);
 
   // ── embla initialization guard ──
   useEffect(() => {
     if (!emblaApi) return;
-    // 延迟标记 ready，确保 loop 模式的 clone slides 初始化完成
-    const timer = setTimeout(() => setEmblaReady(true), 400);
+    // 短暂延迟确保 Embla 完成内部初始化
+    const timer = setTimeout(() => setEmblaReady(true), 50);
     return () => clearTimeout(timer);
   }, [emblaApi]);
 
@@ -221,7 +220,6 @@ export default function Lightbox({
           midX: (e.touches[0].clientX + e.touches[1].clientX) / 2,
           midY: (e.touches[0].clientY + e.touches[1].clientY) / 2,
         };
-        emblaApi?.reInit({ watchDrag: false });
         return;
       }
 
@@ -233,7 +231,6 @@ export default function Lightbox({
           if (s > 1.05) {
             // zoom out
             scale.set(1); posX.set(0); posY.set(0); setIsZoomed(false);
-            emblaApi?.reInit({ watchDrag: true });
           } else {
             // zoom in toward tap
             const target = 2.5;
@@ -243,7 +240,6 @@ export default function Lightbox({
             posX.set((w / 2 - e.touches[0].clientX) * (target - 1));
             posY.set((h / 2 - e.touches[0].clientY) * (target - 1));
             setIsZoomed(true);
-            emblaApi?.reInit({ watchDrag: false });
           }
           lastTap.current = 0;
           return;
@@ -259,11 +255,10 @@ export default function Lightbox({
             x,
             y,
           };
-          emblaApi?.reInit({ watchDrag: false });
         }
       }
     },
-    [scale, posX, posY, emblaApi]
+    [scale, posX, posY]
   );
 
   const handleSlideTouchMove = useCallback(
@@ -305,9 +300,8 @@ export default function Lightbox({
     if (s < 1.05) {
       scale.set(1); posX.set(0); posY.set(0);
       setIsZoomed(false);
-      emblaApi?.reInit({ watchDrag: true });
     }
-  }, [scale, posX, posY, emblaApi]);
+  }, [scale, posX, posY]);
 
   /* ──────────────────────────────────────────
      Swipe-to-dismiss (only when not zoomed)
@@ -399,7 +393,7 @@ export default function Lightbox({
           <div
             ref={emblaRef}
             className="flex-1 min-h-0 cursor-grab active:cursor-grabbing"
-            style={{ overflow: isZoomed ? 'visible' : 'hidden' }}
+            style={{ overflow: isZoomed ? 'visible' : 'hidden', pointerEvents: isZoomed ? 'none' : 'auto' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex h-full">
@@ -409,7 +403,7 @@ export default function Lightbox({
                   <div
                     key={`${p.src}-${i}`}
                     className="flex-[0_0_100%] min-w-0 h-full"
-                    style={{ visibility: isZoomed && !isActive ? 'hidden' : 'visible' }}
+                    style={{ visibility: isZoomed && !isActive ? 'hidden' : 'visible', pointerEvents: 'auto' }}
                     onTouchStart={isActive ? handleSlideTouchStart : undefined}
                     onTouchMove={isActive ? handleSlideTouchMove : undefined}
                     onTouchEnd={isActive ? handleSlideTouchEnd : undefined}

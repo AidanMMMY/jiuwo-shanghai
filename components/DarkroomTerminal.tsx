@@ -84,15 +84,34 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   const [history, setHistory] = useState<ChatMessage[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const terminalRef = useRef<HTMLDivElement>(null);
+  const [hasEnteredViewport, setHasEnteredViewport] = useState(false);
 
-  // Pull next item from queue when idle
+  // Intersection Observer — start typing only when scrolled into view
   useEffect(() => {
+    if (!terminalRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasEnteredViewport(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(terminalRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Pull next item from queue when idle (only after entering viewport)
+  useEffect(() => {
+    if (!hasEnteredViewport) return;
     if (currentTypingId === null && typingQueue.length > 0) {
       const [next, ...rest] = typingQueue;
       setCurrentTypingId(next);
       setTypingQueue(rest);
     }
-  }, [currentTypingId, typingQueue]);
+  }, [hasEnteredViewport, currentTypingId, typingQueue]);
 
   // Auto-scroll to bottom when new content arrives
   useEffect(() => {
@@ -175,7 +194,7 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   return (
     <section className="px-4 md:px-8 pt-20 pb-4 bg-[#0a0a0a]">
       <div className="mx-auto max-w-4xl">
-        <div className="darkroom-terminal">
+        <div className="darkroom-terminal" ref={terminalRef}>
           <div className="darkroom-terminal-screen" ref={scrollRef}>
             {/* Signal header */}
             <div className="darkroom-signal-header">
@@ -192,6 +211,7 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
                 entry={entry}
                 isActiveTyping={entry.id === currentTypingId}
                 onDone={entry.id === currentTypingId ? () => handleTypingDone(entry.id) : undefined}
+                hasStarted={hasEnteredViewport}
               />
             ))}
 
@@ -229,9 +249,10 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   );
 }
 
-function EntryItem({ entry, isActiveTyping, onDone }: { entry: DisplayEntry; isActiveTyping: boolean; onDone?: () => void }) {
+function EntryItem({ entry, isActiveTyping, onDone, hasStarted }: { entry: DisplayEntry; isActiveTyping: boolean; onDone?: () => void; hasStarted: boolean }) {
   const typed = useTypewriter(isActiveTyping ? entry.message : '', TYPE_SPEED, onDone);
-  const displayMessage = isActiveTyping ? typed : entry.message;
+  // Before entering viewport: hide message content entirely
+  const displayMessage = !hasStarted ? '' : (isActiveTyping ? typed : entry.message);
 
   if (entry.type === 'user') {
     return (

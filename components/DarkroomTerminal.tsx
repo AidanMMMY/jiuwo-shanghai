@@ -205,15 +205,20 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
             </div>
 
             <div className="darkroom-terminal-entries">
-              {entries.map((entry) => (
-                <EntryItem
-                  key={entry.id}
-                  entry={entry}
-                  isActiveTyping={entry.id === currentTypingId}
-                  onDone={entry.id === currentTypingId ? () => handleTypingDone(entry.id) : undefined}
-                  hasStarted={hasEnteredViewport}
-                />
-              ))}
+              {entries.map((entry) => {
+                const inQueue = typingQueue.includes(entry.id);
+                const isCurrent = entry.id === currentTypingId;
+                const shouldShow = entry.type === 'user' || isCurrent || !inQueue;
+                if (!shouldShow) return null;
+                return (
+                  <EntryItem
+                    key={entry.id}
+                    entry={entry}
+                    isActiveTyping={isCurrent}
+                    onDone={isCurrent ? () => handleTypingDone(entry.id) : undefined}
+                  />
+                );
+              })}
 
               {loading && (
                 <div className="darkroom-log-entry">
@@ -262,11 +267,10 @@ function getEntryText(entry: DisplayEntry): string {
   return text;
 }
 
-function EntryItem({ entry, isActiveTyping, onDone, hasStarted }: { entry: DisplayEntry; isActiveTyping: boolean; onDone?: () => void; hasStarted: boolean }) {
+function EntryItem({ entry, isActiveTyping, onDone }: { entry: DisplayEntry; isActiveTyping: boolean; onDone?: () => void }) {
   const text = getEntryText(entry);
   const typed = useTypewriter(isActiveTyping ? text : '', TYPE_SPEED, onDone);
-  // Before entering viewport: hide content entirely; while typing show partial; after done show full
-  const display = !hasStarted ? '' : (isActiveTyping ? typed : text);
+  const display = isActiveTyping ? typed : text;
 
   return (
     <div className="darkroom-log-entry">

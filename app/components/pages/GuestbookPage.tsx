@@ -60,7 +60,7 @@ export default function GuestbookPage({
   return (
     <main className="bg-[#0a0a0a] min-h-[100lvh]">
       {/* Header */}
-      <section className="px-4 pt-20 pb-8 md:pt-28 md:pb-12">
+      <section className="px-4 md:px-8 pt-20 pb-8 md:pt-28 md:pb-12">
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-4xl md:text-6xl font-medium tracking-widest text-[#f5f5f0]">
             {labels.title}
@@ -72,7 +72,7 @@ export default function GuestbookPage({
       </section>
 
       {/* CTA + Count */}
-      <section className="px-4 pb-8">
+      <section className="px-4 md:px-8 pb-8">
         <div className="mx-auto max-w-2xl flex flex-col items-center gap-6">
           <button
             onClick={() => setIsPanelOpen(true)}
@@ -87,7 +87,7 @@ export default function GuestbookPage({
       </section>
 
       {/* Entries list */}
-      <section className="px-4 pb-24">
+      <section className="px-4 md:px-8 pb-24">
         <div className="mx-auto max-w-2xl">
           {entries.length === 0 ? (
             <p className="text-center text-[#a0a0a0] py-16">{labels.emptyState}</p>

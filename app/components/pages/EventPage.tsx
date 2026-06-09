@@ -202,7 +202,7 @@ export default function EventPage({
         <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/20 via-transparent to-[#0a0a0a]/20" />
 
         {/* Content overlay */}
-        <div className="absolute inset-0 flex flex-col px-4 pt-20 pb-0 md:pt-4 md:pb-4">
+        <div className="absolute inset-0 flex flex-col px-4 md:px-8 pt-20 pb-0 md:pt-4 md:pb-4">
 
           {/* Back link */}
           <Link
@@ -330,7 +330,7 @@ export default function EventPage({
 
     {/* RSVP List — for upcoming events with RSVP */}
       {showRsvp && (
-        <div className="w-full md:max-w-lg mx-auto px-4 py-12 border-t border-[#222]">
+        <div className="w-full md:max-w-lg mx-auto px-4 md:px-8 py-12 border-t border-[#222]">
           <h2
             className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
             style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
@@ -366,7 +366,7 @@ export default function EventPage({
         <>
           {/* ─── Desktop: Gold divider + count ─── */}
           <div className="hidden md:block w-full pt-24">
-            <div className="flex items-center gap-6 max-w-lg mx-auto px-4">
+            <div className="flex items-center gap-6 max-w-lg mx-auto px-4 md:px-8">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#c9a227]/30 to-transparent" />
               <p className="text-[10px] tracking-[0.25em] text-[#c9a227]/40 shrink-0">
                 {t('Who Came', '到场的朋友')}
@@ -379,7 +379,7 @@ export default function EventPage({
           </div>
 
           {/* ─── Mobile: Flowing name cloud ─── */}
-          <div className="md:hidden w-full max-w-lg mx-auto px-4 py-12">
+          <div className="md:hidden w-full max-w-lg mx-auto px-4 md:px-8 py-12">
             <div className="flex items-center gap-4 mb-8">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#c9a227]/20 to-transparent" />
               <p className="text-[10px] tracking-[0.25em] text-[#c9a227]/40 shrink-0">
@@ -418,7 +418,7 @@ export default function EventPage({
 
           {/* ─── Retrospective content (centered, shared) ─── */}
           {retrospective && (
-            <div className="w-full md:max-w-lg mx-auto px-4 pt-8 md:pt-12 border-t border-[#222] md:border-t-0">
+            <div className="w-full md:max-w-lg mx-auto px-4 md:px-8 pt-8 md:pt-12 border-t border-[#222] md:border-t-0">
               <h2
                 className="text-lg text-[#f5f5f0]/70 tracking-[0.2em] mb-6"
                 style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif', fontWeight: 400 }}
@@ -435,7 +435,7 @@ export default function EventPage({
           {event.retrospectivePhotos && event.retrospectivePhotos.length > 0 && (
             <>
               {/* Section header — matches Who Came style */}
-              <div className="w-full md:max-w-6xl mx-auto px-4 mt-12">
+              <div className="w-full md:max-w-6xl mx-auto px-4 md:px-8 mt-12">
                 <div className="flex items-center gap-4 mb-8">
                   <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#c9a227]/20 to-transparent" />
                   <p className="text-[10px] tracking-[0.25em] text-[#c9a227]/40 shrink-0">
@@ -445,7 +445,7 @@ export default function EventPage({
                 </div>
               </div>
 
-              <div className="w-full md:max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+              <div className="w-full md:max-w-6xl mx-auto px-4 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
               {event.retrospectivePhotos.map((photo, i) => (
                 <div key={i} className="group relative aspect-square overflow-hidden rounded-lg bg-[#0e0e0e]">
                   <Image
@@ -532,7 +532,7 @@ export default function EventPage({
       {/* Modal */}
       {showModal && (
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4 md:px-8"
           onClick={() => { setShowModal(false); setSubmitError(''); }}
         >
           <div

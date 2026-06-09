@@ -101,7 +101,7 @@ export default function Navbar({
           : 'bg-[#0a0a0a]/60'
       }`}
     >
-      <div className="mx-auto max-w-7xl px-3 md:px-4 py-4 flex items-center justify-between">
+      <div className="mx-auto max-w-7xl px-3 md:px-8 py-4 flex items-center justify-between">
         <Link
           href={isZh ? '/zh' : '/'}
           className="flex items-center gap-2.5 text-lg font-medium tracking-wide text-[#f5f5f0] hover:text-[#c9a227] transition-colors duration-300 shrink-0 group"

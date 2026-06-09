@@ -14,7 +14,7 @@ export default function PastEventsGrid({
 
   return (
     <main className="bg-[#0a0a0a] min-h-[100lvh]">
-      <div className="max-w-6xl mx-auto px-4 py-24 md:py-32">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 py-24 md:py-32">
         {/* Section heading */}
         <div className="text-center mb-16">
           <p

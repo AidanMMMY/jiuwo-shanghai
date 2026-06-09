@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark Side 对话 — 改动追踪</title>
+<style>
+:root{--bg:#0a0a0a;--fg:#f5f5f0;--muted:#a0a0a0;--accent:#c9a227;--surface:#141414;--border:#222;}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.7;margin:0;padding:0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:800px;margin:0 auto;padding:48px 24px}
+header{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:40px}
+header h1{font-size:2.2rem;font-weight:600;margin:0 0 8px;letter-spacing:-0.02em}
+header .meta{color:var(--muted);font-size:0.95rem}
+blockquote{border-left:3px solid var(--accent);margin:20px 0;padding:12px 20px;background:var(--surface);border-radius:0 8px 8px 0;color:var(--muted)}
+blockquote p{margin:0}
+blockquote p+p{margin-top:8px}
+h2{font-size:1.5rem;font-weight:600;margin:48px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border);color:var(--fg)}
+h3{font-size:1.15rem;font-weight:600;margin:32px 0 12px;color:var(--accent)}
+hr{border:none;border-top:1px solid var(--border);margin:40px 0}
+p{margin:12px 0}
+ul,ol{margin:12px 0;padding-left:24px}
+li{margin:6px 0}
+li>p{margin:4px 0}
+table{width:100%;border-collapse:collapse;margin:20px 0;font-size:0.95rem}
+th,td{border:1px solid var(--border);padding:10px 14px;text-align:left}
+th{background:var(--surface);font-weight:600;color:var(--accent)}
+tr:nth-child(even){background:rgba(255,255,255,0.02)}
+code{background:var(--surface);padding:2px 8px;border-radius:4px;font-family:"SF Mono",Monaco,"Cascadia Code","Roboto Mono",Consolas,"Courier New",monospace;font-size:0.9em;color:var(--accent)}
+pre{background:var(--surface);padding:16px 20px;border-radius:8px;overflow-x:auto;margin:16px 0}
+pre code{background:none;padding:0;font-size:0.85em}
+ol{list-style-type:decimal}
+ol li::marker{font-weight:600;color:var(--accent)}
+::selection{background:rgba(201,162,39,0.25)}
+.status-pending{color:#c9a227}
+.status-done{color:#4caf50}
+.status-waiting{color:#ff9800}
+@media(max-width:600px){.container{padding:24px 16px}header h1{font-size:1.6rem}h2{font-size:1.25rem}table{font-size:0.85rem}th,td{padding:8px 10px}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+<h1>Dark Side 对话 — 改动追踪</h1>
+<div class="meta">
+<p>本文档随对话进展持续更新</p>
+<p>对话日期：2026-06-08 ~ 进行中</p>
+</div>
+</header>
+
+<blockquote>
+<p>所有关于 After Hours Darkroom（黑白彩蛋）模式的改动记录在此。</p>
+</blockquote>
+
+<h2>工作约定</h2>
+<ul>
+<li>所有改动基于 <strong>After Hours Darkroom（黑白彩蛋）模式</strong></li>
+<li>若改动会影响正常模式内容在彩蛋模式中的显示，需提示冲突并等待用户确认</li>
+<li>详见：<a href="darkroom-mode.html">darkroom-mode.html</a></li>
+</ul>
+
+<h2>改动记录</h2>
+
+<h3>2026-06-08 — Darkroom Tagline 差异化</h3>
+<p><strong>需求</strong>：在 Darkroom 模式下显示不同的 tagline（中英文）。</p>
+
+<p><strong>涉及文件</strong>：</p>
+<ul>
+<li><code>data/site.json</code> — 新增 <code>taglineDarkroom</code>、<code>taglineDarkroomZh</code> 字段</li>
+<li><code>lib/data.ts</code> — <code>SiteData</code> 类型 + <code>localizeSite()</code> 函数 + zod schema</li>
+<li><code>app/components/pages/HomePage.tsx</code> — 新增 darkroom tagline 的 prop 传递</li>
+<li><code>components/HeroCarousel.tsx</code> — tagline 渲染逻辑切换</li>
+</ul>
+
+<p><strong>潜在冲突</strong>（已提示用户）：</p>
+<ul>
+<li><code>HeroCarousel.tsx</code> 里的 tagline 带有入场动画 + shimmer 效果。切换 darkroom 时如果 tagline 文本变了，动画可能重新触发。</li>
+<li><code>site.json</code> 的 zod schema 需要同步更新。</li>
+<li><strong>不影响正常模式</strong>：正常模式下新增字段不会被读取。</li>
+</ul>
+
+<p><strong>决策</strong>（待用户确认后更新）：</p>
+<ul>
+<li>方案：条件渲染（双 div 叠放 + CSS display 切换），与 hero 标题切换模式一致</li>
+<li>或：动态读取 darkroom 状态切换文本</li>
+</ul>
+
+<p><strong>状态</strong>：<span class="status-waiting">⏳ 等待用户确认</span></p>
+
+<h2>待办 / 想法池</h2>
+<ul>
+<li><input type="checkbox" disabled> Tagline 差异化实现</li>
+<li><input type="checkbox" disabled> About story 的 darkroom 版本</li>
+<li><input type="checkbox" disabled> Menu "After Hours" 幽灵酒单</li>
+<li><input type="checkbox" disabled> Journal <code>darkroomOnly</code> 标记支持</li>
+<li><input type="checkbox" disabled> Guestbook 夜班留言语境扩展</li>
+</ul>
+
+</div>
+</body>
+</html>

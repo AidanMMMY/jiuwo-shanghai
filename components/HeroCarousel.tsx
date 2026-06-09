@@ -14,7 +14,12 @@ function AnimatedTitle({ text }: { text: string }) {
         textShadow: '0 2px 20px rgba(0,0,0,0.5), 0 0 60px rgba(0,0,0,0.3)',
       }}
     >
-      {text}
+      {text.split('\n').map((line, i, arr) => (
+        <span key={i}>
+          {line}
+          {i < arr.length - 1 && <br />}
+        </span>
+      ))}
     </h1>
   );
 }
@@ -69,10 +74,40 @@ export default function HeroCarousel({
           <AnimatedTitle text={title} />
         </div>
         <div className="hero-title-breathe hero-darkroom-title hidden">
-          <AnimatedTitle text="JIUWO — After Hours" />
+          <h1
+            className="relative inline-block text-5xl sm:text-6xl md:text-8xl lg:text-9xl tracking-[0.14em] leading-[1.02]"
+            style={{ fontWeight: 700 }}
+          >
+            {(() => {
+              const lines = isZh ? (
+                <>
+                  啾喔
+                  <br />
+                  寅时
+                </>
+              ) : (
+                <>
+                  JIUWO
+                  <br />
+                  After Hours
+                </>
+              );
+              return (
+                <>
+                  <span className="darkroom-cold-base">{lines}</span>
+                  <span className="darkroom-cold-glitch1" aria-hidden="true">
+                    {lines}
+                  </span>
+                  <span className="darkroom-cold-glitch2" aria-hidden="true">
+                    {lines}
+                  </span>
+                </>
+              );
+            })()}
+          </h1>
         </div>
         <p
-          className="mt-5 text-xl md:text-2xl lg:text-3xl tracking-wide text-[#f5f5f0]"
+          className="hero-normal-tagline mt-5 text-xl md:text-2xl lg:text-3xl tracking-wide text-[#f5f5f0]"
           style={{
             opacity: 0,
             animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 800ms forwards, taglineShimmer 4s ease-in-out 1600ms infinite',
@@ -87,6 +122,16 @@ export default function HeroCarousel({
           }}
         >
           {tagline}
+        </p>
+        <p
+          className="hero-darkroom-tagline hidden mt-5 text-xl md:text-2xl lg:text-3xl tracking-wide text-[#a0a8a8]"
+          style={{
+            opacity: 0,
+            animation:
+              'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 800ms forwards, crtSignalFlicker 5s infinite',
+          }}
+        >
+          {isZh ? '另一面' : 'The Other Side'}
         </p>
       </div>
 
@@ -204,6 +249,8 @@ export default function HeroCarousel({
         body.darkroom .hero-normal-icons { display: none !important; }
         body.darkroom .hero-darkroom-title,
         body.darkroom .hero-darkroom-icons { display: flex !important; }
+        body.darkroom .hero-normal-tagline { display: none !important; }
+        body.darkroom .hero-darkroom-tagline { display: block !important; }
       `}</style>
     </section>
   );

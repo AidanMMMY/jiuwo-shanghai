@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>After Hours Darkroom 模式说明</title>
+<style>
+:root{--bg:#0a0a0a;--fg:#f5f5f0;--muted:#a0a0a0;--accent:#c9a227;--surface:#141414;--border:#222;}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.7;margin:0;padding:0}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:800px;margin:0 auto;padding:48px 24px}
+header{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:40px}
+header h1{font-size:2.2rem;font-weight:600;margin:0 0 8px;letter-spacing:-0.02em}
+header .meta{color:var(--muted);font-size:0.95rem}
+blockquote{border-left:3px solid var(--accent);margin:20px 0;padding:12px 20px;background:var(--surface);border-radius:0 8px 8px 0;color:var(--muted)}
+blockquote p{margin:0}
+blockquote p+p{margin-top:8px}
+h2{font-size:1.5rem;font-weight:600;margin:48px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border);color:var(--fg)}
+h3{font-size:1.15rem;font-weight:600;margin:32px 0 12px;color:var(--accent)}
+hr{border:none;border-top:1px solid var(--border);margin:40px 0}
+p{margin:12px 0}
+ul,ol{margin:12px 0;padding-left:24px}
+li{margin:6px 0}
+li>p{margin:4px 0}
+table{width:100%;border-collapse:collapse;margin:20px 0;font-size:0.95rem}
+th,td{border:1px solid var(--border);padding:10px 14px;text-align:left}
+th{background:var(--surface);font-weight:600;color:var(--accent)}
+tr:nth-child(even){background:rgba(255,255,255,0.02)}
+code{background:var(--surface);padding:2px 8px;border-radius:4px;font-family:"SF Mono",Monaco,"Cascadia Code","Roboto Mono",Consolas,"Courier New",monospace;font-size:0.9em;color:var(--accent)}
+pre{background:var(--surface);padding:16px 20px;border-radius:8px;overflow-x:auto;margin:16px 0}
+pre code{background:none;padding:0;font-size:0.85em}
+ol{list-style-type:decimal}
+ol li::marker{font-weight:600;color:var(--accent)}
+::selection{background:rgba(201,162,39,0.25)}
+@media(max-width:600px){.container{padding:24px 16px}header h1{font-size:1.6rem}h2{font-size:1.25rem}table{font-size:0.85rem}th,td{padding:8px 10px}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+<h1>After Hours Darkroom 模式说明</h1>
+<div class="meta">
+<p>更新日期：2026-06-08</p>
+<p>对话：Dark Side</p>
+</div>
+</header>
+
+<blockquote>
+<p>设计理念：「凌晨2点之后的 JIUWO」——灯关了，椅子翻上了，只有夜班的人还在。</p>
+<p><strong>触发方式</strong>：在首页点击左上角 Logo 5 次（1 秒内），切换进入/退出。</p>
+</blockquote>
+
+<h2>一、触发与状态机制</h2>
+
+<h3>触发器</h3>
+<ul>
+<li><strong>文件</strong>：<code>components/Navbar.tsx</code></li>
+<li><strong>条件</strong>：仅在首页 (<code>/</code> 或 <code>/zh</code>) 点击左上角 Logo 时计数</li>
+<li><strong>逻辑</strong>：1 秒内点击满 5 次触发切换；点不满则计数器归零</li>
+<li><strong>反馈</strong>：每次点击有 100ms 的 <code>scale-110</code> 脉冲动画</li>
+</ul>
+
+<h3>状态切换</h3>
+<pre><code>const isDarkroom = document.body.classList.toggle('darkroom');
+localStorage.setItem('jiuwo-darkroom', isDarkroom ? 'true' : 'false');</code></pre>
+<ul>
+<li>切换时产生白色全屏闪光（300ms 淡出）</li>
+<li>进入时显示 4 秒渐显 intro 文字：「The lights are off. The chairs are up. This is JIUWO after 2am.」</li>
+</ul>
+
+<h3>状态恢复</h3>
+<p>页面加载时读取 <code>localStorage</code> 键 <code>jiuwo-darkroom</code>，自动恢复上次状态。这意味着用户一旦进入 darkroom，刷新或跳转页面都会保持。</p>
+
+<h3>关键设计决策</h3>
+<p><strong>无 React Context / 无状态管理库</strong>。纯 DOM 操作（<code>document.body.classList.toggle</code>）+ CSS 全局覆盖。这是故意保持轻量的设计选择。</p>
+
+<h2>二、样式覆盖策略</h2>
+<p>全部定义在 <code>app/globals.css:626-764</code>。</p>
+
+<table>
+<tr><th>覆盖目标</th><th>正常模式</th><th>Darkroom 模式</th></tr>
+<tr><td>背景色</td><td><code>#0a0a0a</code></td><td><code>#030303</code>（更黑）</td></tr>
+<tr><td>文字色</td><td><code>#f5f5f0</code></td><td><code>#e8e8d0</code>（偏黄白）</td></tr>
+<tr><td>品牌金 <code>#c9a227</code></td><td>金色</td><td><code>#a0a0a0</code>（灰色）</td></tr>
+<tr><td>图片</td><td>彩色</td><td><code>grayscale(100%) contrast(1.3)</code></td></tr>
+<tr><td>字体</td><td>各组件自定义</td><td>全局强制等宽字体 Space Mono</td></tr>
+<tr><td>装饰光效</td><td>存在</td><td><code>opacity: 0</code> 隐藏</td></tr>
+<tr><td>滚动条</td><td>默认</td><td>2px 细灰条</td></tr>
+<tr><td>卡片阴影</td><td>暖色调</td><td>冷白 + 深黑</td></tr>
+</table>
+
+<p><strong>实现方式</strong>：全部用 <code>body.darkroom *</code> 选择器暴力覆盖，大量使用 <code>!important</code>。这是故意做成「一层滤镜」的感觉，而不是精心重新设计的主题。</p>
+
+<h2>三、组件层面的差异化</h2>
+<p>目前有两处组件做了 darkroom 专属内容：</p>
+
+<h3>1. Hero 标题切换</h3>
+<p><strong>文件</strong>：<code>components/HeroCarousel.tsx:68-73</code></p>
+<pre><code>&lt;div className="hero-title-breathe hero-normal-title"&gt;
+  &lt;AnimatedTitle text={title} /&gt;           {/* 正常模式 */}
+&lt;/div&gt;
+&lt;div className="hero-title-breathe hero-darkroom-title hidden"&gt;
+  &lt;AnimatedTitle text="JIUWO — After Hours" /&gt;  {/* Darkroom 模式 */}
+&lt;/div&gt;</code></pre>
+<p>两个 <code>&lt;div&gt;</code> 叠在一起，通过 CSS <code>display</code> 切换显示：</p>
+<pre><code>body.darkroom .hero-normal-title { display: none !important; }
+body.darkroom .hero-darkroom-title { display: flex !important; }</code></pre>
+
+<h3>2. GuestbookHook 隐藏入口</h3>
+<p><strong>文件</strong>：<code>components/GuestbookHook.tsx:82-94</code></p>
+<pre><code>&lt;div className="darkroom-hidden text-center pb-6 hidden"
+  data-zh="给夜班留句话"
+  data-en="Leave a message for the night shift"
+&gt;
+  &lt;Link href={`${href}?write=1`}&gt;
+    &lt;span&gt;Leave a message for the night shift&lt;/span&gt;
+  &lt;/Link&gt;
+&lt;/div&gt;</code></pre>
+<p>默认 <code>display: none</code>，darkroom 模式下 <code>display: block !important</code>。</p>
+
+<p><strong>注意</strong>：这两处都是硬编码在组件里的，不是从数据文件读取的。</p>
+
+<h2>四、数据层（JSON）现状</h2>
+<p><code>lib/data.ts</code> 中所有类型定义——<code>SiteData</code>、<code>HeroSlide</code>、<code>JournalEntry</code>、<code>GalleryAlbum</code>、<code>MenuItem</code>、<code>AboutData</code>、<code>EventItem</code>——<strong>没有任何 darkroom 相关字段</strong>。</p>
+<p>这意味着：目前 darkroom 模式<strong>完全无法做内容差异化</strong>。所有页面显示的内容和正常模式一模一样，只是视觉上被 CSS "洗"成了黑白灰。</p>
+
+<h2>五、内容差异化的可行方案</h2>
+
+<h3>方案 A：轻量 — 组件层硬编码（现有模式）</h3>
+<p>适合少量、固定的彩蛋内容。实现方式：在正常内容旁边放一个 <code>.darkroom-only hidden</code>，CSS 控制显示/隐藏。</p>
+<ul>
+<li><strong>优点</strong>：零数据改造，改动范围小</li>
+<li><strong>缺点</strong>：内容写死在代码里，不能通过 <code>data/*.json</code> 维护</li>
+</ul>
+
+<h3>方案 B：中等 — JSON 加字段 + 条件渲染（推荐）</h3>
+<p>在数据类型里加入 <code>*Darkroom</code> 字段，组件根据 <code>document.body.classList.contains('darkroom')</code> 读取不同内容。</p>
+<p>例如 <code>site.json</code>：</p>
+<pre><code>{
+  "tagline": "A neighborhood bar in Shanghai",
+  "taglineZh": "上海的一家社区小酒馆",
+  "taglineDarkroom": "The bar is closed. The night is not.",
+  "taglineDarkroomZh": "酒吧打烊了。夜晚还没有。"
+}</code></pre>
+<ul>
+<li><strong>优点</strong>：内容可由 JSON 维护，符合现有工作流</li>
+<li><strong>缺点</strong>：需要改造 <code>lib/data.ts</code> 的类型 + 每个想支持的组件</li>
+</ul>
+
+<h3>方案 C：完整 — Darkroom 作为独立「主题层」</h3>
+<p>把 darkroom 提升为一等公民：</p>
+<ul>
+<li>提供 <code>useDarkroom()</code> hook（基于 <code>MutationObserver</code> 监听 body class 变化）</li>
+<li>所有组件统一通过 hook 感知状态</li>
+<li>JSON 结构支持完整的 darkroom 变体（如整份 ghost menu、整段 after-hours story）</li>
+</ul>
+<ul>
+<li><strong>优点</strong>：最灵活，可以做出真正独立的内容体验</li>
+<li><strong>缺点</strong>：工程量大，和现在「轻量彩蛋」的定位可能不符</li>
+</ul>
+
+<h2>六、建议</h2>
+<ol>
+<li><strong>如果要加内容差异化</strong> → 走 <strong>方案 B</strong>，在 JSON 里加 <code>*Darkroom</code> / <code>*DarkroomZh</code> 字段。这样可以通过 <code>data/*.json</code> 维护内容，不用每次改代码。</li>
+<li><strong>保持「一层滤镜」的视觉风格</strong> → 这是 darkroom 的灵魂。不要做成精心重新设计的主题，就保持这种「被夜色洗过一遍」的粗糙感。</li>
+<li><strong>内容差异化方向</strong>：
+  <ul>
+    <li><strong>About 的 story</strong>：换一段「打烊后的故事」</li>
+    <li><strong>Menu</strong>：加一栏只在 darkroom 显示的 "After Hours" 酒单</li>
+    <li><strong>Journal</strong>：某几篇标记为 <code>darkroomOnly: true</code>，只在 darkroom 出现</li>
+    <li><strong>Guestbook</strong>：扩展更多「夜班留言」的语境</li>
+  </ul>
+</li>
+</ol>
+
+<h2>相关文件索引</h2>
+<table>
+<tr><th>文件</th><th>职责</th></tr>
+<tr><td><code>components/Navbar.tsx:17-78</code></td><td>Logo 点击计数器 + toggleDarkroom + localStorage 恢复</td></tr>
+<tr><td><code>components/HeroCarousel.tsx:68-73</code></td><td>标题切换（正常 / After Hours）</td></tr>
+<tr><td><code>components/GuestbookHook.tsx:82-94</code></td><td>隐藏入口「给夜班留句话」</td></tr>
+<tr><td><code>app/globals.css:626-764</code></td><td>Darkroom 全局样式覆盖</td></tr>
+<tr><td><code>lib/data.ts</code></td><td>数据类型定义（目前无 darkroom 字段）</td></tr>
+</table>
+
+</div>
+</body>
+</html>

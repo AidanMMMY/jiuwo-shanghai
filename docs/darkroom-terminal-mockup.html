@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Darkroom Terminal Mockups</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #050505;
+    color: #d8e0e0;
+    font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  h2 { font-size: 0.75rem; letter-spacing: 0.2em; color: #555; margin-bottom: 8px; text-transform: uppercase; }
+  .tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid #1a1a1a;
+    padding-bottom: 12px;
+  }
+  .tab {
+    background: none;
+    border: 1px solid #333;
+    color: #666;
+    padding: 8px 20px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab:hover { border-color: #6a8a8a; color: #a0a8a8; }
+  .tab.active { border-color: #6a8a8a; color: #d8e0e0; background: rgba(106,138,138,0.08); }
+  .mockup {
+    max-width: 520px;
+    margin: 0 auto;
+    display: none;
+  }
+  .mockup.active { display: block; }
+
+  /* ── Terminal A ── */
+  .terminal-a {
+    background: #080808;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .terminal-a .header {
+    background: #0e0e0e;
+    padding: 10px 16px;
+    border-bottom: 1px solid #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .terminal-a .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .terminal-a .dot.r { background: #c85060; }
+  .terminal-a .dot.y { background: #c9a227; }
+  .terminal-a .dot.g { background: #508060; }
+  .terminal-a .title { flex: 1; text-align: center; font-size: 0.7rem; color: #444; letter-spacing: 0.1em; }
+  .terminal-a .body {
+    padding: 20px 24px;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: #a0a8a8;
+  }
+  .terminal-a .prompt { color: #6a8a8a; }
+  .terminal-a .cmd { color: #d8e0e0; }
+  .terminal-a .output { color: #a0a8a8; }
+  .terminal-a .output .dim { color: #555; }
+  .terminal-a .output .highlight { color: #c9a227; }
+  .terminal-a .output .blink { animation: blink 1s step-end infinite; }
+  .terminal-a .output .redacted { background: #333; color: #333; border-radius: 2px; padding: 0 4px; }
+  .terminal-a .output .redacted:hover { background: #555; color: #a0a8a8; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ── Broadcast B ── */
+  .broadcast-b {
+    background: #080808;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    padding: 28px 24px;
+    position: relative;
+  }
+  .broadcast-b .static-bar {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: #555;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .broadcast-b .static-bar span { display: flex; align-items: center; gap: 6px; }
+  .broadcast-b .freq-bar {
+    width: 80px;
+    height: 3px;
+    background: #1a1a1a;
+    position: relative;
+    overflow: hidden;
+  }
+  .broadcast-b .freq-bar::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 40%;
+    background: #6a8a8a;
+    animation: freqWobble 2s ease-in-out infinite;
+  }
+  @keyframes freqWobble {
+    0%, 100% { width: 30%; left: 0; }
+    50% { width: 60%; left: 20%; }
+  }
+  .broadcast-b .msg {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: #a0a8a8;
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+  .broadcast-b .msg em { color: #d8e0e0; font-style: normal; }
+  .broadcast-b .static-line {
+    font-size: 0.75rem;
+    color: #444;
+    letter-spacing: 0.3em;
+    margin: 16px 0;
+  }
+  .broadcast-b .end {
+    font-size: 0.65rem;
+    color: #555;
+    letter-spacing: 0.2em;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #1a1a1a;
+  }
+
+  /* ── Log C ── */
+  .log-c {
+    background: #080808;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    padding: 24px;
+    font-size: 0.8rem;
+    line-height: 1.9;
+  }
+  .log-c .entry {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #111;
+  }
+  .log-c .entry:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .log-c .timestamp {
+    color: #444;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .log-c .action {
+    color: #6a8a8a;
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+  }
+  .log-c .content {
+    color: #a0a8a8;
+    padding-left: 12px;
+    border-left: 2px solid #1a1a1a;
+  }
+  .log-c .content .quote { color: #d8e0e0; }
+  .log-c .content .tag {
+    display: inline-block;
+    background: #111;
+    border: 1px solid #222;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    margin-top: 6px;
+    color: #6a8a8a;
+  }
+
+  /* ── Retro D: Broadcast + Log ── */
+  .retro-d {
+    position: relative;
+    background: #020202;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow:
+      inset 0 0 40px rgba(0,0,0,0.9),
+      0 0 0 2px #1a1a1a,
+      0 0 0 4px #0a0a0a,
+      0 0 60px rgba(106,138,138,0.06);
+  }
+  .retro-d .screen {
+    position: relative;
+    background: #030303;
+    border-radius: 12px;
+    padding: 28px 24px;
+    overflow: hidden;
+    border: 1px solid #111;
+    animation: screenFlicker 6s infinite;
+  }
+  /* dense CRT scanlines */
+  .retro-d .screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(0,0,0,0.35) 1px,
+      rgba(0,0,0,0.35) 2px
+    );
+    pointer-events: none;
+    z-index: 5;
+  }
+  /* subtle noise grain */
+  .retro-d .screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 6;
+  }
+  .retro-d .signal-header {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    color: #444;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #111;
+  }
+  .retro-d .signal-header span { display: flex; align-items: center; gap: 6px; }
+  .retro-d .signal-header .freq-bar-retro {
+    width: 60px;
+    height: 2px;
+    background: #111;
+    position: relative;
+    overflow: hidden;
+  }
+  .retro-d .signal-header .freq-bar-retro::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 40%;
+    background: #4a6a6a;
+    animation: freqWobbleRetro 1.8s ease-in-out infinite;
+  }
+  .retro-d .log-entry {
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #0c0c0c;
+    position: relative;
+    z-index: 2;
+  }
+  .retro-d .log-entry:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .retro-d .log-time {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: #3a4a4a;
+    margin-bottom: 6px;
+    text-shadow: 0 0 4px rgba(106,138,138,0.15);
+  }
+  .retro-d .log-action {
+    font-size: 0.72rem;
+    color: #5a7a7a;
+    margin-bottom: 8px;
+    text-shadow: 0 0 6px rgba(90,122,122,0.12);
+  }
+  .retro-d .log-msg {
+    font-size: 0.82rem;
+    line-height: 1.75;
+    color: #889898;
+    padding-left: 12px;
+    border-left: 1px solid #1a2a2a;
+    text-shadow: 0 0 8px rgba(136,152,152,0.08);
+  }
+  .retro-d .log-msg .quote { color: #c0d0d0; }
+  .retro-d .log-msg .tag {
+    display: inline-block;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: #4a6a6a;
+    border: 1px solid #1a2a2a;
+    padding: 2px 8px;
+    margin-top: 8px;
+    margin-right: 6px;
+    background: rgba(10,20,20,0.5);
+  }
+  .retro-d .static-divider {
+    font-size: 0.65rem;
+    color: #222;
+    letter-spacing: 0.4em;
+    margin: 14px 0;
+    text-align: center;
+  }
+  .retro-d .end-line {
+    font-size: 0.58rem;
+    color: #3a4a4a;
+    letter-spacing: 0.25em;
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid #0e1a1a;
+    text-align: center;
+    text-shadow: 0 0 4px rgba(58,74,74,0.2);
+  }
+  .retro-d .cursor-line {
+    margin-top: 16px;
+    font-size: 0.75rem;
+    color: #5a7a7a;
+    animation: cursorBlink 1.2s step-end infinite;
+  }
+  @keyframes freqWobbleRetro {
+    0%, 100% { width: 25%; left: 0; opacity: 0.6; }
+    30% { width: 55%; left: 15%; opacity: 1; }
+    60% { width: 35%; left: 45%; opacity: 0.7; }
+  }
+  @keyframes screenFlicker {
+    0%, 100% { opacity: 1; }
+    3% { opacity: 0.97; }
+    6% { opacity: 1; }
+    48% { opacity: 1; }
+    50% { opacity: 0.85; }
+    52% { opacity: 1; }
+    78% { opacity: 1; }
+    80% { opacity: 0.92; }
+    82% { opacity: 1; }
+    95% { opacity: 1; }
+    97% { opacity: 0.88; }
+    99% { opacity: 1; }
+  }
+  @keyframes cursorBlink { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+
+<h2>Darkroom Terminal Mockups</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="show('a', this)">A · Terminal</button>
+  <button class="tab" onclick="show('b', this)">B · Broadcast</button>
+  <button class="tab" onclick="show('c', this)">C · Log</button>
+  <button class="tab" onclick="show('d', this)">D · Broadcast + Log (Retro)</button>
+</div>
+
+<!-- A: Terminal -->
+<div id="mockup-a" class="mockup active">
+  <div class="terminal-a">
+    <div class="header">
+      <span class="dot r"></span>
+      <span class="dot y"></span>
+      <span class="dot g"></span>
+      <span class="title">jiuwo@after-hours — sh</span>
+    </div>
+    <div class="body">
+      <div><span class="prompt">$</span> <span class="cmd">whoami</span></div>
+      <div class="output">visitor_<span class="redacted">███</span> — unauthorized</div>
+      <div style="margin-top: 12px;"><span class="prompt">$</span> <span class="cmd">where</span></div>
+      <div class="output">
+        JIUWO / AFTER HOURS<br>
+        <span class="dim">classified zone</span>
+      </div>
+      <div style="margin-top: 12px;"><span class="prompt">$</span> <span class="cmd">status</span></div>
+      <div class="output">
+        doors: <span class="highlight">sealed</span><br>
+        lights: <span class="highlight">4%</span><br>
+        rules: <span class="dim">null</span>
+      </div>
+      <div style="margin-top: 16px;"><span class="prompt">$</span> <span class="cmd">msg</span></div>
+      <div class="output">
+        <span class="highlight">"</span>You made it past the surface.<br>
+        This is where the night actually begins.<br><br>
+        There's a drink we don't list.<br>
+        Ask for it: <span class="highlight">Yinshi (寅时)</span><span class="highlight">"</span>
+      </div>
+      <div style="margin-top: 16px;"><span class="prompt">$</span> <span class="blink">_</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- B: Broadcast -->
+<div id="mockup-b" class="mockup">
+  <div class="broadcast-b">
+    <div class="static-bar">
+      <span>SIGNAL <strong style="color:#6a8a8a">118.7 MHz</strong></span>
+      <span>ORIGIN <span style="color:#c85060">UNTRACED</span></span>
+      <span>STRENGTH <span class="freq-bar"></span></span>
+    </div>
+    <div class="msg">
+      <em>"</em>The city sleeps. The bar doesn't.<br>
+      We've been waiting.<br><br>
+      Check the menu. There's something<br>
+      that isn't there during the day.<em>"</em>
+    </div>
+    <div class="static-line">▓░▓▓░▒░░▓░▒▓░▒░░▓▓░▒░▓░░▒▓░▒░░▓▓░</div>
+    <div class="msg">
+      <em>"</em>Order it. They'll know.<em>"</em>
+    </div>
+    <div class="end">END OF BROADCAST</div>
+  </div>
+</div>
+
+<!-- C: Log -->
+<div id="mockup-c" class="mockup">
+  <div class="log-c">
+    <div class="entry">
+      <div class="timestamp">[LOG-7843] 02:33:08</div>
+      <div class="action">> Pattern match: 5 rapid accesses</div>
+      <div class="content">Probability of intent: <span class="quote">97.3%</span></div>
+    </div>
+    <div class="entry">
+      <div class="timestamp">[LOG-7844] 02:33:09</div>
+      <div class="action">> Auto-response dispatched</div>
+      <div class="content">
+        <span class="quote">"You're not supposed to be here.<br>But since you are..."</span>
+      </div>
+    </div>
+    <div class="entry">
+      <div class="timestamp">[LOG-7845] 02:33:11</div>
+      <div class="action">> Recommendation generated</div>
+      <div class="content">
+        <span class="tag">DRINK: UNLISTED</span>
+        <span class="tag">LOCATION: BEHIND THE CURTAIN</span>
+        <span class="tag">WAIT: WHEN YOU'RE READY</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- D: Broadcast + Log (Retro) -->
+<div id="mockup-d" class="mockup">
+  <div class="retro-d">
+    <div class="screen">
+      <div class="signal-header">
+        <span>SIGNAL <strong style="color:#5a7a7a">118.7 MHz</strong></span>
+        <span>ORIGIN <span style="color:#6a4040">UNTRACED</span></span>
+        <span>STRENGTH <span class="freq-bar-retro"></span></span>
+        <span>MODE <span style="color:#4a6a6a">AFTER HOURS</span></span>
+      </div>
+      <div class="log-entry">
+        <div class="log-time">[LOG-7843] 02:33:08 · SHANGHAI</div>
+        <div class="log-action">> Pattern match: 5 rapid accesses</div>
+        <div class="log-msg">
+          Probability of intent: <span class="quote">97.3%</span><br>
+          Subject has breached the surface layer.
+        </div>
+      </div>
+      <div class="static-divider">▓░▓▓░▒░░▓░▒▓░▒░░▓▓░▒░▓░░▒▓░▒░░▓▓░</div>
+      <div class="log-entry">
+        <div class="log-time">[LOG-7844] 02:33:09 · AUTO-DISPATCH</div>
+        <div class="log-action">> Message relayed to subject</div>
+        <div class="log-msg">
+          <span class="quote">"The city sleeps. The bar doesn't.<br>
+          We've been waiting."</span>
+        </div>
+      </div>
+      <div class="log-entry">
+        <div class="log-time">[LOG-7845] 02:33:11 · RECOMMENDATION</div>
+        <div class="log-action">> Generating unlisted entry...</div>
+        <div class="log-msg">
+          <span class="quote">"There's a drink we don't list.<br>
+          Ask for it by name: <span style="color:#c0d0d0">寅时 (Yinshi)</span>."</span><br>
+          <span class="tag">DRINK: UNLISTED</span>
+          <span class="tag">LOCATION: BEHIND THE CURTAIN</span>
+          <span class="tag">STATUS: WHEN YOU'RE READY</span>
+        </div>
+      </div>
+      <div class="end-line">— END TRANSMISSION —</div>
+      <div class="cursor-line">> _</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.mockup').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('mockup-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>

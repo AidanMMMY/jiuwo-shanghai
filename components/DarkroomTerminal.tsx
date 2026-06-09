@@ -70,14 +70,8 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<ChatMessage[]>([]);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const screenRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [entries]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
@@ -145,7 +139,7 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
     <section className="px-4 md:px-8 pt-20 pb-4 bg-[#0a0a0a]">
       <div className="mx-auto max-w-4xl">
         <div className="darkroom-terminal">
-          <div className="darkroom-terminal-screen" ref={scrollRef}>
+          <div className="darkroom-terminal-screen" ref={screenRef}>
             {/* Signal header */}
             <div className="darkroom-signal-header">
               <span>SIGNAL <strong>118.7 MHz</strong></span>

@@ -825,8 +825,6 @@ body.darkroom .darkroom-terminal-screen {
     background: #030303;
     border-radius: 12px;
     padding: 28px 24px;
-    overflow-y: auto;
-    max-height: 60vh;
     border: 1px solid #111;
     animation: screenFlicker 6s infinite;
 }

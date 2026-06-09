@@ -204,26 +204,25 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
               <span>MODE <span style={{ color: '#4a6a6a' }}>AFTER HOURS</span></span>
             </div>
 
-            {/* Entries */}
-            {entries.map((entry) => (
-              <EntryItem
-                key={entry.id}
-                entry={entry}
-                isActiveTyping={entry.id === currentTypingId}
-                onDone={entry.id === currentTypingId ? () => handleTypingDone(entry.id) : undefined}
-                hasStarted={hasEnteredViewport}
-              />
-            ))}
+            <div className="darkroom-terminal-entries">
+              {entries.map((entry) => (
+                <EntryItem
+                  key={entry.id}
+                  entry={entry}
+                  isActiveTyping={entry.id === currentTypingId}
+                  onDone={entry.id === currentTypingId ? () => handleTypingDone(entry.id) : undefined}
+                  hasStarted={hasEnteredViewport}
+                />
+              ))}
 
-            {loading && (
-              <div className="darkroom-log-entry">
-                <div className="darkroom-log-time">{getNowTime()} · PENDING</div>
-                <div className="darkroom-log-action">{'>'} Receiving transmission...</div>
-                <div className="darkroom-log-msg">
-                  <span className="darkroom-cursor-blink">_</span>
+              {loading && (
+                <div className="darkroom-log-entry">
+                  <pre className="darkroom-log-typing">
+                    {`[${getNowTime()}] · PENDING\n> Receiving transmission...\n_`}
+                  </pre>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Input */}
             <div className="darkroom-input-line">
@@ -249,47 +248,29 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   );
 }
 
-function EntryItem({ entry, isActiveTyping, onDone, hasStarted }: { entry: DisplayEntry; isActiveTyping: boolean; onDone?: () => void; hasStarted: boolean }) {
-  const typed = useTypewriter(isActiveTyping ? entry.message : '', TYPE_SPEED, onDone);
-  // Before entering viewport: hide message content entirely
-  const displayMessage = !hasStarted ? '' : (isActiveTyping ? typed : entry.message);
-
+function getEntryText(entry: DisplayEntry): string {
   if (entry.type === 'user') {
-    return (
-      <div className="darkroom-log-entry">
-        <div className="darkroom-log-time">[{entry.timestamp}] · USER INPUT</div>
-        <div className="darkroom-log-action">{'>'} {displayMessage}</div>
-      </div>
-    );
+    return `[${entry.timestamp}] · USER INPUT\n> ${entry.message}`;
   }
-
   if (entry.type === 'broadcast') {
-    return (
-      <div className="darkroom-log-entry">
-        <div className="darkroom-static-divider">▓░▓▓░▒░░▓░▒▓░▒░░▓▓░▒░▓░░▒▓░▒░░▓▓░</div>
-        <div className="darkroom-log-time">[{entry.timestamp}] · {entry.location || 'BROADCAST'}</div>
-        <div className="darkroom-log-action">{'>'} {entry.action}</div>
-        <div className="darkroom-log-msg">
-          <span className="darkroom-quote">{'"'}{displayMessage}{'"'}</span>
-        </div>
-      </div>
-    );
+    return `▓░▓▓░▒░░▓░▒▓░▒░░▓▓░▒░▓░░▒▓░▒░░▓▓░\n[${entry.timestamp}] · ${entry.location || 'BROADCAST'}\n> ${entry.action || 'Broadcast'}\n"${entry.message}"`;
   }
+  let text = `[${entry.timestamp}] · ${entry.location || 'SYSTEM'}\n> ${entry.action || 'System message'}\n${entry.message}`;
+  if (entry.tags && entry.tags.length > 0) {
+    text += '\n' + entry.tags.map((t) => `[${t}]`).join(' ');
+  }
+  return text;
+}
+
+function EntryItem({ entry, isActiveTyping, onDone, hasStarted }: { entry: DisplayEntry; isActiveTyping: boolean; onDone?: () => void; hasStarted: boolean }) {
+  const text = getEntryText(entry);
+  const typed = useTypewriter(isActiveTyping ? text : '', TYPE_SPEED, onDone);
+  // Before entering viewport: hide content entirely; while typing show partial; after done show full
+  const display = !hasStarted ? '' : (isActiveTyping ? typed : text);
 
   return (
     <div className="darkroom-log-entry">
-      <div className="darkroom-log-time">[{entry.timestamp}] · {entry.location || 'SYSTEM'}</div>
-      <div className="darkroom-log-action">{'>'} {entry.action || 'System message'}</div>
-      <div className="darkroom-log-msg">
-        <span className="darkroom-quote">{displayMessage}</span>
-        {entry.tags && entry.tags.length > 0 && (
-          <div className="darkroom-tags">
-            {entry.tags.map((tag) => (
-              <span key={tag} className="darkroom-tag">{tag}</span>
-            ))}
-          </div>
-        )}
-      </div>
+      <pre className="darkroom-log-typing">{display}</pre>
     </div>
   );
 }

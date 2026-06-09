@@ -829,8 +829,10 @@ body.darkroom .darkroom-terminal-screen {
     padding: 28px 24px;
     border: 1px solid #111;
     animation: screenFlicker 6s infinite;
-    overflow: hidden auto;
+    overflow: hidden;
     max-height: 75vh;
+    display: flex;
+    flex-direction: column;
     word-break: break-word;
     overflow-wrap: break-word;
 }
@@ -903,12 +905,22 @@ body.darkroom .darkroom-freq-bar::after {
     animation: freqWobbleRetro 1.8s ease-in-out infinite;
 }
 
+body.darkroom .darkroom-terminal-entries {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    min-height: 0;
+}
+
 body.darkroom .darkroom-log-entry {
     margin-bottom: 18px;
     padding-bottom: 18px;
     border-bottom: 1px solid #0c0c0c;
     position: relative;
     z-index: 2;
+    flex-shrink: 0;
 }
 
 body.darkroom .darkroom-log-entry:last-child {
@@ -945,6 +957,18 @@ body.darkroom .darkroom-log-msg {
 
 body.darkroom .darkroom-log-msg .darkroom-quote {
     color: #c0d0d0;
+}
+
+body.darkroom .darkroom-log-typing {
+    font-family: inherit;
+    font-size: 0.82rem;
+    line-height: 1.75;
+    color: #889898;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    margin: 0;
+    text-shadow: 0 0 8px rgba(136,152,152,0.08);
 }
 
 body.darkroom .darkroom-tags {

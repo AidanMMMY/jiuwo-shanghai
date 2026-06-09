@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
-import darkroomData from "@/data/darkroom-messages.json";
-
-const SYSTEM_PROMPT = darkroomData.systemPrompt;
+import { getDarkroomData } from "@/lib/darkroom";
 
 export async function POST(req: NextRequest) {
+  let isZh = false;
+
   try {
     const body = await req.json();
     const { message, history = [] } = body;
+    isZh = !!body.isZh;
+
+    const data = getDarkroomData(isZh);
+    const SYSTEM_PROMPT = data.systemPrompt;
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
-        { error: "message is required" },
+        { error: isZh ? "消息不能为空" : "message is required" },
         { status: 400 }
       );
     }
@@ -21,16 +25,16 @@ export async function POST(req: NextRequest) {
     if (!apiKey || apiKey === "dummy-key-for-build") {
       // Fallback: keyword-based response
       const lower = message.toLowerCase();
-      let response = darkroomData.fallbackResponses.default;
+      let response = data.fallbackResponses.default;
 
-      if (/hi|hello|hey|你好|在吗/.test(lower)) {
-        response = darkroomData.fallbackResponses.greeting;
-      } else if (/drink|酒|喝|cocktail|推荐/.test(lower)) {
-        response = darkroomData.fallbackResponses.drink;
-      } else if (/where|location|地址|在哪|怎么/.test(lower)) {
-        response = darkroomData.fallbackResponses.location;
-      } else if (/time|时间|几点|开门|close/.test(lower)) {
-        response = darkroomData.fallbackResponses.time;
+      if (/hi|hello|hey|你好|在吗|嗨/.test(lower)) {
+        response = data.fallbackResponses.greeting;
+      } else if (/drink|酒|喝|cocktail|推荐| cocktail|特调/.test(lower)) {
+        response = data.fallbackResponses.drink;
+      } else if (/where|location|地址|在哪|怎么|去|路/.test(lower)) {
+        response = data.fallbackResponses.location;
+      } else if (/time|时间|几点|开门|close|关门|营业/.test(lower)) {
+        response = data.fallbackResponses.time;
       }
 
       return NextResponse.json({
@@ -73,9 +77,10 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: unknown) {
     console.error("Darkroom chat error:", error);
-    const message = error instanceof Error ? error.message : "Signal lost";
+    const data = getDarkroomData(isZh);
+    const message = error instanceof Error ? error.message : (isZh ? "信号丢失" : "Signal lost");
     return NextResponse.json(
-      { error: message, content: darkroomData.fallbackResponses.error },
+      { error: message, content: data.fallbackResponses.error },
       { status: 500 }
     );
   }

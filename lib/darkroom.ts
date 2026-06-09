@@ -1,4 +1,5 @@
 import darkroomData from "@/data/darkroom-messages.json";
+import darkroomDataZh from "@/data/darkroom-messages-zh.json";
 
 export interface DarkroomEntry {
   id: string;
@@ -16,8 +17,8 @@ export interface DarkroomData {
   fallbackResponses: Record<string, string>;
 }
 
-export function getDarkroomData(): DarkroomData {
-  return darkroomData as DarkroomData;
+export function getDarkroomData(isZh?: boolean): DarkroomData {
+  return (isZh ? darkroomDataZh : darkroomData) as DarkroomData;
 }
 
 export interface ChatMessage {
@@ -28,17 +29,18 @@ export interface ChatMessage {
 
 export async function sendDarkroomMessage(
   message: string,
-  history: ChatMessage[]
+  history: ChatMessage[],
+  isZh?: boolean
 ): Promise<{ content: string; source: string; timestamp: string }> {
   const res = await fetch("/api/darkroom/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, history }),
+    body: JSON.stringify({ message, history, isZh }),
   });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || "Signal lost");
+    throw new Error(err.error || (isZh ? "信号丢失" : "Signal lost"));
   }
 
   return res.json();

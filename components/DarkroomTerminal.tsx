@@ -61,7 +61,7 @@ function useTypewriter(text: string, speed = TYPE_SPEED, onDone?: () => void) {
 }
 
 export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
-  const data = getDarkroomData();
+  const data = getDarkroomData(isZh);
 
   // Always start fresh — every visit is a "first" visit
   const [entries, setEntries] = useState<DisplayEntry[]>(
@@ -150,13 +150,13 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
     ];
 
     try {
-      const res = await sendDarkroomMessage(text, history);
+      const res = await sendDarkroomMessage(text, history, isZh);
       const aiId = `sys-${Date.now()}`;
       const assistantEntry: DisplayEntry = {
         id: aiId,
         timestamp: getNowTime(),
-        location: res.source === 'fallback' ? 'LOCAL' : 'EXTERNAL',
-        action: '> Response received',
+        location: res.source === 'fallback' ? (isZh ? '本地' : 'LOCAL') : (isZh ? '外部' : 'EXTERNAL'),
+        action: isZh ? '> 响应已接收' : '> Response received',
         message: res.content,
         type: 'system',
         isTyping: true,
@@ -170,8 +170,8 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
       const errorEntry: DisplayEntry = {
         id: errId,
         timestamp: getNowTime(),
-        location: 'ERROR',
-        action: '> Connection failed',
+        location: isZh ? '错误' : 'ERROR',
+        action: isZh ? '> 连接失败' : '> Connection failed',
         message: err instanceof Error ? err.message : 'Signal lost',
         type: 'system',
         isTyping: true,
@@ -198,10 +198,10 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
           <div className="darkroom-terminal-screen" ref={scrollRef}>
             {/* Signal header */}
             <div className="darkroom-signal-header">
-              <span>SIGNAL <strong>118.7 MHz</strong></span>
-              <span>ORIGIN <span style={{ color: '#6a4040' }}>UNTRACED</span></span>
-              <span>STRENGTH <span className="darkroom-freq-bar" /></span>
-              <span>MODE <span style={{ color: '#4a6a6a' }}>AFTER HOURS</span></span>
+              <span>{isZh ? '信号' : 'SIGNAL'} <strong>118.7 MHz</strong></span>
+              <span>{isZh ? '来源' : 'ORIGIN'} <span style={{ color: '#6a4040' }}>{isZh ? '未追踪' : 'UNTRACED'}</span></span>
+              <span>{isZh ? '强度' : 'STRENGTH'} <span className="darkroom-freq-bar" /></span>
+              <span>{isZh ? '模式' : 'MODE'} <span style={{ color: '#4a6a6a' }}>{isZh ? '营业时间外' : 'AFTER HOURS'}</span></span>
             </div>
 
             <div className="darkroom-terminal-entries">
@@ -216,6 +216,7 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
                     entry={entry}
                     isActiveTyping={isCurrent}
                     onDone={isCurrent ? () => handleTypingDone(entry.id) : undefined}
+                    isZh={isZh}
                   />
                 );
               })}
@@ -223,7 +224,9 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
               {loading && (
                 <div className="darkroom-log-entry">
                   <pre className="darkroom-log-typing">
-                    {`[${getNowTime()}] · PENDING\n> Receiving transmission...\n_`}
+                    {isZh
+                      ? `[${getNowTime()}] · 等待中\n> 接收信号中……\n_`
+                      : `[${getNowTime()}] · PENDING\n> Receiving transmission...\n_`}
                   </pre>
                 </div>
               )}
@@ -253,22 +256,22 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   );
 }
 
-function getEntryText(entry: DisplayEntry): string {
+function getEntryText(entry: DisplayEntry, isZh: boolean): string {
   if (entry.type === 'user') {
-    return `[${entry.timestamp}] · USER INPUT\n> ${entry.message}`;
+    return `[${entry.timestamp}] · ${isZh ? '用户输入' : 'USER INPUT'}\n> ${entry.message}`;
   }
   if (entry.type === 'broadcast') {
-    return `▓░▓▓░▒░░▓░▒▓░▒░░▓▓░▒░▓░░▒▓░▒░░▓▓░\n[${entry.timestamp}] · ${entry.location || 'BROADCAST'}\n> ${entry.action || 'Broadcast'}\n"${entry.message}"`;
+    return `▓░▓▓░▒░░▓░▒▓░▒░░▓▓░▒░▓░░▒▓░▒░░▓▓░\n[${entry.timestamp}] · ${entry.location || (isZh ? '广播' : 'BROADCAST')}\n> ${entry.action || (isZh ? '广播' : 'Broadcast')}\n"${entry.message}"`;
   }
-  let text = `[${entry.timestamp}] · ${entry.location || 'SYSTEM'}\n> ${entry.action || 'System message'}\n${entry.message}`;
+  let text = `[${entry.timestamp}] · ${entry.location || (isZh ? '系统' : 'SYSTEM')}\n> ${entry.action || (isZh ? '系统消息' : 'System message')}\n${entry.message}`;
   if (entry.tags && entry.tags.length > 0) {
     text += '\n' + entry.tags.map((t) => `[${t}]`).join(' ');
   }
   return text;
 }
 
-function EntryItem({ entry, isActiveTyping, onDone }: { entry: DisplayEntry; isActiveTyping: boolean; onDone?: () => void }) {
-  const text = getEntryText(entry);
+function EntryItem({ entry, isActiveTyping, onDone, isZh }: { entry: DisplayEntry; isActiveTyping: boolean; onDone?: () => void; isZh: boolean }) {
+  const text = getEntryText(entry, isZh);
   const typed = useTypewriter(isActiveTyping ? text : '', TYPE_SPEED, onDone);
   const display = isActiveTyping ? typed : text;
 

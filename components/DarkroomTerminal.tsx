@@ -15,18 +15,29 @@ interface DisplayEntry {
 }
 
 const STORAGE_KEY = 'jiuwo-darkroom-chat';
+const TYPE_SPEED = 15; // ms per char — fast retro terminal feel
 
 function getNowTime(): string {
   const d = new Date();
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
 }
 
-function useTypewriter(text: string, speed = 30, onDone?: () => void) {
+function useTypewriter(text: string, speed = TYPE_SPEED, onDone?: () => void) {
   const [displayed, setDisplayed] = useState('');
   const indexRef = useRef(0);
   const doneRef = useRef(false);
+  const onDoneRef = useRef(onDone);
+
+  // Keep onDone ref fresh without restarting the interval
+  useEffect(() => {
+    onDoneRef.current = onDone;
+  });
 
   useEffect(() => {
+    if (!text) {
+      setDisplayed('');
+      return;
+    }
     indexRef.current = 0;
     setDisplayed('');
     doneRef.current = false;
@@ -39,43 +50,96 @@ function useTypewriter(text: string, speed = 30, onDone?: () => void) {
         clearInterval(interval);
         if (!doneRef.current) {
           doneRef.current = true;
-          onDone?.();
+          onDoneRef.current?.();
         }
       }
     }, speed);
 
     return () => clearInterval(interval);
-  }, [text, speed, onDone]);
+  }, [text, speed]);
 
   return displayed;
 }
 
 export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   const data = getDarkroomData();
+
+  // Initialize entries — first-time visitors get typing sequence
   const [entries, setEntries] = useState<DisplayEntry[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            // Saved history: show everything immediately, no re-typing
+            return parsed.map((e: DisplayEntry, i: number) => ({
+              ...e,
+              id: e.id || `saved-${i}`,
+              isTyping: false,
+            }));
+          }
         } catch { /* ignore */ }
       }
     }
-    return data.initialEntries.map((e: DarkroomEntry) => ({
+    // First load: initial entries queued for typing
+    return data.initialEntries.map((e: DarkroomEntry, i: number) => ({
       ...e,
+      id: `init-${i}`,
       type: e.type as 'log' | 'broadcast',
+      isTyping: true,
     }));
   });
+
+  // Queue of entry IDs waiting to be typed out, one at a time
+  const [typingQueue, setTypingQueue] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return [];
+        } catch { }
+      }
+    }
+    return data.initialEntries.map((_, i) => `init-${i}`);
+  });
+
+  const [currentTypingId, setCurrentTypingId] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<ChatMessage[]>([]);
-  const screenRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Pull next item from queue when idle
+  useEffect(() => {
+    if (currentTypingId === null && typingQueue.length > 0) {
+      const [next, ...rest] = typingQueue;
+      setCurrentTypingId(next);
+      setTypingQueue(rest);
+    }
+  }, [currentTypingId, typingQueue]);
+
+  // Auto-scroll to bottom when new content arrives
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [entries, currentTypingId]);
+
+  // Persist to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   }, [entries]);
+
+  // Called when an entry finishes typing
+  const handleTypingDone = useCallback((entryId: string) => {
+    setEntries(prev => prev.map(e =>
+      e.id === entryId ? { ...e, isTyping: false } : e
+    ));
+    setCurrentTypingId(null);
+  }, []);
 
   const handleSend = useCallback(async () => {
     const text = input.trim();
@@ -86,6 +150,7 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
       timestamp: getNowTime(),
       message: text,
       type: 'user',
+      isTyping: false, // user input appears instantly
     };
 
     setEntries(prev => [...prev, userEntry]);
@@ -99,8 +164,9 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
 
     try {
       const res = await sendDarkroomMessage(text, history);
+      const aiId = `sys-${Date.now()}`;
       const assistantEntry: DisplayEntry = {
-        id: `sys-${Date.now()}`,
+        id: aiId,
         timestamp: getNowTime(),
         location: res.source === 'fallback' ? 'LOCAL' : 'EXTERNAL',
         action: '> Response received',
@@ -111,9 +177,11 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
 
       setHistory([...newHistory, { role: 'assistant', content: res.content, timestamp: getNowTime() }]);
       setEntries(prev => [...prev, assistantEntry]);
+      setTypingQueue(prev => [...prev, aiId]);
     } catch (err) {
+      const errId = `err-${Date.now()}`;
       const errorEntry: DisplayEntry = {
-        id: `err-${Date.now()}`,
+        id: errId,
         timestamp: getNowTime(),
         location: 'ERROR',
         action: '> Connection failed',
@@ -122,6 +190,7 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
         isTyping: true,
       };
       setEntries(prev => [...prev, errorEntry]);
+      setTypingQueue(prev => [...prev, errId]);
     } finally {
       setLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -139,7 +208,7 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
     <section className="px-4 md:px-8 pt-20 pb-4 bg-[#0a0a0a]">
       <div className="mx-auto max-w-4xl">
         <div className="darkroom-terminal">
-          <div className="darkroom-terminal-screen" ref={screenRef}>
+          <div className="darkroom-terminal-screen" ref={scrollRef}>
             {/* Signal header */}
             <div className="darkroom-signal-header">
               <span>SIGNAL <strong>118.7 MHz</strong></span>
@@ -150,7 +219,12 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
 
             {/* Entries */}
             {entries.map((entry) => (
-              <EntryItem key={entry.id} entry={entry} />
+              <EntryItem
+                key={entry.id}
+                entry={entry}
+                isActiveTyping={entry.id === currentTypingId}
+                onDone={entry.id === currentTypingId ? () => handleTypingDone(entry.id) : undefined}
+              />
             ))}
 
             {loading && (
@@ -187,11 +261,9 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   );
 }
 
-function EntryItem({ entry }: { entry: DisplayEntry }) {
-  const [done, setDone] = useState(!entry.isTyping);
-  const typed = useTypewriter(entry.isTyping ? entry.message : '', 25, () => setDone(true));
-
-  const displayMessage = entry.isTyping && !done ? typed : entry.message;
+function EntryItem({ entry, isActiveTyping, onDone }: { entry: DisplayEntry; isActiveTyping: boolean; onDone?: () => void }) {
+  const typed = useTypewriter(isActiveTyping ? entry.message : '', TYPE_SPEED, onDone);
+  const displayMessage = isActiveTyping ? typed : entry.message;
 
   if (entry.type === 'user') {
     return (

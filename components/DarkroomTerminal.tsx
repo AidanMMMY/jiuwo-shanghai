@@ -14,7 +14,6 @@ interface DisplayEntry {
   isTyping?: boolean;
 }
 
-const STORAGE_KEY = 'jiuwo-darkroom-chat';
 const TYPE_SPEED = 15; // ms per char — fast retro terminal feel
 
 function getNowTime(): string {
@@ -64,55 +63,20 @@ function useTypewriter(text: string, speed = TYPE_SPEED, onDone?: () => void) {
 export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   const data = getDarkroomData();
 
-  // Initialize entries — typing only on first "real" visit (no user interaction yet)
-  const [entries, setEntries] = useState<DisplayEntry[]>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved) as DisplayEntry[];
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const hasInteracted = parsed.some((e) => e.type === 'user');
-            if (hasInteracted) {
-              // Real chat history exists: show immediately, no re-typing
-              return parsed.map((e, i) => ({
-                ...e,
-                id: e.id || `saved-${i}`,
-                isTyping: false,
-              }));
-            }
-            // No user interaction yet — just initial entries from a previous view.
-            // Clear the stale save so initial entries re-type on this "fresh" visit.
-            localStorage.removeItem(STORAGE_KEY);
-          }
-        } catch { /* ignore */ }
-      }
-    }
-    // First genuine visit: initial entries queued for typing
-    return data.initialEntries.map((e: DarkroomEntry, i: number) => ({
+  // Always start fresh — every visit is a "first" visit
+  const [entries, setEntries] = useState<DisplayEntry[]>(
+    data.initialEntries.map((e: DarkroomEntry, i: number) => ({
       ...e,
       id: `init-${i}`,
       type: e.type as 'log' | 'broadcast',
       isTyping: true,
-    }));
-  });
+    }))
+  );
 
   // Queue of entry IDs waiting to be typed out, one at a time
-  const [typingQueue, setTypingQueue] = useState<string[]>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved) as DisplayEntry[];
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const hasInteracted = parsed.some((e) => e.type === 'user');
-            if (hasInteracted) return [];
-          }
-        } catch { }
-      }
-    }
-    return data.initialEntries.map((_, i) => `init-${i}`);
-  });
+  const [typingQueue, setTypingQueue] = useState<string[]>(
+    data.initialEntries.map((_, i) => `init-${i}`)
+  );
 
   const [currentTypingId, setCurrentTypingId] = useState<string | null>(null);
   const [input, setInput] = useState('');
@@ -136,11 +100,6 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [entries, currentTypingId]);
-
-  // Persist to localStorage
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-  }, [entries]);
 
   // Called when an entry finishes typing
   const handleTypingDone = useCallback((entryId: string) => {

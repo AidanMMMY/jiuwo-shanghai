@@ -64,25 +64,31 @@ function useTypewriter(text: string, speed = TYPE_SPEED, onDone?: () => void) {
 export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   const data = getDarkroomData();
 
-  // Initialize entries — first-time visitors get typing sequence
+  // Initialize entries — typing only on first "real" visit (no user interaction yet)
   const [entries, setEntries] = useState<DisplayEntry[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         try {
-          const parsed = JSON.parse(saved);
+          const parsed = JSON.parse(saved) as DisplayEntry[];
           if (Array.isArray(parsed) && parsed.length > 0) {
-            // Saved history: show everything immediately, no re-typing
-            return parsed.map((e: DisplayEntry, i: number) => ({
-              ...e,
-              id: e.id || `saved-${i}`,
-              isTyping: false,
-            }));
+            const hasInteracted = parsed.some((e) => e.type === 'user');
+            if (hasInteracted) {
+              // Real chat history exists: show immediately, no re-typing
+              return parsed.map((e, i) => ({
+                ...e,
+                id: e.id || `saved-${i}`,
+                isTyping: false,
+              }));
+            }
+            // No user interaction yet — just initial entries from a previous view.
+            // Clear the stale save so initial entries re-type on this "fresh" visit.
+            localStorage.removeItem(STORAGE_KEY);
           }
         } catch { /* ignore */ }
       }
     }
-    // First load: initial entries queued for typing
+    // First genuine visit: initial entries queued for typing
     return data.initialEntries.map((e: DarkroomEntry, i: number) => ({
       ...e,
       id: `init-${i}`,
@@ -97,8 +103,11 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) return [];
+          const parsed = JSON.parse(saved) as DisplayEntry[];
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const hasInteracted = parsed.some((e) => e.type === 'user');
+            if (hasInteracted) return [];
+          }
         } catch { }
       }
     }

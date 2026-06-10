@@ -261,7 +261,7 @@ function getEntryText(entry: DisplayEntry, isZh: boolean): string {
     return `[${entry.timestamp}] · ${isZh ? '用户输入' : 'USER INPUT'}\n> ${entry.message}`;
   }
   if (entry.type === 'broadcast') {
-    return `▓░▓▓░▒░░▓░▒▓░▒░░▓▓░▒░▓░░▒▓░▒░░▓▓░\n[${entry.timestamp}] · ${entry.location || (isZh ? '广播' : 'BROADCAST')}\n> ${entry.action || (isZh ? '广播' : 'Broadcast')}\n"${entry.message}"`;
+    return `▓░▓▓░▒░░▓░▒▓░▒░\n[${entry.timestamp}] · ${entry.location || (isZh ? '广播' : 'BROADCAST')}\n> ${entry.action || (isZh ? '广播' : 'Broadcast')}\n"${entry.message}"`;
   }
   let text = `[${entry.timestamp}] · ${entry.location || (isZh ? '系统' : 'SYSTEM')}\n> ${entry.action || (isZh ? '系统消息' : 'System message')}\n${entry.message}`;
   if (entry.tags && entry.tags.length > 0) {

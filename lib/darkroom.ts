@@ -27,12 +27,22 @@ export interface ChatMessage {
   timestamp: string;
 }
 
+function getApiUrl(): string {
+  if (typeof window === "undefined") return "/api/darkroom/chat";
+  const origin = window.location.origin;
+  // Avoid 308 redirect: apex domain → www subdomain on Vercel
+  if (origin.includes("jiuwoshanghai.net") && !origin.includes("www.")) {
+    return origin.replace("jiuwoshanghai.net", "www.jiuwoshanghai.net") + "/api/darkroom/chat";
+  }
+  return origin + "/api/darkroom/chat";
+}
+
 export async function sendDarkroomMessage(
   message: string,
   history: ChatMessage[],
   isZh?: boolean
 ): Promise<{ content: string; source: string; timestamp: string }> {
-  const res = await fetch("/api/darkroom/chat", {
+  const res = await fetch(getApiUrl(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message, history, isZh }),

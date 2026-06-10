@@ -24,7 +24,7 @@ export default function AboutPage({
   const firstParagraphRest = firstParagraph?.slice(1) ?? '';
 
   return (
-    <main className="relative bg-[#0a0a0a] min-h-[100lvh]">
+    <main className="about-page relative bg-[#0a0a0a] min-h-[100lvh]">
       <AuroraBackground />
 
       {/* Hero block */}
@@ -45,7 +45,7 @@ export default function AboutPage({
       {/* Story block */}
       <section className="relative z-10 px-4 md:px-8 pt-20 md:pt-24 pb-20 md:pb-28">
         <div className="mx-auto max-w-2xl">
-          <div className="bg-[#0a0a0a]/60 backdrop-blur-[2px] rounded-lg p-8 md:p-10 space-y-8 text-lg md:text-xl text-[#a0a0a0] leading-relaxed">
+          <div className="about-card bg-[#0a0a0a]/60 backdrop-blur-[2px] rounded-lg p-8 md:p-10 space-y-8 text-lg md:text-xl text-[#a0a0a0] leading-relaxed">
             {firstParagraph && (
               <ScrollReveal delay={100}>
                 <p>
@@ -72,7 +72,7 @@ export default function AboutPage({
       {/* Pull quote */}
       <section className="relative z-10 px-4 md:px-8 py-12 md:py-16">
         <ScrollReveal>
-          <div className="mx-auto max-w-2xl text-center bg-[#0a0a0a]/40 backdrop-blur-[1px] rounded-lg p-8 md:p-10 transition-all duration-300 hover:brightness-110">
+          <div className="about-card mx-auto max-w-2xl text-center bg-[#0a0a0a]/40 backdrop-blur-[1px] rounded-lg p-8 md:p-10 transition-all duration-300 hover:brightness-110">
             <div className="mx-auto h-px w-12 bg-[#c9a227] mb-8" />
             <p className="text-2xl md:text-3xl italic text-[#f5f5f0] leading-relaxed">
               <span

@@ -239,7 +239,7 @@ export default function AuroraBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 pointer-events-none"
+      className="aurora-bg fixed inset-0 z-0 pointer-events-none"
       style={{ opacity: 0.8 }}
       aria-hidden="true"
     />

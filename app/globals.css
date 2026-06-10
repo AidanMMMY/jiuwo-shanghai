@@ -844,6 +844,43 @@ body.darkroom .weather-darkroom-section {
     display: block !important;
 }
 
+/* ── About page in darkroom: hide aurora, add dark grid background ── */
+body.darkroom .aurora-bg {
+    display: none !important;
+}
+
+body.darkroom .about-page {
+    background-color: #030303 !important;
+    background-image:
+        radial-gradient(ellipse 80% 50% at 50% 25%, rgba(74, 106, 106, 0.05) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 30% at 80% 85%, rgba(90, 50, 50, 0.03) 0%, transparent 50%),
+        linear-gradient(rgba(74, 106, 106, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74, 106, 106, 0.02) 1px, transparent 1px) !important;
+    background-size: 100% 100%, 100% 100%, 120px 120px, 120px 120px !important;
+}
+
+/* Override semi-transparent card backgrounds + remove backdrop-blur */
+body.darkroom .about-page .about-card {
+    background-color: rgba(3, 3, 3, 0.7) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid #111 !important;
+}
+
+/* Hero title shadow: cold tone instead of gold */
+body.darkroom .about-page h1 {
+    text-shadow: 0 0 40px rgba(74, 106, 106, 0.2), 0 0 80px rgba(74, 106, 106, 0.08) !important;
+}
+
+/* Info block left border: cold tone */
+body.darkroom .about-page .border-l {
+    border-color: #4a6a6a !important;
+}
+
+body.darkroom .about-page .group:hover {
+    background-color: rgba(74, 106, 106, 0.05) !important;
+}
+
 /* ── Darkroom Terminal ── */
 body.darkroom .darkroom-terminal {
     position: relative;

@@ -699,9 +699,45 @@ body.darkroom .ambient-light-blob {
     opacity: 0;
 }
 
-body.darkroom img,
+/* Background images: grayscale + high contrast only (no transform to avoid layout issues) */
 body.darkroom [style*="background-image"] {
     filter: grayscale(100%) contrast(1.3) !important;
+}
+
+/* Images: full signal interference — scanline displacement + jitter + brightness flicker */
+body.darkroom img {
+    filter: grayscale(100%) contrast(1.3) !important;
+    animation: signalGlitch 3.5s infinite;
+}
+
+@keyframes signalGlitch {
+    0%, 90%, 100% {
+        clip-path: inset(0 0 0 0);
+        transform: translate(0);
+        filter: grayscale(100%) contrast(1.3) !important;
+        opacity: 1;
+    }
+    91% {
+        clip-path: inset(30% 0 50% 0);
+        transform: translate(-4px, 0);
+        filter: grayscale(100%) contrast(1.5) brightness(1.2) !important;
+    }
+    92% {
+        clip-path: inset(60% 0 10% 0);
+        transform: translate(3px, 0);
+        filter: grayscale(100%) contrast(1.3) brightness(0.7) !important;
+        opacity: 0.85;
+    }
+    93% {
+        clip-path: inset(10% 0 70% 0);
+        transform: translate(-2px, 0);
+        opacity: 1;
+    }
+    94% {
+        clip-path: inset(0 0 0 0);
+        transform: translate(0);
+        filter: grayscale(100%) contrast(1.3) !important;
+    }
 }
 
 body.darkroom h1,

@@ -44,7 +44,10 @@
         "alt": "Icky 07",
         "altZh": "阿远 07"
       }
-    ]
+    ],
+    "friendSocial": {
+      "xiaohongshu": "https://www.xiaohongshu.com/user/profile/5efb3e74000000000101da14?xsec_token=YBLsNUUiJzIK9x7_p5Oee8DwwQWDltSrvlmxYd03tadFQ=&xsec_source=app_share&xhsshare=WeixinSession&appuid=5e1a12be00000000010040c5&apptime=1781194306&share_id=3519197cf44c4cba9c85a284890b96a8&wechatWid=3697c9d7c2cc0e1be7e99f292fe6cc25&wechatOrigin=menu"
+    }
   },
   {
     "id": "our-friend-dex",

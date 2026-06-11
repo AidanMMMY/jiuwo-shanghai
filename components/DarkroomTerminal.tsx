@@ -120,6 +120,29 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
     }
   }, [entries, currentTypingId]);
 
+  // Re-anchor terminal after mobile keyboard closes so it stays in view
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+
+    const vv = window.visualViewport;
+    let lastHeight = vv.height;
+
+    const handleResize = () => {
+      const currentHeight = vv.height;
+      const isKeyboardOpen = currentHeight < window.innerHeight * 0.85;
+
+      if (!isKeyboardOpen && currentHeight > lastHeight) {
+        // Keyboard just closed — scroll terminal back into view
+        terminalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+
+      lastHeight = currentHeight;
+    };
+
+    vv.addEventListener('resize', handleResize);
+    return () => vv.removeEventListener('resize', handleResize);
+  }, []);
+
   // Called when an entry finishes typing
   const handleTypingDone = useCallback((entryId: string) => {
     setEntries(prev => prev.map(e =>
@@ -180,7 +203,8 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
       setTypingQueue(prev => [...prev, errId]);
     } finally {
       setLoading(false);
-      setTimeout(() => inputRef.current?.focus(), 100);
+      // Blur on mobile so the keyboard closes and iOS zoom resets
+      setTimeout(() => inputRef.current?.blur(), 100);
     }
   }, [input, loading, history]);
 

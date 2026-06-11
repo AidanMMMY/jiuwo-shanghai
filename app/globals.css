@@ -1095,10 +1095,17 @@ body.darkroom .darkroom-input {
     outline: none;
     color: #c0d0d0;
     font-family: inherit;
-    font-size: 0.85rem;
+    /* 16px on mobile prevents iOS Safari auto-zoom on focus */
+    font-size: 16px;
     letter-spacing: 0.05em;
     padding: 4px 0;
     caret-color: #5a7a7a;
+}
+
+@media (min-width: 768px) {
+    body.darkroom .darkroom-input {
+        font-size: 0.85rem;
+    }
 }
 
 body.darkroom .darkroom-input::placeholder {

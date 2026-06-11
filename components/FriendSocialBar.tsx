@@ -71,7 +71,7 @@ function WechatRevealPanel({
 
       {/* Panel */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a] border-t border-[#c9a22733]">
-        <div className="mx-auto max-w-md px-4 md:px-8 py-8 text-center">
+        <div className="mx-auto max-w-md px-4 md:px-12 py-8 text-center">
           {/* Close */}
           <div className="flex justify-end mb-2">
             <button

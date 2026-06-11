@@ -46,7 +46,7 @@ export default async function Page() {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return (
-      <main className="bg-[#0a0a0a] min-h-[100lvh] px-4 md:px-8 py-20">
+      <main className="bg-[#0a0a0a] min-h-[100lvh] px-4 md:px-12 py-20">
         <div className="mx-auto max-w-2xl">
           <h1 className="text-2xl text-red-400 mb-4">Error loading guestbook</h1>
           <pre className="text-sm text-[#a0a0a0] whitespace-pre-wrap">{message}</pre>

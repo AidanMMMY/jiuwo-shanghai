@@ -16,7 +16,7 @@ export default function WeatherVibe({ weather, recommendation, isZh = false }: W
     <>
       {/* Normal mode */}
       {weather && recommendation && (
-        <section className="weather-normal-section px-4 md:px-8 pt-20 pb-4 bg-[#0a0a0a]">
+        <section className="weather-normal-section px-4 md:px-12 pt-20 pb-4 bg-[#0a0a0a]">
           <div className="mx-auto max-w-4xl">
             <div className="relative rounded-lg border border-[#1a1a1a] bg-[#0e0e0e] p-6 md:p-8 overflow-hidden">
               {/* Subtle ambient glow */}

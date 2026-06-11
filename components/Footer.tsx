@@ -5,7 +5,7 @@ export default function Footer({ site }: { site: SiteData }) {
   return (
     <>
       <div className="page-bottom-fade" />
-      <footer className="relative border-t border-[#222] bg-[#0a0a0a] py-12 px-4 md:px-8">
+      <footer className="relative border-t border-[#222] bg-[#0a0a0a] py-12 px-4 md:px-12">
       {/* Gold gradient top line */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c9a227]/40 to-transparent" />
 

@@ -13,7 +13,7 @@ export default function MenuPage({
 }) {
   return (
     <div className="pt-24 pb-20 bg-[#0a0a0a] min-h-[100lvh]">
-      <div className="mx-auto px-4 md:px-8">
+      <div className="mx-auto px-4 md:px-12">
         <div className="flex items-center gap-6 mb-4">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#333] to-[#333]" />
           <h1 className="text-3xl md:text-4xl font-medium text-[#f5f5f0] tracking-wide shrink-0">
@@ -26,7 +26,7 @@ export default function MenuPage({
         </p>
       </div>
       <MenuNav categories={categories} />
-      <div className="mx-auto px-4 md:px-8">
+      <div className="mx-auto px-4 md:px-12">
         {categories.map((cat) => (
           <MenuSection key={cat.category} category={cat} />
         ))}

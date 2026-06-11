@@ -64,7 +64,7 @@ export default function MenuNav({ categories }: { categories: MenuCategory[] }) 
     <nav className="sticky top-16 z-40 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-[#222] py-4 mb-12">
       {/* Hide scrollbar for the scroll container */}
       <style>{`.menu-nav-hide-scroll::-webkit-scrollbar { display: none; }`}</style>
-      <div className="mx-auto px-4 md:px-8">
+      <div className="mx-auto px-4 md:px-12">
         <div
           ref={navRef}
           className="menu-nav-hide-scroll relative flex gap-6 overflow-x-auto px-2"

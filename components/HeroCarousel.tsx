@@ -7,7 +7,7 @@ import type { HeroSlide } from '@/lib/data';
 function AnimatedTitle({ text }: { text: string }) {
   return (
     <h1
-      className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl tracking-[0.14em] hero-title-shine"
+      className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl tracking-[0.14em] hero-title-shine"
       style={{
         fontFamily: 'var(--font-bodoni), Georgia, serif',
         fontWeight: 700,

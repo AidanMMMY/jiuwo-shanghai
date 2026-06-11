@@ -86,20 +86,37 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const [hasEnteredViewport, setHasEnteredViewport] = useState(false);
+  const hasSnappedRef = useRef(false);
 
   // Intersection Observer — start typing only when scrolled into view
   useEffect(() => {
-    if (!terminalRef.current) return;
+    const terminal = terminalRef.current;
+    if (!terminal) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setHasEnteredViewport(true);
-          observer.disconnect();
+
+          // Mobile: snap terminal top just below the navbar when entering from below
+          if (
+            !hasSnappedRef.current &&
+            window.innerWidth < 768 &&
+            entry.boundingClientRect.top > 0
+          ) {
+            hasSnappedRef.current = true;
+            const header = document.querySelector('header');
+            const headerHeight = header?.getBoundingClientRect().height ?? 64;
+            const gap = 16; // matches px-4 horizontal padding
+            const terminalTop =
+              terminal.getBoundingClientRect().top + window.scrollY;
+            const targetY = terminalTop - headerHeight - gap;
+            window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+          }
         }
       },
       { threshold: 0.15 }
     );
-    observer.observe(terminalRef.current);
+    observer.observe(terminal);
     return () => observer.disconnect();
   }, []);
 

@@ -912,7 +912,7 @@ body.darkroom .darkroom-terminal-screen {
     border: 1px solid #111;
     animation: screenFlicker 6s infinite;
     overflow: hidden;
-    max-height: 75vh;
+    height: 75vh;
     display: flex;
     flex-direction: column;
     word-break: break-word;

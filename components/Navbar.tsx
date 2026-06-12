@@ -99,7 +99,7 @@ export default function Navbar({
       });
 
       // Remove after all lines have appeared + breathing room
-      setTimeout(() => intro.remove(), 8000);
+      setTimeout(() => intro.remove(), 10000);
     }
   }, []);
 

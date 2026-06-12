@@ -651,7 +651,7 @@ a:not([class*="no-link-style"]) {
     justify-content: center;
     background: #030303;
     pointer-events: none;
-    animation: darkroomIntroFade 8s ease-in-out forwards;
+    animation: darkroomIntroFade 10s ease-in-out forwards;
 }
 
 .darkroom-intro-line {
@@ -673,8 +673,8 @@ a:not([class*="no-link-style"]) {
 
 @keyframes darkroomIntroFade {
     0% { opacity: 0; }
-    5% { opacity: 1; }
-    75% { opacity: 1; }
+    4% { opacity: 1; }
+    84% { opacity: 1; }
     100% { opacity: 0; visibility: hidden; }
 }
 

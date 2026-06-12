@@ -146,25 +146,31 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (!entry.isIntersecting) return;
+
+        // Disconnect immediately — prevent re-fires during smooth scroll
+        observer.disconnect();
+
+        if (
+          !hasSnappedRef.current &&
+          entry.boundingClientRect.top > 0
+        ) {
+          hasSnappedRef.current = true;
+          const header = document.querySelector('header');
+          const headerHeight = header?.getBoundingClientRect().height ?? 64;
+          const gap = 16;
+          const terminalTop =
+            terminal.getBoundingClientRect().top + window.scrollY;
+          const targetY = terminalTop - headerHeight - gap;
+          window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+
+          // Delay typing trigger until smooth scroll settles.
+          // Without this, the layout shift from new content appearing
+          // can interrupt the scroll animation and reset to top.
+          setTimeout(() => setHasEnteredViewport(true), 500);
+        } else {
+          // Already in position — start typing immediately
           setHasEnteredViewport(true);
-
-          // Snap terminal top just below navbar when crossing 40% viewport line
-          if (
-            !hasSnappedRef.current &&
-            entry.boundingClientRect.top > 0
-          ) {
-            hasSnappedRef.current = true;
-            const header = document.querySelector('header');
-            const headerHeight = header?.getBoundingClientRect().height ?? 64;
-            const gap = 16;
-            const terminalTop =
-              terminal.getBoundingClientRect().top + window.scrollY;
-            const targetY = terminalTop - headerHeight - gap;
-            window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
-          }
-
-          observer.disconnect();
         }
       },
       { rootMargin: '-40% 0px 0px 0px', threshold: 0 }

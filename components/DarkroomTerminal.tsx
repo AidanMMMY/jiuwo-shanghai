@@ -265,6 +265,18 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
     }
   };
 
+  // After mobile keyboard closes, re-anchor terminal into viewport
+  const handleInputBlur = () => {
+    if (typeof window === 'undefined' || !terminalRef.current) return;
+    setTimeout(() => {
+      const rect = terminalRef.current?.getBoundingClientRect();
+      if (!rect || rect.bottom < 0 || rect.top > window.innerHeight) {
+        // Terminal is entirely outside viewport — scroll it back
+        terminalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 350); // Wait for keyboard close animation
+  };
+
   return (
     <section className="px-4 md:px-12 pt-20 pb-4 bg-[#0a0a0a]">
       <div className="mx-auto max-w-4xl">
@@ -324,6 +336,7 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onBlur={handleInputBlur}
                 placeholder={isZh ? '输入指令...' : 'Enter command...'}
                 disabled={loading}
                 className="darkroom-input"

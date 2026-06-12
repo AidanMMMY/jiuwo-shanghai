@@ -136,10 +136,8 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const [hasEnteredViewport, setHasEnteredViewport] = useState(false);
-  const hasSnappedRef = useRef(false);
 
-  // Intersection Observer — start typing + snap-to-top when scrolled into view
-  // rootMargin: '-40% 0px 0px 0px' → fires when terminal top crosses 40% viewport line
+  // Intersection Observer — start typing when terminal enters viewport
   useEffect(() => {
     const terminal = terminalRef.current;
     if (!terminal) return;
@@ -147,33 +145,10 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
-
-        // Disconnect immediately — prevent re-fires during smooth scroll
         observer.disconnect();
-
-        if (
-          !hasSnappedRef.current &&
-          entry.boundingClientRect.top > 0
-        ) {
-          hasSnappedRef.current = true;
-          const header = document.querySelector('header');
-          const headerHeight = header?.getBoundingClientRect().height ?? 64;
-          const gap = 16;
-          const terminalTop =
-            terminal.getBoundingClientRect().top + window.scrollY;
-          const targetY = terminalTop - headerHeight - gap;
-          window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
-
-          // Delay typing trigger until smooth scroll settles.
-          // Without this, the layout shift from new content appearing
-          // can interrupt the scroll animation and reset to top.
-          setTimeout(() => setHasEnteredViewport(true), 500);
-        } else {
-          // Already in position — start typing immediately
-          setHasEnteredViewport(true);
-        }
+        setHasEnteredViewport(true);
       },
-      { rootMargin: '-40% 0px 0px 0px', threshold: 0 }
+      { threshold: 0 }
     );
     observer.observe(terminal);
     return () => observer.disconnect();

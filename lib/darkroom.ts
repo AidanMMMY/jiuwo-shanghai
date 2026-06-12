@@ -13,6 +13,7 @@ export interface DarkroomEntry {
 
 export interface DarkroomData {
   initialEntries: DarkroomEntry[];
+  knowledgeBase: string;
   systemPrompt: string;
   fallbackResponses: Record<string, string>;
 }

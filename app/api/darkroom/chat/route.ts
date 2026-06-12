@@ -44,8 +44,12 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    const fullSystemPrompt = data.knowledgeBase
+      ? `${data.knowledgeBase}\n\n${SYSTEM_PROMPT}`
+      : SYSTEM_PROMPT;
+
     const messages = [
-      { role: "system" as const, content: SYSTEM_PROMPT },
+      { role: "system" as const, content: fullSystemPrompt },
       ...history.slice(-6).map((h: { role: string; content: string }) => ({
         role: h.role as "user" | "assistant",
         content: h.content,

@@ -86,37 +86,20 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const [hasEnteredViewport, setHasEnteredViewport] = useState(false);
-  const hasSnappedRef = useRef(false);
 
   // Intersection Observer — start typing only when scrolled into view
   useEffect(() => {
-    const terminal = terminalRef.current;
-    if (!terminal) return;
+    if (!terminalRef.current) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setHasEnteredViewport(true);
-
-          // Mobile: snap terminal top just below the navbar when entering from below
-          if (
-            !hasSnappedRef.current &&
-            window.innerWidth < 768 &&
-            entry.boundingClientRect.top > 0
-          ) {
-            hasSnappedRef.current = true;
-            const header = document.querySelector('header');
-            const headerHeight = header?.getBoundingClientRect().height ?? 64;
-            const gap = 16; // matches px-4 horizontal padding
-            const terminalTop =
-              terminal.getBoundingClientRect().top + window.scrollY;
-            const targetY = terminalTop - headerHeight - gap;
-            window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
-          }
+          observer.disconnect();
         }
       },
       { threshold: 0.15 }
     );
-    observer.observe(terminal);
+    observer.observe(terminalRef.current);
     return () => observer.disconnect();
   }, []);
 
@@ -137,28 +120,8 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
     }
   }, [entries, currentTypingId]);
 
-  // Re-anchor terminal after mobile keyboard closes so it stays in view
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.visualViewport) return;
-
-    const vv = window.visualViewport;
-    let lastHeight = vv.height;
-
-    const handleResize = () => {
-      const currentHeight = vv.height;
-      const isKeyboardOpen = currentHeight < window.innerHeight * 0.85;
-
-      if (!isKeyboardOpen && currentHeight > lastHeight) {
-        // Keyboard just closed — scroll terminal back into view
-        terminalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      }
-
-      lastHeight = currentHeight;
-    };
-
-    vv.addEventListener('resize', handleResize);
-    return () => vv.removeEventListener('resize', handleResize);
-  }, []);
+  // Note: removed visualViewport auto-scroll — iOS toolbar show/hide during
+  // normal scrolling also fires resize events, causing false-positive triggers.
 
   // Called when an entry finishes typing
   const handleTypingDone = useCallback((entryId: string) => {

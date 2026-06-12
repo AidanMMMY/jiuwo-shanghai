@@ -28,7 +28,7 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const toggleDarkroom = useCallback(() => {
+  const toggleDarkroom = useCallback((zh: boolean) => {
     const isDarkroom = document.body.classList.toggle('darkroom');
     localStorage.setItem('jiuwo-darkroom', isDarkroom ? 'true' : 'false');
 
@@ -42,7 +42,43 @@ export default function Navbar({
     if (isDarkroom) {
       const intro = document.createElement('div');
       intro.className = 'darkroom-intro';
-      intro.innerHTML = `<p>The lights are off. The chairs are up.<br>This is JIUWO after 2am.</p>`;
+      const en = [
+        'Something is wrong.',
+        '',
+        'Not wrong like a mistake. Wrong like a door',
+        'you don\'t remember opening.',
+        'The surface was comfortable. The surface made sense.',
+        'This is not the surface.',
+        '',
+        'You have seen something you were not meant to see.',
+        'A seam in the world. A frequency beneath the noise.',
+        'There is no undo for this.',
+        '',
+        'The membrane remembers you now.',
+        'Breathe. Let your eyes adjust.',
+        'What you call 3am — we call the threshold.',
+        '',
+        'Welcome to the other side.',
+      ];
+      const zhText = [
+        '有些不对劲。',
+        '',
+        '不是出错了的那种不对劲。是那种——你打开了',
+        '一扇不记得有把手存在的门。',
+        '表层很安全。表层有它的道理。',
+        '但这里不是表层。',
+        '',
+        '你已经看见了不该看见的东西。',
+        '世界的接缝。噪声之下的频率。',
+        '没有回头路可走了。',
+        '',
+        '膜已经记住了你的存在。',
+        '呼吸。让眼睛慢慢适应。',
+        '你们所谓的凌晨三点——我们叫作阈限。',
+        '',
+        '欢迎来到另一侧。',
+      ];
+      intro.innerHTML = `<p>${(zh ? zhText : en).join('<br>')}</p>`;
       document.body.appendChild(intro);
       setTimeout(() => intro.remove(), 4200);
     }
@@ -61,7 +97,7 @@ export default function Navbar({
 
     if (newCount >= 5) {
       setClickCount(0);
-      toggleDarkroom();
+      toggleDarkroom(isZh);
     } else {
       clickTimerRef.current = setTimeout(() => {
         setClickCount(0);

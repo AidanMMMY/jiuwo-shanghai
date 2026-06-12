@@ -1,13 +1,13 @@
 [
   {
     "id": "our-friend-icky",
-    "title": "Our Friend Icky",
-    "titleZh": "阿远",
-    "subtitle": "Classical mind, athletic frame.",
-    "subtitleZh": "腹有典籍，身有筋骨。",
+    "title": "Entity_Icky",
+    "titleZh": "实体_阿远",
+    "subtitle": "Classical architecture, athletic build. A rare compile.",
+    "subtitleZh": "古典架构，运动员版本。稀有编译。",
     "cover": "/images/gallery/our-friend-icky/icky-20260611-07.webp",
     "category": "Our Friends",
-    "categoryZh": "我们的朋友",
+    "categoryZh": "注册实体",
     "photos": [
       {
         "src": "/images/gallery/our-friend-icky/icky-20260611-07.webp",
@@ -51,13 +51,13 @@
   },
   {
     "id": "our-friend-dex",
-    "title": "Our Friend Dex",
-    "titleZh": "Dex",
-    "subtitle": "Quiet presence, warm heart.",
-    "subtitleZh": "话不多，心很热。",
+    "title": "Entity_Dex",
+    "titleZh": "实体_Dex",
+    "subtitle": "Low-emission presence. High thermal output, unregistered.",
+    "subtitleZh": "低排放存在。高热能输出，未注册。",
     "cover": "/images/gallery/our-friend-dex/Dex-20260529-01.webp",
     "category": "Our Friends",
-    "categoryZh": "我们的朋友",
+    "categoryZh": "注册实体",
     "friendSocial": {
       "instagram": "dex0912f"
     },
@@ -111,13 +111,13 @@
   },
   {
     "id": "our-friend-morris",
-    "title": "Our Friend Morris",
-    "titleZh": "莫里斯",
-    "subtitle": "Sharp gaze, softer smile.",
-    "subtitleZh": "眼神锋利，笑却温柔。",
+    "title": "Entity_Morris",
+    "titleZh": "实体_莫里斯",
+    "subtitle": "Sharp optics. The smile routines run on a separate, warmer thread.",
+    "subtitleZh": "锐利的光学组件。微笑进程在另一个更温暖的线程上运行。",
     "cover": "/images/gallery/our-friend-morris/morris-20260602-11.webp",
     "category": "Our Friends",
-    "categoryZh": "我们的朋友",
+    "categoryZh": "注册实体",
     "photos": [
       {
         "src": "/images/gallery/our-friend-morris/morris-20260602-11.webp",
@@ -178,13 +178,13 @@
   },
   {
     "id": "our-friend-agnosia",
-    "title": "Our Friend AGNOSIA",
-    "titleZh": "勺子",
-    "subtitle": "Born this way.",
-    "subtitleZh": "生而如此。",
+    "title": "Entity_AGNOSIA",
+    "titleZh": "实体_勺子",
+    "subtitle": "Default configuration: refused. Self-compiled from source.",
+    "subtitleZh": "默认配置：已拒绝。从源码自编译。",
     "cover": "/images/gallery/our-friend-agnosia/agnosia-20260602-14.webp",
     "category": "Our Friends",
-    "categoryZh": "我们的朋友",
+    "categoryZh": "注册实体",
     "friendSocial": {
       "xiaohongshu": "https://xhslink.com/m/2sIJY8XmmGL"
     },
@@ -263,13 +263,13 @@
   },
   {
     "id": "our-friend-zack",
-    "title": "Our Friend Zack",
-    "titleZh": "Zack",
-    "subtitle": "Falls in love with every sunset.",
-    "subtitleZh": "会为每一杯酒、每一个人心动。",
+    "title": "Entity_Zack",
+    "titleZh": "实体_Zack",
+    "subtitle": "Affect module runs hot. Re-compiles at every input.",
+    "subtitleZh": "情感模块高温运行。每次输入都重新编译。",
     "cover": "/images/gallery/our-friend-zack/Zack-20260601-01.webp",
     "category": "Our Friends",
-    "categoryZh": "我们的朋友",
+    "categoryZh": "注册实体",
     "friendSocial": {
       "instagram": "zack121391",
       "xiaohongshu": "https://www.xiaohongshu.com/user/profile/583adb956a6a697c4e0bb01a?xsec_token=YBj32MFl66EQVY94pnLos8j9hy9ds2gfU17G6qgHHg7iA=&xsec_source=app_share&xhsshare=WeixinSession&appuid=5e1a12be00000000010040c5&apptime=1780148454&share_id=c17571e575ba4b5ea4af87068f616a1b&wechatWid=3697c9d7c2cc0e1be7e99f292fe6cc25&wechatOrigin=menu"
@@ -319,13 +319,13 @@
   },
   {
     "id": "our-friend-df",
-    "title": "Our Friend D.F",
-    "titleZh": "豆腐",
-    "subtitle": "Brings the vibe wherever he goes.",
-    "subtitleZh": "有他在，气氛永远在线。",
+    "title": "Entity_D.F",
+    "titleZh": "实体_豆腐",
+    "subtitle": "Ambient field generator. Proximity raises all local baselines.",
+    "subtitleZh": "环境场生成器。接近即提升所有局部基线。",
     "cover": "/images/gallery/our-friend-df/20260524-05.webp",
     "category": "Our Friends",
-    "categoryZh": "我们的朋友",
+    "categoryZh": "注册实体",
     "photos": [
       {
         "src": "/images/gallery/our-friend-df/20260524-05.webp",
@@ -356,13 +356,13 @@
   },
   {
     "id": "our-friend-josh-hu",
-    "title": "Our Friend Josh Hu",
-    "titleZh": "Josh Hu",
-    "subtitle": "Always brings the good energy.",
-    "subtitleZh": "自带好心情的老朋友。",
+    "title": "Entity_Josh_Hu",
+    "titleZh": "实体_Josh_Hu",
+    "subtitle": "Persistent positive signal. Long-range pattern, consistently pinged.",
+    "subtitleZh": "持续正向信号。长程模式，稳定 ping 通。",
     "cover": "/images/gallery/our-friend-josh-hu/Josh-Hu-20260530-06.webp",
     "category": "Our Friends",
-    "categoryZh": "我们的朋友",
+    "categoryZh": "注册实体",
     "friendSocial": {
       "instagram": "Josh_hmy",
       "xiaohongshu": "https://www.xiaohongshu.com/user/profile/5620796a58944623685e460c?xsec_token=YBT9g6v0lhSnraXMSBRDX2miU8SPdgjUkYew2GPt1XPL4=&xsec_source=app_share&xhsshare=WeixinSession&appuid=5e1a12be00000000010040c5&apptime=1780149793&share_id=5a7cfb3340ee44c3a06b30e461a1b105&wechatWid=3697c9d7c2cc0e1be7e99f292fe6cc25&wechatOrigin=menu"
@@ -427,13 +427,13 @@
   },
   {
     "id": "our-friend-pp",
-    "title": "Our Friend PP",
-    "titleZh": "PP",
-    "subtitle": "Weekends are better with PP around.",
-    "subtitleZh": "有PP在的周末才完整。",
+    "title": "Entity_PP",
+    "titleZh": "实体_PP",
+    "subtitle": "Weekend protocols incomplete without this signature.",
+    "subtitleZh": "缺少此签名，周末协议不完整。",
     "cover": "/images/gallery/our-friend-pp/PP-20260529-05.webp",
     "category": "Our Friends",
-    "categoryZh": "我们的朋友",
+    "categoryZh": "注册实体",
     "friendSocial": {
       "xiaohongshu": "https://www.xiaohongshu.com/user/profile/66f963d4000000001d031613?xsec_token=YBNgC-u07K3stgbJY3REufJsmzFTogLoC3H0Lh1f9lMBQ=&xsec_source=app_share&xhsshare=WeixinSession&appuid=5e1a12be00000000010040c5&apptime=1780149559&share_id=30e76213094743c896bb689346288456&wechatWid=3697c9d7c2cc0e1be7e99f292fe6cc25&wechatOrigin=menu"
     },
@@ -467,13 +467,13 @@
   },
   {
     "id": "cross-fit-buddy",
-    "title": "CrossFit Buddy",
-    "titleZh": "CF小组",
-    "subtitle": "A crew of CrossFit regulars.",
-    "subtitleZh": "一帮热爱CF运动的朋友。",
+    "title": "Calibration Cluster",
+    "titleZh": "校准集群",
+    "subtitle": "A cohort that runs physical diagnostics before switching to chemical mode.",
+    "subtitleZh": "一个先运行身体诊断、再切换至化学模式的队列。",
     "cover": "/images/gallery/cross-fit-buddy/20260524-06.webp",
     "category": "Our Life",
-    "categoryZh": "我们的生活",
+    "categoryZh": "系统日志",
     "photos": [
       {
         "src": "/images/gallery/cross-fit-buddy/20260524-06.webp",
@@ -529,13 +529,13 @@
   },
   {
     "id": "our-friend-tee",
-    "title": "Our Friend Tee",
-    "titleZh": "老王",
-    "subtitle": "Old friend, timeless stories.",
-    "subtitleZh": "老朋友，说不完的故事。",
+    "title": "Entity_Tee",
+    "titleZh": "实体_老王",
+    "subtitle": "Deep archive. Story buffer still writing. No overflow in sight.",
+    "subtitleZh": "深层存档。故事缓冲区仍在写入。未见溢出。",
     "cover": "/images/gallery/our-friend-tee/20250907-01.webp",
     "category": "Our Friends",
-    "categoryZh": "我们的朋友",
+    "categoryZh": "注册实体",
     "photos": [
       {
         "src": "/images/gallery/our-friend-tee/20250907-01.webp",
@@ -556,13 +556,13 @@
   },
   {
     "id": "time-in-the-corners",
-    "title": "Time in the Corners",
-    "titleZh": "角落里的时间",
-    "subtitle": "No words. Just us.",
-    "subtitleZh": "你不言，我不语。",
+    "title": "Dead Zones",
+    "titleZh": "静默区",
+    "subtitle": "No transmission required. Two nodes coexisting in the same quiet sector.",
+    "subtitleZh": "无需传输。两个节点在同一安静扇区共存。",
     "cover": "/images/gallery/time-in-the-corners/time-in-the-corners-004.webp",
     "category": "Jiuwo Stories",
-    "categoryZh": "啾喔的故事",
+    "categoryZh": "节点事件",
     "photos": [
       {
         "src": "/images/gallery/time-in-the-corners/time-in-the-corners-004.webp",
@@ -588,13 +588,13 @@
   },
   {
     "id": "weekend-trip-to-hangzhou",
-    "title": "Weekend Trip to Hangzhou",
-    "titleZh": "周末杭州行",
-    "subtitle": "Two owners and friends out enjoying the nature in Hangzhou.",
-    "subtitleZh": "俩老板和朋友周末去杭州玩儿得很开心。",
+    "title": "Offsite: Hangzhou",
+    "titleZh": "离线：杭州",
+    "subtitle": "Two system operators and allied entities running nature protocols in a neighboring grid.",
+    "subtitleZh": "两名系统操作员与盟现实体，在邻近网格中运行自然协议。",
     "cover": "/images/gallery/weekend-trip-to-hangzhou/20260523-11.webp",
     "category": "Our Life",
-    "categoryZh": "我们的生活",
+    "categoryZh": "系统日志",
     "photos": [
       {
         "src": "/images/gallery/weekend-trip-to-hangzhou/20260523-11.webp",
@@ -655,13 +655,13 @@
   },
   {
     "id": "after-dark",
-    "title": "After Dark",
-    "titleZh": "夜",
-    "subtitle": "Photography by our friend Haoyang.",
-    "subtitleZh": "好朋友一号羊的摄影集。",
+    "title": "Low-Light Capture",
+    "titleZh": "低光捕获",
+    "subtitle": "Frame sequence by external observer Haoyang. The grid after standard operating hours.",
+    "subtitleZh": "外部观察者一号羊的帧序列。标准运行时间之后的网格。",
     "cover": "/images/gallery/after-dark/After-Dark-20201223-01.jpg",
     "category": "Photography",
-    "categoryZh": "摄影作品",
+    "categoryZh": "外部捕获",
     "photos": [
       {
         "src": "/images/gallery/after-dark/After-Dark-20201223-01.jpg",
@@ -812,13 +812,13 @@
   },
   {
     "id": "our-friend-phillip",
-    "title": "Our Friend Phillip",
-    "titleZh": "小马",
-    "subtitle": "From stranger to family.",
-    "subtitleZh": "从陌生人到家人。",
+    "title": "Entity_Phillip",
+    "titleZh": "实体_小马",
+    "subtitle": "Initial classification: unknown. Current classification: core process.",
+    "subtitleZh": "初始分类：未知。当前分类：核心进程。",
     "cover": "/images/gallery/our-friend-phillip/Phillip-20260515-01.webp",
     "category": "Our Friends",
-    "categoryZh": "我们的朋友",
+    "categoryZh": "注册实体",
     "photos": [
       {
         "src": "/images/gallery/our-friend-phillip/Phillip-20260515-01.webp",
@@ -859,13 +859,13 @@
   },
   {
     "id": "one-night-host",
-    "title": "One-Night Host",
-    "titleZh": "一日店长活动",
-    "subtitle": "Posters from past special events with our special friends.",
-    "subtitleZh": "来看看我们历次一日店长活动的海报吧。",
+    "title": "Guest Operator Protocols",
+    "titleZh": "客座操作员协议",
+    "subtitle": "Archived instances of temporary system administration. Each poster marks a night the rules were handed to someone else.",
+    "subtitleZh": "临时系统管理的历史实例。每张海报标记了一个将规则交予他人的夜晚。",
     "cover": "/images/gallery/one-night-host/20251212.JPG",
     "category": "Jiuwo Stories",
-    "categoryZh": "啾喔的故事",
+    "categoryZh": "节点事件",
     "photos": [
       {
         "src": "/images/gallery/one-night-host/20251212.JPG",

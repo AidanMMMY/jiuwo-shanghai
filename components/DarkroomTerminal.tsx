@@ -63,20 +63,70 @@ function useTypewriter(text: string, speed = TYPE_SPEED, onDone?: () => void) {
 export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   const data = getDarkroomData(isZh);
 
-  // Always start fresh — every visit is a "first" visit
-  const [entries, setEntries] = useState<DisplayEntry[]>(
-    data.initialEntries.map((e: DarkroomEntry, i: number) => ({
+  // Static fallback entries — used while generating or on error
+  const staticEntries: DisplayEntry[] = data.initialEntries.map(
+    (e: DarkroomEntry, i: number) => ({
       ...e,
       id: `init-${i}`,
       type: e.type as 'log' | 'broadcast',
       isTyping: true,
-    }))
+    })
   );
+  const staticQueue = staticEntries.map((_, i) => `init-${i}`);
 
-  // Queue of entry IDs waiting to be typed out, one at a time
-  const [typingQueue, setTypingQueue] = useState<string[]>(
-    data.initialEntries.map((_, i) => `init-${i}`)
-  );
+  const [entries, setEntries] = useState<DisplayEntry[]>(staticEntries);
+  const [typingQueue, setTypingQueue] = useState<string[]>(staticQueue);
+  const [initPhase, setInitPhase] = useState<'loading' | 'ready'>('loading');
+
+  // Fetch dynamically generated initial entries (Matrix/Black Mirror style)
+  useEffect(() => {
+    let cancelled = false;
+    const safetyTimer = setTimeout(() => {
+      if (!cancelled) setInitPhase('ready'); // fallback to static after 5s
+    }, 5000);
+
+    async function load() {
+      try {
+        const res = await fetch('/api/darkroom/init', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isZh }),
+        });
+        const json = await res.json();
+        if (!cancelled && json.entries?.length) {
+          const generated: DisplayEntry[] = json.entries.map(
+            (e: Record<string, unknown>, i: number) => ({
+              id: `gen-${i}`,
+              timestamp: (e.timestamp as string) || '02:33:08',
+              location: (e.location as string) || (isZh ? '系统' : 'SYSTEM'),
+              action: (e.action as string) || '',
+              message: (e.message as string) || '',
+              tags: Array.isArray(e.tags)
+                ? (e.tags as string[]).filter((t: unknown) => typeof t === 'string')
+                : undefined,
+              type: (e.type === 'broadcast' ? 'broadcast' : 'log') as 'log' | 'broadcast',
+              isTyping: true,
+            })
+          );
+          setEntries(generated);
+          setTypingQueue(generated.map((_, i) => `gen-${i}`));
+        }
+      } catch {
+        // Keep static entries
+      } finally {
+        if (!cancelled) {
+          clearTimeout(safetyTimer);
+          setInitPhase('ready');
+        }
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+      clearTimeout(safetyTimer);
+    };
+  }, [isZh]);
 
   const [currentTypingId, setCurrentTypingId] = useState<string | null>(null);
   const [input, setInput] = useState('');
@@ -123,15 +173,15 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
     return () => observer.disconnect();
   }, []);
 
-  // Pull next item from queue when idle (only after entering viewport)
+  // Pull next item from queue when idle (only after entering viewport + entries ready)
   useEffect(() => {
-    if (!hasEnteredViewport) return;
+    if (!hasEnteredViewport || initPhase !== 'ready') return;
     if (currentTypingId === null && typingQueue.length > 0) {
       const [next, ...rest] = typingQueue;
       setCurrentTypingId(next);
       setTypingQueue(rest);
     }
-  }, [hasEnteredViewport, currentTypingId, typingQueue]);
+  }, [hasEnteredViewport, initPhase, currentTypingId, typingQueue]);
 
   // Auto-scroll to bottom when new content arrives
   useEffect(() => {
@@ -229,6 +279,15 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
             </div>
 
             <div className="darkroom-terminal-entries">
+              {hasEnteredViewport && initPhase === 'loading' && (
+                <div className="darkroom-log-entry">
+                  <pre className="darkroom-log-typing">
+                    {isZh
+                      ? `[${getNowTime()}] · 系统\n> 正在初始化诊断界面……\n_`
+                      : `[${getNowTime()}] · SYSTEM\n> Initializing diagnostic interface...\n_`}
+                  </pre>
+                </div>
+              )}
               {entries.map((entry) => {
                 const inQueue = typingQueue.includes(entry.id);
                 const isCurrent = entry.id === currentTypingId;

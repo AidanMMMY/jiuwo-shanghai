@@ -38,10 +38,12 @@ export default function Navbar({
     document.body.appendChild(flash);
     setTimeout(() => flash.remove(), 400);
 
-    // Intro text (only when entering darkroom)
+    // Intro text — line by line (only when entering darkroom)
     if (isDarkroom) {
       const intro = document.createElement('div');
       intro.className = 'darkroom-intro';
+      document.body.appendChild(intro);
+
       const en = [
         'Something is wrong.',
         '',
@@ -78,9 +80,26 @@ export default function Navbar({
         '',
         '欢迎来到另一侧。',
       ];
-      intro.innerHTML = `<p>${(zh ? zhText : en).join('<br>')}</p>`;
-      document.body.appendChild(intro);
-      setTimeout(() => intro.remove(), 4200);
+      const lines = zh ? zhText : en;
+      const LINE_DELAY = 150; // ms between each line
+
+      lines.forEach((line, i) => {
+        setTimeout(() => {
+          if (line === '') {
+            const spacer = document.createElement('div');
+            spacer.style.height = '0.45em';
+            intro.appendChild(spacer);
+          } else {
+            const p = document.createElement('p');
+            p.textContent = line;
+            p.className = 'darkroom-intro-line';
+            intro.appendChild(p);
+          }
+        }, i * LINE_DELAY);
+      });
+
+      // Remove after all lines have appeared + breathing room
+      setTimeout(() => intro.remove(), 5500);
     }
   }, []);
 

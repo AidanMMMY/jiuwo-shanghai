@@ -81,7 +81,7 @@ export default function Navbar({
         '欢迎来到另一侧。',
       ];
       const lines = zh ? zhText : en;
-      const LINE_DELAY = 150; // ms between each line
+      const LINE_DELAY = 350; // ms between each line
 
       lines.forEach((line, i) => {
         setTimeout(() => {
@@ -99,7 +99,7 @@ export default function Navbar({
       });
 
       // Remove after all lines have appeared + breathing room
-      setTimeout(() => intro.remove(), 5500);
+      setTimeout(() => intro.remove(), 8000);
     }
   }, []);
 

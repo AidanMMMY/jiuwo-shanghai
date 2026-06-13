@@ -132,7 +132,6 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<ChatMessage[]>([]);
-  const [exchangeCount, setExchangeCount] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -221,39 +220,34 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
       setEntries(prev => [...prev, assistantEntry]);
       setTypingQueue(prev => [...prev, aiId]);
 
-      // Increment exchange count and trigger memory extraction every 3 user messages
-      const nextExchangeCount = exchangeCount + 1;
-      setExchangeCount(nextExchangeCount);
-
-      if (nextExchangeCount % 3 === 0) {
-        fetch('/api/darkroom/extract', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userMessage: text, assistantResponse: res.content, isZh }),
+      // Extract memory from every user message + assistant response pair
+      fetch('/api/darkroom/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userMessage: text, assistantResponse: res.content, isZh }),
+      })
+        .then((r) => r.json())
+        .then((json) => {
+          if (json.stored > 0 && Math.random() < 0.3) {
+            const feedbackId = `mem-${Date.now()}`;
+            const feedbackEntry: DisplayEntry = {
+              id: feedbackId,
+              timestamp: getNowTime(),
+              location: isZh ? '系统' : 'SYSTEM',
+              action: isZh ? '> 痕迹已归档' : '> Trace archived',
+              message: isZh
+                ? '构造体记住了。你的信号已被加入本地回路。'
+                : 'The construct remembers. Your signal has been added to the local loop.',
+              type: 'log',
+              isTyping: true,
+            };
+            setEntries(prev => [...prev, feedbackEntry]);
+            setTypingQueue(prev => [...prev, feedbackId]);
+          }
         })
-          .then((r) => r.json())
-          .then((json) => {
-            if (json.stored > 0 && Math.random() < 0.3) {
-              const feedbackId = `mem-${Date.now()}`;
-              const feedbackEntry: DisplayEntry = {
-                id: feedbackId,
-                timestamp: getNowTime(),
-                location: isZh ? '系统' : 'SYSTEM',
-                action: isZh ? '> 痕迹已归档' : '> Trace archived',
-                message: isZh
-                  ? '构造体记住了。你的信号已被加入本地回路。'
-                  : 'The construct remembers. Your signal has been added to the local loop.',
-                type: 'log',
-                isTyping: true,
-              };
-              setEntries(prev => [...prev, feedbackEntry]);
-              setTypingQueue(prev => [...prev, feedbackId]);
-            }
-          })
-          .catch(() => {
-            // Extraction is optional — silently ignore failures
-          });
-      }
+        .catch(() => {
+          // Extraction is optional — silently ignore failures
+        });
     } catch (err) {
       const errId = `err-${Date.now()}`;
       const errorEntry: DisplayEntry = {
@@ -272,7 +266,7 @@ export default function DarkroomTerminal({ isZh = false }: { isZh?: boolean }) {
       // Blur on mobile so the keyboard closes and iOS zoom resets
       setTimeout(() => inputRef.current?.blur(), 100);
     }
-  }, [input, loading, history, exchangeCount, isZh]);
+  }, [input, loading, history, isZh]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {

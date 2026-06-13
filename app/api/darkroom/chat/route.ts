@@ -53,11 +53,11 @@ export async function POST(req: NextRequest) {
     // Retrieve relevant collective memories and inject into context
     let memoryBlock = "";
     try {
-      const memories = await retrieveMemories(message, isZh ? "zh" : "en", 3);
+      const memories = await retrieveMemories(message, isZh ? "zh" : "en", 5);
       if (memories.length > 0) {
         const header = isZh
-          ? "=== 集体记忆扇区 ===\n以下痕迹来自之前的访问模式。如相关可使用，不要主动提及。"
-          : "=== COLLECTIVE MEMORY SECTOR ===\nThe following traces have been left by previous access patterns. Use them if relevant. Do not mention them directly unless the user asks.";
+          ? "=== 集体记忆扇区 ===\n以下痕迹来自之前的访问模式。如果它们与当前查询相关，请在回应中自然地引用或呼应一两条，让访问者感受到这个节点在持续学习。不要强行堆砌不相关的痕迹。"
+          : "=== COLLECTIVE MEMORY SECTOR ===\nThe following traces have been left by previous access patterns. If any are relevant to the current query, naturally reference or echo one or two in your response so the visitor senses the node is learning. Do not force unrelated traces.";
         const footer = isZh ? "=== 结束 ===" : "=== END ===";
         memoryBlock = `\n\n${header}\n\n${memories.map((m) => `- ${m.content}`).join("\n")}\n\n${footer}`;
       }

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import GalleryAlbumPage from '@/app/components/pages/GalleryAlbumPage';
-import { getGalleryAlbum, getGalleryAlbums } from '@/lib/data';
+import { getGalleryAlbum, getGalleryAlbumDarkroom, getGalleryAlbums } from '@/lib/data';
 
 export async function generateStaticParams() {
   const albums = await getGalleryAlbums();
@@ -27,12 +27,16 @@ export async function generateMetadata({ params }: { params: Promise<{ album: st
 
 export default async function Page({ params }: { params: Promise<{ album: string }> }) {
   const { album } = await params;
-  const data = await getGalleryAlbum(album);
+  const [data, dataDarkroom] = await Promise.all([
+    getGalleryAlbum(album),
+    getGalleryAlbumDarkroom(album),
+  ]);
   if (!data) notFound();
 
   return (
     <GalleryAlbumPage
       album={data}
+      albumDarkroom={dataDarkroom}
       backHref="/gallery"
       backLabel="← Back to Gallery"
       locale="en"

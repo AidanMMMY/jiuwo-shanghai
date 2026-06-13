@@ -43,6 +43,7 @@ function LikeButton({
 
 export default function JournalEntryWithLikes({
   entry,
+  darkroomEntry,
 }: {
   entry: {
     slug: string;
@@ -50,6 +51,11 @@ export default function JournalEntryWithLikes({
     title: string;
     cover: string;
     coverAspect?: 'wide' | 'square' | 'tall';
+    contentHtml: string;
+  };
+  darkroomEntry?: {
+    slug: string;
+    title: string;
     contentHtml: string;
   };
 }) {
@@ -158,7 +164,12 @@ export default function JournalEntryWithLikes({
         <time className="text-xs uppercase tracking-[0.2em] text-[#a0a0a0]">{entry.date}</time>
       </div>
 
-      <h3 className="text-2xl font-medium text-[#a0a0a0] mb-6 tracking-wide leading-snug">{entry.title}</h3>
+      <h3 className="text-2xl font-medium text-[#a0a0a0] mb-6 tracking-wide leading-snug">
+        <span className="normal-content">{entry.title}</span>
+        {darkroomEntry && (
+          <span className="darkroom-content hidden">{darkroomEntry.title}</span>
+        )}
+      </h3>
 
       {/* Cover image with hover zoom */}
       <div className="flex justify-center mb-8">
@@ -192,8 +203,12 @@ export default function JournalEntryWithLikes({
 
       <div
         className="prose prose-invert prose-stone max-w-none prose-headings:text-[#f5f5f0] prose-p:text-[#a0a0a0] prose-a:text-[#c9a227] [&_img]:block [&_img]:mx-auto [&_img]:my-6 [&_img]:max-w-full [&_img]:max-h-[66vh] [&_img]:h-auto [&_img]:rounded-lg"
-        dangerouslySetInnerHTML={{ __html: entry.contentHtml }}
-      />
+      >
+        <div className="normal-content" dangerouslySetInnerHTML={{ __html: entry.contentHtml }} />
+        {darkroomEntry && (
+          <div className="darkroom-content hidden" dangerouslySetInnerHTML={{ __html: darkroomEntry.contentHtml }} />
+        )}
+      </div>
 
       {/* Fading divider */}
       <div className="mt-14 h-px bg-gradient-to-r from-transparent via-[#222] to-transparent" />

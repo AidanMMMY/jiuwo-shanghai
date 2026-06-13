@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import AboutPage from '@/app/components/pages/AboutPage';
-import { getAboutDataZh } from '@/lib/data';
+import { getAboutDataZh, getAboutDataZhDarkroom } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: '关于我们',
@@ -57,7 +57,10 @@ function generateJsonLd(about: {
 }
 
 export default async function Page() {
-  const about = await getAboutDataZh();
+  const [about, aboutDarkroom] = await Promise.all([
+    getAboutDataZh(),
+    getAboutDataZhDarkroom(),
+  ]);
   const jsonLd = generateJsonLd(about);
 
   return (
@@ -68,6 +71,7 @@ export default async function Page() {
       />
       <AboutPage
         about={about}
+        aboutDarkroom={aboutDarkroom}
         labels={{
           title: '我们',
           subtitle: 'JIUWO · 2022年 · 上海',

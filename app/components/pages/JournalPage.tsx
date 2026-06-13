@@ -6,14 +6,19 @@ import type { JournalEntry } from '@/lib/data';
 
 export default async function JournalPage({
   entry,
+  entryDarkroom,
   backLabel,
   backHref = '/',
 }: {
   entry: JournalEntry;
+  entryDarkroom?: JournalEntry;
   backLabel?: string;
   backHref?: string;
 }) {
   const contentHtml = await markdownToHtml(entry.content);
+  const contentHtmlDarkroom = entryDarkroom
+    ? await markdownToHtml(entryDarkroom.content)
+    : contentHtml;
 
   return (
     <article className="pt-24 pb-20 px-4 md:px-12 bg-[#0a0a0a] min-h-[100lvh]">
@@ -23,7 +28,12 @@ export default async function JournalPage({
         </Link>
         <header className="mt-8 mb-10">
           <time className="text-sm text-[#a0a0a0]">{entry.date}</time>
-          <h1 className="text-3xl md:text-4xl font-medium text-[#f5f5f0] mt-2 tracking-wide">{entry.title}</h1>
+          <h1 className="text-3xl md:text-4xl font-medium text-[#f5f5f0] mt-2 tracking-wide">
+            <span className="normal-content">{entry.title}</span>
+            {entryDarkroom && (
+              <span className="darkroom-content hidden">{entryDarkroom.title}</span>
+            )}
+          </h1>
           <div className="mt-3">
             <LikeButton targetType="journal" targetId={entry.slug} />
           </div>
@@ -31,10 +41,12 @@ export default async function JournalPage({
         <div className="relative aspect-[16/9] w-full mb-10 rounded-lg overflow-hidden">
           <Image src={entry.cover} alt={entry.title} fill className="object-cover" />
         </div>
-        <div
-          className="prose prose-invert prose-stone max-w-none prose-headings:text-[#f5f5f0] prose-p:text-[#a0a0a0] prose-a:text-[#c9a227]"
-          dangerouslySetInnerHTML={{ __html: contentHtml }}
-        />
+        <div className="prose prose-invert prose-stone max-w-none prose-headings:text-[#f5f5f0] prose-p:text-[#a0a0a0] prose-a:text-[#c9a227]">
+          <div className="normal-content" dangerouslySetInnerHTML={{ __html: contentHtml }} />
+          {entryDarkroom && (
+            <div className="darkroom-content hidden" dangerouslySetInnerHTML={{ __html: contentHtmlDarkroom }} />
+          )}
+        </div>
       </div>
     </article>
   );

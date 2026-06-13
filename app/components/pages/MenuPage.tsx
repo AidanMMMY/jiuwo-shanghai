@@ -6,10 +6,12 @@ export default function MenuPage({
   categories,
   title,
   subtitle,
+  subtitleDarkroom,
 }: {
   categories: MenuCategory[];
   title?: string;
   subtitle?: string;
+  subtitleDarkroom?: string;
 }) {
   return (
     <div className="pt-24 pb-20 bg-[#0a0a0a] min-h-[100lvh]">
@@ -22,7 +24,10 @@ export default function MenuPage({
           <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#333] to-[#333]" />
         </div>
         <p className="text-sm text-[#a0a0a0] mb-8 whitespace-pre-line text-center">
-          {subtitle ?? 'Click a category below to jump'}
+          <span className="normal-content">{subtitle ?? 'Click a category below to jump'}</span>
+          {subtitleDarkroom && (
+            <span className="darkroom-content hidden">{subtitleDarkroom}</span>
+          )}
         </p>
       </div>
       <MenuNav categories={categories} />

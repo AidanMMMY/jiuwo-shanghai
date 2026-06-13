@@ -5,11 +5,13 @@ import type { GalleryAlbum } from '@/lib/data';
 
 export default function GalleryAlbumPage({
   album,
+  albumDarkroom,
   backHref,
   backLabel,
   locale = 'en',
 }: {
   album: GalleryAlbum;
+  albumDarkroom?: GalleryAlbum;
   backHref?: string;
   backLabel?: string;
   locale?: 'en' | 'zh';
@@ -26,9 +28,19 @@ export default function GalleryAlbumPage({
           </span>
         </Link>
         <header className="mt-8">
-          <h1 className="text-3xl md:text-4xl font-medium text-[#f5f5f0] tracking-wide">{album.title}</h1>
+          <h1 className="text-3xl md:text-4xl font-medium text-[#f5f5f0] tracking-wide">
+            <span className="normal-content">{album.title}</span>
+            {albumDarkroom && (
+              <span className="darkroom-content hidden">{albumDarkroom.title}</span>
+            )}
+          </h1>
           {album.subtitle && (
-            <p className="mt-3 text-sm text-[#a0a0a0] leading-relaxed max-w-2xl">{album.subtitle}</p>
+            <p className="mt-3 text-sm text-[#a0a0a0] leading-relaxed max-w-2xl">
+              <span className="normal-content">{album.subtitle}</span>
+              {albumDarkroom && (
+                <span className="darkroom-content hidden">{albumDarkroom.subtitle}</span>
+              )}
+            </p>
           )}
           <div className="mt-6 h-px bg-gradient-to-r from-[#c9a227]/30 via-[#333] to-transparent" />
           <FriendSocialBar social={album.friendSocial} locale={locale} />

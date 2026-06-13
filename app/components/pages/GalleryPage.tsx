@@ -14,13 +14,17 @@ const categoryRank: Record<string, number> = {
 
 export default function GalleryPage({
   albums,
+  albumsDarkroom,
   title,
   subtitle,
+  subtitleDarkroom,
   basePath = '',
 }: {
   albums: GalleryAlbum[];
+  albumsDarkroom?: GalleryAlbum[];
   title?: string;
   subtitle?: string;
+  subtitleDarkroom?: string;
   basePath?: string;
 }) {
   // Group albums by category, preserving order within each group
@@ -45,7 +49,12 @@ export default function GalleryPage({
           <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#333] to-[#333]" />
         </div>
         {subtitle && (
-          <p className="mb-12 text-sm text-[#a0a0a0] leading-relaxed max-w-2xl mx-auto text-center">{subtitle}</p>
+          <p className="mb-12 text-sm text-[#a0a0a0] leading-relaxed max-w-2xl mx-auto text-center">
+            <span className="normal-content">{subtitle}</span>
+            {subtitleDarkroom && (
+              <span className="darkroom-content hidden">{subtitleDarkroom}</span>
+            )}
+          </p>
         )}
         {!subtitle && <div className="mb-12" />}
 
@@ -58,7 +67,11 @@ export default function GalleryPage({
                 <h2 className="text-sm uppercase tracking-[0.3em] text-[#c9a227]">{cat}</h2>
                 <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#333] to-[#333]" />
               </div>
-              <GalleryGrid albums={grouped[cat]} basePath={basePath} />
+              <GalleryGrid
+                albums={grouped[cat]}
+                albumsDarkroom={albumsDarkroom}
+                basePath={basePath}
+              />
             </div>
           ))}
         </div>

@@ -9,9 +9,11 @@ type Entry = JournalEntry & { contentHtml: string };
 
 export default function JournalStreamList({
   entries,
+  darkroomMap,
   title,
 }: {
   entries: Entry[];
+  darkroomMap?: Map<string, Entry>;
   title?: string;
 }) {
   const [visibleCount, setVisibleCount] = useState(20);
@@ -33,7 +35,7 @@ export default function JournalStreamList({
         <div className="space-y-16">
           {visibleEntries.map((entry, index) => (
             <ScrollReveal key={entry.slug} delay={index % 3 * 80}>
-              <JournalEntryWithLikes entry={entry} />
+              <JournalEntryWithLikes entry={entry} darkroomEntry={darkroomMap?.get(entry.slug)} />
             </ScrollReveal>
           ))}
         </div>

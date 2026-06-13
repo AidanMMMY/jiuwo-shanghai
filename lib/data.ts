@@ -236,6 +236,30 @@ export async function getJournalEntryZh(slug: string): Promise<JournalEntry | un
   return entries.find((e) => e.slug === slug);
 }
 
+// ── Darkroom journal loaders ──
+
+export async function getJournalEntriesDarkroom(): Promise<JournalEntry[]> {
+  const entries = await readAndValidateJson('updates-darkroom.json', z.array(journalEntrySchema));
+  return entries
+    .filter((e) => !e.hidden)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+export async function getJournalEntriesZhDarkroom(): Promise<JournalEntry[]> {
+  const entries = await getJournalEntriesDarkroom();
+  return localizeJournal(entries);
+}
+
+export async function getJournalEntryDarkroom(slug: string): Promise<JournalEntry | undefined> {
+  const entries = await getJournalEntriesDarkroom();
+  return entries.find((e) => e.slug === slug);
+}
+
+export async function getJournalEntryZhDarkroom(slug: string): Promise<JournalEntry | undefined> {
+  const entries = await getJournalEntriesZhDarkroom();
+  return entries.find((e) => e.slug === slug);
+}
+
 export async function getGalleryAlbums(): Promise<GalleryAlbum[]> {
   return readAndValidateJson('gallery.json', z.array(galleryAlbumSchema));
 }
@@ -255,6 +279,27 @@ export async function getGalleryAlbumZh(id: string): Promise<GalleryAlbum | unde
   return albums.find((a) => a.id === id);
 }
 
+// ── Darkroom gallery loaders ──
+
+export async function getGalleryAlbumsDarkroom(): Promise<GalleryAlbum[]> {
+  return readAndValidateJson('gallery-darkroom.json', z.array(galleryAlbumSchema));
+}
+
+export async function getGalleryAlbumsZhDarkroom(): Promise<GalleryAlbum[]> {
+  const albums = await getGalleryAlbumsDarkroom();
+  return localizeGallery(albums);
+}
+
+export async function getGalleryAlbumDarkroom(id: string): Promise<GalleryAlbum | undefined> {
+  const albums = await getGalleryAlbumsDarkroom();
+  return albums.find((a) => a.id === id);
+}
+
+export async function getGalleryAlbumZhDarkroom(id: string): Promise<GalleryAlbum | undefined> {
+  const albums = await getGalleryAlbumsZhDarkroom();
+  return albums.find((a) => a.id === id);
+}
+
 export async function getMenu(): Promise<MenuCategory[]> {
   return readAndValidateJson('menu.json', z.array(menuCategorySchema));
 }
@@ -270,6 +315,17 @@ export async function getAboutData(): Promise<AboutData> {
 
 export async function getAboutDataZh(): Promise<AboutData> {
   const about = await getAboutData();
+  return localizeAbout(about);
+}
+
+// ── Darkroom about loaders ──
+
+export async function getAboutDataDarkroom(): Promise<AboutData> {
+  return readAndValidateJson('about-darkroom.json', aboutDataSchema);
+}
+
+export async function getAboutDataZhDarkroom(): Promise<AboutData> {
+  const about = await getAboutDataDarkroom();
   return localizeAbout(about);
 }
 

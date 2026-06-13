@@ -1300,3 +1300,20 @@ body.darkroom .darkroom-cold-glitch2 {
         animation: none;
     }
 }
+
+/* ── Dual content visibility: normal vs darkroom ── */
+body:not(.darkroom) .darkroom-content {
+    display: none !important;
+}
+
+body.darkroom .normal-content {
+    display: none !important;
+}
+
+body.darkroom .darkroom-content {
+    display: inline;
+}
+
+body.darkroom .darkroom-content.block {
+    display: block;
+}

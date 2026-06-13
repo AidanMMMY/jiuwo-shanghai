@@ -4,9 +4,11 @@ import type { JournalEntry } from '@/lib/data';
 
 export default async function JournalStream({
   entries,
+  entriesDarkroom,
   title,
 }: {
   entries: JournalEntry[];
+  entriesDarkroom?: JournalEntry[];
   title?: string;
 }) {
   const htmlEntries = await Promise.all(
@@ -16,5 +18,19 @@ export default async function JournalStream({
     }))
   );
 
-  return <JournalStreamList entries={htmlEntries} title={title} />;
+  const darkroomMap = entriesDarkroom
+    ? new Map(
+        await Promise.all(
+          entriesDarkroom.map(async (entry) => [
+            entry.slug,
+            {
+              ...entry,
+              contentHtml: await markdownToHtml(entry.content),
+            },
+          ])
+        ) as [string, JournalEntry & { contentHtml: string }][]
+      )
+    : undefined;
+
+  return <JournalStreamList entries={htmlEntries} darkroomMap={darkroomMap} title={title} />;
 }

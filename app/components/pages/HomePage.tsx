@@ -10,6 +10,7 @@ export default function HomePage({
   site,
   slides,
   entries,
+  entriesDarkroom,
   journalTitle,
   guestbookEntries,
   guestbookTotal,
@@ -23,6 +24,7 @@ export default function HomePage({
   site: SiteData;
   slides: HeroSlide[];
   entries: JournalEntry[];
+  entriesDarkroom?: JournalEntry[];
   journalTitle?: string;
   guestbookEntries: GuestbookEntry[];
   guestbookTotal: number;
@@ -43,7 +45,7 @@ export default function HomePage({
         isZh={isZh}
       />
       <WeatherVibe weather={weather ?? null} recommendation={weatherRec ?? null} isZh={isZh} />
-      <JournalStream entries={entries} title={journalTitle} />
+      <JournalStream entries={entries} entriesDarkroom={entriesDarkroom} title={journalTitle} />
       <GuestbookHook
         entries={guestbookEntries}
         totalCount={guestbookTotal}

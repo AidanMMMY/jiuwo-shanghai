@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import JournalPage from '@/app/components/pages/JournalPage';
-import { getJournalEntriesZh, getJournalEntryZh } from '@/lib/data';
+import { getJournalEntriesZh, getJournalEntryZh, getJournalEntryZhDarkroom } from '@/lib/data';
 
 export async function generateStaticParams() {
   const entries = await getJournalEntriesZh();
@@ -31,8 +31,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const entry = await getJournalEntryZh(slug);
+  const [entry, entryDarkroom] = await Promise.all([
+    getJournalEntryZh(slug),
+    getJournalEntryZhDarkroom(slug),
+  ]);
   if (!entry) notFound();
 
-  return <JournalPage entry={entry} backLabel="← 返回首页" backHref="/zh" />;
+  return (
+    <JournalPage
+      entry={entry}
+      entryDarkroom={entryDarkroom}
+      backLabel="← 返回首页"
+      backHref="/zh"
+    />
+  );
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import AboutPage from '@/app/components/pages/AboutPage';
-import { getAboutData } from '@/lib/data';
+import { getAboutData, getAboutDataDarkroom } from '@/lib/data';
 
 export const metadata: Metadata = {
   title: 'About',
@@ -57,7 +57,10 @@ function generateJsonLd(about: {
 }
 
 export default async function Page() {
-  const about = await getAboutData();
+  const [about, aboutDarkroom] = await Promise.all([
+    getAboutData(),
+    getAboutDataDarkroom(),
+  ]);
   const jsonLd = generateJsonLd(about);
 
   return (
@@ -68,6 +71,7 @@ export default async function Page() {
       />
       <AboutPage
         about={about}
+        aboutDarkroom={aboutDarkroom}
         labels={{
           title: 'About Us',
           subtitle: 'JIUWO · Since 2022 · Shanghai',

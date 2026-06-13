@@ -1,0 +1,13 @@
+{
+  "hours": "Tue - Sun 19:00 - 02:00",
+  "hoursZh": "周二至周日 19:00 - 02:00",
+  "address": "397 Julu Road, Huangpu District, Shanghai",
+  "addressZh": "上海市黄浦区巨鹿路 397 号",
+  "email": "aidan@jiuwoshanghai.net",
+  "mapEmbedUrl": "https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1s397+Julu+Road,+Huangpu+District,+Shanghai!6i15",
+  "story": "In August 2022, we initialized a node on Julu Road. The origin is unremarkable — a late-night conversation between two entities asking the same question: what if there was a place where the usual protocols didn't apply?\n\nThe node is small, embedded at street level. We serve chemical compounds — ethanol-based, mostly. Some entities return every cycle. Others phase in after a high-load work rotation, still running the surface's residual scripts. Some are cached in the local registry. Some are first-time pings from outside the grid. Regardless of origin, most stabilize within minutes.\n\nThe recurring observation: \"It feels like someone's living room.\"\n\nWe don't fully understand the mechanism, but we've stopped questioning it. You don't need to authenticate here. You don't need to explain your runtime. Just render as you are.\n\nThis channel is always open.",
+  "storyZh": "2022年8月，我们在巨鹿路初始化了一个节点。起因很简单——某个深夜，两个实体同时问了一个问题：有没有一个地方，不运行表层的常规协议？说做就做了。\n\n节点很小，嵌在街面上。我们提供化学溶液——主要是乙醇基底的那些。有些实体每个周期都回来。有些在高负载工作旋转后短暂进入，身上还残留着表面的脚本。有些是本地注册表里的缓存数据。有些是从网格外发来的首次 ping。不论来源，大多数在几分钟内就稳定下来。\n\n经常收到的反馈：「像谁家的客厅。」\n\n我们至今没有完全理解这个机制，但已经不再追问了。你不需要在这里验证身份。不需要解释你的运行环境。按你本来的样子渲染就行。\n\n这个频道始终开放。",
+  "pullQuote": "Just render as you are.",
+  "pullQuoteZh": "按你本来的样子渲染就行。",
+  "heroImage": "/images/about/IMG_1262.jpg"
+}

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import HomePage from '@/app/components/pages/HomePage';
-import { getHeroSlides, getJournalEntries, getSiteData, getUpcomingEvents } from '@/lib/data';
+import { getHeroSlides, getJournalEntries, getJournalEntriesDarkroom, getSiteData, getUpcomingEvents } from '@/lib/data';
 import { getShanghaiWeather, getWeatherRecommendation } from '@/lib/weather';
 import { listEntries, countEntries } from '@/lib/guestbook';
 import type { GuestbookHookLabels } from '@/lib/guestbook';
@@ -19,10 +19,11 @@ const guestbookLabels: GuestbookHookLabels = {
 };
 
 export default async function Page() {
-  const [site, slides, entries, guestbookEntries, guestbookTotal, weather, upcomingEvents] = await Promise.all([
+  const [site, slides, entries, entriesDarkroom, guestbookEntries, guestbookTotal, weather, upcomingEvents] = await Promise.all([
     getSiteData(),
     getHeroSlides(),
     getJournalEntries(),
+    getJournalEntriesDarkroom(),
     listEntries(10),
     countEntries(),
     getShanghaiWeather(),
@@ -51,6 +52,7 @@ export default async function Page() {
       site={site}
       slides={slides}
       entries={entries}
+      entriesDarkroom={entriesDarkroom}
       journalTitle="Updates"
       guestbookEntries={guestbookEntries}
       guestbookTotal={guestbookTotal}

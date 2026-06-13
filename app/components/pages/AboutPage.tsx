@@ -5,9 +5,11 @@ import type { AboutData } from '@/lib/data';
 
 export default function AboutPage({
   about,
+  aboutDarkroom,
   labels,
 }: {
   about: AboutData;
+  aboutDarkroom?: AboutData;
   labels: {
     title: string;
     subtitle: string;
@@ -22,6 +24,13 @@ export default function AboutPage({
   const [firstParagraph, ...restParagraphs] = paragraphs;
   const firstChar = firstParagraph?.charAt(0) ?? '';
   const firstParagraphRest = firstParagraph?.slice(1) ?? '';
+
+  const darkroomParagraphs = aboutDarkroom
+    ? aboutDarkroom.story.split('\n').filter((p) => p.trim().length > 0)
+    : paragraphs;
+  const [darkroomFirst, ...darkroomRest] = darkroomParagraphs;
+  const darkroomFirstChar = darkroomFirst?.charAt(0) ?? '';
+  const darkroomFirstRest = darkroomFirst?.slice(1) ?? '';
 
   return (
     <main className="about-page relative bg-[#0a0a0a] min-h-[100lvh]">
@@ -48,7 +57,7 @@ export default function AboutPage({
           <div className="about-card bg-[#0a0a0a]/60 backdrop-blur-[2px] rounded-lg p-8 md:p-10 space-y-8 text-lg md:text-xl text-[#a0a0a0] leading-relaxed">
             {firstParagraph && (
               <ScrollReveal delay={100}>
-                <p>
+                <p className="normal-content">
                   <span
                     className="float-left text-7xl md:text-8xl font-semibold text-[#c9a227] leading-none mr-3 mt-1"
                     style={{ textShadow: '0 0 20px rgba(201,162,39,0.4)' }}
@@ -60,9 +69,28 @@ export default function AboutPage({
                 </p>
               </ScrollReveal>
             )}
+            {aboutDarkroom?.story && darkroomFirst && (
+              <ScrollReveal delay={100}>
+                <p className="darkroom-content hidden">
+                  <span
+                    className="float-left text-7xl md:text-8xl font-semibold text-[#c9a227] leading-none mr-3 mt-1"
+                    style={{ textShadow: '0 0 20px rgba(201,162,39,0.4)' }}
+                    aria-hidden="true"
+                  >
+                    {darkroomFirstChar}
+                  </span>
+                  {darkroomFirstRest}
+                </p>
+              </ScrollReveal>
+            )}
             {restParagraphs.map((paragraph, i) => (
-              <ScrollReveal key={i} delay={(i + 2) * 100}>
-                <p>{paragraph}</p>
+              <ScrollReveal key={`normal-${i}`} delay={(i + 2) * 100}>
+                <p className="normal-content">{paragraph}</p>
+              </ScrollReveal>
+            ))}
+            {aboutDarkroom?.story && darkroomRest.map((paragraph, i) => (
+              <ScrollReveal key={`darkroom-${i}`} delay={(i + 2) * 100}>
+                <p className="darkroom-content hidden">{paragraph}</p>
               </ScrollReveal>
             ))}
           </div>
@@ -82,7 +110,10 @@ export default function AboutPage({
                   animation: 'quoteBreathe 4s ease-in-out infinite',
                 }}
               >&ldquo;</span>
-              {about.pullQuote.replace(/[\"\"\"\"]/g, '').trim()}
+              <span className="normal-content">{about.pullQuote.replace(/[\"\"\"\"]/g, '').trim()}</span>
+              {aboutDarkroom && (
+                <span className="darkroom-content hidden">{aboutDarkroom.pullQuote.replace(/[\"\"\"\"]/g, '').trim()}</span>
+              )}
               <span
                 className="text-[#c9a227] ml-1 inline-block"
                 style={{

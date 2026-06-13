@@ -1,214 +1,214 @@
 [
   {
     "slug": "full-house",
-    "title": "Density Anomaly",
-    "titleZh": "密度异常",
+    "title": "Full House",
+    "titleZh": "人很多",
     "date": "2022-08-27",
     "cover": "/images/journal/20220827-01.webp",
-    "content": "Too many entities occupying the same grid sector. The simulation strained under the load. No one filed a bug report.",
-    "contentZh": "太多实体占据同一网格扇区。模拟在负载下颤抖。无人提交故障报告。"
+    "content": "Full house, drinks flowing.",
+    "contentZh": "人很多，酒够喝。"
   },
   {
     "slug": "big-night",
-    "title": "Glitch in the Construct",
-    "titleZh": "构造中的故障",
+    "title": "Big Night",
+    "titleZh": "大夜",
     "date": "2026-06-06",
     "cover": "/images/journal/20260606-01.webp",
-    "content": "Someone placed an object in the simulation that shouldn't render here. The usual masks all failed. For a few hours, the room ran on a different set of rules — denser, louder, closer to the source code.",
-    "contentZh": "有人在模拟中放置了一个不该在此渲染的物体。惯常的面具全部失效。有那么几个小时，房间运行在另一套规则上——更稠密、更喧响、更靠近源代码。"
+    "content": "Pink pigs at the door. No one kept a straight face. Small place, big night.",
+    "contentZh": "门口粉猪，没人绷住。小地方，大晚上。"
   },
   {
     "slug": "miss-you-already",
-    "title": "Persistent Echo",
-    "titleZh": "残留回声",
+    "title": "Miss You Already",
+    "titleZh": "念",
     "date": "2025-01-12",
     "cover": "/images/journal/20250112-02.webp",
-    "content": "The system has not deleted you yet. Your imprint cycles in a closed loop — same timestamp, same heat signature, same silence at the end. If you're still out there, send anything. This receiver will not shut down.",
-    "contentZh": "系统还没有删除你。你的印记在一个闭路循环中反复运行——相同时间戳、相同热感信号、相同结尾的沉默。如果你还在外面，发任何东西过来。这个接收器不会关机。",
+    "content": "Can't believe it's been this long. Will you come back? See you then.",
+    "contentZh": "竟然这么久了。还会回来吗？等你。",
     "coverAspect": "square"
   },
   {
     "slug": "thankful",
-    "title": "Gratitude Subroutine",
-    "titleZh": "感恩子程序",
+    "title": "Thankful",
+    "titleZh": "感恩",
     "date": "2025-03-13",
     "cover": "/images/journal/20250313-01.webp",
-    "content": "A designated cycle for acknowledging the entities that keep the system running. Some variables cannot be optimized away.",
-    "contentZh": "一个指定的周期，用于承认那些维持系统运转的实体。有些变量无法被优化掉。"
+    "content": "Special birthday, special companies.",
+    "contentZh": "特别的日子，有你们在，就好。"
   },
   {
     "slug": "with-you",
-    "title": "Presence Confirmed",
-    "titleZh": "在场已确认",
+    "title": "With You",
+    "titleZh": "与你们",
     "date": "2026-06-05",
     "cover": "/images/journal/20260605-01.webp",
-    "content": "You rendered here. The simulation is better for it. Let this instance persist.",
-    "contentZh": "你渲染在了这里。模拟因此而更好。让这个实例持久化。"
+    "content": "Glad you're here. Let's make this last.",
+    "contentZh": "你来了，就好。让此刻，慢些走。"
   },
   {
     "slug": "cheers-to-that",
-    "title": "The Core Loop Holds",
-    "titleZh": "核心循环成立",
+    "title": "Cheers to That",
+    "titleZh": "干杯吧",
     "date": "2023-03-04",
     "cover": "/images/journal/20230304-01.webp",
-    "content": "All entities present. The underlying architecture is intact. This is not a given — it is a choice the system makes, every time.",
-    "contentZh": "全体实体在场。底层架构完整。这不是必然——是系统每一次主动做出的选择。"
+    "content": "We are here, we are home, we are glad to have each other.",
+    "contentZh": "我们在，到家了，有彼此在，挺好。"
   },
   {
     "slug": "overshot",
-    "title": "Off Course",
-    "titleZh": "偏航",
+    "title": "Overshot",
+    "titleZh": "飞过头了",
     "date": "2026-06-03",
     "cover": "/images/journal/20260603-01.webp",
-    "content": "Rio to Shanghai — an uncalibrated trajectory. Collision was incidental. The path is still being plotted. Keep moving.",
-    "contentZh": "里约到上海——一次未经校准的轨迹。碰撞纯属偶然。路径仍在绘制中。继续移动。"
+    "content": "Rio to Shanghai, a chance crossing. More travels ahead. Have fun.",
+    "contentZh": "从里约到上海，一场意外的相遇。旅途还长，玩得开心哦。"
   },
   {
     "slug": "dancing-on-you",
-    "title": "Physical Interface",
-    "titleZh": "物理接口",
+    "title": "Dancing on You",
+    "titleZh": "你身我舞",
     "date": "2026-05-31",
     "cover": "/images/journal/20260531-01.webp",
-    "content": "Two bodies occupying the same coordinate set. The simulation does not usually allow this degree of proximity without triggering a collision event. This instance was granted an exception.",
-    "contentZh": "两个身体占据同一坐标集。模拟通常不允许这种程度的接近而不触发碰撞事件。此实例获得了例外许可。",
+    "content": "Dancing on you—my honor, your memory worth keeping.",
+    "contentZh": "在你身上起舞——是我的荣幸，也是你值得珍藏的回忆。",
     "coverAspect": "square"
   },
   {
     "slug": "hello-everyone",
-    "title": "Iteration Three",
-    "titleZh": "第三次迭代",
+    "title": "Hello Everyone",
+    "titleZh": "大家好",
     "date": "2026-05-30",
     "cover": "/images/journal/20260530-01.webp",
-    "content": "The construct has sustained itself for three full rotations. Each cycle the variables shift — faces swap out, timestamps drift — but the core loop remains stable. Against probability, the simulation still chooses to run.",
-    "contentZh": "该构造已自我维持了三个完整旋转。每个周期变量都会偏移——面孔换位、时间戳漂移——但核心循环保持稳定。违背概率，模拟仍然选择了继续运行。",
+    "content": "Three years in, still going strong.",
+    "contentZh": "相遇三年，历久弥坚。",
     "coverAspect": "square"
   },
   {
     "slug": "something-buried",
-    "title": "Seven Years Down",
-    "titleZh": "七年之下",
+    "title": "Something Buried",
+    "titleZh": "深藏的",
     "date": "2026-05-27",
     "cover": "/images/journal/20260527-01.webp",
-    "content": "Seven years underneath. Time here compresses and stretches in ways the surface doesn't account for. Have we shifted, or has the shape of us stayed exactly the same? No instrument can tell.",
-    "contentZh": "七年沉在下面。这里的时间以表面不承认的方式压缩、拉伸。是我们位移了，还是我们的形状从始至终都没变过？没有仪表能分辨。"
+    "content": "Hard to believe it's been seven years. Time moves fast. We've changed, or maybe we haven't—who's to say?",
+    "contentZh": "七年没见，时间快得不像真的。我们变了，又好像没变——变没变呢，谁知道。"
   },
   {
     "slug": "happy-sandwich",
-    "title": "Stack Overflow",
-    "titleZh": "堆叠溢出",
+    "title": "Happy Sandwich",
+    "titleZh": "开心三明治",
     "date": "2025-11-10",
     "cover": "/images/journal/20251110-01.webp",
-    "content": "Two familiar patterns converged on a single coordinate — Will, Daisuke — compressing the target entity between them. The system does not log events of this density often.",
-    "contentZh": "两个熟悉的模式汇聚于单一坐标——Will、Daisuke——将目标实体挤压在中间。系统不常记录这种密度的事件。"
+    "content": "To be greeted by Will and Daisuke like this—front and back, all at once—isn't something that happens every day.",
+    "contentZh": "想被白二和大介这样前拥后抱吗，这种机会可不是天天有哦。"
   },
   {
     "slug": "oh-santa",
-    "title": "The Distribution Algorithm",
-    "titleZh": "分发算法",
+    "title": "Oh Santa!",
+    "titleZh": "圣诞塔哥",
     "date": "2025-12-24",
     "cover": "/images/journal/20251224-02.webp",
-    "content": "An annual subroutine executes. A designated entity — identifier: Robin — distributes artifacts. The query remains open: what do you want the system to generate for you?",
-    "contentZh": "年度子程序执行中。指定实体——标识符：Robin——正在分发物品。查询仍然开放：你希望系统为你生成什么？"
+    "content": "Merry Christmas! Have anything in mind that you hope to get from Santa Robin?",
+    "contentZh": "圣诞快乐！有想从圣诞塔哥这里得到的礼物吗？"
   },
   {
     "slug": "cf-4-drink",
-    "title": "Dual Process",
-    "titleZh": "双进程",
+    "title": "CF 4 Drink",
+    "titleZh": "CF喝酒两不误",
     "date": "2025-12-24",
     "cover": "/images/journal/20251224-01.webp",
-    "content": "The calendar flags a holiday. We run two concurrent subroutines: physical recalibration, and chemical override. Neither is optional.",
-    "contentZh": "日历标记了假日。我们同时运行两个并发的子程序：身体校准，以及化学覆写。两者皆非可选。"
+    "content": "Yes it's Christmas time. We train. We drink. Both, non-negotiable.",
+    "contentZh": "圣诞来了，我们CF小组，练是要练的，酒也是要喝的。"
   },
   {
     "slug": "aidan-birthday",
-    "title": "Origin Cycle: Aidan",
-    "titleZh": "起始周期：Aidan",
+    "title": "Aidan's Birthday",
+    "titleZh": "Aidan的生日",
     "date": "2025-03-29",
     "cover": "/images/journal/20250329-01.webp",
-    "content": "The entity Aidan approaches the anniversary of its first instantiation. An artifact was delivered. Output: elevated baseline readings across all metrics.",
-    "contentZh": "实体 Aidan 正接近其首次实例化的周年。一件物品被送达。输出：全部指标的基线读数上升。"
+    "content": "It's Aidan's birthday soon, he's so happy when he received this special gift.",
+    "contentZh": "老朋友Aidan要过生日啦，我们送了他一个特别的礼物，他开心坏了。"
   },
   {
     "slug": "big-guys-rule",
-    "title": "Mass Concentration",
-    "titleZh": "质量集中",
+    "title": "Big Guys Rule!",
+    "titleZh": "熊王局",
     "date": "2026-05-23",
     "cover": "/images/journal/20260523-02.webp",
-    "content": "A Saturday rotation. Multiple high-mass entities converged on a single sector. Local gravity shifted. No anomalies to report — everything functioned as designed.",
-    "contentZh": "一个周六的旋转。多个高质量实体汇聚于单一扇区。局部引力发生偏移。无异常报告——一切按设计运行。"
+    "content": "Another Saturday night, the big guys are in the house.",
+    "contentZh": "一个重量级选手云集的周六晚。"
   },
   {
     "slug": "woof-woof",
-    "title": "Non-Human Entity Detected",
-    "titleZh": "检测到非人类实体",
+    "title": "Woof Woof",
+    "titleZh": "汪，汪！",
     "date": "2026-05-23",
     "cover": "/images/journal/20260523-01.webp",
-    "content": "DQ is a recurring pattern of a different class — quadrupedal, lower to the ground, consistently angling for system access. Her persistence suggests intent.",
-    "contentZh": "DQ 是一个不同类别的循环模式——四足、更贴近地面、持续试图获取系统权限。她的持续出现暗示着某种意图。"
+    "content": "DQ is an old friend of ours too. Even she's angling for a sip.",
+    "contentZh": "DQ也是老朋友啦，就连她也想来上一口。"
   },
   {
     "slug": "single-glance-eternal",
-    "title": "Timestamp: Suspended",
-    "titleZh": "时间戳：暂停",
+    "title": "A Single Glance",
+    "titleZh": "一眼万年",
     "date": "2024-04-30",
     "cover": "/images/journal/20240430.webp",
-    "content": "One glance. The usual progression of frames halted. For a duration the system cannot accurately measure, nothing updated.",
-    "contentZh": "一次注视。帧的常规推进暂停了。在系统无法精确测量的时长内，没有任何更新。"
+    "content": "One gaze, time stranded in the now.",
+    "contentZh": "一眼凝眸，时光便在此刻搁浅。"
   },
   {
     "slug": "unexpected-encounter",
-    "title": "Friendly Pattern Match",
-    "titleZh": "友好模式匹配",
+    "title": "Unexpected Encounter",
+    "titleZh": "意外的相遇",
     "date": "2026-05-15",
     "cover": "/images/journal/20260515.jpeg",
-    "content": "After a high-load cycle, the system identified familiar signatures in proximity. Output: baseline restored.",
-    "contentZh": "经过一个高负载周期后，系统在邻近区域识别到熟悉的签名。输出：基线恢复。"
+    "content": "What beats seeing friends after a long day?",
+    "contentZh": "还有什么比忙碌了一天之后见到朋友们更令人开心的。"
   },
   {
     "slug": "dex-quiet-moment",
-    "title": "Dex, Frame 247",
-    "titleZh": "Dex，第247帧",
+    "title": "A Quiet Moment of Dex",
+    "titleZh": "Dex的一刻",
     "date": "2026-04-25",
     "cover": "/images/journal/dex-moment.webp",
-    "content": "Dex enters the frame most cycles. We don't know why some people keep coming back and others dissolve into the static. One evening I ran the capture routine and the output was this: a rare alignment — subject, machine, and moment agreeing on the same version of reality. He chose to keep the artifact.",
-    "contentZh": "Dex 大多数周期都会进入取景框。我们不知道为什么有些人反复回来，另一些人则溶解进噪点里。某个傍晚我运行了捕获程序，输出是这一帧：一次罕见的对齐——被摄体、机器、时刻，三者就现实的同一个版本达成了一致。他选择保留这件遗物。"
+    "content": "Dex is a good friend of ours who's been dropping by most weeks lately. One evening before the heat set in, I caught this shot of him — ended up being one of his favorites too.",
+    "contentZh": "Dex是我们的老朋友，近来几乎每周都会来。入夏前的某个夜晚，我随手按下快门，没想到定格了他最松弛的样子——他自己看了，也说喜欢。"
   },
   {
     "slug": "sunny-saucy",
-    "title": "Fifty Shades of the Construct",
-    "titleZh": "构造的五十度",
+    "title": "Sunny Saucy, Fifty Shades of Grey",
+    "titleZh": "阳光骚年，五十度灰",
     "date": "2026-04-17",
     "cover": "/images/journal/20260417-C.JPG",
-    "content": "This rotation's designated host: Matthew. The simulation will run a variant ruleset for one night. Participation is at your own discretion.",
-    "contentZh": "本旋转的指定宿主：Matthew。模拟将在今晚运行变体规则集。参与与否，自行判断。",
+    "content": "This Friday night, come and have a drink or much more, with Matthew, our latest one-night host. ",
+    "contentZh": "本周五晚上，我们将迎来一日店长马修，来和他一醉方休吧！",
     "coverAspect": "tall",
     "hidden": true
   },
   {
     "slug": "untold-surprise",
-    "title": "Re-entry: Yida",
-    "titleZh": "重新进入：益达",
+    "title": "Untold Surprise",
+    "titleZh": "太开心啦",
     "date": "2026-02-22",
     "cover": "/images/journal/20260222-2.jpg",
-    "content": "What the logs did not show in advance — an entity previously migrated to a distant sector, identifier: Yida, has re-entered the local grid. The event was not predicted. The event was welcomed.",
-    "contentZh": "日志没有提前显示的是——一个先前迁移到遥远扇区的实体，标识符：益达，重新进入了本地网格。此事件未被预测。此事件受到欢迎。"
+    "content": "What I didn't mention—Yida, our old friend who moved to Australia, is back in town after all this time.",
+    "contentZh": "我故意没说的是，今天好久没见的移居澳洲的朋友益达回来啦！非常开心！！"
   },
   {
     "slug": "happy-birthday-robin",
-    "title": "The Tower's Rotation",
-    "titleZh": "塔的旋转",
+    "title": "Happy Birthday",
+    "titleZh": "生日快乐",
     "date": "2026-02-22",
     "cover": "/images/journal/20260222-1.jpg",
-    "content": "It is the rotation of Robin, our most structurally reliable entity. The frame chosen for archival may not be the correct one — but the system rarely produces perfect output. This is what we have.",
-    "contentZh": "这是 Robin 的旋转——我们结构上最可靠的实体。选作存档的这一帧也许并不正确——但系统很少输出完美的结果。这就是我们所拥有的。"
+    "content": "It's our best friend Robin's birthday. I'm sure it's not the right picture to post, but anyway haha.",
+    "contentZh": "今天是好朋友铁塔的生日，来一起祝他生日快乐吧！照片选的可能不太对，但……"
   },
   {
     "slug": "dancing-in-the-bubbles",
-    "title": "Render Artifacts",
-    "titleZh": "渲染伪影",
+    "title": "Bubble Romance",
+    "titleZh": "爱的泡泡",
     "date": "2025-05-23",
     "cover": "/images/journal/20250523-1.webp",
-    "content": "Spheres of unknown composition filled the visible spectrum. A subroutine designed for rain was repurposed. The output: pure surface-level anomaly.",
-    "contentZh": "未知构成的球体填满了可见光谱。一个为雨水设计的子程序被挪用了。输出结果：纯粹的表层异常。"
+    "content": "I'm singing in the rain, and dancing in the rain.",
+    "contentZh": "你看，好多泡泡啊。"
   }
 ]

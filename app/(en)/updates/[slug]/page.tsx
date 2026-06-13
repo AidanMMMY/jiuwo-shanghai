@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import JournalPage from '@/app/components/pages/JournalPage';
-import { getJournalEntries, getJournalEntry } from '@/lib/data';
+import { getJournalEntries, getJournalEntry, getJournalEntryDarkroom } from '@/lib/data';
 
 export async function generateStaticParams() {
   const entries = await getJournalEntries();
@@ -31,8 +31,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const entry = await getJournalEntry(slug);
+  const [entry, entryDarkroom] = await Promise.all([
+    getJournalEntry(slug),
+    getJournalEntryDarkroom(slug),
+  ]);
   if (!entry) notFound();
 
-  return <JournalPage entry={entry} backLabel="← Back to home" />;
+  return (
+    <JournalPage
+      entry={entry}
+      entryDarkroom={entryDarkroom}
+      backLabel="← Back to home"
+    />
+  );
 }

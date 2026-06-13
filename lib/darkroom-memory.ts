@@ -24,6 +24,15 @@ export interface ExtractedMemory {
   confidence: number;
 }
 
+export interface Conversation {
+  id: number;
+  user_message: string;
+  assistant_response: string;
+  source_lang: 'en' | 'zh';
+  processed_for_memory: boolean;
+  created_at: string;
+}
+
 const MAX_MEMORIES_PER_LANG = 500;
 
 const EN_STOPWORDS = new Set([
@@ -65,6 +74,62 @@ export function extractKeywords(text: string, lang: 'en' | 'zh'): string[] {
     .split(/\s+/)
     .filter((w) => w.length > 2 && !EN_STOPWORDS.has(w));
   return [...new Set([...chars, ...enWords])].slice(0, 10);
+}
+
+export async function ensureConversationsTable(): Promise<void> {
+  const sql = getSql();
+  await sql`
+    CREATE TABLE IF NOT EXISTS darkroom_conversations (
+      id                   SERIAL PRIMARY KEY,
+      user_message         TEXT NOT NULL,
+      assistant_response   TEXT NOT NULL,
+      source_lang          VARCHAR(2) NOT NULL,
+      processed_for_memory BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_conversations_unprocessed ON darkroom_conversations(source_lang, processed_for_memory, created_at ASC)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_conversations_created_at ON darkroom_conversations(created_at DESC)`;
+}
+
+export async function storeConversation(
+  conv: Omit<Conversation, 'id' | 'processed_for_memory' | 'created_at'>
+): Promise<Conversation> {
+  await ensureConversationsTable();
+  const sql = getSql();
+  const result = await sql`
+    INSERT INTO darkroom_conversations (user_message, assistant_response, source_lang)
+    VALUES (${conv.user_message}, ${conv.assistant_response}, ${conv.source_lang})
+    RETURNING id, user_message, assistant_response, source_lang, processed_for_memory, created_at
+  `;
+  return result.rows[0] as Conversation;
+}
+
+export async function getUnprocessedConversations(
+  sourceLang: 'en' | 'zh',
+  limit: number
+): Promise<Conversation[]> {
+  await ensureConversationsTable();
+  const sql = getSql();
+  const result = await sql`
+    SELECT id, user_message, assistant_response, source_lang, processed_for_memory, created_at
+    FROM darkroom_conversations
+    WHERE source_lang = ${sourceLang} AND processed_for_memory = FALSE
+    ORDER BY created_at ASC
+    LIMIT ${limit}
+  `;
+  return result.rows as Conversation[];
+}
+
+export async function markConversationsProcessed(ids: number[]): Promise<void> {
+  if (ids.length === 0) return;
+  await ensureConversationsTable();
+  const sql = getSql();
+  await sql`
+    UPDATE darkroom_conversations
+    SET processed_for_memory = TRUE
+    WHERE id IN (${ids})
+  `;
 }
 
 export async function ensureMemoriesTable(): Promise<void> {

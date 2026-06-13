@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
 import { getDarkroomData } from "@/lib/darkroom";
-import { storeMemory, extractKeywords } from "@/lib/darkroom-memory";
+import {
+  storeMemory,
+  extractKeywords,
+  storeConversation,
+  getUnprocessedConversations,
+  markConversationsProcessed,
+} from "@/lib/darkroom-memory";
+
+const BATCH_SIZE = 3;
 
 export async function POST(req: NextRequest) {
   let isZh = false;
@@ -28,19 +36,44 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ skipped: true, reason: "no_api_key" });
     }
 
+    const sourceLang = isZh ? "zh" : "en";
+
+    // Step 1: always store the raw conversation exchange
+    await storeConversation({
+      user_message: userMessage,
+      assistant_response: assistantResponse,
+      source_lang: sourceLang,
+    });
+
+    // Step 2: check if we have enough unprocessed exchanges to synthesize memories
+    const pending = await getUnprocessedConversations(sourceLang, BATCH_SIZE);
+    if (pending.length < BATCH_SIZE) {
+      return NextResponse.json({ stored: 0, batched: false, pending: pending.length });
+    }
+
+    // Step 3: batch synthesize memories from the pending exchanges
     const data = getDarkroomData(isZh);
     const extractionPrompt = data.extractionPrompt;
 
     if (!extractionPrompt) {
-      return NextResponse.json({ skipped: true, reason: "no_extraction_prompt" });
+      return NextResponse.json({ stored: 0, batched: false, reason: "no_extraction_prompt" });
     }
 
-    const prompt = isZh
-      ? `用户查询：${userMessage}\n\n系统响应：${assistantResponse}\n\n请提取记忆：`
-      : `User query: ${userMessage}\n\nSystem response: ${assistantResponse}\n\nExtract memories:`;
+    const transcript = pending
+      .map(
+        (c, i) =>
+          isZh
+            ? `--- 对话 ${i + 1} ---\n用户：${c.user_message}\n系统：${c.assistant_response}`
+            : `--- Exchange ${i + 1} ---\nUser: ${c.user_message}\nSystem: ${c.assistant_response}`
+      )
+      .join("\n\n");
+
+    const batchPrompt = isZh
+      ? `基于以下 ${BATCH_SIZE} 段连续对话，综合提取 0–3 个值得持久化的记忆。注意跨对话的重复主题、用户偏好和情绪模式。\n\n${transcript}\n\n请提取记忆：`
+      : `Based on the following ${BATCH_SIZE} consecutive exchanges, synthesize 0–3 memories worth persisting. Look for recurring themes, user preferences, and emotional patterns across the exchanges.\n\n${transcript}\n\nExtract memories:`;
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     let raw = "";
     try {
@@ -49,10 +82,10 @@ export async function POST(req: NextRequest) {
           model: DEFAULT_MODEL,
           messages: [
             { role: "system", content: extractionPrompt },
-            { role: "user", content: prompt },
+            { role: "user", content: batchPrompt },
           ],
           temperature: 0.3,
-          max_tokens: 400,
+          max_tokens: 600,
         },
         { signal: controller.signal }
       );
@@ -65,14 +98,12 @@ export async function POST(req: NextRequest) {
 
     let memories: unknown[] = [];
 
-    // Try direct JSON parse first
     try {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
         memories = parsed;
       }
     } catch {
-      // Try extracting JSON from markdown code block
       const jsonMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
       if (jsonMatch) {
         try {
@@ -86,7 +117,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const sourceLang = isZh ? "zh" : "en";
     const stored = [];
 
     for (const rawMemory of memories) {
@@ -130,8 +160,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Mark conversations as processed only if extraction succeeded (even if no memories met threshold)
+    await markConversationsProcessed(pending.map((c) => c.id));
+
     return NextResponse.json({
       stored: stored.length,
+      batched: true,
       memories: stored.map((m) => ({
         id: m.id,
         content: m.content,

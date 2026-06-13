@@ -8,6 +8,7 @@ import {
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
+  const urlToken = req.nextUrl.searchParams.get("token");
   const expectedToken = process.env.DARKROOM_ADMIN_TOKEN;
 
   if (!expectedToken) {
@@ -17,7 +18,8 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  const headerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  const token = headerToken || urlToken;
   if (token !== expectedToken) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

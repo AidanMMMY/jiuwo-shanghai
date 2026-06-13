@@ -241,3 +241,74 @@ export async function retrieveMemories(
   `;
   return fallback.rows as Memory[];
 }
+
+export interface MemoryStats {
+  total: number;
+  byLang: { source_lang: string; count: number }[];
+}
+
+export interface ConversationStats {
+  total: number;
+  unprocessed: number;
+  byLang: { source_lang: string; count: number }[];
+}
+
+export async function getMemoryStats(): Promise<MemoryStats> {
+  await ensureMemoriesTable();
+  const sql = getSql();
+  const totalResult = await sql`SELECT COUNT(*) as count FROM darkroom_memories`;
+  const byLangResult = await sql`
+    SELECT source_lang, COUNT(*) as count
+    FROM darkroom_memories
+    GROUP BY source_lang
+    ORDER BY source_lang
+  `;
+  return {
+    total: Number((totalResult.rows[0] as { count: number }).count),
+    byLang: byLangResult.rows as { source_lang: string; count: number }[],
+  };
+}
+
+export async function getRecentMemories(limit: number = 20): Promise<Memory[]> {
+  await ensureMemoriesTable();
+  const sql = getSql();
+  const result = await sql`
+    SELECT id, content, keywords, confidence, source_lang, created_at
+    FROM darkroom_memories
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+  return result.rows as Memory[];
+}
+
+export async function getConversationStats(): Promise<ConversationStats> {
+  await ensureConversationsTable();
+  const sql = getSql();
+  const totalResult = await sql`SELECT COUNT(*) as count FROM darkroom_conversations`;
+  const unprocessedResult = await sql`
+    SELECT COUNT(*) as count FROM darkroom_conversations WHERE processed_for_memory = FALSE
+  `;
+  const byLangResult = await sql`
+    SELECT source_lang, COUNT(*) as count
+    FROM darkroom_conversations
+    GROUP BY source_lang
+    ORDER BY source_lang
+  `;
+  return {
+    total: Number((totalResult.rows[0] as { count: number }).count),
+    unprocessed: Number((unprocessedResult.rows[0] as { count: number }).count),
+    byLang: byLangResult.rows as { source_lang: string; count: number }[],
+  };
+}
+
+export async function getRecentConversations(limit: number = 20): Promise<Conversation[]> {
+  await ensureConversationsTable();
+  const sql = getSql();
+  const result = await sql`
+    SELECT id, user_message, assistant_response, source_lang, processed_for_memory, created_at
+    FROM darkroom_conversations
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+  return result.rows as Conversation[];
+}

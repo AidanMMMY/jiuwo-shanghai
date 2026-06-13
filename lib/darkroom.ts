@@ -15,6 +15,7 @@ export interface DarkroomData {
   initialEntries: DarkroomEntry[];
   knowledgeBase: string;
   systemPrompt: string;
+  extractionPrompt: string;
   fallbackResponses: Record<string, string>;
 }
 

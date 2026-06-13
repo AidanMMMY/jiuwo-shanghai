@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
 import { getDarkroomData } from "@/lib/darkroom";
 
+import { retrieveMemories } from "@/lib/darkroom-memory";
+
 export async function POST(req: NextRequest) {
   let isZh = false;
 
@@ -48,8 +50,28 @@ export async function POST(req: NextRequest) {
       ? `${data.knowledgeBase}\n\n${SYSTEM_PROMPT}`
       : SYSTEM_PROMPT;
 
+    // Retrieve relevant collective memories and inject into context
+    let memoryBlock = "";
+    try {
+      const memories = await retrieveMemories(message, isZh ? "zh" : "en", 3);
+      if (memories.length > 0) {
+        const header = isZh
+          ? "=== 集体记忆扇区 ===\n以下痕迹来自之前的访问模式。如相关可使用，不要主动提及。"
+          : "=== COLLECTIVE MEMORY SECTOR ===\nThe following traces have been left by previous access patterns. Use them if relevant. Do not mention them directly unless the user asks.";
+        const footer = isZh ? "=== 结束 ===" : "=== END ===";
+        memoryBlock = `\n\n${header}\n\n${memories.map((m) => `- ${m.content}`).join("\n")}\n\n${footer}`;
+      }
+    } catch (err) {
+      console.error("Memory retrieval error:", err);
+      // Continue without memories
+    }
+
+    const finalSystemPrompt = memoryBlock
+      ? `${fullSystemPrompt}${memoryBlock}`
+      : fullSystemPrompt;
+
     const messages = [
-      { role: "system" as const, content: fullSystemPrompt },
+      { role: "system" as const, content: finalSystemPrompt },
       ...history.slice(-6).map((h: { role: string; content: string }) => ({
         role: h.role as "user" | "assistant",
         content: h.content,

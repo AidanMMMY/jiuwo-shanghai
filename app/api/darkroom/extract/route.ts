@@ -89,8 +89,8 @@ export async function POST(req: NextRequest) {
         .join("\n\n");
 
       const batchPrompt = isZh
-        ? `基于以下 ${BATCH_SIZE} 段连续对话，综合提取 0–3 个值得持久化的记忆。注意跨对话的重复主题、用户偏好和情绪模式。如果某条信息与已有记忆高度重复，请降低其优先级或不包含。\n\n${transcript}\n\n请提取记忆：`
-        : `Based on the following ${BATCH_SIZE} consecutive exchanges, synthesize 0–3 memories worth persisting. Look for recurring themes, user preferences, and emotional patterns across the exchanges. If a memory overlaps heavily with existing traces, deprioritize or omit it.\n\n${transcript}\n\nExtract memories:`;
+        ? `基于以下 ${BATCH_SIZE} 段连续对话，综合提取 0–3 个值得持久化的记忆。注意跨对话的重复主题、用户偏好和情绪模式。如果某条信息与已有记忆高度重复，请降低其优先级或不包含。\n\n每条记忆的 keywords 必须同时包含中文和英文表达，覆盖该记忆的核心概念。例如：涉及“酒”的记忆应包含 ['酒', 'drink', 'alcohol']；涉及“喜欢”的记忆应包含 ['喜欢', 'like']。这样不同语言的查询都能召回这条记忆。\n\n${transcript}\n\n请提取记忆：`
+        : `Based on the following ${BATCH_SIZE} consecutive exchanges, synthesize 0–3 memories worth persisting. Look for recurring themes, user preferences, and emotional patterns across the exchanges. If a memory overlaps heavily with existing traces, deprioritize or omit it.\n\nEach memory's keywords MUST include both Chinese and English expressions of its core concepts. For example, a memory involving "drink" should include ['drink', 'alcohol', '酒']; a memory involving "like" should include ['like', '喜欢']. This allows queries in either language to recall the memory.\n\n${transcript}\n\nExtract memories:`;
 
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000);
@@ -166,15 +166,15 @@ export async function POST(req: NextRequest) {
             : [];
 
           if (keywords.length === 0) {
-            keywords = extractKeywords(trimmedContent, sourceLang);
+            keywords = extractKeywords(trimmedContent);
           }
 
           if (keywords.length === 0) {
             continue;
           }
 
-          // Deduplication check
-          const similar = await findSimilarMemory(trimmedContent, sourceLang, 0.65);
+          // Deduplication check across all languages
+          const similar = await findSimilarMemory(trimmedContent, undefined, 0.65);
           if (similar) {
             console.log(
               `[darkroom:extract] deduplicated memory similar_to=${similar.id} content="${trimmedContent.slice(0, 40)}..."`

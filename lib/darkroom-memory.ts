@@ -33,7 +33,7 @@ export interface Conversation {
   created_at: string;
 }
 
-const MAX_MEMORIES_PER_LANG = 500;
+const MAX_MEMORIES_TOTAL = 1000;
 const MIN_MEMORY_CONFIDENCE = 0.6;
 
 const EN_STOPWORDS = new Set([
@@ -56,18 +56,14 @@ const ZH_STOPWORDS = new Set([
   '的', '了', '在', '是', '我', '有', '和', '就', '不', '人', '都', '一', '一个', '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没有', '看', '好', '自己', '这', '那',
 ]);
 
-export function extractKeywords(text: string, lang: 'en' | 'zh'): string[] {
+export function extractKeywords(text: string): string[] {
   if (!text) return [];
 
-  if (lang === 'en') {
-    const words = text.toLowerCase()
-      .replace(/[^a-z0-9\s]/g, ' ')
-      .split(/\s+/)
-      .filter((w) => w.length > 2 && !EN_STOPWORDS.has(w));
-    return [...new Set(words)].slice(0, 10);
-  }
-
-  // Chinese: keep Chinese chars + English words
+  // Always extract both Chinese characters and English words so memories can be
+  // retrieved across languages. A Chinese memory about 酒 and an English query
+  // about drink will only overlap if the stored memory includes bilingual
+  // keywords (provided by the extraction LLM), but the query side is ready for
+  // mixed-language input.
   const chars = text.replace(/[^一-龥]/g, '').split('')
     .filter((c) => !ZH_STOPWORDS.has(c));
   const enWords = text.toLowerCase()
@@ -150,26 +146,25 @@ export async function ensureMemoriesTable(): Promise<void> {
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_confidence ON darkroom_memories(confidence DESC)`;
 }
 
-export async function countMemories(sourceLang: 'en' | 'zh'): Promise<number> {
+export async function countAllMemories(): Promise<number> {
   await ensureMemoriesTable();
   const sql = getSql();
   const result = await sql`
-    SELECT COUNT(*) as count FROM darkroom_memories WHERE source_lang = ${sourceLang}
+    SELECT COUNT(*) as count FROM darkroom_memories
   `;
   return Number((result.rows[0] as { count: number }).count);
 }
 
-export async function pruneOldMemories(sourceLang: 'en' | 'zh'): Promise<void> {
-  const count = await countMemories(sourceLang);
-  if (count < MAX_MEMORIES_PER_LANG) return;
+export async function pruneOldMemories(): Promise<void> {
+  const count = await countAllMemories();
+  if (count < MAX_MEMORIES_TOTAL) return;
 
-  const toDelete = count - MAX_MEMORIES_PER_LANG + 1; // +1 for the one about to be inserted
+  const toDelete = count - MAX_MEMORIES_TOTAL + 1; // +1 for the one about to be inserted
   const sql = getSql();
   await sql`
     DELETE FROM darkroom_memories
     WHERE id IN (
       SELECT id FROM darkroom_memories
-      WHERE source_lang = ${sourceLang}
       ORDER BY confidence ASC, created_at ASC
       LIMIT ${toDelete}
     )
@@ -180,7 +175,7 @@ export async function storeMemory(
   memory: Omit<Memory, 'id' | 'created_at'>
 ): Promise<Memory> {
   await ensureMemoriesTable();
-  await pruneOldMemories(memory.source_lang);
+  await pruneOldMemories();
 
   const sql = getSql();
   const result = await sql`
@@ -193,18 +188,18 @@ export async function storeMemory(
 
 export async function retrieveMemories(
   query: string,
-  sourceLang: 'en' | 'zh',
+  _sourceLang?: 'en' | 'zh',
   limit: number = 3
 ): Promise<Memory[]> {
   await ensureMemoriesTable();
   const sql = getSql();
-  const keywords = extractKeywords(query, sourceLang);
+  const keywords = extractKeywords(query);
 
   if (keywords.length === 0) {
     const result = await sql`
       SELECT id, content, keywords, confidence, source_lang, created_at
       FROM darkroom_memories
-      WHERE source_lang = ${sourceLang} AND confidence >= ${MIN_MEMORY_CONFIDENCE}
+      WHERE confidence >= ${MIN_MEMORY_CONFIDENCE}
       ORDER BY created_at DESC
       LIMIT ${limit}
     `;
@@ -221,8 +216,7 @@ export async function retrieveMemories(
         1.0 / (EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400.0 + 1.0)
       ) as score
     FROM darkroom_memories
-    WHERE source_lang = ${sourceLang}
-      AND confidence >= ${MIN_MEMORY_CONFIDENCE}
+    WHERE confidence >= ${MIN_MEMORY_CONFIDENCE}
       AND keywords && ${keywords}::text[]
     ORDER BY score DESC
     LIMIT ${limit}
@@ -236,7 +230,7 @@ export async function retrieveMemories(
   const fallback = await sql`
     SELECT id, content, keywords, confidence, source_lang, created_at
     FROM darkroom_memories
-    WHERE source_lang = ${sourceLang} AND confidence >= ${MIN_MEMORY_CONFIDENCE}
+    WHERE confidence >= ${MIN_MEMORY_CONFIDENCE}
     ORDER BY created_at DESC
     LIMIT ${limit}
   `;
@@ -245,12 +239,12 @@ export async function retrieveMemories(
 
 export async function findSimilarMemory(
   content: string,
-  sourceLang: 'en' | 'zh',
+  _sourceLang?: 'en' | 'zh',
   threshold: number = 0.65
 ): Promise<Memory | null> {
   await ensureMemoriesTable();
   const sql = getSql();
-  const keywords = extractKeywords(content, sourceLang);
+  const keywords = extractKeywords(content);
 
   if (keywords.length === 0) return null;
 
@@ -267,8 +261,7 @@ export async function findSimilarMemory(
         GREATEST(array_length(keywords, 1), ${keywords.length})
       ) as similarity
     FROM darkroom_memories
-    WHERE source_lang = ${sourceLang}
-      AND keywords && ${keywords}::text[]
+    WHERE keywords && ${keywords}::text[]
     ORDER BY similarity DESC
     LIMIT 1
   `;

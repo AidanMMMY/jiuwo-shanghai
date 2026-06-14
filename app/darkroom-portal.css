@@ -513,15 +513,13 @@ body.darkroom-chat-active .back-to-top-btn {
     inset: 0;
     align-items: center;
     justify-content: center;
-    padding: 40px;
+    padding: 24px;
     overflow: hidden;
   }
 
   .darkroom-chat-display {
-    width: min(1500px, calc(100vw - 80px));
-    height: min(860px, calc(100vh - 80px));
-    max-width: 1600px;
-    max-height: 900px;
+    width: calc(100vw - 48px);
+    height: calc(100vh - 48px);
     border: 16px solid #0d0b06;
     border-radius: 4px;
     background: #080502;
@@ -558,6 +556,56 @@ body.darkroom-chat-active .back-to-top-btn {
   .darkroom-log-entry {
     font-size: clamp(16px, 1.3vw, 20px);
     line-height: 1.7;
+  }
+}
+
+/* Embedded chat monitor frame on desktop (dark side homepage) */
+@media (min-width: 1024px) {
+  .darkroom-chat-embedded {
+    border: 14px solid #0d0b06;
+    border-radius: 4px;
+    background: #080502;
+    box-shadow:
+      0 0 0 1px rgba(166, 136, 42, 0.12),
+      0 0 0 3px #050402,
+      0 0 0 4px rgba(166, 136, 42, 0.08),
+      inset 0 0 80px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .darkroom-chat-embedded .darkroom-chat-screen {
+    position: relative;
+    z-index: 4;
+  }
+
+  .darkroom-chat-embedded::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.32) 2px,
+      rgba(0, 0, 0, 0.32) 3px
+    );
+    opacity: 0.45;
+  }
+
+  .darkroom-chat-embedded::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 6;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 55%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
   }
 }
 

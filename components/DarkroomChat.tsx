@@ -354,16 +354,6 @@ export default function DarkroomChat({
       <SignalHeader isZh={isZh} />
 
       <div className="darkroom-chat-entries">
-        {hasEnteredViewport && (
-          <div className="darkroom-log-entry">
-            <pre className="darkroom-log-typing">
-              {isZh
-                ? `[${getNowTime()}] · 系统\n> 正在初始化诊断界面……\n_`
-                : `[${getNowTime()}] · SYSTEM\n> Initializing diagnostic interface...\n_`}
-            </pre>
-          </div>
-        )}
-
         {entries.map((entry) => {
           const inQueue = typingQueue.includes(entry.id);
           const isCurrent = entry.id === currentTypingId;

@@ -332,6 +332,29 @@ export default function DarkroomChat({
     };
   }, [mode]);
 
+  // ── Keep input anchored just above the mobile keyboard ──
+  useEffect(() => {
+    if (mode !== 'fullscreen' || typeof window === 'undefined' || !window.visualViewport) return;
+    const el = terminalRef.current;
+    if (!el) return;
+    const vv = window.visualViewport;
+
+    const update = () => {
+      const bottom = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      el.style.setProperty('--vv-bottom', `${bottom}px`);
+    };
+
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    update();
+
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      el.style.removeProperty('--vv-bottom');
+    };
+  }, [mode]);
+
   // ── Called when an entry finishes typing ──
   const handleTypingDone = useCallback((entryId: string) => {
     setEntries((prev) =>

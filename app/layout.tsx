@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import OrientLock from "@/components/OrientLock";
 import "./globals.css";
+import "./darkroom-portal.css";
 
 const inter = Inter({
   subsets: ["latin"],

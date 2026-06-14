@@ -439,11 +439,15 @@
   z-index: 4;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 12px 0 12px 11px;
-  border-top: 1px solid #111;
-  border-left: 1px solid #2a3a4a;
+  gap: 10px;
+  margin: 14px -16px -14px;
+  padding: 14px 16px;
+  background: rgba(8, 12, 16, 0.92);
+  border-top: 1px solid rgba(74, 122, 138, 0.25);
+  border-left: none;
+  box-shadow:
+    0 -6px 24px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(74, 122, 138, 0.08);
   font-size: clamp(14px, 4vw, 17px);
 }
 
@@ -453,18 +457,27 @@
 
 .darkroom-chat-prompt {
   color: #4a7a8a;
+  font-weight: 500;
+  user-select: none;
 }
 
 .darkroom-chat-input {
   flex: 1;
-  background: transparent;
-  border: none;
-  color: #889898;
+  background: rgba(4, 7, 9, 0.7);
+  border: 1px solid rgba(74, 122, 138, 0.22);
+  border-radius: 5px;
+  color: #c0d0d0;
   font-family: inherit;
   font-size: 16px; /* Prevents iOS Safari auto-zoom on focus */
   outline: none;
-  padding: 0;
+  padding: 10px 12px;
   line-height: 1.5;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.darkroom-chat-input:focus {
+  border-color: rgba(74, 122, 138, 0.55);
+  box-shadow: 0 0 0 2px rgba(74, 122, 138, 0.1);
 }
 
 .darkroom-chat-input::placeholder {
@@ -474,6 +487,7 @@
 .darkroom-chat-cursor {
   color: #4a7a8a;
   animation: darkroomCursorBlink 1s infinite;
+  user-select: none;
 }
 
 /* Hide site nav/footer when in fullscreen chat mode */
@@ -537,8 +551,14 @@ body.darkroom-chat-active .back-to-top-btn {
   }
 
   .darkroom-chat-input-line {
-    margin: 0 0 32px;
-    padding: 14px 0 14px 11px;
+    margin: 16px 0 32px;
+    padding: 14px 16px;
+    background: rgba(8, 12, 16, 0.92);
+    border-top: 1px solid rgba(74, 122, 138, 0.25);
+    border-left: none;
+    box-shadow:
+      0 -6px 24px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(74, 122, 138, 0.08);
     font-size: 16px;
   }
 

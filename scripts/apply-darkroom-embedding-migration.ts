@@ -30,11 +30,13 @@ async function main() {
   // Drop and re-add only when empty; safe for initial setup.
   // If you already have embeddings stored, use ALTER COLUMN TYPE instead.
   await sql`ALTER TABLE darkroom_memories DROP COLUMN IF EXISTS embedding`;
-  await sql`ALTER TABLE darkroom_memories ADD COLUMN embedding vector(${dims})`;
+  await sql.query(`ALTER TABLE darkroom_memories ADD COLUMN embedding vector(${dims})`);
 
-  await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_embedding
+  await sql.query(
+    `CREATE INDEX IF NOT EXISTS idx_darkroom_memories_embedding
     ON darkroom_memories USING hnsw (embedding vector_cosine_ops)
-    WHERE embedding IS NOT NULL`;
+    WHERE embedding IS NOT NULL`
+  );
 
   console.log(`Applied darkroom_memories.embedding vector(${dims})`);
 }

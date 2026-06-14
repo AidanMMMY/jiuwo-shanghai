@@ -174,6 +174,10 @@ export async function pruneOldMemories(): Promise<void> {
 
 const VECTOR_DEDUP_THRESHOLD = 0.92;
 
+function formatVector(embedding: number[]): string {
+  return `[${embedding.join(',')}]`;
+}
+
 export async function storeMemory(
   memory: Omit<Memory, 'id' | 'created_at'>
 ): Promise<Memory> {
@@ -181,19 +185,23 @@ export async function storeMemory(
   await pruneOldMemories();
 
   const embedding = await generateEmbedding(memory.content);
-
+  const dims = getEmbeddingDimensions();
   const sql = getSql();
-  const result = await sql`
-    INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, embedding)
-    VALUES (
-      ${memory.content},
-      ${memory.keywords},
-      ${memory.confidence},
-      ${memory.source_lang},
-      ${embedding ? sql`${embedding}::vector(${getEmbeddingDimensions()})` : sql`NULL`}
-    )
-    RETURNING id, content, keywords, confidence, source_lang, created_at
-  `;
+
+  const result = embedding
+    ? await sql.query(
+        `INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, embedding)
+         VALUES ($1, $2, $3, $4, $5::vector(${dims}))
+         RETURNING id, content, keywords, confidence, source_lang, created_at`,
+        [memory.content, memory.keywords, memory.confidence, memory.source_lang, formatVector(embedding)]
+      )
+    : await sql.query(
+        `INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, embedding)
+         VALUES ($1, $2, $3, $4, NULL)
+         RETURNING id, content, keywords, confidence, source_lang, created_at`,
+        [memory.content, memory.keywords, memory.confidence, memory.source_lang]
+      );
+
   return result.rows[0] as Memory;
 }
 
@@ -210,15 +218,17 @@ export async function retrieveMemories(
   const vectorRows: (Memory & { score: number })[] = [];
 
   if (queryEmbedding) {
-    const vectorResult = await sql`
-      SELECT id, content, keywords, confidence, source_lang, created_at,
-        (1 - (embedding <=> ${queryEmbedding}::vector(${getEmbeddingDimensions()}))) AS score
+    const dims = getEmbeddingDimensions();
+    const vectorResult = await sql.query(
+      `SELECT id, content, keywords, confidence, source_lang, created_at,
+        (1 - (embedding <=> $1::vector(${dims}))) AS score
       FROM darkroom_memories
-      WHERE confidence >= ${MIN_MEMORY_CONFIDENCE}
+      WHERE confidence >= $2
         AND embedding IS NOT NULL
-      ORDER BY embedding <=> ${queryEmbedding}::vector(${getEmbeddingDimensions()})
-      LIMIT 10
-    `;
+      ORDER BY embedding <=> $1::vector(${dims})
+      LIMIT $3`,
+      [formatVector(queryEmbedding), MIN_MEMORY_CONFIDENCE, 10]
+    );
     vectorRows.push(...(vectorResult.rows as (Memory & { score: number })[]));
   }
 
@@ -308,14 +318,16 @@ export async function findSimilarMemory(
   // Try vector deduplication first.
   const embedding = await generateEmbedding(content);
   if (embedding) {
-    const result = await sql`
-      SELECT id, content, keywords, confidence, source_lang, created_at,
-        (1 - (embedding <=> ${embedding}::vector(${getEmbeddingDimensions()}))) AS similarity
+    const dims = getEmbeddingDimensions();
+    const result = await sql.query(
+      `SELECT id, content, keywords, confidence, source_lang, created_at,
+        (1 - (embedding <=> $1::vector(${dims}))) AS similarity
       FROM darkroom_memories
       WHERE embedding IS NOT NULL
-      ORDER BY embedding <=> ${embedding}::vector(${getEmbeddingDimensions()})
-      LIMIT 1
-    `;
+      ORDER BY embedding <=> $1::vector(${dims})
+      LIMIT 1`,
+      [formatVector(embedding)]
+    );
     if (result.rows.length > 0) {
       const row = result.rows[0] as Memory & { similarity: number };
       if (row.similarity >= VECTOR_DEDUP_THRESHOLD) {
@@ -358,6 +370,7 @@ export async function findSimilarMemory(
 export async function backfillMissingEmbeddings(batchSize: number = 50): Promise<number> {
   await ensureMemoriesTable();
   const sql = getSql();
+  const dims = getEmbeddingDimensions();
 
   const result = await sql`
     SELECT id, content
@@ -374,11 +387,12 @@ export async function backfillMissingEmbeddings(batchSize: number = 50): Promise
   for (const row of rows) {
     const embedding = await generateEmbedding(row.content);
     if (!embedding) continue;
-    await sql`
-      UPDATE darkroom_memories
-      SET embedding = ${embedding}::vector(${getEmbeddingDimensions()})
-      WHERE id = ${row.id}
-    `;
+    await sql.query(
+      `UPDATE darkroom_memories
+       SET embedding = $1::vector(${dims})
+       WHERE id = $2`,
+      [formatVector(embedding), row.id]
+    );
     updated++;
   }
   return updated;

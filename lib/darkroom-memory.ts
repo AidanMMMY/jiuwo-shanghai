@@ -1,4 +1,5 @@
 import { neon } from '@neondatabase/serverless';
+import { generateEmbedding } from './darkroom-embedding';
 
 // Lazy env check — same pattern as guestbook.ts and rsvp.ts
 function getSql() {
@@ -171,16 +172,26 @@ export async function pruneOldMemories(): Promise<void> {
   `;
 }
 
+const VECTOR_DEDUP_THRESHOLD = 0.92;
+
 export async function storeMemory(
   memory: Omit<Memory, 'id' | 'created_at'>
 ): Promise<Memory> {
   await ensureMemoriesTable();
   await pruneOldMemories();
 
+  const embedding = await generateEmbedding(memory.content);
+
   const sql = getSql();
   const result = await sql`
-    INSERT INTO darkroom_memories (content, keywords, confidence, source_lang)
-    VALUES (${memory.content}, ${memory.keywords}, ${memory.confidence}, ${memory.source_lang})
+    INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, embedding)
+    VALUES (
+      ${memory.content},
+      ${memory.keywords},
+      ${memory.confidence},
+      ${memory.source_lang},
+      ${embedding ? sql`${embedding}::vector(1536)` : sql`NULL`}
+    )
     RETURNING id, content, keywords, confidence, source_lang, created_at
   `;
   return result.rows[0] as Memory;
@@ -193,40 +204,82 @@ export async function retrieveMemories(
 ): Promise<Memory[]> {
   await ensureMemoriesTable();
   const sql = getSql();
-  const keywords = extractKeywords(query);
 
-  if (keywords.length === 0) {
-    const result = await sql`
-      SELECT id, content, keywords, confidence, source_lang, created_at
+  // ── Vector retrieval ──────────────────────────────────────────────────
+  const queryEmbedding = await generateEmbedding(query);
+  const vectorRows: (Memory & { score: number })[] = [];
+
+  if (queryEmbedding) {
+    const vectorResult = await sql`
+      SELECT id, content, keywords, confidence, source_lang, created_at,
+        (1 - (embedding <=> ${queryEmbedding}::vector(1536))) AS score
       FROM darkroom_memories
       WHERE confidence >= ${MIN_MEMORY_CONFIDENCE}
-      ORDER BY created_at DESC
-      LIMIT ${limit}
+        AND embedding IS NOT NULL
+      ORDER BY embedding <=> ${queryEmbedding}::vector(1536)
+      LIMIT 10
     `;
-    return result.rows as Memory[];
+    vectorRows.push(...(vectorResult.rows as (Memory & { score: number })[]));
   }
 
-  const result = await sql`
-    SELECT id, content, keywords, confidence, source_lang, created_at,
-      (
-        array_length(
-          ARRAY(SELECT UNNEST(keywords) INTERSECT SELECT UNNEST(${keywords}::text[])),
-          1
-        ) * 2.0 +
-        1.0 / (EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400.0 + 1.0)
-      ) as score
-    FROM darkroom_memories
-    WHERE confidence >= ${MIN_MEMORY_CONFIDENCE}
-      AND keywords && ${keywords}::text[]
-    ORDER BY score DESC
-    LIMIT ${limit}
-  `;
+  // ── Keyword retrieval (supplement / fallback) ─────────────────────────
+  const keywords = extractKeywords(query);
+  const keywordRows: (Memory & { score: number })[] = [];
 
-  if (result.rows.length > 0) {
-    return result.rows as Memory[];
+  if (keywords.length > 0) {
+    const keywordResult = await sql`
+      SELECT id, content, keywords, confidence, source_lang, created_at,
+        (
+          COALESCE(array_length(
+            ARRAY(SELECT UNNEST(keywords) INTERSECT SELECT UNNEST(${keywords}::text[])),
+            1
+          ), 0) * 2.0 +
+          1.0 / (EXTRACT(EPOCH FROM (NOW() - created_at)) / 86400.0 + 1.0)
+        ) AS score
+      FROM darkroom_memories
+      WHERE confidence >= ${MIN_MEMORY_CONFIDENCE}
+        AND keywords && ${keywords}::text[]
+      ORDER BY score DESC
+      LIMIT 10
+    `;
+    keywordRows.push(...(keywordResult.rows as (Memory & { score: number })[]));
   }
 
-  // Fallback: recent high-confidence memories
+  // ── Merge and rank ────────────────────────────────────────────────────
+  const seen = new Set<number>();
+  const merged = new Map<number, Memory & { score: number }>();
+
+  for (const row of vectorRows) {
+    merged.set(row.id, row);
+    seen.add(row.id);
+  }
+
+  for (const row of keywordRows) {
+    const existing = merged.get(row.id);
+    if (existing) {
+      existing.score += row.score * 0.5;
+    } else {
+      merged.set(row.id, row);
+    }
+  }
+
+  const ranked = Array.from(merged.values())
+    .map((row) => {
+      const days = Math.max(
+        0,
+        (Date.now() - new Date(row.created_at).getTime()) / 86400000
+      );
+      const recency = 1.0 / (days + 1.0);
+      return { ...row, score: row.score + recency * 0.1 };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+
+  if (ranked.length > 0) {
+    return ranked.map(({ score: _score, ...memory }) => memory);
+  }
+
+  // ── Final fallback: recent high-confidence memories ───────────────────
   const fallback = await sql`
     SELECT id, content, keywords, confidence, source_lang, created_at
     FROM darkroom_memories
@@ -244,8 +297,28 @@ export async function findSimilarMemory(
 ): Promise<Memory | null> {
   await ensureMemoriesTable();
   const sql = getSql();
-  const keywords = extractKeywords(content);
 
+  // Try vector deduplication first.
+  const embedding = await generateEmbedding(content);
+  if (embedding) {
+    const result = await sql`
+      SELECT id, content, keywords, confidence, source_lang, created_at,
+        (1 - (embedding <=> ${embedding}::vector(1536))) AS similarity
+      FROM darkroom_memories
+      WHERE embedding IS NOT NULL
+      ORDER BY embedding <=> ${embedding}::vector(1536)
+      LIMIT 1
+    `;
+    if (result.rows.length > 0) {
+      const row = result.rows[0] as Memory & { similarity: number };
+      if (row.similarity >= VECTOR_DEDUP_THRESHOLD) {
+        return row;
+      }
+    }
+  }
+
+  // Fallback to keyword Jaccard.
+  const keywords = extractKeywords(content);
   if (keywords.length === 0) return null;
 
   const result = await sql`
@@ -273,6 +346,35 @@ export async function findSimilarMemory(
     }
   }
   return null;
+}
+
+export async function backfillMissingEmbeddings(batchSize: number = 50): Promise<number> {
+  await ensureMemoriesTable();
+  const sql = getSql();
+
+  const result = await sql`
+    SELECT id, content
+    FROM darkroom_memories
+    WHERE embedding IS NULL
+    ORDER BY created_at ASC
+    LIMIT ${batchSize}
+  `;
+
+  const rows = result.rows as { id: number; content: string }[];
+  if (rows.length === 0) return 0;
+
+  let updated = 0;
+  for (const row of rows) {
+    const embedding = await generateEmbedding(row.content);
+    if (!embedding) continue;
+    await sql`
+      UPDATE darkroom_memories
+      SET embedding = ${embedding}::vector(1536)
+      WHERE id = ${row.id}
+    `;
+    updated++;
+  }
+  return updated;
 }
 
 export interface MemoryStats {

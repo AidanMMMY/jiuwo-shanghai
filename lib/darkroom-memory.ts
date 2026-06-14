@@ -276,7 +276,14 @@ export async function retrieveMemories(
     .slice(0, limit);
 
   if (ranked.length > 0) {
-    return ranked.map(({ score: _score, ...memory }) => memory);
+    return ranked.map(({ id, content, keywords, confidence, source_lang, created_at }) => ({
+      id,
+      content,
+      keywords,
+      confidence,
+      source_lang,
+      created_at,
+    }));
   }
 
   // ── Final fallback: recent high-confidence memories ───────────────────

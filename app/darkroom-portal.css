@@ -2,19 +2,31 @@
 
 .darkroom-portal,
 .darkroom-chat-fullscreen {
-  position: fixed;
-  inset: 0;
   background: #050505;
   color: #889898;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  overflow: hidden;
   z-index: 100;
+}
+
+.darkroom-portal {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.darkroom-chat-fullscreen {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
 .darkroom-portal::before,
 .darkroom-chat-fullscreen::before {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   background:
     radial-gradient(ellipse at 25% 15%, rgba(201, 100, 40, 0.14) 0%, transparent 45%),
@@ -26,7 +38,7 @@
 .darkroom-portal::after,
 .darkroom-chat-fullscreen::after {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   opacity: 0.05;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
@@ -36,7 +48,7 @@
 
 .darkroom-portal-scanlines,
 .darkroom-chat-scanlines {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.25) 2px, rgba(0,0,0,0.25) 3px);
   pointer-events: none;
@@ -61,14 +73,14 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 32px 28px 56px;
+  padding: max(32px, env(safe-area-inset-top)) 28px max(56px, env(safe-area-inset-bottom));
   max-width: 560px;
   margin: 0 auto;
 }
 
 @media (min-width: 768px) {
   .darkroom-portal-content {
-    padding: 48px 40px 72px;
+    padding: max(48px, env(safe-area-inset-top)) 40px max(72px, env(safe-area-inset-bottom));
   }
 }
 
@@ -238,10 +250,19 @@
   flex-direction: column;
 }
 
+.darkroom-chat-display {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 4;
+}
+
 .darkroom-chat-header {
   position: relative;
   z-index: 4;
-  padding: 18px 20px;
+  padding: max(18px, env(safe-area-inset-top)) 20px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -311,7 +332,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 20px 28px;
+  margin: 0 20px max(28px, env(safe-area-inset-bottom));
   padding: 14px 0;
   border-top: 1px solid #111;
   font-size: clamp(13px, 3.8vw, 16px);
@@ -340,6 +361,60 @@
 .darkroom-chat-cursor {
   color: #4a7a8a;
   animation: darkroomCursorBlink 1s infinite;
+}
+
+/* Desktop monitor frame for fullscreen chat */
+@media (min-width: 1024px) {
+  .darkroom-chat-fullscreen {
+    position: fixed;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    overflow: hidden;
+  }
+
+  .darkroom-chat-display {
+    width: min(1100px, calc(100vw - 96px));
+    height: min(760px, calc(100vh - 96px));
+    max-width: 1200px;
+    max-height: 800px;
+    border: 1px solid #2a3a4a;
+    border-radius: 12px;
+    background: #050505;
+    box-shadow:
+      0 0 0 1px #111,
+      0 32px 100px rgba(0, 0, 0, 0.9),
+      inset 0 0 80px rgba(74, 122, 138, 0.04);
+    overflow: hidden;
+  }
+
+  .darkroom-chat-display::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.18) 2px,
+      rgba(0, 0, 0, 0.18) 3px
+    );
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .darkroom-chat-header {
+    padding: 20px 32px;
+  }
+
+  .darkroom-chat-screen {
+    padding: 28px 36px;
+  }
+
+  .darkroom-chat-input-line {
+    margin: 0 36px 32px;
+  }
 }
 
 @keyframes darkroomCursorBlink {

@@ -406,18 +406,20 @@ export default function DarkroomChat({
   if (mode === 'fullscreen') {
     return (
       <div className={rootClass} ref={terminalRef}>
-        {/* Fullscreen header */}
-        <div className="darkroom-chat-header">
-          {onBack && (
-            <button className="darkroom-chat-back" onClick={onBack} type="button">
-              {isZh ? '← 返回' : '← Back'}
-            </button>
-          )}
-          {header}
-        </div>
+        <div className="darkroom-chat-display">
+          {/* Fullscreen header */}
+          <div className="darkroom-chat-header">
+            {onBack && (
+              <button className="darkroom-chat-back" onClick={onBack} type="button">
+                {isZh ? '← 返回' : '← Back'}
+              </button>
+            )}
+            {header}
+          </div>
 
-        <div className="darkroom-chat-screen" ref={scrollRef}>
-          {screenContent}
+          <div className="darkroom-chat-screen" ref={scrollRef}>
+            {screenContent}
+          </div>
         </div>
       </div>
     );

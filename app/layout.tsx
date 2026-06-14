@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Bodoni_Moda, Space_Mono } from "next/font/google";
+import { Inter, Bodoni_Moda, Space_Mono, Share_Tech_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import OrientLock from "@/components/OrientLock";
@@ -21,6 +21,12 @@ const spaceMono = Space_Mono({
   subsets: ["latin"],
   variable: "--font-space-mono",
   weight: ["400", "700"],
+});
+
+const shareTechMono = Share_Tech_Mono({
+  subsets: ["latin"],
+  variable: "--font-share-tech-mono",
+  weight: ["400"],
 });
 
 export const viewport: Viewport = {
@@ -110,7 +116,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${bodoni.variable} ${spaceMono.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${bodoni.variable} ${spaceMono.variable} ${shareTechMono.variable} font-sans antialiased`}>
         <OrientLock />
         <script
           dangerouslySetInnerHTML={{

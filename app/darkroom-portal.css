@@ -4,7 +4,8 @@
 .darkroom-chat-fullscreen {
   background: #050505;
   color: #889898;
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family: var(--font-share-tech-mono), "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  letter-spacing: 0.02em;
   z-index: 100;
 }
 
@@ -373,7 +374,7 @@
   font-size: clamp(14px, 4.2vw, 17px);
   line-height: 1.55;
   color: #b0c0c0;
-  padding: 4px 0 4px 10px;
+  padding: 4px 0 4px 11px;
   border-left: 1px solid #2a3a4a;
   white-space: pre-wrap;
   word-break: break-word;
@@ -440,8 +441,9 @@
   align-items: center;
   gap: 8px;
   margin: 0 16px 0;
-  padding: 12px 0;
+  padding: 12px 0 12px 11px;
   border-top: 1px solid #111;
+  border-left: 1px solid #2a3a4a;
   font-size: clamp(14px, 4vw, 17px);
 }
 
@@ -536,6 +538,7 @@ body.darkroom-chat-active .back-to-top-btn {
 
   .darkroom-chat-input-line {
     margin: 0 36px 32px;
+    padding: 14px 0 14px 11px;
     font-size: 16px;
   }
 

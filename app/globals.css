@@ -655,7 +655,7 @@ a:not([class*="no-link-style"]) {
 }
 
 .darkroom-intro-line {
-    font-family: var(--font-space-mono), monospace;
+    font-family: var(--font-share-tech-mono), var(--font-space-mono), monospace;
     font-size: 0.875rem;
     color: #a0a0a0;
     letter-spacing: 0.1em;
@@ -682,7 +682,7 @@ a:not([class*="no-link-style"]) {
 body.darkroom {
     background-color: #030303;
     color: #e8e8d0;
-    font-family: var(--font-space-mono), monospace;
+    font-family: var(--font-share-tech-mono), var(--font-space-mono), monospace;
     font-size: 0.9rem;
     overflow-x: hidden;
 }

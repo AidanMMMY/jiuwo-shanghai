@@ -248,6 +248,7 @@ export default function DarkroomChat({
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
+  const displayRef = useRef<HTMLDivElement>(null);
   const historyIdCounter = useRef(0);
   const pendingTimeRef = useRef<string>('');
 
@@ -333,26 +334,36 @@ export default function DarkroomChat({
     };
   }, [mode]);
 
-  // ── Keep input anchored just above the mobile keyboard ──
+  // ── Anchor the fullscreen chat display to the visual viewport (mobile keyboard) ──
   useEffect(() => {
     if (mode !== 'fullscreen' || typeof window === 'undefined' || !window.visualViewport) return;
-    const el = terminalRef.current;
-    if (!el) return;
+    const display = displayRef.current;
+    if (!display) return;
     const vv = window.visualViewport;
 
+    const isMobile = () => window.innerWidth < 1024;
+
     const update = () => {
-      const bottom = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      el.style.setProperty('--vv-bottom', `${bottom}px`);
+      if (!isMobile()) {
+        display.style.height = '';
+        return;
+      }
+      // Fit the chat display exactly into the visible viewport so the input
+      // bar stays right above the on-screen keyboard with no extra gap.
+      const visibleHeight = Math.round(vv.height);
+      display.style.height = `${visibleHeight}px`;
     };
 
     vv.addEventListener('resize', update);
     vv.addEventListener('scroll', update);
+    window.addEventListener('resize', update);
     update();
 
     return () => {
       vv.removeEventListener('resize', update);
       vv.removeEventListener('scroll', update);
-      el.style.removeProperty('--vv-bottom');
+      window.removeEventListener('resize', update);
+      display.style.height = '';
     };
   }, [mode]);
 
@@ -393,6 +404,15 @@ export default function DarkroomChat({
         terminalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     }, 350);
+  };
+
+  // ── When the input is focused, scroll the latest message into view ──
+  const handleInputFocus = () => {
+    setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
+    }, 250);
   };
 
   // ── Render helpers ──
@@ -440,6 +460,7 @@ export default function DarkroomChat({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
+          onFocus={handleInputFocus}
           onBlur={handleInputBlur}
           placeholder={isZh ? '输入指令...' : 'Enter command...'}
           disabled={loading}
@@ -456,7 +477,7 @@ export default function DarkroomChat({
   if (mode === 'fullscreen') {
     return (
       <div className={rootClass} ref={terminalRef}>
-        <div className="darkroom-chat-display">
+        <div className="darkroom-chat-display" ref={displayRef}>
           {/* Fullscreen header */}
           <div className="darkroom-chat-header">
             {onBack && (

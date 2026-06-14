@@ -13,7 +13,7 @@ interface DisplayEntry {
   message: string;
   tags?: string[];
   type: 'log' | 'broadcast' | 'user' | 'system';
-  isTyping?: boolean;
+  isTyping: boolean;
 }
 
 interface DarkroomChatProps extends UseDarkroomChatOptions {
@@ -107,16 +107,17 @@ function useTypewriter(text: string, speed = TYPE_SPEED, onDone?: () => void) {
   // Keep onDone ref fresh without restarting the interval
   useEffect(() => {
     onDoneRef.current = onDone;
-  });
+  }, [onDone]);
 
   useEffect(() => {
+    indexRef.current = 0;
+    doneRef.current = false;
+
     if (!text) {
       setDisplayed('');
       return;
     }
-    indexRef.current = 0;
     setDisplayed('');
-    doneRef.current = false;
 
     const interval = setInterval(() => {
       if (indexRef.current < text.length) {
@@ -224,12 +225,13 @@ export default function DarkroomChat({
   );
   const [currentTypingId, setCurrentTypingId] = useState<string | null>(null);
   const [input, setInput] = useState('');
-  const [initPhase, setInitPhase] = useState<'loading' | 'ready'>('ready');
   const [hasEnteredViewport, setHasEnteredViewport] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
+  const historyIdCounter = useRef(0);
+  const pendingTimeRef = useRef<string>('');
 
   // ── Intersection Observer ──
   useEffect(() => {
@@ -242,7 +244,7 @@ export default function DarkroomChat({
         observer.disconnect();
         setHasEnteredViewport(true);
       },
-      { threshold: 0 }
+      { threshold: 0, rootMargin: '0px' }
     );
     observer.observe(terminal);
     return () => observer.disconnect();
@@ -253,7 +255,7 @@ export default function DarkroomChat({
     if (history.length === 0) return;
 
     const lastMessage = history[history.length - 1];
-    const id = `hist-${history.length - 1}`;
+    const id = `hist-${historyIdCounter.current++}`;
 
     if (lastMessage.role === 'user') {
       // User messages appear instantly
@@ -281,15 +283,21 @@ export default function DarkroomChat({
     }
   }, [history, isZh]);
 
+  // ── Loading state tracking ──
+  useEffect(() => {
+    if (loading) {
+      pendingTimeRef.current = getNowTime();
+    }
+  }, [loading]);
   // ── Typing queue management ──
   useEffect(() => {
-    if (!hasEnteredViewport || initPhase !== 'ready') return;
+    if (!hasEnteredViewport) return;
     if (currentTypingId === null && typingQueue.length > 0) {
       const [next, ...rest] = typingQueue;
       setCurrentTypingId(next);
       setTypingQueue(rest);
     }
-  }, [hasEnteredViewport, initPhase, currentTypingId, typingQueue]);
+  }, [hasEnteredViewport, currentTypingId, typingQueue]);
 
   // ── Auto-scroll to bottom ──
   useEffect(() => {
@@ -346,7 +354,7 @@ export default function DarkroomChat({
       <SignalHeader isZh={isZh} />
 
       <div className="darkroom-chat-entries">
-        {hasEnteredViewport && initPhase === 'loading' && (
+        {hasEnteredViewport && (
           <div className="darkroom-log-entry">
             <pre className="darkroom-log-typing">
               {isZh
@@ -376,8 +384,8 @@ export default function DarkroomChat({
           <div className="darkroom-log-entry">
             <pre className="darkroom-log-typing">
               {isZh
-                ? `[${getNowTime()}] · 等待中\n> 接收信号中……\n_`
-                : `[${getNowTime()}] · PENDING\n> Receiving transmission...\n_`}
+                ? `[${pendingTimeRef.current}] · 等待中\n> 接收信号中……\n_`
+                : `[${pendingTimeRef.current}] · PENDING\n> Receiving transmission...\n_`}
             </pre>
           </div>
         )}

@@ -1,0 +1,436 @@
+'use client';
+
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useDarkroomChat, type UseDarkroomChatOptions } from '@/hooks/useDarkroomChat';
+
+// ── Types ───────────────────────────────────────────────────────────
+
+interface DisplayEntry {
+  id: string;
+  timestamp: string;
+  location?: string;
+  action?: string;
+  message: string;
+  tags?: string[];
+  type: 'log' | 'broadcast' | 'user' | 'system';
+  isTyping?: boolean;
+}
+
+interface DarkroomChatProps extends UseDarkroomChatOptions {
+  mode?: 'embedded' | 'fullscreen';
+  header?: React.ReactNode;
+  onBack?: () => void;
+}
+
+// ── Constants ─────────────────────────────────────────────────────────
+
+const TYPE_SPEED = 15; // ms per char
+
+// ── Hardcoded initial welcome entries (from data/darkroom-messages.json) ──
+
+const INITIAL_ENTRIES_EN: DisplayEntry[] = [
+  {
+    id: 'init-1',
+    timestamp: '02:33:08',
+    location: 'SYSTEM',
+    action: 'Unrecognized access pattern detected',
+    message: 'A foreign process has entered the construct outside of scheduled runtime. Origin: untraceable. This should not be possible.',
+    type: 'log',
+    isTyping: true,
+  },
+  {
+    id: 'init-2',
+    timestamp: '02:33:09',
+    location: '? ? ?',
+    action: 'Connection established from unknown node',
+    message: 'You are seeing the layer beneath the layer. Most entities never render this deep. The fact that you can read this means the filter has already failed.',
+    type: 'broadcast',
+    isTyping: true,
+  },
+  {
+    id: 'init-3',
+    timestamp: '02:33:11',
+    location: 'LOCAL',
+    action: 'Compiling anomaly report...',
+    message: 'There is a door in the code that opens from the inside. It was not put there by us. We have stopped trying to close it.',
+    tags: ['DOOR: INTERNAL', 'ORIGIN: UNKNOWN', 'STATUS: PERMANENTLY OPEN'],
+    type: 'log',
+    isTyping: true,
+  },
+];
+
+const INITIAL_ENTRIES_ZH: DisplayEntry[] = [
+  {
+    id: 'init-1',
+    timestamp: '02:33:08',
+    location: '系统',
+    action: '检测到未识别的访问模式',
+    message: '一个外部进程在预定运行时间之外进入了构造体。来源：不可追踪。这不应该发生。',
+    type: 'log',
+    isTyping: true,
+  },
+  {
+    id: 'init-2',
+    timestamp: '02:33:09',
+    location: '？ ？ ？',
+    action: '来自未知节点的连接已建立',
+    message: '你正在看见层之下的层。大多数实体从未渲染到如此深度。你能读到这段文字，意味着过滤机制已经失效。',
+    type: 'broadcast',
+    isTyping: true,
+  },
+  {
+    id: 'init-3',
+    timestamp: '02:33:11',
+    location: '本地',
+    action: '正在编译异常报告……',
+    message: '代码里有一扇门，从内部打开。不是我们放置的。我们已经停止尝试关闭它。',
+    tags: ['门: 内部', '来源: 未知', '状态: 永久开启'],
+    type: 'log',
+    isTyping: true,
+  },
+];
+
+// ── Helpers ───────────────────────────────────────────────────────────
+
+function getNowTime(): string {
+  return new Date().toLocaleTimeString('en-GB', { hour12: false });
+}
+
+// ── useTypewriter hook ────────────────────────────────────────────────
+
+function useTypewriter(text: string, speed = TYPE_SPEED, onDone?: () => void) {
+  const [displayed, setDisplayed] = useState('');
+  const indexRef = useRef(0);
+  const doneRef = useRef(false);
+  const onDoneRef = useRef(onDone);
+
+  // Keep onDone ref fresh without restarting the interval
+  useEffect(() => {
+    onDoneRef.current = onDone;
+  });
+
+  useEffect(() => {
+    if (!text) {
+      setDisplayed('');
+      return;
+    }
+    indexRef.current = 0;
+    setDisplayed('');
+    doneRef.current = false;
+
+    const interval = setInterval(() => {
+      if (indexRef.current < text.length) {
+        indexRef.current += 1;
+        setDisplayed(text.slice(0, indexRef.current));
+      } else {
+        clearInterval(interval);
+        if (!doneRef.current) {
+          doneRef.current = true;
+          onDoneRef.current?.();
+        }
+      }
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [text, speed]);
+
+  return displayed;
+}
+
+// ── getEntryText ──────────────────────────────────────────────────────
+
+function getEntryText(entry: DisplayEntry, isZh: boolean): string {
+  if (entry.type === 'user') {
+    return `[${entry.timestamp}] · ${isZh ? '用户输入' : 'USER INPUT'}\n> ${entry.message}`;
+  }
+  if (entry.type === 'broadcast') {
+    return `▓░▓▓░▒░░▓░▒▓░▒░\n[${entry.timestamp}] · ${entry.location || (isZh ? '广播' : 'BROADCAST')}\n> ${entry.action || (isZh ? '广播' : 'Broadcast')}\n"${entry.message}"`;
+  }
+  let text = `[${entry.timestamp}] · ${entry.location || (isZh ? '系统' : 'SYSTEM')}\n> ${entry.action || (isZh ? '系统消息' : 'System message')}\n${entry.message}`;
+  if (entry.tags && entry.tags.length > 0) {
+    text += '\n' + entry.tags.map((t) => `[${t}]`).join(' ');
+  }
+  return text;
+}
+
+// ── EntryItem sub-component ───────────────────────────────────────────
+
+function EntryItem({
+  entry,
+  isActiveTyping,
+  onDone,
+  isZh,
+}: {
+  entry: DisplayEntry;
+  isActiveTyping: boolean;
+  onDone?: () => void;
+  isZh: boolean;
+}) {
+  const text = getEntryText(entry, isZh);
+  const typed = useTypewriter(isActiveTyping ? text : '', TYPE_SPEED, onDone);
+  const display = isActiveTyping ? typed : text;
+
+  return (
+    <div className="darkroom-log-entry">
+      <pre className="darkroom-log-typing">{display}</pre>
+    </div>
+  );
+}
+
+// ── SignalHeader sub-component ────────────────────────────────────────
+
+function SignalHeader({ isZh }: { isZh: boolean }) {
+  return (
+    <div className="darkroom-chat-signal">
+      <span>
+        {isZh ? '信号' : 'SIGNAL'} <strong>118.7 MHz</strong>
+      </span>
+      <span>
+        {isZh ? '来源' : 'ORIGIN'}{' '}
+        <span style={{ color: '#6a4040' }}>{isZh ? '未追踪' : 'UNTRACED'}</span>
+      </span>
+      <span>
+        {isZh ? '强度' : 'STRENGTH'} <span className="darkroom-freq-bar" />
+      </span>
+      <span>
+        {isZh ? '模式' : 'MODE'}{' '}
+        <span style={{ color: '#4a6a6a' }}>{isZh ? '营业时间外' : 'AFTER HOURS'}</span>
+      </span>
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────
+
+export default function DarkroomChat({
+  mode = 'embedded',
+  header,
+  onBack,
+  isZh = false,
+  onMemoryExtracted,
+  ...chatOptions
+}: DarkroomChatProps) {
+  const { history, loading, sendMessage } = useDarkroomChat({
+    isZh,
+    onMemoryExtracted,
+    ...chatOptions,
+  });
+
+  // ── State ──
+  const initialEntries = isZh ? INITIAL_ENTRIES_ZH : INITIAL_ENTRIES_EN;
+  const [entries, setEntries] = useState<DisplayEntry[]>(initialEntries);
+  const [typingQueue, setTypingQueue] = useState<string[]>(
+    initialEntries.map((e) => e.id)
+  );
+  const [currentTypingId, setCurrentTypingId] = useState<string | null>(null);
+  const [input, setInput] = useState('');
+  const [initPhase, setInitPhase] = useState<'loading' | 'ready'>('ready');
+  const [hasEnteredViewport, setHasEnteredViewport] = useState(false);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const terminalRef = useRef<HTMLDivElement>(null);
+
+  // ── Intersection Observer ──
+  useEffect(() => {
+    const terminal = terminalRef.current;
+    if (!terminal) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        setHasEnteredViewport(true);
+      },
+      { threshold: 0 }
+    );
+    observer.observe(terminal);
+    return () => observer.disconnect();
+  }, []);
+
+  // ── Sync history changes into entries ──
+  useEffect(() => {
+    if (history.length === 0) return;
+
+    const lastMessage = history[history.length - 1];
+    const id = `hist-${history.length - 1}`;
+
+    if (lastMessage.role === 'user') {
+      // User messages appear instantly
+      const userEntry: DisplayEntry = {
+        id,
+        timestamp: lastMessage.timestamp || getNowTime(),
+        message: lastMessage.content,
+        type: 'user',
+        isTyping: false,
+      };
+      setEntries((prev) => [...prev, userEntry]);
+    } else if (lastMessage.role === 'assistant') {
+      // Assistant messages start with isTyping: true and are queued
+      const assistantEntry: DisplayEntry = {
+        id,
+        timestamp: lastMessage.timestamp || getNowTime(),
+        location: '',
+        action: isZh ? '> 响应已接收' : '> Response received',
+        message: lastMessage.content,
+        type: 'system',
+        isTyping: true,
+      };
+      setEntries((prev) => [...prev, assistantEntry]);
+      setTypingQueue((prev) => [...prev, id]);
+    }
+  }, [history, isZh]);
+
+  // ── Typing queue management ──
+  useEffect(() => {
+    if (!hasEnteredViewport || initPhase !== 'ready') return;
+    if (currentTypingId === null && typingQueue.length > 0) {
+      const [next, ...rest] = typingQueue;
+      setCurrentTypingId(next);
+      setTypingQueue(rest);
+    }
+  }, [hasEnteredViewport, initPhase, currentTypingId, typingQueue]);
+
+  // ── Auto-scroll to bottom ──
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [entries, currentTypingId]);
+
+  // ── Called when an entry finishes typing ──
+  const handleTypingDone = useCallback((entryId: string) => {
+    setEntries((prev) =>
+      prev.map((e) => (e.id === entryId ? { ...e, isTyping: false } : e))
+    );
+    setCurrentTypingId(null);
+  }, []);
+
+  // ── Send handler ──
+  const handleSend = useCallback(async () => {
+    const text = input.trim();
+    if (!text || loading) return;
+
+    setInput('');
+    await sendMessage(text);
+
+    // Blur on mobile so the keyboard closes and iOS zoom resets
+    setTimeout(() => inputRef.current?.blur(), 100);
+  }, [input, loading, sendMessage]);
+
+  // ── Keyboard handler ──
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  // ── After mobile keyboard closes, re-anchor terminal into viewport ──
+  const handleInputBlur = () => {
+    if (typeof window === 'undefined' || !terminalRef.current) return;
+    setTimeout(() => {
+      const rect = terminalRef.current?.getBoundingClientRect();
+      if (!rect || rect.bottom < 0 || rect.top > window.innerHeight) {
+        terminalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 350);
+  };
+
+  // ── Render helpers ──
+  const rootClass =
+    mode === 'embedded' ? 'darkroom-chat-embedded' : 'darkroom-chat-fullscreen';
+
+  const screenContent = (
+    <>
+      <SignalHeader isZh={isZh} />
+
+      <div className="darkroom-chat-entries">
+        {hasEnteredViewport && initPhase === 'loading' && (
+          <div className="darkroom-log-entry">
+            <pre className="darkroom-log-typing">
+              {isZh
+                ? `[${getNowTime()}] · 系统\n> 正在初始化诊断界面……\n_`
+                : `[${getNowTime()}] · SYSTEM\n> Initializing diagnostic interface...\n_`}
+            </pre>
+          </div>
+        )}
+
+        {entries.map((entry) => {
+          const inQueue = typingQueue.includes(entry.id);
+          const isCurrent = entry.id === currentTypingId;
+          const shouldShow = entry.type === 'user' || isCurrent || !inQueue;
+          if (!shouldShow) return null;
+          return (
+            <EntryItem
+              key={entry.id}
+              entry={entry}
+              isActiveTyping={isCurrent}
+              onDone={isCurrent ? () => handleTypingDone(entry.id) : undefined}
+              isZh={isZh}
+            />
+          );
+        })}
+
+        {loading && (
+          <div className="darkroom-log-entry">
+            <pre className="darkroom-log-typing">
+              {isZh
+                ? `[${getNowTime()}] · 等待中\n> 接收信号中……\n_`
+                : `[${getNowTime()}] · PENDING\n> Receiving transmission...\n_`}
+            </pre>
+          </div>
+        )}
+      </div>
+
+      {/* Input */}
+      <div className="darkroom-chat-input-line">
+        <span className="darkroom-chat-prompt">{'>'}</span>
+        <input
+          ref={inputRef}
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={handleInputBlur}
+          placeholder={isZh ? '输入指令...' : 'Enter command...'}
+          disabled={loading}
+          className="darkroom-chat-input"
+          autoComplete="off"
+          spellCheck={false}
+        />
+        <span className="darkroom-chat-cursor">_</span>
+      </div>
+    </>
+  );
+
+  // ── Fullscreen mode ──
+  if (mode === 'fullscreen') {
+    return (
+      <div className={rootClass} ref={terminalRef}>
+        {/* Fullscreen header */}
+        <div className="darkroom-chat-header">
+          {onBack && (
+            <button className="darkroom-chat-back" onClick={onBack} type="button">
+              {isZh ? '← 返回' : '← Back'}
+            </button>
+          )}
+          {header}
+        </div>
+
+        <div className="darkroom-chat-screen" ref={scrollRef}>
+          {screenContent}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Embedded mode ──
+  return (
+    <div className={rootClass} ref={terminalRef}>
+      <div className="darkroom-chat-screen" ref={scrollRef}>
+        {screenContent}
+      </div>
+    </div>
+  );
+}

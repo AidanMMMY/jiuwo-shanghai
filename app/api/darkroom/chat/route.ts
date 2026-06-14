@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
-import { getDarkroomData } from "@/lib/darkroom";
+import { getDarkroomData, matchKnownEntity } from "@/lib/darkroom";
 
-import { retrieveMemories } from "@/lib/darkroom-memory";
+import { retrieveMemories, searchMemoriesByKeyword } from "@/lib/darkroom-memory";
 import {
   getClientIp,
   hashIp,
@@ -142,11 +142,34 @@ export async function POST(req: NextRequest) {
     const activeTimeContext = isZh ? timeContextZh : timeContext;
 
     const userName = extractUserNameFromHistory(history, isZh) || extractExplicitName(message, isZh);
-    const nameContext = userName
-      ? isZh
+    let nameContext = "";
+    let recognitionContext = "";
+
+    if (userName) {
+      nameContext = isZh
         ? `[用户已表明身份：${userName}。称呼用户时请用这个名字；除非用户明确指代他人，否则不要将 ${userName} 当作第三方讨论。]`
-        : `[The user has identified themselves as: ${userName}. Use this name when addressing them; do not discuss ${userName} as a third party unless the user clearly refers to someone else.]`
-      : "";
+        : `[The user has identified themselves as: ${userName}. Use this name when addressing them; do not discuss ${userName} as a third party unless the user clearly refers to someone else.]`;
+
+      const entity = matchKnownEntity(userName);
+      if (entity) {
+        recognitionContext = isZh
+          ? `[识别：用户自称为「${entity.name}」，与知识库中的已知实体匹配（${entity.zhHint}）。请表现出恍然大悟，把这个身份自然接起来，并由此发散聊天。]`
+          : `[Recognition: the user identifies as "${entity.name}", matching a known entity in the knowledge base (${entity.enHint}). React with recognition, connect the identity naturally, and build the conversation from there.]`;
+      }
+
+      try {
+        const nameMemories = await searchMemoriesByKeyword(userName, 3);
+        if (nameMemories.length > 0) {
+          const memHeader = isZh
+            ? "=== 与这个名字相关的集体记忆 ==="
+            : "=== Collective memory traces related to this name ===";
+          const memFooter = isZh ? "=== 结束 ===" : "=== END ===";
+          recognitionContext += `\n\n${memHeader}\n${nameMemories.map((m) => `- ${m.content}`).join("\n")}\n\n${memFooter}`;
+        }
+      } catch (err) {
+        console.error("Name memory search error:", err);
+      }
+    }
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -180,8 +203,8 @@ export async function POST(req: NextRequest) {
     }
 
     const fullSystemPrompt = data.knowledgeBase
-      ? `${data.knowledgeBase}\n\n${SYSTEM_PROMPT}\n\n${activeTimeContext}${nameContext ? "\n" + nameContext : ""}`
-      : `${SYSTEM_PROMPT}\n\n${activeTimeContext}${nameContext ? "\n" + nameContext : ""}`;
+      ? `${data.knowledgeBase}\n\n${SYSTEM_PROMPT}\n\n${activeTimeContext}${nameContext ? "\n" + nameContext : ""}${recognitionContext ? "\n" + recognitionContext : ""}`
+      : `${SYSTEM_PROMPT}\n\n${activeTimeContext}${nameContext ? "\n" + nameContext : ""}${recognitionContext ? "\n" + recognitionContext : ""}`;
 
     // Retrieve relevant collective memories and inject into context
     let memoryBlock = "";

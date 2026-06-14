@@ -425,6 +425,28 @@ export async function getMemoryStats(): Promise<MemoryStats> {
   };
 }
 
+export async function searchMemoriesByKeyword(
+  keyword: string,
+  limit: number = 3
+): Promise<Memory[]> {
+  await ensureMemoriesTable();
+  const sql = getSql();
+  const pattern = `%${keyword}%`;
+  const result = await sql`
+    SELECT id, content, keywords, confidence, source_lang, created_at
+    FROM darkroom_memories
+    WHERE content ILIKE ${pattern}
+       OR ${keyword} = ANY(keywords)
+       OR EXISTS (
+         SELECT 1 FROM UNNEST(keywords) AS k
+         WHERE k ILIKE ${pattern}
+       )
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+  return result.rows as Memory[];
+}
+
 export async function getRecentMemories(limit: number = 20): Promise<Memory[]> {
   await ensureMemoriesTable();
   const sql = getSql();

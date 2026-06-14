@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import HomePage from '@/app/components/pages/HomePage';
+import DarkroomClassRestorer from '@/components/DarkroomClassRestorer';
 import { getHeroSlides, getJournalEntriesZh, getJournalEntriesZhDarkroom, getSiteDataZh, getUpcomingEventsZh } from '@/lib/data';
 import { getShanghaiWeather, getWeatherRecommendation } from '@/lib/weather';
 import { listEntries, countEntries } from '@/lib/guestbook';
@@ -52,20 +53,23 @@ export default async function Page() {
     : undefined;
 
   return (
-    <HomePage
-      site={site}
-      slides={slides}
-      entries={entries}
-      entriesDarkroom={entriesDarkroom}
-      journalTitle="最新动态"
-      guestbookEntries={guestbookEntries}
-      guestbookTotal={guestbookTotal}
-      guestbookLabels={guestbookLabels}
-      guestbookHref="/zh/guestbook"
-      weather={weather}
-      weatherRec={weatherRec}
-      isZh={true}
-      specialEventCard={specialEventCard}
-    />
+    <>
+      <DarkroomClassRestorer />
+      <HomePage
+        site={site}
+        slides={slides}
+        entries={entries}
+        entriesDarkroom={entriesDarkroom}
+        journalTitle="最新动态"
+        guestbookEntries={guestbookEntries}
+        guestbookTotal={guestbookTotal}
+        guestbookLabels={guestbookLabels}
+        guestbookHref="/zh/guestbook"
+        weather={weather}
+        weatherRec={weatherRec}
+        isZh={true}
+        specialEventCard={specialEventCard}
+      />
+    </>
   );
 }

@@ -51,12 +51,13 @@ export default function DarkroomPortal() {
   const [showChoices, setShowChoices] = useState(false);
 
   useEffect(() => {
-    const timers: NodeJS.Timeout[] = [];
+    const timers: ReturnType<typeof setTimeout>[] = [];
     lines.forEach((_, i) => {
       const timer = setTimeout(() => {
         setVisibleCount(i + 1);
         if (i === lines.length - 1) {
-          setTimeout(() => setShowChoices(true), 600);
+          const choiceTimer = setTimeout(() => setShowChoices(true), 600);
+          timers.push(choiceTimer);
         }
       }, i * LINE_DELAY);
       timers.push(timer);
@@ -122,7 +123,7 @@ export default function DarkroomPortal() {
           <div className="darkroom-portal-choices">
             <button
               type="button"
-              className="darkroom-portal-pill darkroom-portal-pill--blue"
+              className="darkroom-portal-pill blue"
               onClick={handleBluePill}
             >
               <span className="darkroom-portal-pill-dot" />
@@ -132,7 +133,7 @@ export default function DarkroomPortal() {
 
             <button
               type="button"
-              className="darkroom-portal-pill darkroom-portal-pill--red"
+              className="darkroom-portal-pill red"
               onClick={handleRedPill}
             >
               <span className="darkroom-portal-pill-dot" />

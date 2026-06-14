@@ -128,7 +128,7 @@ export async function markConversationsProcessed(ids: number[]): Promise<void> {
   await sql`
     UPDATE darkroom_conversations
     SET processed_for_memory = TRUE
-    WHERE id IN (${ids})
+    WHERE id = ANY(${ids}::int[])
   `;
 }
 
@@ -240,6 +240,45 @@ export async function retrieveMemories(
     LIMIT ${limit}
   `;
   return fallback.rows as Memory[];
+}
+
+export async function findSimilarMemory(
+  content: string,
+  sourceLang: 'en' | 'zh',
+  threshold: number = 0.65
+): Promise<Memory | null> {
+  await ensureMemoriesTable();
+  const sql = getSql();
+  const keywords = extractKeywords(content, sourceLang);
+
+  if (keywords.length === 0) return null;
+
+  const result = await sql`
+    SELECT id, content, keywords, confidence, source_lang, created_at,
+      (
+        COALESCE(
+          array_length(
+            ARRAY(SELECT UNNEST(keywords) INTERSECT SELECT UNNEST(${keywords}::text[])),
+            1
+          ),
+          0
+        )::float /
+        GREATEST(array_length(keywords, 1), ${keywords.length})
+      ) as similarity
+    FROM darkroom_memories
+    WHERE source_lang = ${sourceLang}
+      AND keywords && ${keywords}::text[]
+    ORDER BY similarity DESC
+    LIMIT 1
+  `;
+
+  if (result.rows.length > 0) {
+    const row = result.rows[0] as Memory & { similarity: number };
+    if (row.similarity >= threshold) {
+      return row;
+    }
+  }
+  return null;
 }
 
 export interface MemoryStats {

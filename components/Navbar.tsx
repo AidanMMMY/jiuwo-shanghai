@@ -69,7 +69,7 @@ export default function Navbar({
         setClickCount(0);
       }, 1000);
     }
-  }, [clickCount, toggleDarkroom]);
+  }, [clickCount, toggleDarkroom, isZh]);
 
   useEffect(() => {
     // Restore darkroom state on mount

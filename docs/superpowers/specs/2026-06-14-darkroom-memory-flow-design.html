@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Darkroom 对话记忆注入说明</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f5f5f0;
+      --gold: #c9a227;
+      --muted: #888;
+      --code-bg: #151515;
+      --border: #2a2a2a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 64px 24px;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin: 0 0 16px;
+      letter-spacing: -0.02em;
+    }
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin: 48px 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--fg);
+      margin: 32px 0 12px;
+    }
+    p { margin: 0 0 16px; }
+    ul, ol { margin: 0 0 20px; padding-left: 22px; }
+    li { margin-bottom: 8px; }
+    a {
+      color: var(--gold);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.3);
+    }
+    a:hover { border-bottom-color: var(--gold); }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      background: var(--code-bg);
+      color: var(--gold);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+      overflow-x: auto;
+      margin: 20px 0;
+    }
+    pre code {
+      background: transparent;
+      color: var(--fg);
+      padding: 0;
+      font-size: 0.85em;
+      line-height: 1.6;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 40px;
+    }
+    .note {
+      border-left: 3px solid var(--gold);
+      background: rgba(201, 162, 39, 0.06);
+      padding: 16px 20px;
+      margin: 24px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .ascii {
+      color: var(--muted);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.85em;
+      line-height: 1.5;
+      white-space: pre;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Darkroom 对话记忆注入说明</h1>
+    <p class="meta">JIUWO Shanghai · Dark Side 子系统文档</p>
+
+    <h2>三层记忆结构</h2>
+    <p>当前 Darkroom 终端的记忆系统分为三个层次，每层作用不同：</p>
+
+    <h3>1. 当前会话历史（Session History）</h3>
+    <ul>
+      <li><strong>位置：</strong>前端 <code>DarkroomTerminal.tsx</code> 的 <code>history</code> state</li>
+      <li><strong>生命周期：</strong>页面刷新即清空</li>
+      <li><strong>作用：</strong>让 AI 在同一次访问中记住最近 6 轮对话上下文</li>
+      <li><strong>注入方式：</strong>每次调用 <code>/api/darkroom/chat</code> 时，<code>history.slice(-6)</code> 被放在 system prompt 之后、当前消息之前</li>
+    </ul>
+
+    <h3>2. 原始对话记录（Conversations）</h3>
+    <ul>
+      <li><strong>位置：</strong>Neon Postgres <code>darkroom_conversations</code> 表</li>
+      <li><strong>生命周期：</strong>云端持久保存</li>
+      <li><strong>作用：</strong>保留每次访问的原始 user/assistant exchange，用于后续批量提取记忆</li>
+      <li><strong>写入时机：</strong>每次用户发送消息并得到 AI 回复后，前端调用 <code>/api/darkroom/extract</code>，后端先把 exchange 原样写入该表</li>
+    </ul>
+
+    <h3>3. 提取后的集体记忆（Memories）</h3>
+    <ul>
+      <li><strong>位置：</strong>Neon Postgres <code>darkroom_memories</code> 表</li>
+      <li><strong>生命周期：</strong>云端持久保存，每语言最多 500 条，旧记忆按置信度/时间淘汰</li>
+      <li><strong>作用：</strong>跨访问者共享的抽象痕迹，让 AI 在相关话题上自然引用前人留下的信号</li>
+      <li><strong>写入时机：</strong>当某语言的未处理对话累积到 <strong>2 条</strong>时，后端取出这 2 条对话，调用 DeepSeek 综合提取 0–3 条记忆，写入该表，并标记这 2 条对话为已处理</li>
+    </ul>
+
+    <h2>数据流</h2>
+    <pre class="ascii">用户输入
+  │
+  ▼
+DarkroomTerminal.tsx
+  │  ├─ 把 user message 加入本地 history
+  │  └─ 调用 /api/darkroom/chat（携带 history + 当前消息）
+  ▼
+app/api/darkroom/chat/route.ts
+  │  ├─ 拼接 system prompt + knowledge base
+  │  ├─ 用当前消息检索 darkroom_memories（最多 5 条相关记忆，置信度 ≥ 0.6）
+  │  ├─ 把检索到的记忆注入 system prompt
+  │  └─ 调用 DeepSeek 生成回复
+  ▼
+返回 assistant response
+  │
+  ▼
+DarkroomTerminal.tsx
+  │  ├─ 显示 assistant response
+  │  └─ 调用 /api/darkroom/extract
+  ▼
+app/api/darkroom/extract/route.ts
+  │  ├─ 把 user_message + assistant_response 写入 darkroom_conversations
+  │  └─ 检查未处理对话数量
+  │       └─ &gt;= 2 条：批量提取记忆 → 去重 → 写入 darkroom_memories → 标记已处理
+  │       └─ 每次最多处理 5 批 = 10 条对话（自动消化积压）
+  ▼
+下一位用户/下一轮对话</pre>
+
+    <h2>提取与去重规则</h2>
+
+    <h3>哪些内容会被提取</h3>
+    <p>满足以下任意一条的对话组合会被综合提取成记忆：</p>
+    <ul>
+      <li>用户对饮品、茶、酒、鸡尾酒、氛围或音乐的偏好、口味或观点</li>
+      <li>提到的与节点相关的任何人、事件或地点（包括昵称、伴侣、朋友、常客）</li>
+      <li>关于酒吧、街区或文化的有趣事实、故事或观察</li>
+      <li>用户行为中的重复主题或模式</li>
+      <li>与节点氛围相关的个人情绪状态（孤独、庆祝、怀旧、兴奋等）</li>
+      <li>用户的计划、意图或未来到访信号</li>
+      <li>用户对人、地点或事实提供的纠正或澄清</li>
+    </ul>
+
+    <h3>置信度门槛</h3>
+    <ul>
+      <li>可存储记忆的最低置信度：<strong>0.6</strong></li>
+      <li>检索记忆时的最低置信度：<strong>0.6</strong></li>
+    </ul>
+
+    <h3>去重机制</h3>
+    <p>存储新记忆前，会与已有记忆进行关键词重叠度计算。如果相似度 ≥ 65%，则跳过该记忆，避免同一事实被反复记录（例如大量重复的"Devil 是谁"）。</p>
+
+    <h2>为什么刷新后"不记得"刚才聊的内容？</h2>
+    <p>刷新页面会清空前端 <code>history</code> state。此时：</p>
+    <ul>
+      <li>原始对话已经写入 <code>darkroom_conversations</code>，但<strong>还没满 2 条</strong>，所以不会触发提取</li>
+      <li>即使已经提取成 <code>darkroom_memories</code>，它也是<strong>集体共享</strong>的抽象痕迹，不是个人聊天记录</li>
+      <li>除非下一条消息恰好命中这些记忆的关键词，否则 AI 不会主动提及</li>
+    </ul>
+    <div class="note">
+      如果希望同一个用户刷新后仍能继续完整对话，需要额外实现<strong>个人会话持久化</strong>（sessionId + 按 session 恢复 history），当前系统没有做这个。
+    </div>
+
+    <h2>如何查看当前数据</h2>
+    <p>部署后访问受保护的调试接口：</p>
+    <pre><code>curl -H "Authorization: Bearer &lt;DARKROOM_ADMIN_TOKEN&gt;" \
+  https://www.jiuwoshanghai.net/api/darkroom/admin</code></pre>
+    <p>或在浏览器直接打开：</p>
+    <pre><code>https://www.jiuwoshanghai.net/api/darkroom/admin?token=&lt;DARKROOM_ADMIN_TOKEN&gt;</code></pre>
+    <p>返回 <code>memories</code> 和 <code>conversations</code> 的统计与最近 20 条记录。</p>
+
+    <h2>关键文件</h2>
+    <ul>
+      <li><code>components/DarkroomTerminal.tsx</code>：前端 state、对话流、调用 extract</li>
+      <li><code>app/api/darkroom/chat/route.ts</code>：检索并注入记忆</li>
+      <li><code>app/api/darkroom/extract/route.ts</code>：存对话、批量提取记忆、去重</li>
+      <li><code>lib/darkroom-memory.ts</code>：数据库表操作、去重逻辑</li>
+      <li><code>data/darkroom-messages.json</code> / <code>data/darkroom-messages-zh.json</code>：system prompt 与 extraction prompt</li>
+    </ul>
+  </main>
+</body>
+</html>

@@ -9,6 +9,10 @@ function getSql() {
   return neon(url, { fullResults: true });
 }
 
+function hasDbUrl(): boolean {
+  return !!(process.env.POSTGRES_URL || process.env.GUESTBOOK_POSTGRES_URL || process.env.DATABASE_URL);
+}
+
 export const ALLOWED_STAMPS = ['monkey', 'pig', 'wolf', 'dog', 'bear'] as const;
 export type StampId = (typeof ALLOWED_STAMPS)[number];
 
@@ -87,6 +91,7 @@ export async function createEntry({
 }
 
 export async function listEntries(limit?: number): Promise<GuestbookEntry[]> {
+  if (!hasDbUrl()) return [];
   const sql = getSql();
   const result = limit
     ? await sql`
@@ -104,6 +109,7 @@ export async function listEntries(limit?: number): Promise<GuestbookEntry[]> {
 }
 
 export async function countEntries(): Promise<number> {
+  if (!hasDbUrl()) return 0;
   const sql = getSql();
   const result = await sql`SELECT COUNT(*) as count FROM guestbook_entries`;
   return Number((result.rows[0] as { count: number }).count);

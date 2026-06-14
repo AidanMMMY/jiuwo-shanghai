@@ -311,6 +311,11 @@
   letter-spacing: 0.16em;
   color: #5a4a18;
   font-family: var(--font-chakra), var(--font-share-tech-mono), monospace;
+  flex-shrink: 0;
+}
+
+.darkroom-chat-header-embedded {
+  justify-content: center;
 }
 
 .darkroom-chat-back {

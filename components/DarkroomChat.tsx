@@ -360,8 +360,6 @@ export default function DarkroomChat({
 
   const screenContent = (
     <>
-      {mode === 'embedded' && <SignalHeader isZh={isZh} />}
-
       <div className="darkroom-chat-entries">
         {entries.map((entry) => {
           const inQueue = typingQueue.includes(entry.id);
@@ -439,6 +437,9 @@ export default function DarkroomChat({
   // ── Embedded mode ──
   return (
     <div className={rootClass} ref={terminalRef}>
+      <div className="darkroom-chat-header darkroom-chat-header-embedded">
+        <SignalHeader isZh={isZh} />
+      </div>
       <div className="darkroom-chat-screen" ref={scrollRef}>
         {screenContent}
       </div>

@@ -74,7 +74,25 @@
   text-transform: uppercase;
 }
 
+.darkroom-portal-signal-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4a7a8a;
+  margin-right: 8px;
+  box-shadow: 0 0 8px rgba(74, 122, 138, 0.6);
+  animation: darkroomSignalPulse 2s infinite;
+}
+
+@keyframes darkroomSignalPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 .darkroom-portal-title {
+  display: flex;
+  flex-direction: column;
   color: #f5f5f0;
   font-size: clamp(32px, 10vw, 46px);
   font-weight: 700;
@@ -87,6 +105,10 @@
     -1px 0 rgba(48, 80, 128, 0.15);
 }
 
+.darkroom-portal-title span {
+  display: block;
+}
+
 .darkroom-portal-narrative {
   color: #6a7a7a;
   font-size: 12px;
@@ -96,16 +118,26 @@
   border-left: 1px solid #2a3a4a;
 }
 
+.darkroom-portal-line {
+  margin: 0;
+}
+
+.darkroom-portal-spacer {
+  height: 0.45em;
+  margin: 0;
+}
+
 .darkroom-portal-choices {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.darkroom-portal-choice {
+.darkroom-portal-pill {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
   padding: 14px 16px;
   border: 1px solid #1a2a3a;
   border-radius: 4px;
@@ -113,44 +145,54 @@
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: left;
-  width: 100%;
 }
 
-.darkroom-portal-choice:hover {
+.darkroom-portal-pill:hover {
   border-color: #4a7a8a;
   background: rgba(74, 122, 138, 0.08);
 }
 
-.darkroom-portal-pill {
+.darkroom-portal-pill.blue {
+  /* no extra styles needed, blue is default */
+}
+
+.darkroom-portal-pill.red {
+  border-color: rgba(176, 64, 48, 0.3);
+}
+
+.darkroom-portal-pill.red:hover {
+  border-color: rgba(176, 64, 48, 0.6);
+  background: rgba(176, 64, 48, 0.08);
+}
+
+.darkroom-portal-pill-dot {
   width: 14px;
   height: 22px;
   border-radius: 7px;
   flex-shrink: 0;
 }
 
-.darkroom-portal-pill.red {
-  background: linear-gradient(180deg, #b04030 0%, #4a1510 100%);
-  box-shadow: 0 0 12px rgba(176, 64, 48, 0.35);
-}
-
-.darkroom-portal-pill.blue {
+.darkroom-portal-pill.blue .darkroom-portal-pill-dot {
   background: linear-gradient(180deg, #305080 0%, #101830 100%);
   box-shadow: 0 0 12px rgba(48, 80, 128, 0.35);
 }
 
-.darkroom-portal-choice h4 {
+.darkroom-portal-pill.red .darkroom-portal-pill-dot {
+  background: linear-gradient(180deg, #b04030 0%, #4a1510 100%);
+  box-shadow: 0 0 12px rgba(176, 64, 48, 0.35);
+}
+
+.darkroom-portal-pill-label {
   color: #c0d0d0;
   font-size: 12px;
-  margin: 0 0 2px;
   letter-spacing: 0.04em;
   font-weight: 500;
 }
 
-.darkroom-portal-choice p {
+.darkroom-portal-pill-sub {
   color: #4a5a6a;
   font-size: 9px;
-  margin: 0;
-  line-height: 1.5;
+  margin-left: auto;
 }
 
 .darkroom-portal-input-line {

@@ -138,12 +138,13 @@ function getApiUrl(): string {
 export async function sendDarkroomMessage(
   message: string,
   history: ChatMessage[],
-  isZh?: boolean
-): Promise<{ content: string; source: string; timestamp: string }> {
+  isZh?: boolean,
+  knownName?: string
+): Promise<{ content: string; source: string; timestamp: string; recognizedName?: string | null }> {
   const res = await fetch(getApiUrl(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, history, isZh }),
+    body: JSON.stringify({ message, history, isZh, knownName }),
   });
 
   if (!res.ok) {

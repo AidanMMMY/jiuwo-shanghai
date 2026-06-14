@@ -8,6 +8,7 @@ function getNowTime(): string {
 }
 
 const MAX_STORED_MESSAGES = 20;
+const USERNAME_KEY = 'darkroom-username';
 
 export interface UseDarkroomChatOptions {
   isZh?: boolean;
@@ -23,15 +24,25 @@ export interface UseDarkroomChatReturn {
 export function useDarkroomChat({ isZh = false, onMemoryExtracted }: UseDarkroomChatOptions): UseDarkroomChatReturn {
   const [history, setHistory] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [knownName, setKnownName] = useState<string>(() => {
+    if (typeof window === 'undefined') return '';
+    try {
+      return window.localStorage.getItem(USERNAME_KEY) || '';
+    } catch {
+      return '';
+    }
+  });
 
   // Use refs to avoid stale closures and race conditions
   const historyRef = useRef(history);
   const loadingRef = useRef(loading);
+  const knownNameRef = useRef(knownName);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Keep refs in sync with state
   historyRef.current = history;
   loadingRef.current = loading;
+  knownNameRef.current = knownName;
 
   const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim();
@@ -52,11 +63,23 @@ export function useDarkroomChat({ isZh = false, onMemoryExtracted }: UseDarkroom
 
     try {
       // Pass the latest history including the user message
-      const res = await sendDarkroomMessage(trimmed, currentHistory, isZh);
+      const res = await sendDarkroomMessage(trimmed, currentHistory, isZh, knownNameRef.current);
       const assistantTimestamp = getNowTime();
       const assistantMessage: ChatMessage = { role: 'assistant', content: res.content, timestamp: assistantTimestamp };
 
       setHistory((prev) => [...prev, assistantMessage]);
+
+      // Persist recognized name so the AI doesn't ask again in this or future sessions
+      if (res.recognizedName && res.recognizedName !== knownNameRef.current) {
+        setKnownName(res.recognizedName);
+        try {
+          if (typeof window !== 'undefined') {
+            window.localStorage.setItem(USERNAME_KEY, res.recognizedName);
+          }
+        } catch {
+          // ignore storage errors
+        }
+      }
 
       // Abort any previous extract fetch before starting a new one
       if (abortControllerRef.current) {

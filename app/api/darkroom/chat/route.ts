@@ -126,6 +126,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { message, history = [] } = body;
+    const knownName = typeof body.knownName === "string" ? body.knownName : "";
     isZh = !!body.isZh;
 
     const data = getDarkroomData(isZh);
@@ -141,7 +142,7 @@ export async function POST(req: NextRequest) {
       : `[当前本地时间：${timeString}。JIUWO 当前非营业时间（周二至周日 19:00–02:00）。不要问假设用户此刻在店内的问题，比如「今晚跟谁一起喝酒」。问题转向人际关系、心情、近况或计划来访。]`;
     const activeTimeContext = isZh ? timeContextZh : timeContext;
 
-    const userName = extractUserNameFromHistory(history, isZh) || extractExplicitName(message, isZh);
+    const userName = knownName || extractUserNameFromHistory(history, isZh) || extractExplicitName(message, isZh);
     let identityReminder = "";
 
     if (userName) {
@@ -283,6 +284,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       content,
       source: "deepseek",
+      recognizedName: userName || null,
       usage: usage
         ? {
             prompt_tokens: usage.prompt_tokens,

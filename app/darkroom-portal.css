@@ -1,10 +1,12 @@
 /* Darkroom Portal & Full-screen Chat — Amber monochrome retro terminal */
 
+@import '@chinese-fonts/dyh/dist/SmileySans-Oblique/result.css';
+
 .darkroom-portal,
 .darkroom-chat-fullscreen {
   background: #080502;
   color: #a6882a;
-  font-family: var(--font-chakra), var(--font-share-tech-mono), "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family: var(--font-chakra), var(--font-share-tech-mono), 'Smiley Sans Oblique', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   letter-spacing: 0.04em;
   z-index: 100;
 }
@@ -128,7 +130,7 @@
   margin-bottom: clamp(28px, 4vh, 40px);
   padding-left: 14px;
   border-left: 1px solid rgba(166, 136, 42, 0.25);
-  font-family: var(--font-share-tech-mono), monospace;
+  font-family: var(--font-share-tech-mono), 'Smiley Sans Oblique', 'PingFang SC', monospace;
 }
 
 .darkroom-portal-line {
@@ -396,7 +398,7 @@
   white-space: pre-wrap;
   word-break: break-word;
   text-shadow: 0 0 6px rgba(166, 136, 42, 0.18);
-  font-family: var(--font-share-tech-mono), monospace;
+  font-family: var(--font-share-tech-mono), 'Smiley Sans Oblique', 'PingFang SC', monospace;
 }
 
 .darkroom-log-entry.user {
@@ -481,7 +483,7 @@
   border-bottom: 1px solid rgba(106, 138, 138, 0.25);
   border-radius: 0;
   color: #6a8a8a;
-  font-family: var(--font-share-tech-mono), monospace;
+  font-family: var(--font-share-tech-mono), 'Smiley Sans Oblique', 'PingFang SC', monospace;
   font-size: 16px; /* Prevents iOS Safari auto-zoom on focus */
   outline: none;
   padding: 6px 0;

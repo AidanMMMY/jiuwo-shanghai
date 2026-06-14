@@ -4,7 +4,7 @@
 .darkroom-chat-fullscreen {
   background: #080502;
   color: #a6882a;
-  font-family: var(--font-share-tech-mono), "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family: var(--font-chakra), var(--font-share-tech-mono), "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   letter-spacing: 0.04em;
   z-index: 100;
 }
@@ -108,7 +108,7 @@
   color: #c9a227;
   font-size: clamp(42px, 8vw, 72px);
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   line-height: 1.05;
   margin-bottom: clamp(20px, 3vh, 32px);
   text-shadow:
@@ -128,6 +128,7 @@
   margin-bottom: clamp(28px, 4vh, 40px);
   padding-left: 14px;
   border-left: 1px solid rgba(166, 136, 42, 0.25);
+  font-family: var(--font-share-tech-mono), monospace;
 }
 
 .darkroom-portal-line {
@@ -305,19 +306,21 @@
   gap: 12px;
   border-bottom: 1px solid rgba(166, 136, 42, 0.12);
   font-size: clamp(10px, 3vw, 12px);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   color: #5a4a18;
+  font-family: var(--font-chakra), var(--font-share-tech-mono), monospace;
 }
 
 .darkroom-chat-back {
   color: #8a7020;
   font-size: clamp(11px, 3.2vw, 13px);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   background: transparent;
   border: none;
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
+  font-family: var(--font-chakra), var(--font-share-tech-mono), monospace;
 }
 
 .darkroom-chat-back:hover {
@@ -393,10 +396,12 @@
   white-space: pre-wrap;
   word-break: break-word;
   text-shadow: 0 0 6px rgba(166, 136, 42, 0.18);
+  font-family: var(--font-share-tech-mono), monospace;
 }
 
 .darkroom-log-entry.user {
-  color: #c9a227;
+  color: #6a8a8a;
+  text-shadow: 0 0 6px rgba(106, 138, 138, 0.14);
 }
 
 .darkroom-log-entry.broadcast {

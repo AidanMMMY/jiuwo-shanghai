@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useDarkroomChat, type UseDarkroomChatOptions } from '@/hooks/useDarkroomChat';
-import type { ChatMessage } from '@/lib/darkroom';
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -236,45 +235,11 @@ export default function DarkroomChat({
   });
 
   // ── State ──
+  // ── State ──
   const initialEntries = isZh ? INITIAL_ENTRIES_ZH : INITIAL_ENTRIES_EN;
-
-  // Build the full entry list from hardcoded welcome entries + stored history.
-  // Stored assistant messages are queued for re-typing on refresh so the whole
-  // conversation replays in order instead of showing old messages instantly.
-  const buildInitialState = useCallback(
-    (hist: ChatMessage[]) => {
-      const historyEntries: DisplayEntry[] = hist.map((m, idx) => {
-        if (m.role === 'user') {
-          return {
-            id: `hist-user-${idx}`,
-            timestamp: m.timestamp || getNowTime(),
-            message: m.content,
-            type: 'user',
-            isTyping: false,
-          };
-        }
-        return {
-          id: `hist-assist-${idx}`,
-          timestamp: m.timestamp || getNowTime(),
-          location: '',
-          action: isZh ? '响应已接收' : 'Response received',
-          message: m.content,
-          type: 'system',
-          isTyping: true,
-        };
-      });
-      const allEntries = [...initialEntries, ...historyEntries];
-      const queue = allEntries.filter((e) => e.isTyping).map((e) => e.id);
-      return { allEntries, queue };
-    },
-    [initialEntries, isZh]
-  );
-
-  const [entries, setEntries] = useState<DisplayEntry[]>(() =>
-    buildInitialState(history).allEntries
-  );
-  const [typingQueue, setTypingQueue] = useState<string[]>(() =>
-    buildInitialState(history).queue
+  const [entries, setEntries] = useState<DisplayEntry[]>(initialEntries);
+  const [typingQueue, setTypingQueue] = useState<string[]>(
+    initialEntries.map((e) => e.id)
   );
   const [currentTypingId, setCurrentTypingId] = useState<string | null>(null);
   const [input, setInput] = useState('');
@@ -283,7 +248,6 @@ export default function DarkroomChat({
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
-  const historyLengthRef = useRef(history.length);
   const historyIdCounter = useRef(0);
   const pendingTimeRef = useRef<string>('');
 
@@ -307,9 +271,6 @@ export default function DarkroomChat({
   // ── Sync history changes into entries ──
   useEffect(() => {
     if (history.length === 0) return;
-    // Skip the initial load: we already built entries from the full history above.
-    if (history.length <= historyLengthRef.current) return;
-    historyLengthRef.current = history.length;
 
     const lastMessage = history[history.length - 1];
     const id = `hist-${historyIdCounter.current++}`;
@@ -446,10 +407,7 @@ export default function DarkroomChat({
         {entries.map((entry) => {
           const inQueue = typingQueue.includes(entry.id);
           const isCurrent = entry.id === currentTypingId;
-          // Show user messages immediately. Show non-typing messages immediately.
-          // For queued typing messages, only show the one currently being typed;
-          // the rest stay hidden so the conversation replays in order.
-          const shouldShow = entry.type === 'user' || !entry.isTyping || isCurrent;
+          const shouldShow = entry.type === 'user' || isCurrent || !inQueue;
           if (!shouldShow) return null;
           return (
             <EntryItem

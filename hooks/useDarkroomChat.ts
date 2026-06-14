@@ -7,39 +7,7 @@ function getNowTime(): string {
   return new Date().toLocaleTimeString('en-GB', { hour12: false });
 }
 
-const STORAGE_KEY = 'darkroom-chat-history';
 const MAX_STORED_MESSAGES = 20;
-
-function loadStoredHistory(): ChatMessage[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      return parsed.filter(
-        (m): m is ChatMessage =>
-          m &&
-          typeof m === 'object' &&
-          (m.role === 'user' || m.role === 'assistant') &&
-          typeof m.content === 'string' &&
-          typeof m.timestamp === 'string'
-      );
-    }
-  } catch {
-    // Ignore corrupted storage
-  }
-  return [];
-}
-
-function saveStoredHistory(history: ChatMessage[]): void {
-  if (typeof window === 'undefined') return;
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-MAX_STORED_MESSAGES)));
-  } catch {
-    // Storage may be unavailable or full; chat continues regardless
-  }
-}
 
 export interface UseDarkroomChatOptions {
   isZh?: boolean;
@@ -53,7 +21,7 @@ export interface UseDarkroomChatReturn {
 }
 
 export function useDarkroomChat({ isZh = false, onMemoryExtracted }: UseDarkroomChatOptions): UseDarkroomChatReturn {
-  const [history, setHistory] = useState<ChatMessage[]>(() => loadStoredHistory());
+  const [history, setHistory] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Use refs to avoid stale closures and race conditions
@@ -64,11 +32,6 @@ export function useDarkroomChat({ isZh = false, onMemoryExtracted }: UseDarkroom
   // Keep refs in sync with state
   historyRef.current = history;
   loadingRef.current = loading;
-
-  // Persist history across language switches (same tab only)
-  useEffect(() => {
-    saveStoredHistory(history);
-  }, [history]);
 
   const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim();

@@ -306,6 +306,15 @@ export default function DarkroomChat({
     }
   }, [entries, currentTypingId]);
 
+  // ── Hide site nav/footer when in fullscreen chat mode ──
+  useEffect(() => {
+    if (mode !== 'fullscreen') return;
+    document.body.classList.add('darkroom-chat-active');
+    return () => {
+      document.body.classList.remove('darkroom-chat-active');
+    };
+  }, [mode]);
+
   // ── Called when an entry finishes typing ──
   const handleTypingDone = useCallback((entryId: string) => {
     setEntries((prev) =>

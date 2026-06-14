@@ -3,6 +3,18 @@ import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
 import { getDarkroomData } from "@/lib/darkroom";
 
 import { retrieveMemories } from "@/lib/darkroom-memory";
+import {
+  getClientIp,
+  hashIp,
+  logSearch,
+  recentSearchCountForIp,
+  searchAndFormat,
+  shouldSearch,
+} from "@/lib/search";
+
+const SEARCH_ENABLED = process.env.DARKROOM_WEB_SEARCH_ENABLED === "true";
+const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
+const MAX_SEARCHES_PER_HOUR = 10;
 
 export async function POST(req: NextRequest) {
   let isZh = false;
@@ -70,8 +82,39 @@ export async function POST(req: NextRequest) {
       ? `${fullSystemPrompt}${memoryBlock}`
       : fullSystemPrompt;
 
+    // ── Web search augmentation (only for out-of-scope queries) ───────────
+    let searchBlock = "";
+    if (SEARCH_ENABLED && TAVILY_API_KEY && TAVILY_API_KEY !== "dummy-key-for-build") {
+      try {
+        const needsSearch = await shouldSearch(message, isZh);
+        if (needsSearch) {
+          const ip = getClientIp(req);
+          const ipHash = await hashIp(ip);
+          const recentSearches = await recentSearchCountForIp(ipHash, 60);
+
+          if (recentSearches < MAX_SEARCHES_PER_HOUR) {
+            const searchResult = await searchAndFormat(message, isZh, {
+              maxResults: 3,
+              searchDepth: "basic",
+            });
+            if (searchResult) {
+              searchBlock = `\n\n${searchResult.block}`;
+              await logSearch(ipHash, message, searchResult.resultsCount);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("[darkroom:chat] web search step failed:", err);
+        // Continue without search results
+      }
+    }
+
+    const systemPromptWithSearch = searchBlock
+      ? `${finalSystemPrompt}${searchBlock}`
+      : finalSystemPrompt;
+
     const messages = [
-      { role: "system" as const, content: finalSystemPrompt },
+      { role: "system" as const, content: systemPromptWithSearch },
       ...history.slice(-6).map((h: { role: string; content: string }) => ({
         role: h.role as "user" | "assistant",
         content: h.content,

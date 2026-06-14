@@ -246,14 +246,14 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #111;
-  font-size: 9px;
+  font-size: clamp(10px, 3vw, 12px);
   letter-spacing: 0.18em;
   color: #444;
 }
 
 .darkroom-chat-back {
   color: #4a7a8a;
-  font-size: 10px;
+  font-size: clamp(11px, 3.2vw, 13px);
   letter-spacing: 0.1em;
   background: transparent;
   border: none;
@@ -284,10 +284,10 @@
 }
 
 .darkroom-log-entry {
-  font-size: 12px;
-  line-height: 1.75;
+  font-size: clamp(14px, 4.2vw, 17px);
+  line-height: 1.8;
   color: #6a7a7a;
-  padding-left: 12px;
+  padding-left: 14px;
   border-left: 1px solid #2a3a4a;
   white-space: pre-wrap;
   word-break: break-word;
@@ -314,7 +314,7 @@
   margin: 0 20px 28px;
   padding: 14px 0;
   border-top: 1px solid #111;
-  font-size: 12px;
+  font-size: clamp(13px, 3.8vw, 16px);
 }
 
 .darkroom-chat-prompt {

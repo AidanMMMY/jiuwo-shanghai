@@ -23,8 +23,7 @@
   overflow-x: hidden;
 }
 
-.darkroom-portal::before,
-.darkroom-chat-fullscreen::before {
+.darkroom-portal::before {
   content: '';
   position: fixed;
   inset: 0;
@@ -35,8 +34,7 @@
   z-index: 1;
 }
 
-.darkroom-portal::after,
-.darkroom-chat-fullscreen::after {
+.darkroom-portal::after {
   content: '';
   position: fixed;
   inset: 0;
@@ -46,8 +44,33 @@
   z-index: 2;
 }
 
-.darkroom-portal-scanlines,
-.darkroom-chat-scanlines {
+/* Chat display background + overlays so the dark style fills the whole mobile screen */
+.darkroom-chat-display {
+  background: #050505;
+}
+
+.darkroom-chat-display::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 25% 15%, rgba(201, 100, 40, 0.14) 0%, transparent 45%),
+    radial-gradient(ellipse at 75% 70%, rgba(60, 80, 160, 0.14) 0%, transparent 45%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.darkroom-chat-display::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 2;
+}
+
+.darkroom-portal-scanlines {
   position: fixed;
   inset: 0;
   background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.25) 2px, rgba(0,0,0,0.25) 3px);
@@ -266,25 +289,65 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   border-bottom: 1px solid #111;
-  font-size: clamp(10px, 3vw, 12px);
-  letter-spacing: 0.18em;
+  font-size: clamp(11px, 3.2vw, 13px);
+  letter-spacing: 0.12em;
   color: #444;
 }
 
 .darkroom-chat-back {
   color: #4a7a8a;
-  font-size: clamp(11px, 3.2vw, 13px);
-  letter-spacing: 0.1em;
+  font-size: clamp(12px, 3.5vw, 14px);
+  letter-spacing: 0.08em;
   background: transparent;
   border: none;
   cursor: pointer;
   padding: 0;
+  flex-shrink: 0;
+}
+
+.darkroom-chat-signal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  color: #4a5a6a;
+  font-size: clamp(11px, 3.2vw, 13px);
+}
+
+.darkroom-chat-signal-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.darkroom-chat-signal-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4a7a8a;
+  box-shadow: 0 0 6px rgba(74, 122, 138, 0.6);
+  animation: darkroomSignalPulse 2s infinite;
+  flex-shrink: 0;
 }
 
 .darkroom-chat-signal strong {
   color: #4a7a8a;
-  font-weight: 400;
+  font-weight: 500;
+}
+
+.darkroom-chat-signal-sep {
+  color: #2a3a4a;
+}
+
+.darkroom-chat-signal-alert {
+  color: #8a5a4a;
+}
+
+.darkroom-chat-signal-mode {
+  color: #4a6a6a;
 }
 
 .darkroom-chat-screen {
@@ -305,18 +368,75 @@
 }
 
 .darkroom-log-entry {
-  font-size: clamp(14px, 4.2vw, 17px);
+  font-size: clamp(15px, 4.6vw, 18px);
   line-height: 1.8;
-  color: #6a7a7a;
-  padding-left: 14px;
-  border-left: 1px solid #2a3a4a;
+  color: #a0b0b0;
+  padding: 14px;
+  border-radius: 6px;
+  background: rgba(10, 15, 20, 0.42);
+  border-left: 2px solid #2a3a4a;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 .darkroom-log-entry.user {
-  color: #a0b0b0;
+  color: #f5f5f0;
   border-left-color: #4a7a8a;
+  background: rgba(74, 122, 138, 0.08);
+  margin-left: auto;
+  max-width: 92%;
+}
+
+.darkroom-log-entry.broadcast {
+  color: #b8a090;
+  border-left-color: #6a4040;
+  background: rgba(106, 64, 64, 0.08);
+}
+
+.darkroom-log-entry.pending {
+  color: #4a5a6a;
+  background: transparent;
+  border-left-color: transparent;
+}
+
+.darkroom-log-meta {
+  font-size: 0.78em;
+  color: #4a5a6a;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.darkroom-log-action {
+  color: #4a7a8a;
+  font-weight: 500;
+  font-size: 0.9em;
+  margin-bottom: 4px;
+}
+
+.darkroom-log-message {
+  color: inherit;
+}
+
+.darkroom-log-message a {
+  color: #4a7a8a;
+  text-decoration: underline;
+}
+
+.darkroom-log-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.darkroom-log-tag {
+  font-size: 0.72em;
+  color: #4a5a6a;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border: 1px solid #1f2f3f;
+  border-radius: 3px;
+  background: rgba(10, 15, 20, 0.5);
 }
 
 .darkroom-log-typing {
@@ -335,7 +455,7 @@
   margin: 0 20px max(28px, env(safe-area-inset-bottom));
   padding: 14px 0;
   border-top: 1px solid #111;
-  font-size: clamp(13px, 3.8vw, 16px);
+  font-size: clamp(15px, 4.2vw, 18px);
 }
 
 .darkroom-chat-prompt {
@@ -416,7 +536,7 @@ body.darkroom-chat-active .back-to-top-btn {
 
   .darkroom-chat-header {
     padding: 20px 32px;
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .darkroom-chat-screen {
@@ -425,11 +545,11 @@ body.darkroom-chat-active .back-to-top-btn {
 
   .darkroom-chat-input-line {
     margin: 0 36px 32px;
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .darkroom-log-entry {
-    font-size: clamp(15px, 1.25vw, 18px);
+    font-size: clamp(16px, 1.4vw, 20px);
     line-height: 1.85;
   }
 }

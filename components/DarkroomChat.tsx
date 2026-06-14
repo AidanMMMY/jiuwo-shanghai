@@ -140,18 +140,30 @@ function useTypewriter(text: string, speed = TYPE_SPEED, onDone?: () => void) {
 
 // ── getEntryText ──────────────────────────────────────────────────────
 
-function getEntryText(entry: DisplayEntry, isZh: boolean): string {
+function getEntryMeta(entry: DisplayEntry, isZh: boolean): string {
   if (entry.type === 'user') {
-    return `[${entry.timestamp}] · ${isZh ? '用户输入' : 'USER INPUT'}\n> ${entry.message}`;
+    return `[${entry.timestamp}] · ${isZh ? '用户输入' : 'USER INPUT'}`;
+  }
+  const location = entry.location || (isZh ? '系统' : 'SYSTEM');
+  return `[${entry.timestamp}] · ${location}`;
+}
+
+function getEntryAction(entry: DisplayEntry, isZh: boolean): string | null {
+  if (entry.type === 'user') return null;
+  if (entry.type === 'broadcast') {
+    return entry.action || (isZh ? '广播' : 'BROADCAST');
+  }
+  return entry.action || (isZh ? '系统消息' : 'System message');
+}
+
+function getEntryMessage(entry: DisplayEntry, isZh: boolean): string {
+  if (entry.type === 'user') {
+    return `> ${entry.message}`;
   }
   if (entry.type === 'broadcast') {
-    return `▓░▓▓░▒░░▓░▒▓░▒░\n[${entry.timestamp}] · ${entry.location || (isZh ? '广播' : 'BROADCAST')}\n> ${entry.action || (isZh ? '广播' : 'Broadcast')}\n"${entry.message}"`;
+    return `"${entry.message}"`;
   }
-  let text = `[${entry.timestamp}] · ${entry.location || (isZh ? '系统' : 'SYSTEM')}\n> ${entry.action || (isZh ? '系统消息' : 'System message')}\n${entry.message}`;
-  if (entry.tags && entry.tags.length > 0) {
-    text += '\n' + entry.tags.map((t) => `[${t}]`).join(' ');
-  }
-  return text;
+  return entry.message;
 }
 
 // ── EntryItem sub-component ───────────────────────────────────────────
@@ -167,36 +179,41 @@ function EntryItem({
   onDone?: () => void;
   isZh: boolean;
 }) {
-  const text = getEntryText(entry, isZh);
-  const typed = useTypewriter(isActiveTyping ? text : '', TYPE_SPEED, onDone);
-  const display = isActiveTyping ? typed : text;
+  const message = getEntryMessage(entry, isZh);
+  const typedMessage = useTypewriter(isActiveTyping ? message : '', TYPE_SPEED, onDone);
+  const displayMessage = isActiveTyping ? typedMessage : message;
+
+  const meta = getEntryMeta(entry, isZh);
+  const action = getEntryAction(entry, isZh);
+  const tags = entry.tags || [];
 
   return (
-    <div className="darkroom-log-entry">
-      <pre className="darkroom-log-typing">{display}</pre>
+    <div className={`darkroom-log-entry ${entry.type}`}>
+      <div className="darkroom-log-meta">{meta}</div>
+      {action && <div className="darkroom-log-action">{`> ${action}`}</div>}
+      <div className="darkroom-log-message">{displayMessage}</div>
+      {tags.length > 0 && (
+        <div className="darkroom-log-tags">
+          {tags.map((t) => (
+            <span key={t} className="darkroom-log-tag">{`[${t}]`}</span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 // ── SignalHeader sub-component ────────────────────────────────────────
 
-function SignalHeader({ isZh }: { isZh: boolean }) {
+function SignalHeader({ isZh, centered = false }: { isZh: boolean; centered?: boolean }) {
   return (
-    <div className="darkroom-chat-signal">
-      <span>
-        {isZh ? '信号' : 'SIGNAL'} <strong>118.7 MHz</strong>
-      </span>
-      <span>
-        {isZh ? '来源' : 'ORIGIN'}{' '}
-        <span style={{ color: '#6a4040' }}>{isZh ? '未追踪' : 'UNTRACED'}</span>
-      </span>
-      <span>
-        {isZh ? '强度' : 'STRENGTH'} <span className="darkroom-freq-bar" />
-      </span>
-      <span>
-        {isZh ? '模式' : 'MODE'}{' '}
-        <span style={{ color: '#4a6a6a' }}>{isZh ? '营业时间外' : 'AFTER HOURS'}</span>
-      </span>
+    <div className={`darkroom-chat-signal ${centered ? 'darkroom-chat-signal-center' : ''}`}>
+      <span className="darkroom-chat-signal-pulse" />
+      <strong>118.7 MHz</strong>
+      <span className="darkroom-chat-signal-sep">·</span>
+      <span className="darkroom-chat-signal-alert">{isZh ? '未追踪' : 'UNTRACED'}</span>
+      <span className="darkroom-chat-signal-sep">·</span>
+      <span className="darkroom-chat-signal-mode">{isZh ? '营业时间外' : 'AFTER HOURS'}</span>
     </div>
   );
 }
@@ -273,7 +290,7 @@ export default function DarkroomChat({
         id,
         timestamp: lastMessage.timestamp || getNowTime(),
         location: '',
-        action: isZh ? '> 响应已接收' : '> Response received',
+        action: isZh ? '响应已接收' : 'Response received',
         message: lastMessage.content,
         type: 'system',
         isTyping: true,
@@ -360,7 +377,7 @@ export default function DarkroomChat({
 
   const screenContent = (
     <>
-      <SignalHeader isZh={isZh} />
+      {mode === 'embedded' && <SignalHeader isZh={isZh} />}
 
       <div className="darkroom-chat-entries">
         {entries.map((entry) => {
@@ -423,6 +440,7 @@ export default function DarkroomChat({
                 {isZh ? '← 返回' : '← Back'}
               </button>
             )}
+            <SignalHeader isZh={isZh} centered />
             {header}
           </div>
 

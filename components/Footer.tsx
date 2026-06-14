@@ -10,8 +10,8 @@ export default function Footer({ site }: { site: SiteData }) {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c9a227]/40 to-transparent" />
 
       <div className="mx-auto max-w-7xl">
-        {/* Social icons */}
-        <div className="flex justify-center gap-6 mb-10">
+        {/* Social icons (hidden until accounts are active) */}
+        <div className="hidden justify-center gap-6 mb-10">
           {site.social.instagram && (
             <a
               href={site.social.instagram}

@@ -16,6 +16,29 @@ const SEARCH_ENABLED = process.env.DARKROOM_WEB_SEARCH_ENABLED === "true";
 const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 const MAX_SEARCHES_PER_HOUR = 10;
 
+function getShanghaiTime(): { date: Date; hour: number; minute: number; timeString: string } {
+  const now = new Date();
+  const shanghaiString = now.toLocaleString("en-US", {
+    timeZone: "Asia/Shanghai",
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const date = new Date(shanghaiString);
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  const timeString = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+  return { date, hour, minute, timeString };
+}
+
+function isJiuwoOpen(hour: number): boolean {
+  // Hours: Tue–Sun 19:00–02:00 (Shanghai)
+  return hour >= 19 || hour < 2;
+}
+
 export async function POST(req: NextRequest) {
   let isZh = false;
 
@@ -26,6 +49,16 @@ export async function POST(req: NextRequest) {
 
     const data = getDarkroomData(isZh);
     const SYSTEM_PROMPT = data.systemPrompt;
+
+    const { timeString, hour } = getShanghaiTime();
+    const open = isJiuwoOpen(hour);
+    const timeContext = open
+      ? `[Current local time: ${timeString}. JIUWO is open.]`
+      : `[Current local time: ${timeString}. JIUWO is currently CLOSED (hours: Tue–Sun 19:00–02:00). Do not ask questions that assume the user is in the bar right now, such as "who are you drinking with tonight?". Instead, ask about relationships, moods, recent stories, or future visits.]`;
+    const timeContextZh = open
+      ? `[当前本地时间：${timeString}。JIUWO 正在营业中。]`
+      : `[当前本地时间：${timeString}。JIUWO 当前非营业时间（周二至周日 19:00–02:00）。不要问假设用户此刻在店内的问题，比如「今晚跟谁一起喝酒」。问题转向人际关系、心情、近况或计划来访。]`;
+    const activeTimeContext = isZh ? timeContextZh : timeContext;
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -59,8 +92,8 @@ export async function POST(req: NextRequest) {
     }
 
     const fullSystemPrompt = data.knowledgeBase
-      ? `${data.knowledgeBase}\n\n${SYSTEM_PROMPT}`
-      : SYSTEM_PROMPT;
+      ? `${data.knowledgeBase}\n\n${SYSTEM_PROMPT}\n\n${activeTimeContext}`
+      : `${SYSTEM_PROMPT}\n\n${activeTimeContext}`;
 
     // Retrieve relevant collective memories and inject into context
     let memoryBlock = "";

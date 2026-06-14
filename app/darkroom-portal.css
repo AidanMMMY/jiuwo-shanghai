@@ -513,16 +513,16 @@ body.darkroom-chat-active .back-to-top-btn {
     inset: 0;
     align-items: center;
     justify-content: center;
-    padding: 48px;
+    padding: 40px;
     overflow: hidden;
   }
 
   .darkroom-chat-display {
-    width: min(1100px, calc(100vw - 96px));
-    height: min(760px, calc(100vh - 96px));
-    max-width: 1200px;
-    max-height: 800px;
-    border: 14px solid #0d0b06;
+    width: min(1500px, calc(100vw - 80px));
+    height: min(860px, calc(100vh - 80px));
+    max-width: 1600px;
+    max-height: 900px;
+    border: 16px solid #0d0b06;
     border-radius: 4px;
     background: #080502;
     box-shadow:
@@ -539,25 +539,25 @@ body.darkroom-chat-active .back-to-top-btn {
   }
 
   .darkroom-chat-header {
-    padding: 20px 32px;
+    padding: 22px 40px;
     font-size: 13px;
   }
 
   .darkroom-chat-screen {
-    padding: 28px 36px;
+    padding: 32px 44px;
   }
 
   .darkroom-chat-input-line {
-    margin: 16px 0 0;
-    padding: 14px 16px;
+    margin: 18px 0 0;
+    padding: 16px 40px;
     background: rgba(12, 10, 4, 0.92);
     border-top: 1px solid rgba(166, 136, 42, 0.18);
-    font-size: 16px;
+    font-size: 17px;
   }
 
   .darkroom-log-entry {
-    font-size: clamp(15px, 1.3vw, 19px);
-    line-height: 1.65;
+    font-size: clamp(16px, 1.3vw, 20px);
+    line-height: 1.7;
   }
 }
 

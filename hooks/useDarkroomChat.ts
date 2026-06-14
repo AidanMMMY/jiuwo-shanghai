@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { sendDarkroomMessage, type ChatMessage } from '@/lib/darkroom';
 
 function getNowTime(): string {
@@ -22,36 +22,66 @@ export function useDarkroomChat({ isZh = false, onMemoryExtracted }: UseDarkroom
   const [history, setHistory] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Use refs to avoid stale closures and race conditions
+  const historyRef = useRef(history);
+  const loadingRef = useRef(loading);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Keep refs in sync with state
+  historyRef.current = history;
+  loadingRef.current = loading;
+
   const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || loading) return;
+    if (!trimmed || loadingRef.current) return;
 
     const timestamp = getNowTime();
     const userMessage: ChatMessage = { role: 'user', content: trimmed, timestamp };
-    const newHistory = [...history, userMessage];
-    setHistory(newHistory);
+
+    // Use functional update to always work with latest history
+    let currentHistory: ChatMessage[] = [];
+    setHistory((prev) => {
+      currentHistory = [...prev, userMessage];
+      return currentHistory;
+    });
+
     setLoading(true);
+    loadingRef.current = true;
 
     try {
-      const res = await sendDarkroomMessage(trimmed, history, isZh);
+      // Pass the latest history including the user message
+      const res = await sendDarkroomMessage(trimmed, currentHistory, isZh);
       const assistantTimestamp = getNowTime();
       const assistantMessage: ChatMessage = { role: 'assistant', content: res.content, timestamp: assistantTimestamp };
-      setHistory([...newHistory, assistantMessage]);
 
-      // Fire-and-forget memory extraction
+      setHistory((prev) => [...prev, assistantMessage]);
+
+      // Abort any previous extract fetch before starting a new one
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
+      // Fire-and-forget memory extraction with abort/cleanup
       fetch('/api/darkroom/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userMessage: trimmed, assistantResponse: res.content, isZh }),
+        signal: abortControllerRef.current.signal,
       })
-        .then((r) => r.json())
+        .then((r) => {
+          if (!r.ok) {
+            throw new Error(`HTTP ${r.status}`);
+          }
+          return r.json();
+        })
         .then((json) => {
           if (json.stored > 0) {
             onMemoryExtracted?.(json.stored);
           }
         })
         .catch(() => {
-          // Extraction is optional — silently ignore failures
+          // Extraction is optional — silently ignore failures (including abort)
         });
     } catch (err) {
       const errorTimestamp = getNowTime();
@@ -60,11 +90,17 @@ export function useDarkroomChat({ isZh = false, onMemoryExtracted }: UseDarkroom
         content: err instanceof Error ? err.message : (isZh ? '信号丢失' : 'Signal lost'),
         timestamp: errorTimestamp,
       };
-      setHistory([...newHistory, errorMessage]);
+      setHistory((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
+      loadingRef.current = false;
     }
-  }, [history, loading, isZh, onMemoryExtracted]);
+  }, [isZh, onMemoryExtracted]);
+
+  // Cleanup abort controller on unmount
+  useEffect(() => () => {
+    abortControllerRef.current?.abort();
+  }, []);
 
   return { history, loading, sendMessage };
 }

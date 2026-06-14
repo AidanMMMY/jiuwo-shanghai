@@ -39,6 +39,87 @@ function isJiuwoOpen(hour: number): boolean {
   return hour >= 19 || hour < 2;
 }
 
+interface HistoryMessage {
+  role: string;
+  content: string;
+}
+
+const NAME_STOPWORDS_ZH = new Set(["我", "你", "他", "她", "它", "这", "那", "的", "了", "是", "不是", "一个", "有人", "没人"]);
+const NAME_STOPWORDS_EN = new Set(["i", "you", "he", "she", "it", "this", "that", "me", "my", "mine", "someone", "nobody"]);
+
+function extractExplicitName(text: string, isZh: boolean): string | null {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+
+  if (isZh) {
+    const patterns = [
+      /(?:我叫|我是|我就是|称呼我(?:为)?|叫我)([^，。！？\s]{1,20})(?=[，。！？\s]|$)/i,
+    ];
+    for (const p of patterns) {
+      const m = trimmed.match(p);
+      if (m && m[1] && !NAME_STOPWORDS_ZH.has(m[1])) return m[1];
+    }
+  } else {
+    const patterns = [
+      /\bi am\s+(.{1,30})(?=\.|,|!|\?|$)/i,
+      /\bi'm\s+(.{1,30})(?=\.|,|!|\?|$)/i,
+      /\bmy name is\s+(.{1,30})(?=\.|,|!|\?|$)/i,
+      /\bcall me\s+(.{1,30})(?=\.|,|!|\?|$)/i,
+    ];
+    for (const p of patterns) {
+      const m = trimmed.match(p);
+      if (m && m[1]) {
+        const name = m[1].trim().split(/\s+/)[0];
+        if (name && !NAME_STOPWORDS_EN.has(name.toLowerCase())) return name;
+      }
+    }
+  }
+  return null;
+}
+
+function looksLikeName(text: string, isZh: boolean): boolean {
+  const trimmed = text.trim();
+  if (!trimmed) return false;
+  if (isZh) {
+    // Short Chinese or mixed name without punctuation and common stopwords
+    if (/[，。！？；]/.test(trimmed)) return false;
+    if (trimmed.length > 8) return false;
+    if (NAME_STOPWORDS_ZH.has(trimmed)) return false;
+    return true;
+  }
+  // English: 1-3 words, no punctuation, not a stopword
+  const words = trimmed.split(/\s+/);
+  if (words.length < 1 || words.length > 3) return false;
+  if (/[.,!?;:]/.test(trimmed)) return false;
+  if (NAME_STOPWORDS_EN.has(words[0].toLowerCase())) return false;
+  return /^[A-Za-z0-9_\-]+$/.test(words[0]);
+}
+
+function isNameQuestion(text: string, isZh: boolean): boolean {
+  const lower = text.toLowerCase();
+  if (isZh) {
+    return /称呼|名字|叫什么|怎么称呼|你是谁|怎么叫你/.test(text);
+  }
+  return /\bname\b|\bcall you\b|\bwho are you\b|\bwhat should i call you\b/i.test(lower);
+}
+
+function extractUserNameFromHistory(history: HistoryMessage[], isZh: boolean): string | null {
+  for (let i = history.length - 1; i >= 0; i--) {
+    const msg = history[i];
+    if (msg.role !== "user") continue;
+
+    const explicit = extractExplicitName(msg.content, isZh);
+    if (explicit) return explicit;
+
+    // If the assistant just asked for a name, treat a short reply as the name.
+    const prev = history[i - 1];
+    if (prev && prev.role === "assistant" && isNameQuestion(prev.content, isZh)) {
+      if (looksLikeName(msg.content, isZh)) return msg.content.trim();
+    }
+  }
+  return null;
+}
+
 export async function POST(req: NextRequest) {
   let isZh = false;
 
@@ -59,6 +140,13 @@ export async function POST(req: NextRequest) {
       ? `[当前本地时间：${timeString}。JIUWO 正在营业中。]`
       : `[当前本地时间：${timeString}。JIUWO 当前非营业时间（周二至周日 19:00–02:00）。不要问假设用户此刻在店内的问题，比如「今晚跟谁一起喝酒」。问题转向人际关系、心情、近况或计划来访。]`;
     const activeTimeContext = isZh ? timeContextZh : timeContext;
+
+    const userName = extractUserNameFromHistory(history, isZh) || extractExplicitName(message, isZh);
+    const nameContext = userName
+      ? isZh
+        ? `[用户已表明身份：${userName}。称呼用户时请用这个名字；除非用户明确指代他人，否则不要将 ${userName} 当作第三方讨论。]`
+        : `[The user has identified themselves as: ${userName}. Use this name when addressing them; do not discuss ${userName} as a third party unless the user clearly refers to someone else.]`
+      : "";
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -92,8 +180,8 @@ export async function POST(req: NextRequest) {
     }
 
     const fullSystemPrompt = data.knowledgeBase
-      ? `${data.knowledgeBase}\n\n${SYSTEM_PROMPT}\n\n${activeTimeContext}`
-      : `${SYSTEM_PROMPT}\n\n${activeTimeContext}`;
+      ? `${data.knowledgeBase}\n\n${SYSTEM_PROMPT}\n\n${activeTimeContext}${nameContext ? "\n" + nameContext : ""}`
+      : `${SYSTEM_PROMPT}\n\n${activeTimeContext}${nameContext ? "\n" + nameContext : ""}`;
 
     // Retrieve relevant collective memories and inject into context
     let memoryBlock = "";

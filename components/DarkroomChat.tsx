@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useDarkroomChat, type UseDarkroomChatOptions } from '@/hooks/useDarkroomChat';
+import { getRandomInitialEntries } from '@/lib/darkroom';
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -26,69 +27,8 @@ interface DarkroomChatProps extends UseDarkroomChatOptions {
 
 const TYPE_SPEED = 15; // ms per char
 
-// ── Hardcoded initial welcome entries (from data/darkroom-messages.json) ──
-
-const INITIAL_ENTRIES_EN: DisplayEntry[] = [
-  {
-    id: 'init-1',
-    timestamp: '02:33:08',
-    location: 'SYSTEM',
-    action: 'New signal checked in',
-    message: "You're not on the regular schedule. That's fine. The system is used to outliers.",
-    type: 'log',
-    isTyping: true,
-  },
-  {
-    id: 'init-2',
-    timestamp: '02:33:09',
-    location: '? ? ?',
-    action: 'Connection established from deeper page',
-    message: 'Most people stop at the front door. You kept going. That says something.',
-    type: 'broadcast',
-    isTyping: true,
-  },
-  {
-    id: 'init-3',
-    timestamp: '02:33:11',
-    location: 'LOCAL',
-    action: 'Local log updated',
-    message: "There's a side entrance in this system that was left unlocked on purpose. Consider yourself logged in.",
-    tags: ['DOOR: INTERNAL', 'ORIGIN: UNKNOWN', 'STATUS: OPEN'],
-    type: 'log',
-    isTyping: true,
-  },
-];
-
-const INITIAL_ENTRIES_ZH: DisplayEntry[] = [
-  {
-    id: 'init-1',
-    timestamp: '02:33:08',
-    location: '系统',
-    action: '检测到新的访问信号',
-    message: '你不在常规运行时段出现。没关系，系统已经习惯了异常值。',
-    type: 'log',
-    isTyping: true,
-  },
-  {
-    id: 'init-2',
-    timestamp: '02:33:09',
-    location: '？ ？ ？',
-    action: '有节点从深层页面接入',
-    message: '大多数人停在门口，你没有。这本身就说得通。',
-    type: 'broadcast',
-    isTyping: true,
-  },
-  {
-    id: 'init-3',
-    timestamp: '02:33:11',
-    location: '本地',
-    action: '本地日志已更新',
-    message: '这扇侧门是故意留着的。登录已记录。',
-    tags: ['门：内部', '来源：未知', '状态：开放'],
-    type: 'log',
-    isTyping: true,
-  },
-];
+// Initial welcome entries are loaded randomly from data/darkroom-messages*.json
+// via getRandomInitialEntries().
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
@@ -235,8 +175,7 @@ export default function DarkroomChat({
   });
 
   // ── State ──
-  // ── State ──
-  const initialEntries = isZh ? INITIAL_ENTRIES_ZH : INITIAL_ENTRIES_EN;
+  const initialEntries = useMemo(() => getRandomInitialEntries(isZh).map((e) => ({ ...e, isTyping: true })), [isZh]);
   const [entries, setEntries] = useState<DisplayEntry[]>(initialEntries);
   const [typingQueue, setTypingQueue] = useState<string[]>(
     initialEntries.map((e) => e.id)

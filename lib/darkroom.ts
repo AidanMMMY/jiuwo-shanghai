@@ -9,10 +9,12 @@ export interface DarkroomEntry {
   message: string;
   tags?: string[];
   type: "log" | "broadcast";
+  isTyping?: boolean;
 }
 
 export interface DarkroomData {
   initialEntries: DarkroomEntry[];
+  initialEntrySets?: DarkroomEntry[][];
   knowledgeBase: string;
   systemPrompt: string;
   extractionPrompt: string;
@@ -21,6 +23,13 @@ export interface DarkroomData {
 
 export function getDarkroomData(isZh?: boolean): DarkroomData {
   return (isZh ? darkroomDataZh : darkroomData) as DarkroomData;
+}
+
+export function getRandomInitialEntries(isZh?: boolean): DarkroomEntry[] {
+  const data = getDarkroomData(isZh);
+  const sets = data.initialEntrySets?.length ? data.initialEntrySets : [data.initialEntries];
+  const idx = Math.floor(Math.random() * sets.length);
+  return sets[idx];
 }
 
 export interface ChatMessage {

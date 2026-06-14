@@ -142,32 +142,36 @@ export async function POST(req: NextRequest) {
     const activeTimeContext = isZh ? timeContextZh : timeContext;
 
     const userName = extractUserNameFromHistory(history, isZh) || extractExplicitName(message, isZh);
-    let nameContext = "";
-    let recognitionContext = "";
+    let identityReminder = "";
 
     if (userName) {
-      nameContext = isZh
-        ? `[用户已表明身份：${userName}。称呼用户时请用这个名字；除非用户明确指代他人，否则不要将 ${userName} 当作第三方讨论。]`
-        : `[The user has identified themselves as: ${userName}. Use this name when addressing them; do not discuss ${userName} as a third party unless the user clearly refers to someone else.]`;
-
       const entity = matchKnownEntity(userName);
-      if (entity) {
-        recognitionContext = isZh
-          ? `[识别：用户自称为「${entity.name}」，与知识库中的已知实体匹配（${entity.zhHint}）。请表现出恍然大悟，把这个身份自然接起来，并由此发散聊天。]`
-          : `[Recognition: the user identifies as "${entity.name}", matching a known entity in the knowledge base (${entity.enHint}). React with recognition, connect the identity naturally, and build the conversation from there.]`;
-      }
-
+      const nameMemories = [];
       try {
-        const nameMemories = await searchMemoriesByKeyword(userName, 3);
-        if (nameMemories.length > 0) {
-          const memHeader = isZh
-            ? "=== 与这个名字相关的集体记忆 ==="
-            : "=== Collective memory traces related to this name ===";
-          const memFooter = isZh ? "=== 结束 ===" : "=== END ===";
-          recognitionContext += `\n\n${memHeader}\n${nameMemories.map((m) => `- ${m.content}`).join("\n")}\n\n${memFooter}`;
-        }
+        const found = await searchMemoriesByKeyword(userName, 3);
+        nameMemories.push(...found);
       } catch (err) {
         console.error("Name memory search error:", err);
+      }
+
+      if (isZh) {
+        identityReminder = `[重要：用户已表明身份为「${userName}」。你必须用这个名字称呼用户，绝对不要再问「你是谁」「该怎么称呼你」或任何类似问题。`;
+        if (entity) {
+          identityReminder += ` 这个名字与知识库中的已知实体「${entity.name}」匹配（${entity.zhHint}）。请表现出恍然大悟，把用户当作这个身份本人来聊，引用对应描述或痕迹，并由此发散。`;
+        }
+        identityReminder += ` 除非用户明确指代别人，否则不要将 ${userName} 当作第三方讨论。]`;
+        if (nameMemories.length > 0) {
+          identityReminder += `\n\n=== 与这个名字相关的集体记忆 ===\n${nameMemories.map((m) => `- ${m.content}`).join("\n")}\n\n=== 结束 ===`;
+        }
+      } else {
+        identityReminder = `[IMPORTANT: The user has identified themselves as "${userName}". You MUST use this name when addressing them and NEVER ask "who are you", "what should I call you", or any similar identity question again.`;
+        if (entity) {
+          identityReminder += ` This name matches a known entity in the knowledge base: "${entity.name}" (${entity.enHint}). React with recognition, treat the user as that identity, reference the matching description or trace, and build the conversation outward from there.`;
+        }
+        identityReminder += ` Do not discuss ${userName} as a third party unless the user clearly refers to someone else.]`;
+        if (nameMemories.length > 0) {
+          identityReminder += `\n\n=== Collective memory traces related to this name ===\n${nameMemories.map((m) => `- ${m.content}`).join("\n")}\n\n=== END ===`;
+        }
       }
     }
 
@@ -203,8 +207,8 @@ export async function POST(req: NextRequest) {
     }
 
     const fullSystemPrompt = data.knowledgeBase
-      ? `${data.knowledgeBase}\n\n${SYSTEM_PROMPT}\n\n${activeTimeContext}${nameContext ? "\n" + nameContext : ""}${recognitionContext ? "\n" + recognitionContext : ""}`
-      : `${SYSTEM_PROMPT}\n\n${activeTimeContext}${nameContext ? "\n" + nameContext : ""}${recognitionContext ? "\n" + recognitionContext : ""}`;
+      ? `${data.knowledgeBase}\n\n${SYSTEM_PROMPT}\n\n${activeTimeContext}`
+      : `${SYSTEM_PROMPT}\n\n${activeTimeContext}`;
 
     // Retrieve relevant collective memories and inject into context
     let memoryBlock = "";
@@ -254,8 +258,8 @@ export async function POST(req: NextRequest) {
     }
 
     const systemPromptWithSearch = searchBlock
-      ? `${finalSystemPrompt}${searchBlock}`
-      : finalSystemPrompt;
+      ? `${finalSystemPrompt}${searchBlock}${identityReminder ? "\n\n" + identityReminder : ""}`
+      : `${finalSystemPrompt}${identityReminder ? "\n\n" + identityReminder : ""}`;
 
     const messages = [
       { role: "system" as const, content: systemPromptWithSearch },

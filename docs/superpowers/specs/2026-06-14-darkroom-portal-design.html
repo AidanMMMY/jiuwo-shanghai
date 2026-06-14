@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Darkroom Portal 彩蛋入口 + 独立对话页设计</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f5f5f0;
+      --gold: #c9a227;
+      --muted: #888;
+      --code-bg: #151515;
+      --border: #2a2a2a;
+      --cyan: #4a7a8a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 64px 24px;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin: 0 0 16px;
+      letter-spacing: -0.02em;
+    }
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin: 48px 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--fg);
+      margin: 32px 0 12px;
+    }
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--cyan);
+      margin: 24px 0 10px;
+    }
+    p { margin: 0 0 16px; }
+    ul, ol { margin: 0 0 20px; padding-left: 22px; }
+    li { margin-bottom: 8px; }
+    a {
+      color: var(--gold);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.3);
+    }
+    a:hover { border-bottom-color: var(--gold); }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      background: var(--code-bg);
+      color: var(--gold);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+      overflow-x: auto;
+      margin: 20px 0;
+    }
+    pre code {
+      background: transparent;
+      color: var(--fg);
+      padding: 0;
+      font-size: 0.85em;
+      line-height: 1.6;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 40px;
+    }
+    .note {
+      border-left: 3px solid var(--gold);
+      background: rgba(201, 162, 39, 0.06);
+      padding: 16px 20px;
+      margin: 24px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .ascii {
+      color: var(--muted);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.85em;
+      line-height: 1.5;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.9em;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+    }
+    th {
+      background: var(--code-bg);
+      color: var(--gold);
+      font-weight: 600;
+    }
+    td code { font-size: 0.85em; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Darkroom Portal：彩蛋入口 + 独立对话页设计</h1>
+    <p class="meta">JIUWO Shanghai · Dark Side 子系统文档</p>
+
+    <h2>目标</h2>
+    <p>为 Dark Side（Darkroom）模式增加一个独立的彩蛋入口页。用户每次切换到 darkroom 模式后，先进入一个独立的"选择界面"，然后分流到：</p>
+    <ul>
+      <li><strong>蓝药丸</strong>：进入现有的 Dark Side 首页（表层构造）</li>
+      <li><strong>红药丸</strong>：进入全新的全屏对话终端页（未注册对话扇区）</li>
+    </ul>
+    <p>同时，新对话页提供比首页嵌入式对话框更沉浸、更专注的体验，并保留返回 Dark Side 首页的入口。</p>
+
+    <h2>设计方向</h2>
+    <p>视觉风格参考 <strong>Blade Runner 2049 + 复古 CRT 终端</strong>：</p>
+    <ul>
+      <li>黑底 + 低饱和度橙/蓝环境光雾（haze）</li>
+      <li>轻微的全息故障感（glitch text shadow）</li>
+      <li>CRT 扫描线和噪点纹理</li>
+      <li>巨大标题 + 极简选项</li>
+      <li>底部反射/潮湿感微光</li>
+    </ul>
+    <div class="note">
+      高亮色采用<strong>冷青色 #4a7a8a</strong>（方案 3），用于系统提示符、信号文字、hover 边框等。药丸保持电影感的暗红/深蓝。
+    </div>
+
+    <h2>入口彩蛋页</h2>
+
+    <h3>触发时机</h3>
+    <p>每次用户切换到 <code>body.darkroom</code> 模式后，不直接渲染首页，而是先进入彩蛋入口页。选择后通过客户端路由跳转，浏览器后退不可撤销选择（但对话页提供返回首页的入口）。</p>
+
+    <h3>URL</h3>
+    <ul>
+      <li>EN: <code>/darkroom/portal</code></li>
+      <li>ZH: <code>/zh/darkroom/portal</code></li>
+    </ul>
+
+    <h3>页面结构</h3>
+    <pre class="ascii">┌─────────────────────────┐
+│  SIGNAL 118.7 MHz       │  ← 顶部信号条，小字
+│  ORIGIN UNTRACED        │
+│  MODE AFTER HOURS       │
+├─────────────────────────┤
+│                         │
+│  THE                    │  ← 巨大标题
+│  OTHER                  │
+│  SIDE                   │
+│                         │
+│  你正在看见层之下的层。  │  ← 叙事文字，逐行打字
+│  大多数实体从未...       │
+│  过滤器已经失效。        │
+│                         │
+│  [●] 蓝药丸 · 进入表层   │  ← 两个药丸选项
+│       Dark Side 主页     │
+│                         │
+│  [●] 红药丸 · 接入信号   │
+│       未注册对话扇区     │
+│                         │
+├─────────────────────────┤
+│  &gt; 等待选择... _         │  ← 终端输入行
+├─────────────────────────┤
+│  SHANGHAI  JULU RD  2026│  ← 底部 footer
+└─────────────────────────┘</pre>
+
+    <h3>行为</h3>
+    <ol>
+      <li>页面加载后，信号条和标题淡入</li>
+      <li>叙事文字以打字机效果逐行显示（复用现有 <code>useTypewriter</code>）</li>
+      <li>叙事完成后，两个药丸选项从下方滑入/淡入</li>
+      <li>用户点击药丸后，路由跳转：</li>
+    </ol>
+    <ul>
+      <li>蓝药丸 → <code>/</code> 或 <code>/zh</code>（带 <code>darkroom</code> class）</li>
+      <li>红药丸 → <code>/darkroom/chat</code> 或 <code>/zh/darkroom/chat</code></li>
+    </ul>
+
+    <h3>视觉细节</h3>
+    <ul>
+      <li>背景：<code>#050505</code> + 橙/蓝径向渐变 haze + 噪点 + 扫描线</li>
+      <li>标题：<code>38px</code>、字重 700、行高 1.05、轻微红/蓝 text-shadow 制造 glitch</li>
+      <li>叙事文字：<code>12px</code>、冷灰色、左侧 1px 边框</li>
+      <li>药丸：<code>14×22px</code>、圆角 <code>7px</code>、暗红/深蓝渐变、微弱 glow</li>
+      <li>选项框：<code>14px 16px</code> padding、1px <code>#1a2a3a</code> 边框、hover 变青色</li>
+      <li>底部 footer：8px 字、SHANGHAI / JULU RD / 2026</li>
+    </ul>
+
+    <h2>对话专属页</h2>
+
+    <h3>URL</h3>
+    <ul>
+      <li>EN: <code>/darkroom/chat</code></li>
+      <li>ZH: <code>/zh/darkroom/chat</code></li>
+    </ul>
+
+    <h3>页面结构</h3>
+    <pre class="ascii">┌─────────────────────────┐
+│  ← 返回                  │  ← 左上角返回按钮
+│  SIGNAL 118.7 MHz · ... │  ← 顶部居中信标
+├─────────────────────────┤
+│                         │
+│  [02:33:08] · SYSTEM    │  ← 日志式消息流
+│  &gt; 检测到未识别...       │
+│                         │
+│  [02:34:12] · USER INPUT│
+│  &gt; Devil 是谁？          │
+│                         │
+│  [02:34:13] · SYSTEM    │
+│  &gt; 找到碎片记录。        │
+│                         │
+├─────────────────────────┤
+│  &gt; 输入指令... _         │  ← 底部输入行
+└─────────────────────────┘</pre>
+
+    <h3>行为</h3>
+    <ul>
+      <li>复用现有 <code>DarkroomTerminal</code> 的核心逻辑：打字机、消息流、API 调用、记忆提取</li>
+      <li>但改为<strong>全屏沉浸</strong>，不再嵌入在首页内容中</li>
+      <li>输入框固定在底部，消息从底部向上增长</li>
+      <li>顶部提供"← 返回"按钮，跳转回 Dark Side 首页</li>
+      <li>不显示记忆流，保持神秘感</li>
+    </ul>
+
+    <h2>交互与数据流</h2>
+    <pre class="ascii">用户触发 darkroom 模式
+        │
+        ▼
+┌───────────────┐
+│ /darkroom/portal │  ← 彩蛋入口页
+└───────────────┘
+        │
+   选择蓝药丸 ────────────→ / 或 /zh （现有 Dark Side 首页）
+        │
+   选择红药丸 ────────────→ /darkroom/chat （新对话页）
+                                │
+                                ▼
+                        复用 sendDarkroomMessage
+                        调用 /api/darkroom/chat
+                        调用 /api/darkroom/extract
+                                │
+                                ▼
+                        点击 ← 返回 ──→ / 或 /zh</pre>
+
+    <h2>URL 与路由</h2>
+    <table>
+      <tr><th>页面</th><th>路由</th><th>类型</th></tr>
+      <tr><td>入口彩蛋页</td><td><code>/darkroom/portal</code></td><td>Client Component</td></tr>
+      <tr><td>入口彩蛋页（中文）</td><td><code>/zh/darkroom/portal</code></td><td>Client Component</td></tr>
+      <tr><td>对话专属页</td><td><code>/darkroom/chat</code></td><td>Client Component</td></tr>
+      <tr><td>对话专属页（中文）</td><td><code>/zh/darkroom/chat</code></td><td>Client Component</td></tr>
+    </table>
+
+    <h2>实现要点</h2>
+
+    <h3>复用与拆分</h3>
+    <ul>
+      <li>现有 <code>components/DarkroomTerminal.tsx</code> 逻辑-heavy，建议拆出：</li>
+      <ul>
+        <li><code>useDarkroomChat</code>：聊天 state、API 调用、history 管理</li>
+        <li><code>DarkroomChatUI</code>：纯展示组件，支持全屏/嵌入两种模式</li>
+      </ul>
+      <li><code>DarkroomTerminal</code> 改为组合：<code>DarkroomChatUI</code> + 嵌入模式样式</li>
+      <li>新页面 <code>app/(en)/darkroom/chat/page.tsx</code> 使用全屏模式</li>
+    </ul>
+
+    <h3>入口页实现</h3>
+    <ul>
+      <li>新组件 <code>components/DarkroomPortal.tsx</code></li>
+      <li>使用 <code>next/navigation</code> 的 <code>useRouter</code> 做客户端跳转</li>
+      <li>打字机效果复用现有的 <code>useTypewriter</code></li>
+      <li>动画序列：信号条淡入 → 标题淡入 → 叙事打字 → 选项滑入</li>
+    </ul>
+
+    <h3>视觉样式</h3>
+    <ul>
+      <li>新建 <code>app/darkroom-portal.css</code> 或在 <code>globals.css</code> 内增加 <code>body.darkroom-portal</code> 相关样式</li>
+      <li>背景效果用 CSS：多层 radial-gradient + repeating-linear-gradient + SVG noise</li>
+      <li>移动端优先，所有尺寸基于 <code>max-width: 375px</code> 设计，大屏居中放大</li>
+    </ul>
+
+    <h3>切换逻辑</h3>
+    <ul>
+      <li>现有切换 darkroom 模式的代码需要改：触发后导航到 <code>/darkroom/portal</code> 而不是直接加 class</li>
+      <li>从 portal 进入首页后再加 <code>body.darkroom</code> class</li>
+      <li>对话页本身不需要 <code>body.darkroom</code>，它自己就是全屏 dark 风格</li>
+    </ul>
+
+    <h2>移动端适配</h2>
+    <ul>
+      <li>所有尺寸按 iPhone 375×812 为基准设计</li>
+      <li>标题在更小的屏幕上缩小到 <code>32px</code></li>
+      <li>选项保持可点击区域 ≥ 44px 高度</li>
+      <li>输入框固定在底部，避免键盘弹起时被顶飞</li>
+      <li>全屏对话页不需要滚动页面，只需消息区域内滚动</li>
+    </ul>
+
+    <h2>关键文件</h2>
+    <ul>
+      <li><code>app/(en)/darkroom/portal/page.tsx</code>：英文入口页</li>
+      <li><code>app/zh/darkroom/portal/page.tsx</code>：中文入口页</li>
+      <li><code>app/(en)/darkroom/chat/page.tsx</code>：英文对话页</li>
+      <li><code>app/zh/darkroom/chat/page.tsx</code>：中文对话页</li>
+      <li><code>components/DarkroomPortal.tsx</code>：入口彩蛋组件</li>
+      <li><code>components/DarkroomChat.tsx</code>：可复用的全屏/嵌入对话组件</li>
+      <li><code>components/DarkroomTerminal.tsx</code>：改为基于 DarkroomChat 的嵌入版本</li>
+      <li><code>lib/darkroom.ts</code>：如有必要，调整 API 调用逻辑</li>
+      <li><code>app/globals.css</code>：新增 portal + fullscreen chat 样式</li>
+    </ul>
+
+    <h2>风险与注意事项</h2>
+    <ol>
+      <li><strong>URL 结构变化</strong>：当前 Dark Side 是 <code>body.darkroom</code> 切换的伪路由，新增真实路由后，需要确保普通模式不会访问这些页面。</li>
+      <li><strong>SSR 问题</strong>：portal 和 chat 都是 Client Component，需要 <code>use client</code>。</li>
+      <li><strong>返回逻辑</strong>：对话页返回首页时，需要确保 <code>body.darkroom</code> class 仍然存在。</li>
+      <li><strong>记忆系统不变</strong>：对话页继续复用 <code>/api/darkroom/chat</code> 和 <code>/api/darkroom/extract</code>，数据层无需改动。</li>
+    </ol>
+  </main>
+</body>
+</html>

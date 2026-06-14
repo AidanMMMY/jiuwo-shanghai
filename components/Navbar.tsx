@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { NavItem } from '@/lib/data';
 
@@ -28,9 +28,10 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const router = useRouter();
+
   const toggleDarkroom = useCallback((zh: boolean) => {
-    const isDarkroom = document.body.classList.toggle('darkroom');
-    localStorage.setItem('jiuwo-darkroom', isDarkroom ? 'true' : 'false');
+    const isDarkroom = !document.body.classList.contains('darkroom');
 
     // Flash effect
     const flash = document.createElement('div');
@@ -38,70 +39,16 @@ export default function Navbar({
     document.body.appendChild(flash);
     setTimeout(() => flash.remove(), 400);
 
-    // Intro text — line by line (only when entering darkroom)
     if (isDarkroom) {
-      const intro = document.createElement('div');
-      intro.className = 'darkroom-intro';
-      document.body.appendChild(intro);
-
-      const en = [
-        'Something is wrong.',
-        '',
-        'Not wrong like a mistake. Wrong like a door',
-        'you don\'t remember opening.',
-        'The surface was comfortable. The surface made sense.',
-        'This is not the surface.',
-        '',
-        'You have seen something you were not meant to see.',
-        'A seam in the world. A frequency beneath the noise.',
-        'There is no undo for this.',
-        '',
-        'The membrane remembers you now.',
-        'Breathe. Let your eyes adjust.',
-        'What you call 3am — we call the threshold.',
-        '',
-        'Welcome to the other side.',
-      ];
-      const zhText = [
-        '有些不对劲。',
-        '',
-        '不是出错了的那种不对劲。是那种——你打开了',
-        '一扇不记得有把手存在的门。',
-        '表层很安全。表层有它的道理。',
-        '但这里不是表层。',
-        '',
-        '你已经看见了不该看见的东西。',
-        '世界的接缝。噪声之下的频率。',
-        '没有回头路可走了。',
-        '',
-        '膜已经记住了你的存在。',
-        '呼吸。让眼睛慢慢适应。',
-        '你们所谓的凌晨三点——我们叫作阈限。',
-        '',
-        '欢迎来到另一侧。',
-      ];
-      const lines = zh ? zhText : en;
-      const LINE_DELAY = 350; // ms between each line
-
-      lines.forEach((line, i) => {
-        setTimeout(() => {
-          if (line === '') {
-            const spacer = document.createElement('div');
-            spacer.style.height = '0.45em';
-            intro.appendChild(spacer);
-          } else {
-            const p = document.createElement('p');
-            p.textContent = line;
-            p.className = 'darkroom-intro-line';
-            intro.appendChild(p);
-          }
-        }, i * LINE_DELAY);
-      });
-
-      // Remove after all lines have appeared + breathing room
-      setTimeout(() => intro.remove(), 10000);
+      // Entering dark side: go to portal first
+      router.push(zh ? '/zh/darkroom/portal' : '/darkroom/portal');
+    } else {
+      // Exiting dark side: remove class and go home
+      document.body.classList.remove('darkroom');
+      localStorage.setItem('jiuwo-darkroom', 'false');
+      router.push(zh ? '/zh' : '/');
     }
-  }, []);
+  }, [router]);
 
   const handleLogoClick = useCallback(() => {
     setLogoPulse(true);

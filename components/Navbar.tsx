@@ -40,7 +40,10 @@ export default function Navbar({
     setTimeout(() => flash.remove(), 400);
 
     if (isDarkroom) {
-      // Entering dark side: go to portal first
+      // Entering dark side: flip the current page to dark mode under the flash,
+      // then navigate to the portal so the user never sees the normal homepage.
+      document.body.classList.add('darkroom');
+      localStorage.setItem('jiuwo-darkroom', 'true');
       router.push(zh ? '/zh/darkroom/portal' : '/darkroom/portal');
     } else {
       // Exiting dark side: remove class and go home

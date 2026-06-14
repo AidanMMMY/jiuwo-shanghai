@@ -16,7 +16,6 @@
     "kimi-usage": "npx tsx scripts/kimi-usage.ts"
   },
   "dependencies": {
-    "@chinese-fonts/dyh": "^3.0.0",
     "@neondatabase/serverless": "^1.1.0",
     "@tailwindcss/typography": "^0.5.19",
     "@vercel/analytics": "^2.0.1",

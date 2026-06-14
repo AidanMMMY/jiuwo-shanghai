@@ -1,12 +1,10 @@
 /* Darkroom Portal & Full-screen Chat — Amber monochrome retro terminal */
 
-@import '@chinese-fonts/dyh/dist/SmileySans-Oblique/result.css';
-
 .darkroom-portal,
 .darkroom-chat-fullscreen {
   background: #080502;
   color: #a6882a;
-  font-family: var(--font-chakra), var(--font-share-tech-mono), 'Smiley Sans Oblique', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-chakra), var(--font-share-tech-mono), 'PingFang SC', 'Microsoft YaHei', sans-serif;
   letter-spacing: 0.04em;
   z-index: 100;
 }
@@ -130,8 +128,91 @@
   margin-bottom: clamp(28px, 4vh, 40px);
   padding-left: 14px;
   border-left: 1px solid rgba(166, 136, 42, 0.25);
-  font-family: var(--font-share-tech-mono), 'Smiley Sans Oblique', 'PingFang SC', monospace;
+  font-family: var(--font-share-tech-mono), 'PingFang SC', monospace;
 }
+
+/* CRT phosphor treatment for Chinese characters — blur + sharpen + scanlines */
+.darkroom-portal,
+.darkroom-chat-fullscreen,
+.darkroom-chat-display,
+.darkroom-chat-embedded {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.darkroom-portal *,
+.darkroom-chat-fullscreen *,
+.darkroom-chat-display *,
+.darkroom-chat-embedded * {
+  text-rendering: geometricPrecision;
+}
+
+/* Slight phosphor blur on all text, then sharpened back by contrast */
+.darkroom-portal-content,
+.darkroom-chat-screen {
+  filter: contrast(1.05);
+}
+
+/* Heavier scanlines on the screen content */
+.darkroom-chat-display::before,
+.darkroom-chat-embedded::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(0, 0, 0, 0.45) 1px,
+    rgba(0, 0, 0, 0.45) 2px
+  );
+  opacity: 0.6;
+}
+
+/* Subtle horizontal jitter on text to mimic signal instability */
+@keyframes textJitter {
+  0%, 100% { transform: translateX(0); }
+  96% { transform: translateX(0); }
+  97% { transform: translateX(-1px); }
+  98% { transform: translateX(1px); }
+  99% { transform: translateX(0); }
+}
+
+.darkroom-portal-title,
+.darkroom-chat-header,
+.darkroom-log-entry {
+  animation: textJitter 6s infinite;
+}
+
+/* Chromatic aberration / RGB split for a worn CRT look */
+.darkroom-chat-display,
+.darkroom-chat-embedded {
+  position: relative;
+}
+
+.darkroom-chat-display::after,
+.darkroom-chat-embedded::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 7;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+
+/* Optional: very subtle red/cyan edge ghost (commented out by default — enable if you want stronger CRT) */
+/*
+.darkroom-chat-display::before,
+.darkroom-chat-embedded::before {
+  box-shadow: inset 1px 0 0 rgba(180, 60, 40, 0.04), inset -1px 0 0 rgba(40, 120, 120, 0.04);
+}
+*/
 
 .darkroom-portal-line {
   margin: 0;

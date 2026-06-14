@@ -314,8 +314,10 @@
   border: none;
   color: #889898;
   font-family: inherit;
-  font-size: 12px;
+  font-size: 16px; /* Prevents iOS Safari auto-zoom on focus */
   outline: none;
+  padding: 0;
+  line-height: 1.5;
 }
 
 .darkroom-chat-input::placeholder {

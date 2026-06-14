@@ -10,8 +10,8 @@ import {
   findSimilarMemory,
 } from "@/lib/darkroom-memory";
 
-const BATCH_SIZE = 3;
-const MAX_BATCHES_PER_REQUEST = 5; // Process up to 15 conversations per call
+const BATCH_SIZE = 2;
+const MAX_BATCHES_PER_REQUEST = 5; // Process up to 10 conversations per call
 
 export async function POST(req: NextRequest) {
   let isZh = false;
@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
           content.length > 5 &&
           content.length < 500 &&
           typeof confidence === "number" &&
-          confidence >= 0.7 &&
+          confidence >= 0.6 &&
           confidence <= 1.0
         ) {
           const trimmedContent = content.trim();

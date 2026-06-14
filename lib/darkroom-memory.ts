@@ -34,6 +34,7 @@ export interface Conversation {
 }
 
 const MAX_MEMORIES_PER_LANG = 500;
+const MIN_MEMORY_CONFIDENCE = 0.6;
 
 const EN_STOPWORDS = new Set([
   'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
@@ -203,7 +204,7 @@ export async function retrieveMemories(
     const result = await sql`
       SELECT id, content, keywords, confidence, source_lang, created_at
       FROM darkroom_memories
-      WHERE source_lang = ${sourceLang} AND confidence >= 0.7
+      WHERE source_lang = ${sourceLang} AND confidence >= ${MIN_MEMORY_CONFIDENCE}
       ORDER BY created_at DESC
       LIMIT ${limit}
     `;
@@ -221,7 +222,7 @@ export async function retrieveMemories(
       ) as score
     FROM darkroom_memories
     WHERE source_lang = ${sourceLang}
-      AND confidence >= 0.7
+      AND confidence >= ${MIN_MEMORY_CONFIDENCE}
       AND keywords && ${keywords}::text[]
     ORDER BY score DESC
     LIMIT ${limit}
@@ -235,7 +236,7 @@ export async function retrieveMemories(
   const fallback = await sql`
     SELECT id, content, keywords, confidence, source_lang, created_at
     FROM darkroom_memories
-    WHERE source_lang = ${sourceLang} AND confidence >= 0.7
+    WHERE source_lang = ${sourceLang} AND confidence >= ${MIN_MEMORY_CONFIDENCE}
     ORDER BY created_at DESC
     LIMIT ${limit}
   `;

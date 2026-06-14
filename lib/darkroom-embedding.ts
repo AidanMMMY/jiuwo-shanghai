@@ -1,18 +1,46 @@
 // Embedding client for Darkroom collective memory.
-// Uses OpenAI text-embedding-3-small (1536 dims) by default.
+// Supports any OpenAI-compatible embeddings endpoint.
 // Returns null when no API key is configured so callers can fall back to keyword retrieval.
 
-const EMBEDDING_MODEL = 'text-embedding-3-small';
-const EMBEDDING_DIMENSIONS = 1536;
-const EMBEDDING_API_URL = 'https://api.openai.com/v1/embeddings';
 const MAX_INPUT_CHARS = 12000;
 const TIMEOUT_MS = 8000;
 
 function getApiKey(): string | undefined {
   try {
-    return process.env.DARKROOM_EMBEDDING_API_KEY || process.env.OPENAI_API_KEY;
+    return (
+      process.env.DARKROOM_EMBEDDING_API_KEY ||
+      process.env.OPENAI_API_KEY
+    );
   } catch {
     return undefined;
+  }
+}
+
+function getBaseUrl(): string {
+  try {
+    return (
+      process.env.DARKROOM_EMBEDDING_BASE_URL ||
+      'https://api.openai.com/v1/embeddings'
+    );
+  } catch {
+    return 'https://api.openai.com/v1/embeddings';
+  }
+}
+
+function getModel(): string {
+  try {
+    return process.env.DARKROOM_EMBEDDING_MODEL || 'text-embedding-3-small';
+  } catch {
+    return 'text-embedding-3-small';
+  }
+}
+
+export function getEmbeddingDimensions(): number {
+  try {
+    const dims = Number(process.env.DARKROOM_EMBEDDING_DIMENSIONS);
+    return Number.isFinite(dims) && dims > 0 ? dims : 1536;
+  } catch {
+    return 1536;
   }
 }
 
@@ -34,7 +62,7 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const res = await fetch(EMBEDDING_API_URL, {
+    const res = await fetch(getBaseUrl(), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -42,14 +70,14 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
       },
       body: JSON.stringify({
         input: truncateText(trimmed),
-        model: EMBEDDING_MODEL,
+        model: getModel(),
       }),
       signal: controller.signal,
     });
 
     if (!res.ok) {
       const body = await res.text().catch(() => '');
-      console.error('[darkroom:embedding] OpenAI embedding failed:', res.status, body);
+      console.error('[darkroom:embedding] embedding request failed:', res.status, body);
       return null;
     }
 
@@ -57,16 +85,22 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
       data: { embedding: number[]; index: number }[];
     };
     const embedding = data.data?.[0]?.embedding;
-    if (!Array.isArray(embedding) || embedding.length !== EMBEDDING_DIMENSIONS) {
-      console.error('[darkroom:embedding] unexpected embedding shape:', embedding?.length);
+    const expectedDims = getEmbeddingDimensions();
+    if (!Array.isArray(embedding) || embedding.length !== expectedDims) {
+      console.error(
+        '[darkroom:embedding] unexpected embedding shape:',
+        embedding?.length,
+        'expected:',
+        expectedDims
+      );
       return null;
     }
     return embedding;
   } catch (error: unknown) {
     if (error instanceof Error && error.name === 'AbortError') {
-      console.error('[darkroom:embedding] OpenAI embedding timed out');
+      console.error('[darkroom:embedding] embedding request timed out');
     } else {
-      console.error('[darkroom:embedding] OpenAI embedding error:', error);
+      console.error('[darkroom:embedding] embedding request error:', error);
     }
     return null;
   } finally {

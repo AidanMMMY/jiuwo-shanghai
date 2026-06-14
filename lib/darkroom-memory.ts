@@ -1,5 +1,5 @@
 import { neon } from '@neondatabase/serverless';
-import { generateEmbedding } from './darkroom-embedding';
+import { generateEmbedding, getEmbeddingDimensions } from './darkroom-embedding';
 
 // Lazy env check — same pattern as guestbook.ts and rsvp.ts
 function getSql() {
@@ -190,7 +190,7 @@ export async function storeMemory(
       ${memory.keywords},
       ${memory.confidence},
       ${memory.source_lang},
-      ${embedding ? sql`${embedding}::vector(1536)` : sql`NULL`}
+      ${embedding ? sql`${embedding}::vector(${getEmbeddingDimensions()})` : sql`NULL`}
     )
     RETURNING id, content, keywords, confidence, source_lang, created_at
   `;
@@ -212,11 +212,11 @@ export async function retrieveMemories(
   if (queryEmbedding) {
     const vectorResult = await sql`
       SELECT id, content, keywords, confidence, source_lang, created_at,
-        (1 - (embedding <=> ${queryEmbedding}::vector(1536))) AS score
+        (1 - (embedding <=> ${queryEmbedding}::vector(${getEmbeddingDimensions()}))) AS score
       FROM darkroom_memories
       WHERE confidence >= ${MIN_MEMORY_CONFIDENCE}
         AND embedding IS NOT NULL
-      ORDER BY embedding <=> ${queryEmbedding}::vector(1536)
+      ORDER BY embedding <=> ${queryEmbedding}::vector(${getEmbeddingDimensions()})
       LIMIT 10
     `;
     vectorRows.push(...(vectorResult.rows as (Memory & { score: number })[]));
@@ -310,10 +310,10 @@ export async function findSimilarMemory(
   if (embedding) {
     const result = await sql`
       SELECT id, content, keywords, confidence, source_lang, created_at,
-        (1 - (embedding <=> ${embedding}::vector(1536))) AS similarity
+        (1 - (embedding <=> ${embedding}::vector(${getEmbeddingDimensions()}))) AS similarity
       FROM darkroom_memories
       WHERE embedding IS NOT NULL
-      ORDER BY embedding <=> ${embedding}::vector(1536)
+      ORDER BY embedding <=> ${embedding}::vector(${getEmbeddingDimensions()})
       LIMIT 1
     `;
     if (result.rows.length > 0) {
@@ -376,7 +376,7 @@ export async function backfillMissingEmbeddings(batchSize: number = 50): Promise
     if (!embedding) continue;
     await sql`
       UPDATE darkroom_memories
-      SET embedding = ${embedding}::vector(1536)
+      SET embedding = ${embedding}::vector(${getEmbeddingDimensions()})
       WHERE id = ${row.id}
     `;
     updated++;

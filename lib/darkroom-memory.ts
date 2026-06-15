@@ -31,11 +31,110 @@ export interface Conversation {
   assistant_response: string;
   source_lang: 'en' | 'zh';
   processed_for_memory: boolean;
+  session_id?: string;
   created_at: string;
 }
 
 const MAX_MEMORIES_TOTAL = 1000;
 const MIN_MEMORY_CONFIDENCE = 0.6;
+
+const HIGH_CONFIDENCE_THRESHOLD = 0.85;
+const CHAT_MIN_CONFIDENCE = 0.7;
+
+const SENSITIVE_ZH_KEYWORDS = new Set([
+  "摸下体",
+  "性骚扰",
+  "性侵",
+  "强奸",
+  "猥亵",
+  "偷窥",
+  "骚扰",
+  "妓女",
+  "卖淫",
+  "吸毒",
+  "自杀",
+  "自残",
+  "杀人",
+  "暴力",
+  "仇恨",
+  "色情",
+]);
+
+const SENSITIVE_EN_KEYWORDS = new Set([
+  "grope",
+  "molest",
+  "rape",
+  "sexual assault",
+  "sexual harassment",
+  "harass",
+  "stalk",
+  "peep",
+  "voyeur",
+  "prostitute",
+  "porn",
+  "drug abuse",
+  "suicide",
+  "self-harm",
+  "kill",
+  "violence",
+  "hate",
+]);
+
+export function isSensitiveMemory(content: string): boolean {
+  if (!content) return false;
+  const lower = content.toLowerCase();
+  for (const kw of SENSITIVE_ZH_KEYWORDS) {
+    if (lower.includes(kw.toLowerCase())) return true;
+  }
+  for (const kw of SENSITIVE_EN_KEYWORDS) {
+    if (lower.includes(kw.toLowerCase())) return true;
+  }
+  return false;
+}
+
+export interface FilterMemoriesOptions {
+  minConfidence?: number;
+  excludeSensitive?: boolean;
+  maxMediumConfidence?: number;
+}
+
+export function filterMemoriesForChat(
+  memories: Memory[],
+  options: FilterMemoriesOptions = {}
+): Memory[] {
+  const {
+    minConfidence = CHAT_MIN_CONFIDENCE,
+    excludeSensitive = true,
+    maxMediumConfidence = 2,
+  } = options;
+
+  const filtered = memories.filter((m) => {
+    const confidence =
+      typeof m.confidence === "string" ? parseFloat(m.confidence) : m.confidence;
+    if (confidence < minConfidence) return false;
+    if (excludeSensitive && isSensitiveMemory(m.content)) return false;
+    return true;
+  });
+
+  const high = filtered.filter((m) => {
+    const confidence =
+      typeof m.confidence === "string" ? parseFloat(m.confidence) : m.confidence;
+    return confidence >= HIGH_CONFIDENCE_THRESHOLD;
+  });
+
+  const medium = filtered
+    .filter((m) => {
+      const confidence =
+        typeof m.confidence === "string" ? parseFloat(m.confidence) : m.confidence;
+      return confidence >= minConfidence && confidence < HIGH_CONFIDENCE_THRESHOLD;
+    })
+    .slice(0, maxMediumConfidence);
+
+  return [...high, ...medium].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+}
 
 const EN_STOPWORDS = new Set([
   'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
@@ -83,11 +182,13 @@ export async function ensureConversationsTable(): Promise<void> {
       assistant_response   TEXT NOT NULL,
       source_lang          VARCHAR(2) NOT NULL,
       processed_for_memory BOOLEAN NOT NULL DEFAULT FALSE,
+      session_id           VARCHAR(64),
       created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_conversations_unprocessed ON darkroom_conversations(source_lang, processed_for_memory, created_at ASC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_conversations_created_at ON darkroom_conversations(created_at DESC)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_conversations_session ON darkroom_conversations(session_id, created_at DESC)`;
 }
 
 export async function storeConversation(
@@ -96,9 +197,9 @@ export async function storeConversation(
   await ensureConversationsTable();
   const sql = getSql();
   const result = await sql`
-    INSERT INTO darkroom_conversations (user_message, assistant_response, source_lang)
-    VALUES (${conv.user_message}, ${conv.assistant_response}, ${conv.source_lang})
-    RETURNING id, user_message, assistant_response, source_lang, processed_for_memory, created_at
+    INSERT INTO darkroom_conversations (user_message, assistant_response, source_lang, session_id)
+    VALUES (${conv.user_message}, ${conv.assistant_response}, ${conv.source_lang}, ${conv.session_id ?? null})
+    RETURNING id, user_message, assistant_response, source_lang, processed_for_memory, session_id, created_at
   `;
   return result.rows[0] as Conversation;
 }
@@ -479,6 +580,22 @@ export async function getConversationStats(): Promise<ConversationStats> {
   };
 }
 
+export async function getRecentConversationsBySession(
+  sessionId: string,
+  limit: number = 10
+): Promise<Conversation[]> {
+  await ensureConversationsTable();
+  const sql = getSql();
+  const result = await sql`
+    SELECT id, user_message, assistant_response, source_lang, processed_for_memory, session_id, created_at
+    FROM darkroom_conversations
+    WHERE session_id = ${sessionId}
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+  return (result.rows as Conversation[]).reverse();
+}
+
 export async function getRecentConversations(limit: number = 20): Promise<Conversation[]> {
   await ensureConversationsTable();
   const sql = getSql();
@@ -489,4 +606,159 @@ export async function getRecentConversations(limit: number = 20): Promise<Conver
     LIMIT ${limit}
   `;
   return result.rows as Conversation[];
+}
+
+// ── Session-level rolling summary ──────────────────────────────────────
+
+export interface SessionState {
+  session_id: string;
+  summary: string;
+  primary_entity?: string;
+  last_user_intent?: string;
+  updated_at: string;
+}
+
+export async function ensureSessionsTable(): Promise<void> {
+  const sql = getSql();
+  await sql`
+    CREATE TABLE IF NOT EXISTS darkroom_sessions (
+      id             SERIAL PRIMARY KEY,
+      session_id     VARCHAR(64) NOT NULL UNIQUE,
+      summary        TEXT NOT NULL DEFAULT '',
+      primary_entity VARCHAR(64),
+      last_user_intent VARCHAR(32),
+      updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_sessions_id ON darkroom_sessions(session_id)`;
+}
+
+export async function getSessionState(
+  sessionId: string
+): Promise<SessionState | null> {
+  await ensureSessionsTable();
+  const sql = getSql();
+  const result = await sql`
+    SELECT session_id, summary, primary_entity, last_user_intent, updated_at
+    FROM darkroom_sessions
+    WHERE session_id = ${sessionId}
+  `;
+  return result.rows.length > 0 ? (result.rows[0] as SessionState) : null;
+}
+
+export async function upsertSessionState(
+  sessionId: string,
+  state: Partial<Omit<SessionState, "session_id" | "updated_at">>
+): Promise<SessionState> {
+  await ensureSessionsTable();
+  const sql = getSql();
+  const result = await sql`
+    INSERT INTO darkroom_sessions (session_id, summary, primary_entity, last_user_intent)
+    VALUES (${sessionId}, ${state.summary ?? ""}, ${state.primary_entity ?? null}, ${state.last_user_intent ?? null})
+    ON CONFLICT (session_id)
+    DO UPDATE SET
+      summary = EXCLUDED.summary,
+      primary_entity = EXCLUDED.primary_entity,
+      last_user_intent = EXCLUDED.last_user_intent,
+      updated_at = NOW()
+    RETURNING session_id, summary, primary_entity, last_user_intent, updated_at
+  `;
+  return result.rows[0] as SessionState;
+}
+
+// ── Dynamic entities (names mentioned by users, beyond KNOWN_ENTITIES) ──
+
+export interface DynamicEntity {
+  id: number;
+  name: string;
+  aliases: string[];
+  source: "user_mentioned" | "memory" | "knowledge_base";
+  created_at: string;
+}
+
+export async function ensureEntitiesTable(): Promise<void> {
+  const sql = getSql();
+  await sql`
+    CREATE TABLE IF NOT EXISTS darkroom_entities (
+      id         SERIAL PRIMARY KEY,
+      name       VARCHAR(64) NOT NULL UNIQUE,
+      aliases    TEXT[] NOT NULL DEFAULT '{}',
+      source     VARCHAR(32) NOT NULL DEFAULT 'user_mentioned',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_entities_name ON darkroom_entities(name)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_entities_aliases ON darkroom_entities USING GIN(aliases)`;
+}
+
+export async function getDynamicEntities(): Promise<DynamicEntity[]> {
+  await ensureEntitiesTable();
+  const sql = getSql();
+  const result = await sql`
+    SELECT id, name, aliases, source, created_at
+    FROM darkroom_entities
+    ORDER BY updated_at DESC
+  `;
+  return result.rows as DynamicEntity[];
+}
+
+export async function findDynamicEntity(
+  name: string
+): Promise<DynamicEntity | null> {
+  await ensureEntitiesTable();
+  const sql = getSql();
+  const lower = name.toLowerCase();
+  const result = await sql`
+    SELECT id, name, aliases, source, created_at
+    FROM darkroom_entities
+    WHERE LOWER(name) = ${lower}
+       OR LOWER(aliases) @> ARRAY[${lower}]::text[]
+    LIMIT 1
+  `;
+  return result.rows.length > 0 ? (result.rows[0] as DynamicEntity) : null;
+}
+
+export async function createDynamicEntity(
+  name: string,
+  aliases: string[] = [],
+  source: DynamicEntity["source"] = "user_mentioned"
+): Promise<DynamicEntity | null> {
+  await ensureEntitiesTable();
+  const sql = getSql();
+  try {
+    const result = await sql`
+      INSERT INTO darkroom_entities (name, aliases, source)
+      VALUES (${name}, ${aliases}, ${source})
+      ON CONFLICT (name) DO UPDATE SET
+        aliases = EXCLUDED.aliases,
+        updated_at = NOW()
+      RETURNING id, name, aliases, source, created_at
+    `;
+    return result.rows[0] as DynamicEntity;
+  } catch (err) {
+    console.error("[darkroom:memory] createDynamicEntity failed:", err);
+    return null;
+  }
+}
+
+export async function recordMentionedNames(
+  names: string[]
+): Promise<void> {
+  if (names.length === 0) return;
+  await ensureEntitiesTable();
+  const sql = getSql();
+  for (const name of names) {
+    const trimmed = name.trim();
+    if (!trimmed || trimmed.length < 2) continue;
+    try {
+      await sql`
+        INSERT INTO darkroom_entities (name, aliases, source)
+        VALUES (${trimmed}, ${[]}, 'user_mentioned')
+        ON CONFLICT (name) DO UPDATE SET updated_at = NOW()
+      `;
+    } catch (err) {
+      console.error("[darkroom:memory] recordMentionedNames failed:", err);
+    }
+  }
 }

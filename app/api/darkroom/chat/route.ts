@@ -1,8 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
-import { getDarkroomData, matchKnownEntity, KNOWN_ENTITIES } from "@/lib/darkroom";
+import { getDarkroomData, matchKnownEntity } from "@/lib/darkroom";
+import {
+  TopicState,
+  buildTopicState,
+  buildTopicReminder,
+  classifyMessageWithModel,
+  containsPronoun,
+  extractExplicitName,
+  extractUserMentionedNames,
+  extractUserNameFromHistory,
+  formatTopicLockInstruction,
+  parseTopicLock,
+  resolvePronouns,
+} from "@/lib/darkroom-chat";
 
-import { retrieveMemories, searchMemoriesByKeyword } from "@/lib/darkroom-memory";
+import {
+  retrieveMemories,
+  searchMemoriesByKeyword,
+  filterMemoriesForChat,
+  getSessionState,
+  getDynamicEntities,
+  recordMentionedNames,
+} from "@/lib/darkroom-memory";
 import {
   getClientIp,
   hashIp,
@@ -39,216 +59,6 @@ function isJiuwoOpen(hour: number): boolean {
   return hour >= 19 || hour < 2;
 }
 
-interface HistoryMessage {
-  role: string;
-  content: string;
-}
-
-const NAME_STOPWORDS_ZH = new Set(["我", "你", "他", "她", "它", "这", "那", "的", "了", "是", "不是", "一个", "有人", "没人"]);
-const NAME_STOPWORDS_EN = new Set(["i", "you", "he", "she", "it", "this", "that", "me", "my", "mine", "someone", "nobody"]);
-
-function extractExplicitName(text: string, isZh: boolean): string | null {
-  const trimmed = text.trim();
-  if (!trimmed) return null;
-
-  if (isZh) {
-    const patterns = [
-      /(?:我叫|我是|我就是|称呼我(?:为)?|叫我)([^，。！？\s]{1,20})(?=[，。！？\s]|$)/i,
-    ];
-    for (const p of patterns) {
-      const m = trimmed.match(p);
-      if (m && m[1] && !NAME_STOPWORDS_ZH.has(m[1])) return m[1];
-    }
-  } else {
-    const patterns = [
-      /\bi am\s+(.{1,30})(?=\.|,|!|\?|$)/i,
-      /\bi'm\s+(.{1,30})(?=\.|,|!|\?|$)/i,
-      /\bmy name is\s+(.{1,30})(?=\.|,|!|\?|$)/i,
-      /\bcall me\s+(.{1,30})(?=\.|,|!|\?|$)/i,
-    ];
-    for (const p of patterns) {
-      const m = trimmed.match(p);
-      if (m && m[1]) {
-        const name = m[1].trim().split(/\s+/)[0];
-        if (name && !NAME_STOPWORDS_EN.has(name.toLowerCase())) return name;
-      }
-    }
-  }
-  return null;
-}
-
-function looksLikeName(text: string, isZh: boolean): boolean {
-  const trimmed = text.trim();
-  if (!trimmed) return false;
-  if (isZh) {
-    // Short Chinese or mixed name without punctuation and common stopwords
-    if (/[，。！？；]/.test(trimmed)) return false;
-    if (trimmed.length > 8) return false;
-    if (NAME_STOPWORDS_ZH.has(trimmed)) return false;
-    return true;
-  }
-  // English: 1-3 words, no punctuation, not a stopword
-  const words = trimmed.split(/\s+/);
-  if (words.length < 1 || words.length > 3) return false;
-  if (/[.,!?;:]/.test(trimmed)) return false;
-  if (NAME_STOPWORDS_EN.has(words[0].toLowerCase())) return false;
-  return /^[A-Za-z0-9_\-]+$/.test(words[0]);
-}
-
-function isNameQuestion(text: string, isZh: boolean): boolean {
-  const lower = text.toLowerCase();
-  if (isZh) {
-    return /称呼|名字|叫什么|怎么称呼|你是谁|怎么叫你/.test(text);
-  }
-  return /\bname\b|\bcall you\b|\bwho are you\b|\bwhat should i call you\b/i.test(lower);
-}
-
-function extractUserNameFromHistory(history: HistoryMessage[], isZh: boolean): string | null {
-  for (let i = history.length - 1; i >= 0; i--) {
-    const msg = history[i];
-    if (msg.role !== "user") continue;
-
-    const explicit = extractExplicitName(msg.content, isZh);
-    if (explicit) return explicit;
-
-    // If the assistant just asked for a name, treat a short reply as the name.
-    const prev = history[i - 1];
-    if (prev && prev.role === "assistant" && isNameQuestion(prev.content, isZh)) {
-      if (looksLikeName(msg.content, isZh)) return msg.content.trim();
-    }
-  }
-  return null;
-}
-
-const ZH_PRONOUNS = /他|她|ta|这个|那个|那人|这位|那位/;
-const EN_PRONOUNS = /\b(he|she|they|him|her|them|this person|that person|this guy|that guy)\b/i;
-
-function containsPronoun(text: string, isZh: boolean): boolean {
-  if (!text) return false;
-  if (isZh) return ZH_PRONOUNS.test(text);
-  return EN_PRONOUNS.test(text);
-}
-
-function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function extractUserMentionedNames(history: HistoryMessage[], isZh: boolean): string[] {
-  const names: string[] = [];
-  const seen = new Set<string>();
-
-  const patterns = isZh
-    ? [
-        /(?:你|我|系统)?(?:认识|知道|了解|听过|见过)(.+?)(?:吗|么|？|\?|$)/,
-        /(.+?)(?:是|叫)(?:谁|哪位)/,
-      ]
-    : [
-        /(?:do you know|have you met|have you heard of|tell me about)\s+(.+?)(?:\?|\.|!|$)/i,
-        /who is\s+(.+?)(?:\?|\.|!|$)/i,
-        /what about\s+(.+?)(?:\?|\.|!|$)/i,
-      ];
-
-  // Scan last 6 user messages, most recent first
-  for (let i = history.length - 1; i >= 0 && i >= history.length - 6; i--) {
-    const msg = history[i];
-    if (msg.role !== "user" || !msg.content) continue;
-
-    const text = msg.content.trim();
-    let matched: RegExpMatchArray | null = null;
-    for (const p of patterns) {
-      matched = text.match(p);
-      if (matched && matched[1]) break;
-    }
-
-    if (matched && matched[1]) {
-      const raw = matched[1].trim();
-      const cleaned = raw.replace(/[，。！？、；：\.\,\!\?\;\:]/g, "").trim();
-      if (cleaned.length >= 2 && cleaned.length <= 20) {
-        const key = cleaned.toLowerCase();
-        if (!seen.has(key)) {
-          names.push(cleaned);
-          seen.add(key);
-        }
-      }
-    }
-  }
-
-  return names;
-}
-
-function trackRecentEntities(history: HistoryMessage[], isZh: boolean): string[] {
-  const entities: string[] = [];
-  const seen = new Set<string>();
-
-  // First, prioritize names the user explicitly asked about (even if not in KNOWN_ENTITIES)
-  const userMentioned = extractUserMentionedNames(history, isZh);
-  for (const name of userMentioned) {
-    entities.push(name);
-    seen.add(name.toLowerCase());
-  }
-
-  // Scan last 10 messages, most recent first
-  for (let i = history.length - 1; i >= 0 && i >= history.length - 10; i--) {
-    const msg = history[i];
-    if (!msg.content) continue;
-
-    for (const entity of KNOWN_ENTITIES) {
-      if (seen.has(entity.name)) continue;
-      const names = [entity.name, ...entity.aliases];
-      for (const name of names) {
-        if (name.length < 2) continue;
-        const found = isZh
-          ? msg.content.includes(name)
-          : new RegExp(`\\b${escapeRegex(name)}\\b`, "i").test(msg.content);
-        if (found) {
-          entities.push(entity.name);
-          seen.add(entity.name);
-          break;
-        }
-      }
-    }
-  }
-
-  return entities;
-}
-
-function resolvePronouns(message: string, recentEntities: string[], isZh: boolean): string | null {
-  if (recentEntities.length === 0) return null;
-
-  const topEntity = recentEntities[0];
-  const lowerMsg = message.toLowerCase();
-  const names = [topEntity.toLowerCase()];
-  const entity = matchKnownEntity(topEntity);
-  if (entity) {
-    names.push(...entity.aliases.map((a) => a.toLowerCase()));
-  }
-
-  // If the message already names the entity explicitly, no need to rewrite
-  for (const name of names) {
-    if (name.length >= 2 && lowerMsg.includes(name)) return null;
-  }
-
-  // If message contains pronoun or is very short, prepend topic context
-  if (containsPronoun(message, isZh) || message.trim().length < 12) {
-    if (isZh) {
-      return `关于刚才聊的「${topEntity}」：${message}`;
-    }
-    return `Regarding ${topEntity} we were just discussing: ${message}`;
-  }
-
-  return null;
-}
-
-function buildTopicReminder(recentEntities: string[], isZh: boolean): string {
-  if (recentEntities.length === 0) return "";
-  const top = recentEntities[0];
-
-  if (isZh) {
-    return `[当前话题锁定：${top}。用户下一条消息中的「他」「她」「ta」「这个」「那个」等指代，默认就是指 ${top}。不要反问「指谁」，直接顺着这个话题回答。]`;
-  }
-  return `[Current topic locked: ${top}. Pronouns like "he", "she", "they", "this person", "that person" in the user's next message refer to ${top} by default. Do not ask who they mean; answer within this topic.]`;
-}
-
 export async function POST(req: NextRequest) {
   let isZh = false;
 
@@ -256,6 +66,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { message, history = [] } = body;
     const knownName = typeof body.knownName === "string" ? body.knownName : "";
+    const sessionId = typeof body.sessionId === "string" ? body.sessionId : "";
     isZh = !!body.isZh;
 
     const data = getDarkroomData(isZh);
@@ -279,7 +90,7 @@ export async function POST(req: NextRequest) {
       const nameMemories = [];
       try {
         const found = await searchMemoriesByKeyword(userName, 3);
-        nameMemories.push(...found);
+        nameMemories.push(...filterMemoriesForChat(found));
       } catch (err) {
         console.error("Name memory search error:", err);
       }
@@ -336,16 +147,33 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const fullSystemPrompt = data.knowledgeBase
-      ? `${data.knowledgeBase}\n\n${SYSTEM_PROMPT}\n\n${activeTimeContext}`
-      : `${SYSTEM_PROMPT}\n\n${activeTimeContext}`;
-
-    // Retrieve relevant collective memories and inject into context
+    // ── Parallel preparation: classify, fetch session state, memories, entities ─
     let memoryBlock = "";
+    let sessionBlock = "";
+    let topicState: TopicState;
+
     try {
-      const isAmbiguous = containsPronoun(message, isZh) || message.trim().length < 10;
+      const isAmbiguous =
+        containsPronoun(message, isZh) || message.trim().length < 10;
       const memoryLimit = isAmbiguous ? 3 : 5;
-      const memories = await retrieveMemories(message, isZh ? "zh" : "en", memoryLimit);
+
+      const [classifierResult, sessionState, rawMemories, dynamicEntities] =
+        await Promise.all([
+          classifyMessageWithModel(message, history, isZh),
+          sessionId
+            ? getSessionState(sessionId).catch((err) => {
+                console.error("[darkroom:chat] session fetch error:", err);
+                return null;
+              })
+            : Promise.resolve(null),
+          retrieveMemories(message, isZh ? "zh" : "en", memoryLimit),
+          getDynamicEntities().catch((err) => {
+            console.error("[darkroom:chat] dynamic entities fetch error:", err);
+            return [];
+          }),
+        ]);
+
+      const memories = filterMemoriesForChat(rawMemories);
       if (memories.length > 0) {
         const header = isZh
           ? "=== 集体记忆扇区 ===\n以下痕迹来自之前的访问模式。如果与当前查询相关，可在回应中简短引用或呼应一两条。这些是过往记忆，不是当前观察。不要将其当作谁此刻在场的证据。当前如果用户在用指代聊某个特定人物，优先回应当前话题人物，不要让记忆把你拉走。"
@@ -353,14 +181,46 @@ export async function POST(req: NextRequest) {
         const footer = isZh ? "=== 结束 ===" : "=== END ===";
         memoryBlock = `\n\n${header}\n\n${memories.map((m) => `- ${m.content}`).join("\n")}\n\n${footer}`;
       }
+
+      if (sessionState?.summary) {
+        sessionBlock = isZh
+          ? `\n\n[本会话摘要：${sessionState.summary}]\n[本会话当前话题对象：${sessionState.primary_entity || "无"}]`
+          : `\n\n[Session summary: ${sessionState.summary}]\n[Current session topic: ${sessionState.primary_entity || "none"}]`;
+      }
+
+      topicState = buildTopicState(history, isZh, dynamicEntities, classifierResult);
+
+      // Persist any user-mentioned names so future sessions recognize them
+      const userMentioned = extractUserMentionedNames(history, isZh);
+      if (userMentioned.length > 0) {
+        recordMentionedNames(userMentioned).catch((err) =>
+          console.error("[darkroom:chat] record entities error:", err)
+        );
+      }
     } catch (err) {
-      console.error("Memory retrieval error:", err);
-      // Continue without memories
+      console.error("[darkroom:chat] preparation error:", err);
+      topicState = buildTopicState(history, isZh);
     }
 
-    const finalSystemPrompt = memoryBlock
-      ? `${fullSystemPrompt}${memoryBlock}`
-      : fullSystemPrompt;
+    const topicReminder = buildTopicReminder(topicState, isZh);
+    const resolvedMessage = resolvePronouns(message, topicState, isZh);
+    const topicLockInstruction = formatTopicLockInstruction(
+      topicState.primaryEntity || (isZh ? "无" : "none"),
+      isZh
+    );
+
+    const finalSystemPrompt = [
+      data.knowledgeBase,
+      SYSTEM_PROMPT,
+      activeTimeContext,
+      sessionBlock,
+      memoryBlock,
+      identityReminder,
+      topicReminder,
+      topicLockInstruction,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
     // ── Web search augmentation (only for out-of-scope queries) ───────────
     let searchBlock = "";
@@ -390,59 +250,75 @@ export async function POST(req: NextRequest) {
     }
 
     const systemPromptWithSearch = searchBlock
-      ? `${finalSystemPrompt}${searchBlock}${identityReminder ? "\n\n" + identityReminder : ""}`
-      : `${finalSystemPrompt}${identityReminder ? "\n\n" + identityReminder : ""}`;
+      ? `${finalSystemPrompt}${searchBlock}`
+      : finalSystemPrompt;
 
-    // Track current topic entity and resolve pronouns in ambiguous user messages
-    const recentEntities = trackRecentEntities(history, isZh);
-    const topicReminder = buildTopicReminder(recentEntities, isZh);
-    const resolvedMessage = resolvePronouns(message, recentEntities, isZh);
-
-    const systemPromptWithTopic = topicReminder
-      ? `${systemPromptWithSearch}\n\n${topicReminder}`
-      : systemPromptWithSearch;
-
-    const messages = [
-      { role: "system" as const, content: systemPromptWithTopic },
-      ...history.slice(-10).map((h: { role: string; content: string }) => ({
-        role: h.role as "user" | "assistant",
-        content: h.content,
-      })),
-      { role: "user" as const, content: resolvedMessage || message },
-    ];
-
-    const completion = await deepseekClient.chat.completions.create({
-      model: DEFAULT_MODEL,
-      messages,
-      temperature: 0.65,
-      max_tokens: 2048,
-      thinking: { type: "enabled" },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
-
-    // Defensive logging for empty-content investigation
     interface DeepSeekMessage {
       role?: string;
       content?: string | null;
       reasoning_content?: string | null;
     }
-    const rawMessage = completion.choices[0]?.message as DeepSeekMessage;
-    console.log("[darkroom:chat] raw message:", JSON.stringify(rawMessage));
 
-    const content = rawMessage?.content || rawMessage?.reasoning_content || "";
-    const usage = completion.usage;
+    async function callModel(
+      systemContent: string,
+      isRetry = false
+    ): Promise<string> {
+      const completion = await deepseekClient.chat.completions.create({
+        model: DEFAULT_MODEL,
+        messages: [
+          { role: "system" as const, content: systemContent },
+          ...history.slice(-10).map((h: { role: string; content: string }) => ({
+            role: h.role as "user" | "assistant",
+            content: h.content,
+          })),
+          { role: "user" as const, content: resolvedMessage || message },
+        ],
+        temperature: 0.65,
+        max_tokens: 2048,
+        thinking: { type: "enabled" },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      const rawMessage = completion.choices[0]?.message as DeepSeekMessage;
+      console.log("[darkroom:chat] raw message:", JSON.stringify(rawMessage));
+
+      const rawContent =
+        rawMessage?.content || rawMessage?.reasoning_content || "";
+      const { topic, cleanContent } = parseTopicLock(rawContent);
+
+      if (
+        topic &&
+        topicState.primaryEntity &&
+        !isRetry
+      ) {
+        const expected = topicState.primaryEntity.toLowerCase();
+        const actual = topic.toLowerCase();
+        const normalizedNone = isZh ? "无" : "none";
+        if (
+          actual !== expected &&
+          actual !== normalizedNone &&
+          !actual.includes(expected) &&
+          !expected.includes(actual)
+        ) {
+          console.log(
+            `[darkroom:chat] topic lock mismatch: expected ${topicState.primaryEntity}, got ${topic}`
+          );
+          const correction = isZh
+            ? `[强制校正] 你刚才错误地把话题对象写成了 "${topic}"。当前话题对象必须是 "${topicState.primaryEntity}"。请重新输出 [TopicLock: ${topicState.primaryEntity}] 并围绕 ${topicState.primaryEntity} 回复。`
+            : `[Correction] You incorrectly locked the topic as "${topic}". The current topic must be "${topicState.primaryEntity}". Re-output [TopicLock: ${topicState.primaryEntity}] and reply about ${topicState.primaryEntity}.`;
+          return callModel(`${systemContent}\n\n${correction}`, true);
+        }
+      }
+
+      return cleanContent;
+    }
+
+    const content = await callModel(systemPromptWithSearch);
 
     return NextResponse.json({
       content,
       source: "deepseek",
       recognizedName: userName || null,
-      usage: usage
-        ? {
-            prompt_tokens: usage.prompt_tokens,
-            completion_tokens: usage.completion_tokens,
-            total_tokens: usage.total_tokens,
-          }
-        : null,
       timestamp: new Date().toISOString(),
     });
   } catch (error: unknown) {

@@ -2,12 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
 import { getDarkroomData } from "@/lib/darkroom";
 import {
+  extractUserMentionedNames,
+  updateSessionSummary,
+} from "@/lib/darkroom-chat";
+import {
   storeMemory,
   extractKeywords,
   storeConversation,
   getUnprocessedConversations,
   markConversationsProcessed,
   findSimilarMemory,
+  recordMentionedNames,
 } from "@/lib/darkroom-memory";
 
 const BATCH_SIZE = 2;
@@ -19,6 +24,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { userMessage, assistantResponse } = body;
+    const sessionId = typeof body.sessionId === "string" ? body.sessionId : "";
     isZh = !!body.isZh;
 
     if (
@@ -40,15 +46,32 @@ export async function POST(req: NextRequest) {
     }
 
     const sourceLang = isZh ? "zh" : "en";
-    console.log(`[darkroom:extract] start lang=${sourceLang}`);
+    console.log(`[darkroom:extract] start lang=${sourceLang} session=${sessionId || "none"}`);
 
     // Step 1: always store the raw conversation exchange
     const storedConv = await storeConversation({
       user_message: userMessage,
       assistant_response: assistantResponse,
       source_lang: sourceLang,
+      session_id: sessionId || undefined,
     });
     console.log(`[darkroom:extract] conversation stored id=${storedConv.id}`);
+
+    // Record any new names the user mentioned, and update session summary asynchronously
+    if (sessionId) {
+      const mentionedNames = extractUserMentionedNames(
+        [{ role: "user", content: userMessage }],
+        isZh
+      );
+      if (mentionedNames.length > 0) {
+        recordMentionedNames(mentionedNames).catch((err) =>
+          console.error("[darkroom:extract] record entities error:", err)
+        );
+      }
+      updateSessionSummary(sessionId, userMessage, assistantResponse, isZh).catch((err) =>
+        console.error("[darkroom:extract] summary update error:", err)
+      );
+    }
 
     const data = getDarkroomData(isZh);
     const extractionPrompt = data.extractionPrompt;

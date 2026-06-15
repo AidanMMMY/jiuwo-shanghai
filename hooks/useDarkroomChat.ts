@@ -9,6 +9,23 @@ function getNowTime(): string {
 
 const MAX_STORED_MESSAGES = 20;
 const USERNAME_KEY = 'darkroom-username';
+const SESSION_ID_KEY = 'darkroom-session-id';
+
+function generateSessionId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `sess-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function getStoredSessionId(): string {
+  if (typeof window === 'undefined') return generateSessionId();
+  try {
+    return window.localStorage.getItem(SESSION_ID_KEY) || generateSessionId();
+  } catch {
+    return generateSessionId();
+  }
+}
 
 export interface UseDarkroomChatOptions {
   isZh?: boolean;
@@ -32,17 +49,30 @@ export function useDarkroomChat({ isZh = false, onMemoryExtracted }: UseDarkroom
       return '';
     }
   });
+  const [sessionId, setSessionId] = useState<string>(() => {
+    const id = getStoredSessionId();
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem(SESSION_ID_KEY, id);
+      } catch {
+        // ignore
+      }
+    }
+    return id;
+  });
 
   // Use refs to avoid stale closures and race conditions
   const historyRef = useRef(history);
   const loadingRef = useRef(loading);
   const knownNameRef = useRef(knownName);
+  const sessionIdRef = useRef(sessionId);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Keep refs in sync with state
   historyRef.current = history;
   loadingRef.current = loading;
   knownNameRef.current = knownName;
+  sessionIdRef.current = sessionId;
 
   const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim();
@@ -63,7 +93,7 @@ export function useDarkroomChat({ isZh = false, onMemoryExtracted }: UseDarkroom
 
     try {
       // Pass the latest history including the user message
-      const res = await sendDarkroomMessage(trimmed, currentHistory, isZh, knownNameRef.current);
+      const res = await sendDarkroomMessage(trimmed, currentHistory, isZh, knownNameRef.current, sessionIdRef.current);
       const assistantTimestamp = getNowTime();
       const assistantMessage: ChatMessage = { role: 'assistant', content: res.content, timestamp: assistantTimestamp };
 
@@ -91,7 +121,7 @@ export function useDarkroomChat({ isZh = false, onMemoryExtracted }: UseDarkroom
       fetch('/api/darkroom/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userMessage: trimmed, assistantResponse: res.content, isZh }),
+        body: JSON.stringify({ userMessage: trimmed, assistantResponse: res.content, isZh, sessionId: sessionIdRef.current }),
         signal: abortControllerRef.current.signal,
       })
         .then((r) => {

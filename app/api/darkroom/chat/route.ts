@@ -133,9 +133,59 @@ function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function extractUserMentionedNames(history: HistoryMessage[], isZh: boolean): string[] {
+  const names: string[] = [];
+  const seen = new Set<string>();
+
+  const patterns = isZh
+    ? [
+        /(?:你|我|系统)?(?:认识|知道|了解|听过|见过)(.+?)(?:吗|么|？|\?|$)/,
+        /(.+?)(?:是|叫)(?:谁|哪位)/,
+      ]
+    : [
+        /(?:do you know|have you met|have you heard of|tell me about)\s+(.+?)(?:\?|\.|!|$)/i,
+        /who is\s+(.+?)(?:\?|\.|!|$)/i,
+        /what about\s+(.+?)(?:\?|\.|!|$)/i,
+      ];
+
+  // Scan last 6 user messages, most recent first
+  for (let i = history.length - 1; i >= 0 && i >= history.length - 6; i--) {
+    const msg = history[i];
+    if (msg.role !== "user" || !msg.content) continue;
+
+    const text = msg.content.trim();
+    let matched: RegExpMatchArray | null = null;
+    for (const p of patterns) {
+      matched = text.match(p);
+      if (matched && matched[1]) break;
+    }
+
+    if (matched && matched[1]) {
+      const raw = matched[1].trim();
+      const cleaned = raw.replace(/[，。！？、；：\.\,\!\?\;\:]/g, "").trim();
+      if (cleaned.length >= 2 && cleaned.length <= 20) {
+        const key = cleaned.toLowerCase();
+        if (!seen.has(key)) {
+          names.push(cleaned);
+          seen.add(key);
+        }
+      }
+    }
+  }
+
+  return names;
+}
+
 function trackRecentEntities(history: HistoryMessage[], isZh: boolean): string[] {
   const entities: string[] = [];
   const seen = new Set<string>();
+
+  // First, prioritize names the user explicitly asked about (even if not in KNOWN_ENTITIES)
+  const userMentioned = extractUserMentionedNames(history, isZh);
+  for (const name of userMentioned) {
+    entities.push(name);
+    seen.add(name.toLowerCase());
+  }
 
   // Scan last 10 messages, most recent first
   for (let i = history.length - 1; i >= 0 && i >= history.length - 10; i--) {

@@ -365,14 +365,21 @@ export async function POST(req: NextRequest) {
       model: DEFAULT_MODEL,
       messages,
       temperature: 0.75,
-      max_tokens: 1024,
-    });
+      max_tokens: 2048,
+      thinking: { type: "enabled" },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     // Defensive logging for empty-content investigation
-    const rawMessage = completion.choices[0]?.message;
+    interface DeepSeekMessage {
+      role?: string;
+      content?: string | null;
+      reasoning_content?: string | null;
+    }
+    const rawMessage = completion.choices[0]?.message as DeepSeekMessage;
     console.log("[darkroom:chat] raw message:", JSON.stringify(rawMessage));
 
-    const content = rawMessage?.content || "";
+    const content = rawMessage?.content || rawMessage?.reasoning_content || "";
     const usage = completion.usage;
 
     return NextResponse.json({

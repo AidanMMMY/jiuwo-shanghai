@@ -39,7 +39,7 @@ export interface KnownEntity {
   zhHint: string;
 }
 
-const KNOWN_ENTITIES: KnownEntity[] = [
+export const KNOWN_ENTITIES: KnownEntity[] = [
   {
     name: "Aidan",
     aliases: ["aidan"],

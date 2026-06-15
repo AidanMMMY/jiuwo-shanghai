@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
-import { getDarkroomData, matchKnownEntity } from "@/lib/darkroom";
+import { getDarkroomData, matchKnownEntity, KNOWN_ENTITIES } from "@/lib/darkroom";
 
 import { retrieveMemories, searchMemoriesByKeyword } from "@/lib/darkroom-memory";
 import {
@@ -120,6 +120,93 @@ function extractUserNameFromHistory(history: HistoryMessage[], isZh: boolean): s
   return null;
 }
 
+const ZH_PRONOUNS = /他|她|ta|这个|那个|那人|这位|那位/;
+const EN_PRONOUNS = /\b(he|she|they|him|her|them|this person|that person|this guy|that guy)\b/i;
+
+function containsPronoun(text: string, isZh: boolean): boolean {
+  if (!text) return false;
+  if (isZh) return ZH_PRONOUNS.test(text);
+  return EN_PRONOUNS.test(text);
+}
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function trackRecentEntities(history: HistoryMessage[], isZh: boolean): string[] {
+  const entities: string[] = [];
+  const seen = new Set<string>();
+
+  // Scan last 10 messages, most recent first
+  for (let i = history.length - 1; i >= 0 && i >= history.length - 10; i--) {
+    const msg = history[i];
+    if (!msg.content) continue;
+
+    for (const entity of KNOWN_ENTITIES) {
+      if (seen.has(entity.name)) continue;
+      const names = [entity.name, ...entity.aliases];
+      for (const name of names) {
+        if (name.length < 2) continue;
+        const found = isZh
+          ? msg.content.includes(name)
+          : new RegExp(`\\b${escapeRegex(name)}\\b`, "i").test(msg.content);
+        if (found) {
+          entities.push(entity.name);
+          seen.add(entity.name);
+          break;
+        }
+      }
+    }
+  }
+
+  return entities;
+}
+
+function resolvePronouns(message: string, recentEntities: string[], isZh: boolean): string | null {
+  if (recentEntities.length === 0) return null;
+  if (!containsPronoun(message, isZh)) return null;
+
+  const topEntity = recentEntities[0];
+  const lowerMsg = message.toLowerCase();
+  const names = [topEntity.toLowerCase()];
+  const entity = matchKnownEntity(topEntity);
+  if (entity) {
+    names.push(...entity.aliases.map((a) => a.toLowerCase()));
+  }
+
+  // If the message already names the entity explicitly, no need to rewrite
+  for (const name of names) {
+    if (name.length >= 2 && lowerMsg.includes(name)) return null;
+  }
+
+  if (isZh) {
+    return `用户（指刚才聊的「${topEntity}」）：${message}`;
+  }
+  return `User (referring to ${topEntity} just discussed): ${message}`;
+}
+
+function buildTopicReminder(recentEntities: string[], isZh: boolean): string {
+  if (recentEntities.length === 0) return "";
+  const top = recentEntities[0];
+  const others = recentEntities.slice(1, 4);
+
+  if (isZh) {
+    let reminder = `[当前话题：${top}。用户下一条消息中的「他」「她」「ta」「这个」「那个」等指代，如果没有特别说明，优先指向 ${top}。`;
+    if (others.length > 0) {
+      reminder += ` 聊天中曾提及 ${others.join("、")}，但除非用户明确建立关联，否则不要主动跳到这些人。`;
+    }
+    reminder += ` 如要提及其他人物，请先说明其与 ${top} 的关联。]`;
+    return reminder;
+  }
+
+  let reminder = `[Current topic: ${top}. Pronouns like "he", "she", "they", "this person", "that person" in the user's next message should, unless specified otherwise, refer to ${top}.`;
+  if (others.length > 0) {
+    reminder += ` The conversation has also mentioned ${others.join(", ")}, but do not pivot to them unless the user explicitly connects them.`;
+  }
+  reminder += ` If you mention someone else, explain their connection to ${top} first.]`;
+  return reminder;
+}
+
 export async function POST(req: NextRequest) {
   let isZh = false;
 
@@ -214,11 +301,13 @@ export async function POST(req: NextRequest) {
     // Retrieve relevant collective memories and inject into context
     let memoryBlock = "";
     try {
-      const memories = await retrieveMemories(message, isZh ? "zh" : "en", 5);
+      const isAmbiguous = containsPronoun(message, isZh) || message.trim().length < 10;
+      const memoryLimit = isAmbiguous ? 3 : 5;
+      const memories = await retrieveMemories(message, isZh ? "zh" : "en", memoryLimit);
       if (memories.length > 0) {
         const header = isZh
-          ? "=== 集体记忆扇区 ===\n以下痕迹来自之前的访问模式。如果它们与当前查询相关，请在回应中自然地引用或呼应一两条，让访问者感受到这个节点在持续学习。不要强行堆砌不相关的痕迹。"
-          : "=== COLLECTIVE MEMORY SECTOR ===\nThe following traces have been left by previous access patterns. If any are relevant to the current query, naturally reference or echo one or two in your response so the visitor senses the node is learning. Do not force unrelated traces.";
+          ? "=== 集体记忆扇区 ===\n以下痕迹来自之前的访问模式。如果它们与当前查询相关，请在回应中自然地引用或呼应一两条，让访问者感受到这个节点在持续学习。不要强行堆砌不相关的痕迹。当前如果用户在用指代聊某个特定人物，优先回应当前话题人物，不要让记忆把你拉走。"
+          : "=== COLLECTIVE MEMORY SECTOR ===\nThe following traces have been left by previous access patterns. If any are relevant to the current query, naturally reference or echo one or two in your response so the visitor senses the node is learning. Do not force unrelated traces. If the user is using pronouns to discuss a specific person, prioritize the current topic and do not let memories pull you away.";
         const footer = isZh ? "=== 结束 ===" : "=== END ===";
         memoryBlock = `\n\n${header}\n\n${memories.map((m) => `- ${m.content}`).join("\n")}\n\n${footer}`;
       }
@@ -262,13 +351,22 @@ export async function POST(req: NextRequest) {
       ? `${finalSystemPrompt}${searchBlock}${identityReminder ? "\n\n" + identityReminder : ""}`
       : `${finalSystemPrompt}${identityReminder ? "\n\n" + identityReminder : ""}`;
 
+    // Track current topic entity and resolve pronouns in ambiguous user messages
+    const recentEntities = trackRecentEntities(history, isZh);
+    const topicReminder = buildTopicReminder(recentEntities, isZh);
+    const resolvedMessage = resolvePronouns(message, recentEntities, isZh);
+
+    const systemPromptWithTopic = topicReminder
+      ? `${systemPromptWithSearch}\n\n${topicReminder}`
+      : systemPromptWithSearch;
+
     const messages = [
-      { role: "system" as const, content: systemPromptWithSearch },
+      { role: "system" as const, content: systemPromptWithTopic },
       ...history.slice(-10).map((h: { role: string; content: string }) => ({
         role: h.role as "user" | "assistant",
         content: h.content,
       })),
-      { role: "user" as const, content: message },
+      { role: "user" as const, content: resolvedMessage || message },
     ];
 
     const completion = await deepseekClient.chat.completions.create({

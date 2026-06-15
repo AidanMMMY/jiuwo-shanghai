@@ -377,7 +377,15 @@
 
 /* Subtle screen flicker animation on the display */
 .darkroom-chat-display {
+  display: flex;
+  flex-direction: column;
   animation: screenFlicker 8s infinite;
+}
+
+/* In fullscreen, the input line sits outside the scrollable screen */
+.darkroom-chat-fullscreen .darkroom-chat-input-line {
+  margin: 0;
+  flex-shrink: 0;
 }
 
 .darkroom-chat-header {
@@ -612,7 +620,7 @@ body.darkroom-chat-active .back-to-top-btn {
   }
 
   .darkroom-chat-display {
-    width: calc(100vw - 48px);
+    width: min(1200px, calc(100vw - 48px));
     height: calc(100vh - 48px);
     border: 16px solid #0d0b06;
     border-radius: 4px;
@@ -640,7 +648,7 @@ body.darkroom-chat-active .back-to-top-btn {
   }
 
   .darkroom-chat-input-line {
-    margin: 18px 0 0;
+    margin: 0;
     padding: 16px 40px;
     background: rgba(12, 10, 4, 0.92);
     border-top: 1px solid rgba(166, 136, 42, 0.18);

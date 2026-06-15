@@ -358,55 +358,61 @@ export default function DarkroomChat({
   const rootClass =
     mode === 'embedded' ? 'darkroom-chat-embedded' : 'darkroom-chat-fullscreen';
 
-  const screenContent = (
+  const entriesContent = (
+    <div className="darkroom-chat-entries">
+      {entries.map((entry) => {
+        const inQueue = typingQueue.includes(entry.id);
+        const isCurrent = entry.id === currentTypingId;
+        const shouldShow = entry.type === 'user' || isCurrent || !inQueue;
+        if (!shouldShow) return null;
+        return (
+          <EntryItem
+            key={entry.id}
+            entry={entry}
+            isActiveTyping={isCurrent}
+            onDone={isCurrent ? () => handleTypingDone(entry.id) : undefined}
+            isZh={isZh}
+          />
+        );
+      })}
+
+      {loading && (
+        <div className="darkroom-log-entry">
+          <pre className="darkroom-log-typing">
+            {isZh
+              ? `[${pendingTimeRef.current}] · 等待中\n> 接收信号中……\n_`
+              : `[${pendingTimeRef.current}] · PENDING\n> Receiving transmission...\n_`}
+          </pre>
+        </div>
+      )}
+    </div>
+  );
+
+  const inputLine = (
+    <div className="darkroom-chat-input-line">
+      <span className="darkroom-chat-prompt">{'>'}</span>
+      <input
+        ref={inputRef}
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onFocus={handleInputFocus}
+        onBlur={handleInputBlur}
+        placeholder={isZh ? '输入指令...' : 'Enter command...'}
+        disabled={loading}
+        className="darkroom-chat-input"
+        autoComplete="off"
+        spellCheck={false}
+      />
+      <span className="darkroom-chat-cursor">_</span>
+    </div>
+  );
+
+  const embeddedScreenContent = (
     <>
-      <div className="darkroom-chat-entries">
-        {entries.map((entry) => {
-          const inQueue = typingQueue.includes(entry.id);
-          const isCurrent = entry.id === currentTypingId;
-          const shouldShow = entry.type === 'user' || isCurrent || !inQueue;
-          if (!shouldShow) return null;
-          return (
-            <EntryItem
-              key={entry.id}
-              entry={entry}
-              isActiveTyping={isCurrent}
-              onDone={isCurrent ? () => handleTypingDone(entry.id) : undefined}
-              isZh={isZh}
-            />
-          );
-        })}
-
-        {loading && (
-          <div className="darkroom-log-entry">
-            <pre className="darkroom-log-typing">
-              {isZh
-                ? `[${pendingTimeRef.current}] · 等待中\n> 接收信号中……\n_`
-                : `[${pendingTimeRef.current}] · PENDING\n> Receiving transmission...\n_`}
-            </pre>
-          </div>
-        )}
-      </div>
-
-      {/* Input */}
-      <div className="darkroom-chat-input-line">
-        <span className="darkroom-chat-prompt">{'>'}</span>
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={handleInputFocus}
-          onBlur={handleInputBlur}
-          placeholder={isZh ? '输入指令...' : 'Enter command...'}
-          disabled={loading}
-          className="darkroom-chat-input"
-          autoComplete="off"
-          spellCheck={false}
-        />
-        <span className="darkroom-chat-cursor">_</span>
-      </div>
+      {entriesContent}
+      {inputLine}
     </>
   );
 
@@ -427,8 +433,10 @@ export default function DarkroomChat({
           </div>
 
           <div className="darkroom-chat-screen" ref={scrollRef}>
-            {screenContent}
+            {entriesContent}
           </div>
+
+          {inputLine}
         </div>
       </div>
     );
@@ -441,7 +449,7 @@ export default function DarkroomChat({
         <SignalHeader isZh={isZh} />
       </div>
       <div className="darkroom-chat-screen" ref={scrollRef}>
-        {screenContent}
+        {embeddedScreenContent}
       </div>
     </div>
   );

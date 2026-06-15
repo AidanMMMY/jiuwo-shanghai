@@ -83,14 +83,14 @@ export async function POST(req: NextRequest) {
         .map(
           (c, i) =>
             isZh
-              ? `--- 对话 ${i + 1} ---\n用户：${c.user_message}\n系统：${c.assistant_response}`
-              : `--- Exchange ${i + 1} ---\nUser: ${c.user_message}\nSystem: ${c.assistant_response}`
+              ? `--- 用户输入 ${i + 1} ---\n${c.user_message}`
+              : `--- User input ${i + 1} ---\n${c.user_message}`
         )
         .join("\n\n");
 
       const batchPrompt = isZh
-        ? `基于以下 ${BATCH_SIZE} 段连续对话，综合提取 0–3 个值得持久化的记忆。注意跨对话的重复主题、用户偏好和情绪模式。如果某条信息与已有记忆高度重复，请降低其优先级或不包含。\n\n每条记忆的 keywords 必须同时包含中文和英文表达，覆盖该记忆的核心概念。例如：涉及“酒”的记忆应包含 ['酒', 'drink', 'alcohol']；涉及“喜欢”的记忆应包含 ['喜欢', 'like']。这样不同语言的查询都能召回这条记忆。\n\n${transcript}\n\n请提取记忆：`
-        : `Based on the following ${BATCH_SIZE} consecutive exchanges, synthesize 0–3 memories worth persisting. Look for recurring themes, user preferences, and emotional patterns across the exchanges. If a memory overlaps heavily with existing traces, deprioritize or omit it.\n\nEach memory's keywords MUST include both Chinese and English expressions of its core concepts. For example, a memory involving "drink" should include ['drink', 'alcohol', '酒']; a memory involving "like" should include ['like', '喜欢']. This allows queries in either language to recall the memory.\n\n${transcript}\n\nExtract memories:`;
+        ? `基于以下 ${BATCH_SIZE} 条用户消息，提取 0–3 个值得持久化的记忆。只从用户说的话里提取，不要从系统回复中推断或编造。注意跨消息的重复主题、用户偏好和情绪模式。如果某条信息与已有记忆高度重复，请降低其优先级或不包含。\n\n每条记忆的 keywords 必须同时包含中文和英文表达，覆盖该记忆的核心概念。例如：涉及“酒”的记忆应包含 ['酒', 'drink', 'alcohol']；涉及“喜欢”的记忆应包含 ['喜欢', 'like']。这样不同语言的查询都能召回这条记忆。\n\n${transcript}\n\n请提取记忆：`
+        : `Based on the following ${BATCH_SIZE} user messages, extract 0–3 memories worth persisting. Extract ONLY from what the user said. Do not infer or fabricate from the system's responses. Look for recurring themes, user preferences, and emotional patterns across the messages. If a memory overlaps heavily with existing traces, deprioritize or omit it.\n\nEach memory's keywords MUST include both Chinese and English expressions of its core concepts. For example, a memory involving "drink" should include ['drink', 'alcohol', '酒']; a memory involving "like" should include ['like', '喜欢']. This allows queries in either language to recall the memory.\n\n${transcript}\n\nExtract memories:`;
 
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000);

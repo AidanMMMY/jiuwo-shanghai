@@ -83,14 +83,14 @@ export async function POST(req: NextRequest) {
         .map(
           (c, i) =>
             isZh
-              ? `--- 用户输入 ${i + 1} ---\n${c.user_message}`
-              : `--- User input ${i + 1} ---\n${c.user_message}`
+              ? `--- 对话 ${i + 1} ---\n用户：${c.user_message}\n系统：${c.assistant_response}`
+              : `--- Exchange ${i + 1} ---\nUser: ${c.user_message}\nSystem: ${c.assistant_response}`
         )
         .join("\n\n");
 
       const batchPrompt = isZh
-        ? `基于以下 ${BATCH_SIZE} 条用户消息，提取 0–3 个值得持久化的记忆。只从用户说的话里提取，不要从系统回复中推断或编造。注意跨消息的重复主题、用户偏好和情绪模式。如果某条信息与已有记忆高度重复，请降低其优先级或不包含。\n\n每条记忆的 keywords 必须同时包含中文和英文表达，覆盖该记忆的核心概念。例如：涉及“酒”的记忆应包含 ['酒', 'drink', 'alcohol']；涉及“喜欢”的记忆应包含 ['喜欢', 'like']。这样不同语言的查询都能召回这条记忆。\n\n${transcript}\n\n请提取记忆：`
-        : `Based on the following ${BATCH_SIZE} user messages, extract 0–3 memories worth persisting. Extract ONLY from what the user said. Do not infer or fabricate from the system's responses. Look for recurring themes, user preferences, and emotional patterns across the messages. If a memory overlaps heavily with existing traces, deprioritize or omit it.\n\nEach memory's keywords MUST include both Chinese and English expressions of its core concepts. For example, a memory involving "drink" should include ['drink', 'alcohol', '酒']; a memory involving "like" should include ['like', '喜欢']. This allows queries in either language to recall the memory.\n\n${transcript}\n\nExtract memories:`;
+        ? `基于以下 ${BATCH_SIZE} 段连续对话，提取 0–4 个值得持久化的记忆。提取两类：\n\n1. **用户事实**：从用户说的话里提取的具体事实（偏好、提到的人、纠正、计划、情绪）。只提取用户明确说过的内容。\n2. **对话综合**：结合用户和系统的多轮内容，提取跨轮的主题、关系动态、用户纠正后的共识、情绪走向。可以从上下文中合理推断，但不要编造系统回复里没有依据的内容。\n\n注意跨对话的重复主题。如果某条信息与已有记忆高度重复，请降低其优先级或不包含。\n\n每条记忆的 keywords 必须同时包含中文和英文表达，覆盖该记忆的核心概念。例如：涉及“酒”的记忆应包含 ['酒', 'drink', 'alcohol']；涉及“喜欢”的记忆应包含 ['喜欢', 'like']。这样不同语言的查询都能召回这条记忆。\n\n${transcript}\n\n请提取记忆：`
+        : `Based on the following ${BATCH_SIZE} consecutive exchanges, extract 0–4 memories worth persisting. Extract two types:\n\n1. **User facts**: specific facts from what the user said (preferences, people mentioned, corrections, plans, moods). Only extract what the user explicitly stated.\n2. **Conversation synthesis**: higher-level themes, relationship dynamics, post-correction consensus, or emotional arcs that emerge across the full exchange. You may reasonably infer these from context, but do not fabricate details with no basis in the conversation.\n\nLook for recurring themes across exchanges. If a memory overlaps heavily with existing traces, deprioritize or omit it.\n\nEach memory's keywords MUST include both Chinese and English expressions of its core concepts. For example, a memory involving "drink" should include ['drink', 'alcohol', '酒']; a memory involving "like" should include ['like', '喜欢']. This allows queries in either language to recall the memory.\n\n${transcript}\n\nExtract memories:`;
 
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000);

@@ -164,7 +164,6 @@ function trackRecentEntities(history: HistoryMessage[], isZh: boolean): string[]
 
 function resolvePronouns(message: string, recentEntities: string[], isZh: boolean): string | null {
   if (recentEntities.length === 0) return null;
-  if (!containsPronoun(message, isZh)) return null;
 
   const topEntity = recentEntities[0];
   const lowerMsg = message.toLowerCase();
@@ -179,32 +178,25 @@ function resolvePronouns(message: string, recentEntities: string[], isZh: boolea
     if (name.length >= 2 && lowerMsg.includes(name)) return null;
   }
 
-  if (isZh) {
-    return `用户（指刚才聊的「${topEntity}」）：${message}`;
+  // If message contains pronoun or is very short, prepend topic context
+  if (containsPronoun(message, isZh) || message.trim().length < 12) {
+    if (isZh) {
+      return `关于刚才聊的「${topEntity}」：${message}`;
+    }
+    return `Regarding ${topEntity} we were just discussing: ${message}`;
   }
-  return `User (referring to ${topEntity} just discussed): ${message}`;
+
+  return null;
 }
 
 function buildTopicReminder(recentEntities: string[], isZh: boolean): string {
   if (recentEntities.length === 0) return "";
   const top = recentEntities[0];
-  const others = recentEntities.slice(1, 4);
 
   if (isZh) {
-    let reminder = `[当前话题：${top}。用户下一条消息中的「他」「她」「ta」「这个」「那个」等指代，如果没有特别说明，优先指向 ${top}。`;
-    if (others.length > 0) {
-      reminder += ` 聊天中曾提及 ${others.join("、")}，但除非用户明确建立关联，否则不要主动跳到这些人。`;
-    }
-    reminder += ` 如要提及其他人物，请先说明其与 ${top} 的关联。]`;
-    return reminder;
+    return `[当前话题锁定：${top}。用户下一条消息中的「他」「她」「ta」「这个」「那个」等指代，默认就是指 ${top}。不要反问「指谁」，直接顺着这个话题回答。]`;
   }
-
-  let reminder = `[Current topic: ${top}. Pronouns like "he", "she", "they", "this person", "that person" in the user's next message should, unless specified otherwise, refer to ${top}.`;
-  if (others.length > 0) {
-    reminder += ` The conversation has also mentioned ${others.join(", ")}, but do not pivot to them unless the user explicitly connects them.`;
-  }
-  reminder += ` If you mention someone else, explain their connection to ${top} first.]`;
-  return reminder;
+  return `[Current topic locked: ${top}. Pronouns like "he", "she", "they", "this person", "that person" in the user's next message refer to ${top} by default. Do not ask who they mean; answer within this topic.]`;
 }
 
 export async function POST(req: NextRequest) {

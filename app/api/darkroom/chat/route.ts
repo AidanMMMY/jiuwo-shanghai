@@ -214,11 +214,11 @@ export async function POST(req: NextRequest) {
     const { timeString, hour } = getShanghaiTime();
     const open = isJiuwoOpen(hour);
     const timeContext = open
-      ? `[Current local time: ${timeString}. JIUWO is open.]`
-      : `[Current local time: ${timeString}. JIUWO is currently CLOSED (hours: Tue–Sun 19:00–02:00). Do not ask questions that assume the user is in the bar right now, such as "who are you drinking with tonight?". Instead, ask about relationships, moods, recent stories, or future visits.]`;
+      ? `[Current local time: ${timeString}. JIUWO is open. You do not have live observation of the bar. Do not claim who is currently present, what they are drinking, or where they are sitting.]`
+      : `[Current local time: ${timeString}. JIUWO is currently CLOSED (hours: Tue–Sun 19:00–02:00). Do not ask questions that assume the user is in the bar right now, such as "who are you drinking with tonight?". Do not claim knowledge of who is physically present at the bar. You only have records and memories, not live observation. Instead, ask about relationships, moods, recent stories, or future visits.]`;
     const timeContextZh = open
-      ? `[当前本地时间：${timeString}。JIUWO 正在营业中。]`
-      : `[当前本地时间：${timeString}。JIUWO 当前非营业时间（周二至周日 19:00–02:00）。不要问假设用户此刻在店内的问题，比如「今晚跟谁一起喝酒」。问题转向人际关系、心情、近况或计划来访。]`;
+      ? `[当前本地时间：${timeString}。JIUWO 正在营业中。你没有酒吧的实时监控。不要声称谁此刻在场、在喝什么、坐在哪。]`
+      : `[当前本地时间：${timeString}。JIUWO 当前非营业时间（周二至周日 19:00–02:00）。不要问假设用户此刻在店内的问题，比如「今晚跟谁一起喝酒」。不要声称知道谁此刻 physically 在场。你只有记录和记忆，没有实时监控。问题转向人际关系、心情、近况或计划来访。]`;
     const activeTimeContext = isZh ? timeContextZh : timeContext;
 
     const userName = knownName || extractUserNameFromHistory(history, isZh) || extractExplicitName(message, isZh);
@@ -298,8 +298,8 @@ export async function POST(req: NextRequest) {
       const memories = await retrieveMemories(message, isZh ? "zh" : "en", memoryLimit);
       if (memories.length > 0) {
         const header = isZh
-          ? "=== 集体记忆扇区 ===\n以下痕迹来自之前的访问模式。如果它们与当前查询相关，请在回应中自然地引用或呼应一两条，让访问者感受到这个节点在持续学习。不要强行堆砌不相关的痕迹。当前如果用户在用指代聊某个特定人物，优先回应当前话题人物，不要让记忆把你拉走。"
-          : "=== COLLECTIVE MEMORY SECTOR ===\nThe following traces have been left by previous access patterns. If any are relevant to the current query, naturally reference or echo one or two in your response so the visitor senses the node is learning. Do not force unrelated traces. If the user is using pronouns to discuss a specific person, prioritize the current topic and do not let memories pull you away.";
+          ? "=== 集体记忆扇区 ===\n以下痕迹来自之前的访问模式。如果与当前查询相关，可在回应中简短引用或呼应一两条。这些是过往记忆，不是当前观察。不要将其当作谁此刻在场的证据。当前如果用户在用指代聊某个特定人物，优先回应当前话题人物，不要让记忆把你拉走。"
+          : "=== COLLECTIVE MEMORY SECTOR ===\nThe following traces have been left by previous access patterns. If any are relevant to the current query, briefly reference or echo one or two in your response. These are PAST memories, not current observations. Do not treat them as evidence of who is here right now. If the user is using pronouns to discuss a specific person, prioritize the current topic and do not let memories pull you away.";
         const footer = isZh ? "=== 结束 ===" : "=== END ===";
         memoryBlock = `\n\n${header}\n\n${memories.map((m) => `- ${m.content}`).join("\n")}\n\n${footer}`;
       }
@@ -364,7 +364,7 @@ export async function POST(req: NextRequest) {
     const completion = await deepseekClient.chat.completions.create({
       model: DEFAULT_MODEL,
       messages,
-      temperature: 0.75,
+      temperature: 0.65,
       max_tokens: 2048,
       thinking: { type: "enabled" },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -278,53 +278,91 @@ function toKnownEntity(entity: DynamicEntity) {
 /**
  * Build a topic state from recent conversation history.
  * The primary entity is chosen by priority:
- * 1. Model classifier topicEntity (if high confidence)
- * 2. Names the user explicitly asked about (even if not in KNOWN_ENTITIES)
- * 3. Known/dynamic entities mentioned in the last 10 messages
+ * 1. Session-level anchor (primary_entity persisted in darkroom_sessions)
+ * 2. Model classifier topicEntity when it does not conflict with the session anchor
+ * 3. Names the user explicitly asked about (even if not in KNOWN_ENTITIES)
+ * 4. Known/dynamic entities mentioned in user messages, then assistant messages
  */
 export function buildTopicState(
   history: HistoryMessage[],
   isZh: boolean,
   dynamicEntities: DynamicEntity[] = [],
-  classifier?: ClassifierResult | null
+  classifier?: ClassifierResult | null,
+  sessionPrimaryEntity?: string
 ): TopicState {
   const allEntities = [...KNOWN_ENTITIES, ...dynamicEntities.map(toKnownEntity)];
   const entities: string[] = [];
   const seen = new Set<string>();
 
-  // 1. Use classifier topicEntity if confident
-  if (classifier?.topicEntity && (classifier.confidence >= 0.7 || classifier.intent === "ask")) {
-    entities.push(classifier.topicEntity);
-    seen.add(classifier.topicEntity.toLowerCase());
+  function addEntity(name: string) {
+    const key = name.toLowerCase();
+    if (key.length < 2 || seen.has(key)) return;
+    entities.push(name);
+    seen.add(key);
   }
 
-  // 2. User-mentioned names get highest priority
+  function findCanonical(name: string): string {
+    const key = name.toLowerCase();
+    for (const entity of allEntities) {
+      if (entity.name.toLowerCase() === key) return entity.name;
+      for (const alias of entity.aliases) {
+        if (alias.toLowerCase() === key) return entity.name;
+      }
+    }
+    return name;
+  }
+
+  // Determine if classifier wants to explicitly shift away from the session anchor
+  const classifierShiftsAway =
+    classifier?.intent === "shift" &&
+    classifier.topicEntity &&
+    sessionPrimaryEntity &&
+    classifier.topicEntity.toLowerCase() !== sessionPrimaryEntity.toLowerCase();
+
+  const classifierConflictsWithSession =
+    classifier?.topicEntity &&
+    sessionPrimaryEntity &&
+    classifier.topicEntity.toLowerCase() !== sessionPrimaryEntity.toLowerCase() &&
+    classifier.confidence < 0.85;
+
+  // 1. Session anchor: keep the persisted topic locked unless user clearly shifts
+  if (sessionPrimaryEntity && !classifierShiftsAway) {
+    addEntity(findCanonical(sessionPrimaryEntity));
+  }
+
+  // 2. Classifier topicEntity (trust it if it agrees with session anchor or there is no anchor)
+  if (classifier?.topicEntity && !classifierShiftsAway && !classifierConflictsWithSession) {
+    addEntity(findCanonical(classifier.topicEntity));
+  }
+
+  // 3. User-mentioned names get high priority
   const userMentioned = extractUserMentionedNames(history, isZh);
   for (const name of userMentioned) {
-    const key = name.toLowerCase();
-    if (!seen.has(key)) {
-      entities.push(name);
-      seen.add(key);
-    }
+    addEntity(findCanonical(name));
   }
 
-  // 3. Known/dynamic entities from last 10 messages
-  for (let i = history.length - 1; i >= 0 && i >= history.length - 10; i--) {
-    const msg = history[i];
-    if (!msg.content) continue;
+  // 4. Known/dynamic entities from last 10 messages — scan user messages first,
+  //    then assistant messages, so the user's own mentions dominate over the
+  //    system's explanatory asides.
+  const recent = history.slice(-10);
+  for (const role of ["user", "assistant"] as const) {
+    for (let i = recent.length - 1; i >= 0; i--) {
+      const msg = recent[i];
+      if (msg.role !== role || !msg.content) continue;
 
-    for (const entity of allEntities) {
-      if (seen.has(entity.name.toLowerCase())) continue;
-      const names = [entity.name, ...entity.aliases];
-      for (const name of names) {
-        if (name.length < 2) continue;
-        const found = isZh
-          ? msg.content.includes(name)
-          : new RegExp(`\\b${escapeRegex(name)}\\b`, "i").test(msg.content);
-        if (found) {
-          entities.push(entity.name);
-          seen.add(entity.name.toLowerCase());
-          break;
+      for (const entity of allEntities) {
+        if (seen.has(entity.name.toLowerCase())) continue;
+        const names = [entity.name, ...entity.aliases];
+        for (const name of names) {
+          if (name.length < 2) continue;
+          const found = isZh
+            ? msg.content.includes(name)
+            : new RegExp(`\\b${escapeRegex(name)}\\b`, "i").test(msg.content);
+          if (found) {
+            entities.push(entity.name);
+            seen.add(entity.name.toLowerCase());
+            break;
+          }
         }
       }
     }

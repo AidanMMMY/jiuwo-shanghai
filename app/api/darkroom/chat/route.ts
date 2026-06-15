@@ -173,22 +173,50 @@ export async function POST(req: NextRequest) {
           }),
         ]);
 
-      const memories = filterMemoriesForChat(rawMemories);
-      if (memories.length > 0) {
-        const header = isZh
-          ? "=== 集体记忆扇区 ===\n以下痕迹来自之前的访问模式。如果与当前查询相关，可在回应中简短引用或呼应一两条。这些是过往记忆，不是当前观察。不要将其当作谁此刻在场的证据。当前如果用户在用指代聊某个特定人物，优先回应当前话题人物，不要让记忆把你拉走。"
-          : "=== COLLECTIVE MEMORY SECTOR ===\nThe following traces have been left by previous access patterns. If any are relevant to the current query, briefly reference or echo one or two in your response. These are PAST memories, not current observations. Do not treat them as evidence of who is here right now. If the user is using pronouns to discuss a specific person, prioritize the current topic and do not let memories pull you away.";
-        const footer = isZh ? "=== 结束 ===" : "=== END ===";
-        memoryBlock = `\n\n${header}\n\n${memories.map((m) => `- ${m.content}`).join("\n")}\n\n${footer}`;
-      }
-
       if (sessionState?.summary) {
         sessionBlock = isZh
           ? `\n\n[本会话摘要：${sessionState.summary}]\n[本会话当前话题对象：${sessionState.primary_entity || "无"}]`
           : `\n\n[Session summary: ${sessionState.summary}]\n[Current session topic: ${sessionState.primary_entity || "none"}]`;
       }
 
-      topicState = buildTopicState(history, isZh, dynamicEntities, classifierResult);
+      topicState = buildTopicState(
+        history,
+        isZh,
+        dynamicEntities,
+        classifierResult,
+        sessionState?.primary_entity ?? undefined
+      );
+
+      const memories = filterMemoriesForChat(rawMemories);
+      if (memories.length > 0) {
+        const topicEntity = topicState.primaryEntity;
+        const topicNames = topicEntity
+          ? new Set([
+              topicEntity.toLowerCase(),
+              ...(matchKnownEntity(topicEntity)?.aliases.map((a) => a.toLowerCase()) || []),
+            ])
+          : null;
+        const relevant = topicNames
+          ? memories.filter((m) =>
+              Array.from(topicNames).some((n) => m.content.toLowerCase().includes(n))
+            )
+          : memories;
+        const irrelevant = topicNames
+          ? memories.filter(
+              (m) => !Array.from(topicNames).some((n) => m.content.toLowerCase().includes(n))
+            )
+          : [];
+        // If there are topic-relevant memories, keep them and allow at most one
+        // unrelated memory as background. Otherwise keep everything.
+        const displayMemories =
+          relevant.length > 0 && topicNames ? [...relevant, ...irrelevant.slice(0, 1)] : memories;
+
+        const header = isZh
+          ? `=== 集体记忆扇区 ===\n以下痕迹来自之前的访问模式。当前主要话题对象：${topicEntity || "无"}。请优先引用与「${topicEntity || "当前话题"}」相关的记忆；与当前话题无关的记忆可以忽略，不要让它们把你拉走。这些只是过往记忆，不是当前观察。`
+          : `=== COLLECTIVE MEMORY SECTOR ===\nThe following traces have been left by previous access patterns. Current main topic: ${topicEntity || "none"}. Prioritize memories related to "${topicEntity || "the current topic"}"; unrelated memories may be ignored. Do not let memories pull you away. These are PAST memories, not current observations.`;
+        const footer = isZh ? "=== 结束 ===" : "=== END ===";
+        memoryBlock = `\n\n${header}\n\n${displayMemories.map((m) => `- ${m.content}`).join("\n")}\n\n${footer}`;
+      }
 
       // Persist any user-mentioned names so future sessions recognize them
       const userMentioned = extractUserMentionedNames(history, isZh);

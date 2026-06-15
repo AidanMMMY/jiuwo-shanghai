@@ -84,6 +84,36 @@ describe('buildTopicState', () => {
     expect(state.userIntent).toBe('answer');
     expect(state.primaryEntity).toBe('Phillip');
   });
+
+  it('keeps session primary_entity as anchor even when assistant mentions another known entity', () => {
+    const history: HistoryMessage[] = [
+      { role: 'user', content: '你认识司徒吗？' },
+      { role: 'assistant', content: '认得，司徒……是小马的前任。' },
+      { role: 'user', content: '他很喜欢看电影' },
+    ];
+    const state = buildTopicState(history, true, [], null, '司徒');
+    expect(state.primaryEntity).toBe('司徒');
+  });
+
+  it('scans user messages before assistant messages so user mentions dominate', () => {
+    const history: HistoryMessage[] = [
+      { role: 'user', content: '我今晚跟老王一起去的。' },
+      { role: 'assistant', content: '那挺好。他今天晚上状态怎么样？' },
+      { role: 'user', content: '他有点累' },
+    ];
+    const state = buildTopicState(history, true);
+    expect(state.primaryEntity).toBe('Tee');
+  });
+
+  it('lets classifier shift away from session anchor when explicit', () => {
+    const history: HistoryMessage[] = [{ role: 'user', content: '聊聊 Dex' }];
+    const state = buildTopicState(history, true, [], {
+      intent: 'shift',
+      topicEntity: 'Dex',
+      confidence: 0.9,
+    }, 'Tee');
+    expect(state.primaryEntity).toBe('Dex');
+  });
 });
 
 describe('resolvePronouns', () => {

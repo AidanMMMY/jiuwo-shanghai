@@ -365,10 +365,14 @@ export async function POST(req: NextRequest) {
       model: DEFAULT_MODEL,
       messages,
       temperature: 0.75,
-      max_tokens: 150,
+      max_tokens: 1024,
     });
 
-    const content = completion.choices[0]?.message?.content || "";
+    // Defensive logging for empty-content investigation
+    const rawMessage = completion.choices[0]?.message;
+    console.log("[darkroom:chat] raw message:", JSON.stringify(rawMessage));
+
+    const content = rawMessage?.content || "";
     const usage = completion.usage;
 
     return NextResponse.json({

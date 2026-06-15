@@ -264,7 +264,7 @@ export async function POST(req: NextRequest) {
 
     const messages = [
       { role: "system" as const, content: systemPromptWithSearch },
-      ...history.slice(-6).map((h: { role: string; content: string }) => ({
+      ...history.slice(-10).map((h: { role: string; content: string }) => ({
         role: h.role as "user" | "assistant",
         content: h.content,
       })),
@@ -274,8 +274,8 @@ export async function POST(req: NextRequest) {
     const completion = await deepseekClient.chat.completions.create({
       model: DEFAULT_MODEL,
       messages,
-      temperature: 0.85,
-      max_tokens: 120,
+      temperature: 0.75,
+      max_tokens: 150,
     });
 
     const content = completion.choices[0]?.message?.content || "";

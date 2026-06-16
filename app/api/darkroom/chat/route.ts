@@ -22,6 +22,7 @@ import {
   getSessionState,
   getDynamicEntities,
   recordMentionedNames,
+  getRecentConversationsBySession,
 } from "@/lib/darkroom-memory";
 import {
   getClientIp,
@@ -64,7 +65,8 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { message, history = [] } = body;
+    const { message } = body;
+    let history = Array.isArray(body.history) ? body.history : [];
     const knownName = typeof body.knownName === "string" ? body.knownName : "";
     const sessionId = typeof body.sessionId === "string" ? body.sessionId : "";
     isZh = !!body.isZh;
@@ -156,10 +158,10 @@ export async function POST(req: NextRequest) {
       const isAmbiguous =
         containsPronoun(message, isZh) || message.trim().length < 10;
       const memoryLimit = isAmbiguous ? 3 : 5;
+      const shouldHydrateHistory = sessionId && history.length === 0;
 
-      const [classifierResult, sessionState, rawMemories, dynamicEntities] =
+      const [sessionState, rawMemories, dynamicEntities, recentConversations] =
         await Promise.all([
-          classifyMessageWithModel(message, history, isZh),
           sessionId
             ? getSessionState(sessionId).catch((err) => {
                 console.error("[darkroom:chat] session fetch error:", err);
@@ -171,7 +173,31 @@ export async function POST(req: NextRequest) {
             console.error("[darkroom:chat] dynamic entities fetch error:", err);
             return [];
           }),
+          shouldHydrateHistory
+            ? getRecentConversationsBySession(sessionId, 6).catch((err) => {
+                console.error("[darkroom:chat] history hydrate error:", err);
+                return [];
+              })
+            : Promise.resolve([]),
         ]);
+
+      // If the frontend did not send history (e.g. fresh page load), rebuild it
+      // from the session's stored conversations so topic locking still works.
+      if (recentConversations && recentConversations.length > 0) {
+        const hydrated = recentConversations
+          .map((c) => [
+            { role: "user", content: c.user_message },
+            { role: "assistant", content: c.assistant_response },
+          ])
+          .flat();
+        history = [...hydrated, { role: "user", content: message }];
+        console.log(`[darkroom:chat] hydrated history from db: ${hydrated.length} messages`);
+      }
+
+      console.log("[darkroom:chat] history length:", history.length, "session:", sessionId || "none");
+
+      // Run classifier after history hydration so it has full context.
+      const classifierResult = await classifyMessageWithModel(message, history, isZh);
 
       if (sessionState?.summary) {
         sessionBlock = isZh
@@ -186,6 +212,8 @@ export async function POST(req: NextRequest) {
         classifierResult,
         sessionState?.primary_entity ?? undefined
       );
+
+      console.log("[darkroom:chat] topicState:", JSON.stringify(topicState));
 
       const memories = filterMemoriesForChat(rawMemories);
       if (memories.length > 0) {

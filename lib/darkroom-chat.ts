@@ -368,12 +368,41 @@ export function buildTopicState(
     }
   }
 
+  // 5. Fallback: if the latest user message uses a pronoun and no entity was
+  //    found, inherit the most recent entity from earlier in the conversation.
+  //    This catches short follow-ups like "他喜欢谁？" right after "dex经常来吗".
+  const lastUserMsg = history[history.length - 1];
+  if (!entities[0] && lastUserMsg && containsPronoun(lastUserMsg.content, isZh)) {
+    for (let i = history.length - 2; i >= 0 && i >= history.length - 10; i--) {
+      const msg = history[i];
+      if (!msg.content) continue;
+      let foundEntity: string | null = null;
+      for (const entity of allEntities) {
+        const names = [entity.name, ...entity.aliases];
+        for (const name of names) {
+          if (name.length < 2) continue;
+          const found = isZh
+            ? msg.content.includes(name)
+            : new RegExp(`\\b${escapeRegex(name)}\\b`, "i").test(msg.content);
+          if (found) {
+            foundEntity = entity.name;
+            break;
+          }
+        }
+        if (foundEntity) break;
+      }
+      if (foundEntity) {
+        addEntity(foundEntity);
+        break;
+      }
+    }
+  }
+
   const primaryEntity = entities[0];
   const primaryIsUserMentioned = primaryEntity
     ? userMentioned.some((n) => n.toLowerCase() === primaryEntity.toLowerCase())
     : false;
 
-  const lastUserMsg = history[history.length - 1];
   const previousAssistant =
     history.length >= 2 && history[history.length - 2].role === "assistant"
       ? history[history.length - 2].content

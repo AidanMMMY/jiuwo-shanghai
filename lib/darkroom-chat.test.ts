@@ -114,6 +114,16 @@ describe('buildTopicState', () => {
     }, 'Tee');
     expect(state.primaryEntity).toBe('Dex');
   });
+
+  it('inherits recent entity when user message is a short pronoun question', () => {
+    const history: HistoryMessage[] = [
+      { role: 'user', content: 'dex经常来吗？' },
+      { role: 'assistant', content: '挺稳定的。你找他？' },
+      { role: 'user', content: '他喜欢谁？' },
+    ];
+    const state = buildTopicState(history, true);
+    expect(state.primaryEntity).toBe('Dex');
+  });
 });
 
 describe('resolvePronouns', () => {

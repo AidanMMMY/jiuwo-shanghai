@@ -8,6 +8,7 @@ import {
   formatTopicLockInstruction,
   extractUserMentionedNames,
   isConcreteTopicEntityForTest,
+  safeJsonParse,
 } from './darkroom-chat';
 import type { HistoryMessage } from './darkroom-chat';
 
@@ -292,5 +293,47 @@ describe('isConcreteTopicEntityForTest', () => {
   it('accepts concrete names', () => {
     expect(isConcreteTopicEntityForTest('Dex', false)).toBe(true);
     expect(isConcreteTopicEntityForTest('司徒', true)).toBe(true);
+  });
+});
+
+describe('safeJsonParse', () => {
+  it('returns null for empty or whitespace input', () => {
+    expect(safeJsonParse('')).toBeNull();
+    expect(safeJsonParse('   ')).toBeNull();
+  });
+
+  it('parses clean JSON', () => {
+    const result = safeJsonParse('{"summary":"test","primary_entity":"Alice"}');
+    expect(result).toEqual({ summary: 'test', primary_entity: 'Alice' });
+  });
+
+  it('strips markdown fences', () => {
+    const raw = '```json\n{"summary":"test"}\n```';
+    expect(safeJsonParse(raw)).toEqual({ summary: 'test' });
+  });
+
+  it('extracts JSON from surrounding text', () => {
+    const raw = 'Here is the summary:\n{"summary":"test","primary_entity":"Bob"}\nHope that helps!';
+    expect(safeJsonParse(raw)).toEqual({ summary: 'test', primary_entity: 'Bob' });
+  });
+
+  it('returns null for truncated JSON', () => {
+    const raw = '{"summary":"this is a very long summary that got cut off mid';
+    expect(safeJsonParse(raw)).toBeNull();
+  });
+
+  it('returns null for unterminated string in JSON', () => {
+    const raw = '{"summary":"unterminated';
+    expect(safeJsonParse(raw)).toBeNull();
+  });
+
+  it('returns null for non-JSON or array responses', () => {
+    expect(safeJsonParse('just some text')).toBeNull();
+    expect(safeJsonParse('[]')).toBeNull();
+  });
+
+  it('handles nested braces correctly', () => {
+    const raw = '{"summary":"She said {hello} to him"}';
+    expect(safeJsonParse(raw)).toEqual({ summary: 'She said {hello} to him' });
   });
 });

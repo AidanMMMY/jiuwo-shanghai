@@ -22,6 +22,43 @@ export interface TopicState {
   lastAssistantQuestionTopic?: string;
 }
 
+/**
+ * Extract and parse a JSON object from an LLM response.
+ * Handles markdown fences, surrounding text, empty responses, and malformed
+ * output. Returns null if no valid JSON object can be extracted.
+ */
+export function safeJsonParse(raw: string): Record<string, unknown> | null {
+  if (!raw || !raw.trim()) return null;
+
+  // Strip markdown code fences.
+  let cleaned = raw.replace(/```(?:json)?\s*|\s*```/g, "").trim();
+
+  // Extract the first {...} block from surrounding text.
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    cleaned = jsonMatch[0];
+  }
+
+  try {
+    const parsed = JSON.parse(cleaned);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+    return null;
+  } catch {
+    // Last resort: try the original raw string.
+    try {
+      const parsed = JSON.parse(raw.trim());
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        return parsed as Record<string, unknown>;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+}
+
 const NAME_STOPWORDS_ZH = new Set([
   "我",
   "你",
@@ -278,19 +315,10 @@ Format: {"intent":"...","topicEntity":"...","confidence":0.x}`;
       return null;
     }
 
-    let cleaned = raw.replace(/```(?:json)?\s*|\s*```/g, "").trim();
-    // Sometimes the model wraps the JSON in quotes or adds trailing text.
-    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      cleaned = jsonMatch[0];
-    }
-
-    let parsed: Record<string, unknown>;
-    try {
-      parsed = JSON.parse(cleaned);
-    } catch {
-      // Last resort: try the original raw string in case markdown was not present.
-      parsed = JSON.parse(raw.trim());
+    const parsed = safeJsonParse(raw);
+    if (!parsed) {
+      console.error("[darkroom:chat] classifier failed to parse JSON, raw:", JSON.stringify(raw.slice(0, 500)));
+      return null;
     }
 
     const intent = VALID_INTENTS.has(parsed.intent as UserIntent) ? (parsed.intent as UserIntent) : "gossip";
@@ -742,12 +770,24 @@ export async function updateSessionSummary(
         { role: "user", content: userPrompt },
       ],
       temperature: 0.2,
-      max_tokens: 150,
+      max_tokens: 256,
+      response_format: { type: "json_object" },
     });
 
     const raw = completion.choices[0]?.message?.content || "";
-    const cleaned = raw.replace(/```(?:json)?\s*|\s*```/g, "").trim();
-    const parsed = JSON.parse(cleaned);
+    if (!raw.trim()) {
+      console.log("[darkroom:chat] updateSessionSummary empty response");
+      return;
+    }
+
+    const parsed = safeJsonParse(raw);
+    if (!parsed) {
+      console.error(
+        "[darkroom:chat] updateSessionSummary failed to parse JSON, raw:",
+        JSON.stringify(raw.slice(0, 500))
+      );
+      return;
+    }
 
     if (typeof parsed.summary === "string" && parsed.summary.trim()) {
       await upsertSessionState(sessionId, {
@@ -757,8 +797,8 @@ export async function updateSessionSummary(
           parsed.primary_entity.trim().length >= 2
             ? parsed.primary_entity.trim()
             : undefined,
-        last_user_intent: VALID_INTENTS.has(parsed.last_user_intent)
-          ? parsed.last_user_intent
+        last_user_intent: VALID_INTENTS.has(parsed.last_user_intent as UserIntent)
+          ? (parsed.last_user_intent as UserIntent)
           : undefined,
       });
     }

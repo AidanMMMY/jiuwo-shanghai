@@ -186,6 +186,8 @@ export async function ensureConversationsTable(): Promise<void> {
       created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
+  // Defensive: older deployments created this table before session_id existed.
+  await sql`ALTER TABLE darkroom_conversations ADD COLUMN IF NOT EXISTS session_id VARCHAR(64)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_conversations_unprocessed ON darkroom_conversations(source_lang, processed_for_memory, created_at ASC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_conversations_created_at ON darkroom_conversations(created_at DESC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_conversations_session ON darkroom_conversations(session_id, created_at DESC)`;

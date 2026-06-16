@@ -198,6 +198,7 @@ export async function POST(req: NextRequest) {
 
       // Run classifier after history hydration so it has full context.
       const classifierResult = await classifyMessageWithModel(message, history, isZh);
+      console.log("[darkroom:chat] classifier result:", JSON.stringify(classifierResult));
 
       if (sessionState?.summary) {
         sessionBlock = isZh
@@ -260,6 +261,7 @@ export async function POST(req: NextRequest) {
 
     const topicReminder = buildTopicReminder(topicState, isZh);
     const resolvedMessage = resolvePronouns(message, topicState, isZh);
+    console.log("[darkroom:chat] resolved message:", resolvedMessage || message);
     const topicLockInstruction = formatTopicLockInstruction(
       topicState.primaryEntity || (isZh ? "无" : "none"),
       isZh

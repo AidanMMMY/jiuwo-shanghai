@@ -62,10 +62,33 @@ const ZH_SHIFT_MARKERS = /先不说|换个话题|聊聊别的|转回|回到|至�
 const EN_SHIFT_MARKERS =
   /\b(let's talk about|switching to|by the way|anyway|moving on|back to|changing subject)\b/i;
 
+const GENERIC_TOPIC_DENYLIST_ZH = new Set([
+  "他", "她", "ta", "它", "这个", "那个", "这位", "那位", "这人", "那人",
+  "某个人", "某人", "有人", "没人", "任何人", "谁", "什么", "哪个",
+]);
+
+const GENERIC_TOPIC_DENYLIST_EN = new Set([
+  "he", "she", "they", "him", "her", "them", "it", "this", "that",
+  "this person", "that person", "this guy", "that guy", "someone",
+  "somebody", "anyone", "anybody", "nobody", "no one", "who", "what",
+  "which", "person",
+]);
+
 export function containsPronoun(text: string, isZh: boolean): boolean {
   if (!text) return false;
   if (isZh) return ZH_PRONOUNS.test(text);
   return EN_PRONOUNS.test(text);
+}
+
+function isConcreteTopicEntity(name: string, isZh: boolean): boolean {
+  const key = name.trim().toLowerCase();
+  if (key.length < 2) return false;
+  const denylist = isZh ? GENERIC_TOPIC_DENYLIST_ZH : GENERIC_TOPIC_DENYLIST_EN;
+  return !denylist.has(key);
+}
+
+export function isConcreteTopicEntityForTest(name: string, isZh: boolean): boolean {
+  return isConcreteTopicEntity(name, isZh);
 }
 
 export function looksLikeName(text: string, isZh: boolean): boolean {
@@ -226,13 +249,13 @@ export async function classifyMessageWithModel(
     ? `你是一个对话意图分类器。只输出 JSON，不要解释。
 根据最近对话和用户的最新消息，判断：
 - intent: "answer"（用户在回答 assistant 刚问的问题） / "ask"（用户在提问） / "shift"（用户明确想换话题） / "gossip"（闲聊延续）
-- topicEntity: 用户正在聊的具体人名或主题，没有则填 null
+- topicEntity: 用户正在聊的具体人名或主题。如果用户用了指代（他/她/ta/这个/那个），必须把它对应到对话历史里最近出现过的具体人名；不要填泛指（某个人/有人/他）。如果最新消息里有指代，topicEntity 应该是该指代指向的人，而不是句子里出现的其他名字（例如「他喜欢 Aidan」里，topicEntity 是「他」指的人，不是 Aidan）。没有具体对象则填 null。
 - confidence: 0-1
 输出格式：{"intent":"...","topicEntity":"...","confidence":0.x}`
     : `You are a conversation intent classifier. Output ONLY JSON, no explanation.
 Given the recent conversation and the user's latest message, classify:
 - intent: "answer" (user answers assistant's previous question) / "ask" (user asks a question) / "shift" (user clearly changes topic) / "gossip" (casual continuation)
-- topicEntity: the specific person or topic the user is talking about, or null
+- topicEntity: the specific person or topic the user is talking about. If the user uses a pronoun (he/she/they/this/that), you MUST resolve it to the most recently mentioned concrete person in the conversation; do NOT use generic placeholders like "someone" or "that person". If the latest message contains a pronoun, topicEntity should be the person the pronoun refers to, not another name in the sentence (e.g. in "Does he like Aidan?", topicEntity is who "he" refers to, not Aidan). Use null if there is no concrete object.
 - confidence: 0-1
 Format: {"intent":"...","topicEntity":"...","confidence":0.x}`;
 
@@ -245,16 +268,39 @@ Format: {"intent":"...","topicEntity":"...","confidence":0.x}`;
         { role: "user", content: `Latest user message: ${message}` },
       ],
       temperature: 0.1,
-      max_tokens: 80,
+      max_tokens: 120,
     });
     const raw = completion.choices[0]?.message?.content || "";
-    const cleaned = raw.replace(/```(?:json)?\s*|\s*```/g, "").trim();
-    const parsed = JSON.parse(cleaned);
-    const intent = VALID_INTENTS.has(parsed.intent) ? parsed.intent : "gossip";
-    const topicEntity =
+    console.log("[darkroom:chat] classifier raw:", JSON.stringify(raw));
+
+    if (!raw.trim()) {
+      console.log("[darkroom:chat] classifier returned empty content");
+      return null;
+    }
+
+    let cleaned = raw.replace(/```(?:json)?\s*|\s*```/g, "").trim();
+    // Sometimes the model wraps the JSON in quotes or adds trailing text.
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleaned = jsonMatch[0];
+    }
+
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch {
+      // Last resort: try the original raw string in case markdown was not present.
+      parsed = JSON.parse(raw.trim());
+    }
+
+    const intent = VALID_INTENTS.has(parsed.intent as UserIntent) ? (parsed.intent as UserIntent) : "gossip";
+    let topicEntity =
       typeof parsed.topicEntity === "string" && parsed.topicEntity.trim().length >= 2
         ? parsed.topicEntity.trim()
         : undefined;
+    if (topicEntity && !isConcreteTopicEntity(topicEntity, isZh)) {
+      topicEntity = undefined;
+    }
     const confidence =
       typeof parsed.confidence === "number"
         ? Math.max(0, Math.min(1, parsed.confidence))
@@ -312,43 +358,116 @@ export function buildTopicState(
     return name;
   }
 
-  // Determine if classifier wants to explicitly shift away from the session anchor
-  const classifierShiftsAway =
-    classifier?.intent === "shift" &&
-    classifier.topicEntity &&
-    sessionPrimaryEntity &&
-    classifier.topicEntity.toLowerCase() !== sessionPrimaryEntity.toLowerCase();
-
-  const classifierConflictsWithSession =
-    classifier?.topicEntity &&
-    sessionPrimaryEntity &&
-    classifier.topicEntity.toLowerCase() !== sessionPrimaryEntity.toLowerCase() &&
-    classifier.confidence < 0.85;
-
-  // 1. Session anchor: keep the persisted topic locked unless user clearly shifts
-  if (sessionPrimaryEntity && !classifierShiftsAway) {
-    addEntity(findCanonical(sessionPrimaryEntity));
+  function setPrimaryEntity(name: string) {
+    const canonical = findCanonical(name);
+    const key = canonical.toLowerCase();
+    const idx = entities.findIndex((e) => e.toLowerCase() === key);
+    if (idx >= 0) entities.splice(idx, 1);
+    entities.unshift(canonical);
+    seen.add(key);
   }
 
-  // 2. Classifier topicEntity (trust it if it agrees with session anchor or there is no anchor)
-  if (classifier?.topicEntity && !classifierShiftsAway && !classifierConflictsWithSession) {
-    addEntity(findCanonical(classifier.topicEntity));
+  function appearsInMessages(name: string, messages: HistoryMessage[]): boolean {
+    const canonical = findCanonical(name);
+    const entity = matchKnownEntity(canonical);
+    const names = [name, canonical, ...(entity?.aliases || [])];
+    const unique = new Set(names.filter((n) => n.length >= 2));
+    for (const msg of messages) {
+      if (!msg.content) continue;
+      for (const n of unique) {
+        const found = isZh
+          ? msg.content.includes(n)
+          : new RegExp(`\\b${escapeRegex(n)}\\b`, "i").test(msg.content);
+        if (found) return true;
+      }
+    }
+    return false;
   }
 
-  // 3. User-mentioned names get high priority
+  function findRecentTopicInMessages(
+    messages: HistoryMessage[],
+    candidate?: string
+  ): string | null {
+    if (candidate) {
+      for (const role of ["user", "assistant"] as const) {
+        for (let i = messages.length - 1; i >= 0; i--) {
+          const msg = messages[i];
+          if (msg.role !== role || !msg.content) continue;
+          if (appearsInMessages(candidate, [msg])) {
+            return findCanonical(candidate);
+          }
+        }
+      }
+    }
+    for (const role of ["user", "assistant"] as const) {
+      for (let i = messages.length - 1; i >= 0; i--) {
+        const msg = messages[i];
+        if (msg.role !== role || !msg.content) continue;
+        for (const entity of allEntities) {
+          const names = [entity.name, ...entity.aliases];
+          for (const name of names) {
+            if (name.length < 2) continue;
+            const found = isZh
+              ? msg.content.includes(name)
+              : new RegExp(`\\b${escapeRegex(name)}\\b`, "i").test(msg.content);
+            if (found) return entity.name;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  const lastUserMsg = history[history.length - 1];
+  const priorMessages = history.slice(0, -1).slice(-10);
+  const recentMessages = history.slice(-10);
+
+  // 1. Inherit the most recent entity when the latest user message uses a
+  //    pronoun. We look at prior messages for a concrete reference, preferring
+  //    user messages over assistant messages. The classifier topicEntity is used
+  //    first because it can resolve memory-out names (like "nemo") that are not
+  //    in KNOWN_ENTITIES or the dynamic entity table.
+  if (
+    lastUserMsg &&
+    lastUserMsg.role === "user" &&
+    containsPronoun(lastUserMsg.content, isZh)
+  ) {
+    let inherited: string | null = null;
+
+    if (classifier?.topicEntity && isConcreteTopicEntity(classifier.topicEntity, isZh)) {
+      inherited = findRecentTopicInMessages(priorMessages, classifier.topicEntity);
+    }
+
+    if (!inherited && sessionPrimaryEntity) {
+      inherited = findRecentTopicInMessages(priorMessages, sessionPrimaryEntity);
+    }
+
+    if (!inherited) {
+      inherited = findRecentTopicInMessages(priorMessages);
+    }
+
+    if (!inherited && sessionPrimaryEntity) {
+      inherited = findCanonical(sessionPrimaryEntity);
+    }
+
+    if (inherited) addEntity(inherited);
+  }
+
+  // 2. Names the user explicitly asked about (even if not in KNOWN_ENTITIES)
   const userMentioned = extractUserMentionedNames(history, isZh);
   for (const name of userMentioned) {
     addEntity(findCanonical(name));
   }
 
-  // 4. Known/dynamic entities from last 10 messages — scan user messages first,
-  //    then assistant messages, so the user's own mentions dominate over the
-  //    system's explanatory asides.
-  const recent = history.slice(-10);
+  // 3. Known/dynamic entities from user messages, then assistant messages.
+  //    If the latest message was a pronoun, we already inherited a topic above,
+  //    so we skip re-scanning user messages to avoid an object name (e.g. Aidan)
+  //    from becoming primary.
   for (const role of ["user", "assistant"] as const) {
-    for (let i = recent.length - 1; i >= 0; i--) {
-      const msg = recent[i];
+    for (let i = recentMessages.length - 1; i >= 0; i--) {
+      const msg = recentMessages[i];
       if (msg.role !== role || !msg.content) continue;
+      if (msg.role === "user" && entities[0]) continue;
 
       for (const entity of allEntities) {
         if (seen.has(entity.name.toLowerCase())) continue;
@@ -368,33 +487,22 @@ export function buildTopicState(
     }
   }
 
-  // 5. Fallback: if the latest user message uses a pronoun and no entity was
-  //    found, inherit the most recent entity from earlier in the conversation.
-  //    This catches short follow-ups like "他喜欢谁？" right after "dex经常来吗".
-  const lastUserMsg = history[history.length - 1];
-  if (!entities[0] && lastUserMsg && containsPronoun(lastUserMsg.content, isZh)) {
-    for (let i = history.length - 2; i >= 0 && i >= history.length - 10; i--) {
-      const msg = history[i];
-      if (!msg.content) continue;
-      let foundEntity: string | null = null;
-      for (const entity of allEntities) {
-        const names = [entity.name, ...entity.aliases];
-        for (const name of names) {
-          if (name.length < 2) continue;
-          const found = isZh
-            ? msg.content.includes(name)
-            : new RegExp(`\\b${escapeRegex(name)}\\b`, "i").test(msg.content);
-          if (found) {
-            foundEntity = entity.name;
-            break;
-          }
-        }
-        if (foundEntity) break;
-      }
-      if (foundEntity) {
-        addEntity(foundEntity);
-        break;
-      }
+  // 4. Session anchor: only use as a fallback if the current history gives us
+  //    no topic object. This prevents a stale session topic from overriding a
+  //    name the user is currently asking about.
+  if (!entities[0] && sessionPrimaryEntity) {
+    addEntity(findCanonical(sessionPrimaryEntity));
+  }
+
+  // 5. Classifier: an explicit, confident shift can override the current topic;
+  //    otherwise use the classifier topicEntity as a fallback when it is concrete
+  //    and actually appears in the recent conversation.
+  if (classifier?.topicEntity && isConcreteTopicEntity(classifier.topicEntity, isZh)) {
+    const canonical = findCanonical(classifier.topicEntity);
+    if (classifier.intent === "shift" && classifier.confidence >= 0.7) {
+      setPrimaryEntity(canonical);
+    } else if (!entities[0] && appearsInMessages(classifier.topicEntity, recentMessages)) {
+      addEntity(canonical);
     }
   }
 
@@ -413,9 +521,10 @@ export function buildTopicState(
       ? classifyUserIntent(lastUserMsg.content, previousAssistant, isZh)
       : "gossip";
 
-  // Prefer classifier intent if confident; otherwise fall back to rules
+  // Prefer classifier intent only when it is confident enough; otherwise fall
+  // back to the rule-based intent derived from the current message.
   const userIntent =
-    classifier && classifier.confidence >= 0.6
+    classifier && classifier.confidence >= 0.75
       ? classifier.intent
       : ruleIntent;
 
@@ -483,7 +592,7 @@ export function buildTopicReminder(
   if (!primaryEntity) return "";
 
   if (isZh) {
-    let reminder = `[当前话题对象锁定为：${primaryEntity}。用户这条消息里的「他」「她」「ta」「这个」「那个」「那位」等指代，默认就是指 ${primaryEntity}。不要反问「指谁」「哪位」。]`;
+    let reminder = `[当前话题对象锁定为：${primaryEntity}。用户这条消息里的「他」「她」「ta」「这个」「那个」「那位」等指代，默认就是指 ${primaryEntity}。不要反问「指谁」「哪位」，不要请求用户重新锁定坐标，不要以指代模糊为由回避或要求澄清。直接回答。]`;
     if (userIntent === "answer") {
       reminder += `\n[用户这条消息是在回答你上一句关于 ${primaryEntity} 的问题。请先明确承认/回应用户的回答，再顺着问。]`;
     } else if (userIntent === "ask") {
@@ -492,7 +601,7 @@ export function buildTopicReminder(
     return reminder;
   }
 
-  let reminder = `[Current topic locked on: ${primaryEntity}. Pronouns like "he", "she", "they", "this person", "that person" in the user's message refer to ${primaryEntity} by default. Do not ask who they mean.]`;
+  let reminder = `[Current topic locked on: ${primaryEntity}. Pronouns like "he", "she", "they", "this person", "that person" in the user's message refer to ${primaryEntity} by default. Do not ask who they mean, do not ask to re-lock coordinates, and do not use ambiguous pronouns as an excuse to deflect or request clarification. Answer directly.]`;
   if (userIntent === "answer") {
     reminder += `\n[The user is answering your previous question about ${primaryEntity}. Acknowledge their answer first, then continue.]`;
   } else if (userIntent === "ask") {

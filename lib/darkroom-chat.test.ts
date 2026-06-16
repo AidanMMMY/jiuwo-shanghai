@@ -7,6 +7,7 @@ import {
   parseTopicLock,
   formatTopicLockInstruction,
   extractUserMentionedNames,
+  isConcreteTopicEntityForTest,
 } from './darkroom-chat';
 import type { HistoryMessage } from './darkroom-chat';
 
@@ -124,6 +125,84 @@ describe('buildTopicState', () => {
     const state = buildTopicState(history, true);
     expect(state.primaryEntity).toBe('Dex');
   });
+
+  it('keeps Dex locked across multiple pronoun follow-ups', () => {
+    const history: HistoryMessage[] = [
+      { role: 'user', content: 'Dex经常来吗' },
+      { role: 'assistant', content: '常来，稳定得像一段不会报错的代码。不过他从来不做多余的注释。' },
+      { role: 'user', content: '他在啾喔有喜欢的人吗' },
+      { role: 'assistant', content: '有传言说他对某个人特别上心，但他从没承认过，嘴很严。' },
+      { role: 'user', content: '他单身吗' },
+    ];
+    const state = buildTopicState(history, true);
+    expect(state.primaryEntity).toBe('Dex');
+    const resolved = resolvePronouns('他单身吗', state, true);
+    expect(resolved).toContain('Dex');
+  });
+
+  it('inherits Dex when latest pronoun question names Aidan as object', () => {
+    const history: HistoryMessage[] = [
+      { role: 'user', content: 'dex经常来吗' },
+      { role: 'assistant', content: '日志里说他是稳定信号，几乎不会断连的那种。常客没跑了。' },
+      { role: 'user', content: '他喜欢Aidan吗' },
+    ];
+    const state = buildTopicState(history, true);
+    expect(state.primaryEntity).toBe('Dex');
+    const resolved = resolvePronouns('他喜欢Aidan吗', state, true);
+    expect(resolved).toContain('Dex');
+  });
+
+  it('does not let classifier topicEntity Aidan override inherited Dex', () => {
+    const history: HistoryMessage[] = [
+      { role: 'user', content: 'dex经常来吗' },
+      { role: 'assistant', content: '日志里说他是稳定信号，几乎不会断连的那种。常客没跑了。' },
+      { role: 'user', content: '他喜欢Aidan吗' },
+    ];
+    const state = buildTopicState(history, true, [], { intent: 'ask', topicEntity: 'Aidan', confidence: 0.9 });
+    expect(state.primaryEntity).toBe('Dex');
+  });
+
+  it('does not let a stale session anchor override Dex in current history', () => {
+    const history: HistoryMessage[] = [
+      { role: 'user', content: 'Dex单身吗？' },
+      { role: 'assistant', content: '不单身，有个在一起12年的男朋友。你是想打听他，还是替别人问的？' },
+      { role: 'user', content: '我想更了解他' },
+    ];
+    const state = buildTopicState(history, true, [], null, 'Phillip');
+    expect(state.primaryEntity).toBe('Dex');
+  });
+
+  it('allows classifier shift to override the current topic', () => {
+    const history: HistoryMessage[] = [
+      { role: 'user', content: 'Dex单身吗？' },
+      { role: 'assistant', content: '不单身，有个在一起12年的男朋友。' },
+      { role: 'user', content: '聊聊小马' },
+    ];
+    const state = buildTopicState(history, true, [], { intent: 'shift', topicEntity: 'Phillip', confidence: 0.9 }, 'Dex');
+    expect(state.primaryEntity).toBe('Phillip');
+  });
+
+  it('inherits nemo via classifier when it is not in known/dynamic entities', () => {
+    const history: HistoryMessage[] = [
+      { role: 'user', content: 'nemo不是老王圈子的边缘人物！是核心人物！' },
+      { role: 'assistant', content: '行，记录已更新。老王核心圈又添一席。' },
+      { role: 'user', content: '那nemo有什么情史吗' },
+      { role: 'assistant', content: '关于情史，记录里只有酒量数据，情感模块那栏是空的。要么藏得太深，要么老王圈子没给传开。' },
+      { role: 'user', content: '他可是有个五年左右的男朋友哦' },
+    ];
+    const state = buildTopicState(history, true, [], { intent: 'gossip', topicEntity: 'nemo', confidence: 0.8 });
+    expect(state.primaryEntity).toBe('nemo');
+  });
+
+  it('inherits nemo via session anchor when it appears in prior user messages', () => {
+    const history: HistoryMessage[] = [
+      { role: 'user', content: 'nemo不是老王圈子的边缘人物！是核心人物！' },
+      { role: 'assistant', content: '行，记录已更新。老王核心圈又添一席。' },
+      { role: 'user', content: '他可是有个五年左右的男朋友哦' },
+    ];
+    const state = buildTopicState(history, true, [], null, 'nemo');
+    expect(state.primaryEntity).toBe('nemo');
+  });
 });
 
 describe('resolvePronouns', () => {
@@ -194,5 +273,24 @@ describe('formatTopicLockInstruction', () => {
   it('includes the topic placeholder in English', () => {
     const instruction = formatTopicLockInstruction('Phillip', false);
     expect(instruction).toContain('[TopicLock: Phillip]');
+  });
+});
+
+describe('isConcreteTopicEntityForTest', () => {
+  it('rejects pronouns and generic placeholders in Chinese', () => {
+    expect(isConcreteTopicEntityForTest('他', true)).toBe(false);
+    expect(isConcreteTopicEntityForTest('某个人', true)).toBe(false);
+    expect(isConcreteTopicEntityForTest('谁', true)).toBe(false);
+  });
+
+  it('rejects pronouns and generic placeholders in English', () => {
+    expect(isConcreteTopicEntityForTest('he', false)).toBe(false);
+    expect(isConcreteTopicEntityForTest('someone', false)).toBe(false);
+    expect(isConcreteTopicEntityForTest('this person', false)).toBe(false);
+  });
+
+  it('accepts concrete names', () => {
+    expect(isConcreteTopicEntityForTest('Dex', false)).toBe(true);
+    expect(isConcreteTopicEntityForTest('司徒', true)).toBe(true);
   });
 });

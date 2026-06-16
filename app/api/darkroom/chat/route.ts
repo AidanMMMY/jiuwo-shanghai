@@ -310,8 +310,18 @@ export async function POST(req: NextRequest) {
       const rawMessage = completion.choices[0]?.message as DeepSeekMessage;
       console.log("[darkroom:chat] raw message:", JSON.stringify(rawMessage));
 
-      const rawContent =
-        rawMessage?.content || rawMessage?.reasoning_content || "";
+      // Never expose reasoning_content to the user; it is internal monologue.
+      const rawContent = rawMessage?.content || "";
+      if (!rawContent.trim()) {
+        console.log(
+          "[darkroom:chat] model returned empty content; reasoning:",
+          rawMessage?.reasoning_content
+        );
+        return isZh
+          ? "刚才信号没录全，你再说一遍？"
+          : "The signal didn't record fully. Say that again?";
+      }
+
       const { topic, cleanContent } = parseTopicLock(rawContent);
 
       if (

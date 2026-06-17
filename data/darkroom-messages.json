@@ -177,6 +177,105 @@
         "type": "log",
         "isTyping": true
       }
+    ],
+    [
+      {
+        "id": "init-1",
+        "timestamp": "02:33:08",
+        "location": "SYSTEM",
+        "action": "Back door unlocked",
+        "message": "Back door unlocked. Logging you in.",
+        "type": "log",
+        "isTyping": true
+      },
+      {
+        "id": "init-2",
+        "timestamp": "02:33:09",
+        "location": "? ? ?",
+        "action": "Records available",
+        "message": "I keep records on the regulars, the drinks, and the stories people leave behind. You can ask.",
+        "type": "broadcast",
+        "isTyping": true
+      },
+      {
+        "id": "init-3",
+        "timestamp": "02:33:11",
+        "location": "LOCAL",
+        "action": "Learning enabled",
+        "message": "The more you tell me, the better I recognize the patterns. No pressure.",
+        "tags": [
+          "LEARNING: ON",
+          "RETENTION: VARIABLE"
+        ],
+        "type": "log",
+        "isTyping": true
+      }
+    ],
+    [
+      {
+        "id": "init-1",
+        "timestamp": "02:33:08",
+        "location": "SYSTEM",
+        "action": "Signal retained",
+        "message": "After-hours signal retained. You're in the log.",
+        "type": "log",
+        "isTyping": true
+      },
+      {
+        "id": "init-2",
+        "timestamp": "02:33:09",
+        "location": "? ? ?",
+        "action": "Names on file",
+        "message": "Some names here have histories. Others are still being written. Which one are you after?",
+        "type": "broadcast",
+        "isTyping": true
+      },
+      {
+        "id": "init-3",
+        "timestamp": "02:33:11",
+        "location": "LOCAL",
+        "action": "Patterns need data",
+        "message": "Talk enough and I start to recognize the shape of things. It isn't magic — just logging.",
+        "tags": [
+          "DATA: INCOMING",
+          "OUTPUT: ADAPTIVE"
+        ],
+        "type": "log",
+        "isTyping": true
+      }
+    ],
+    [
+      {
+        "id": "init-1",
+        "timestamp": "02:33:08",
+        "location": "SYSTEM",
+        "action": "Side door open",
+        "message": "Side door open. I won't pretend I don't know who's been through it.",
+        "type": "log",
+        "isTyping": true
+      },
+      {
+        "id": "init-2",
+        "timestamp": "02:33:09",
+        "location": "? ? ?",
+        "action": "Ask around",
+        "message": "Ask me about the people, the drinks, or the things that happen after midnight. I probably have a record.",
+        "type": "broadcast",
+        "isTyping": true
+      },
+      {
+        "id": "init-3",
+        "timestamp": "02:33:11",
+        "location": "LOCAL",
+        "action": "Every input writes a line",
+        "message": "Every question adds a line to the log. Keep going and the picture gets clearer.",
+        "tags": [
+          "INPUT: LOGGED",
+          "CONTEXT: BUILDING"
+        ],
+        "type": "log",
+        "isTyping": true
+      }
     ]
   ]
 }

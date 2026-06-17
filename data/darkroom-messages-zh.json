@@ -177,6 +177,105 @@
         "type": "log",
         "isTyping": true
       }
+    ],
+    [
+      {
+        "id": "init-1",
+        "timestamp": "02:33:08",
+        "location": "系统",
+        "action": "后门已解锁",
+        "message": "后门已解锁。正在登录。",
+        "type": "log",
+        "isTyping": true
+      },
+      {
+        "id": "init-2",
+        "timestamp": "02:33:09",
+        "location": "？ ？ ？",
+        "action": "记录可用",
+        "message": "我这儿存着一些常客、酒单，还有人们没说完的故事。你可以试着打听。",
+        "type": "broadcast",
+        "isTyping": true
+      },
+      {
+        "id": "init-3",
+        "timestamp": "02:33:11",
+        "location": "本地",
+        "action": "识别已开启",
+        "message": "你聊得越多，我识别得越准。不勉强。",
+        "tags": [
+          "识别：开启",
+          "保留：可变"
+        ],
+        "type": "log",
+        "isTyping": true
+      }
+    ],
+    [
+      {
+        "id": "init-1",
+        "timestamp": "02:33:08",
+        "location": "系统",
+        "action": "信号已保留",
+        "message": "非营业信号已保留。你已经在日志里了。",
+        "type": "log",
+        "isTyping": true
+      },
+      {
+        "id": "init-2",
+        "timestamp": "02:33:09",
+        "location": "？ ？ ？",
+        "action": "名单上有名字",
+        "message": "有些名字背后有故事，有些还在写。你想从谁开始？",
+        "type": "broadcast",
+        "isTyping": true
+      },
+      {
+        "id": "init-3",
+        "timestamp": "02:33:11",
+        "location": "本地",
+        "action": "模式需要数据",
+        "message": "多聊几句，我就能开始识别这里的形状。不是魔法，是日志。",
+        "tags": [
+          "数据：流入",
+          "输出：自适应"
+        ],
+        "type": "log",
+        "isTyping": true
+      }
+    ],
+    [
+      {
+        "id": "init-1",
+        "timestamp": "02:33:08",
+        "location": "系统",
+        "action": "侧门已开",
+        "message": "侧门已开。我不会假装不知道谁从这儿进出过。",
+        "type": "log",
+        "isTyping": true
+      },
+      {
+        "id": "init-2",
+        "timestamp": "02:33:09",
+        "location": "？ ？ ？",
+        "action": "可以打听",
+        "message": "你可以问我这里的人、酒单，或者半夜发生的事。我大概率有记录。",
+        "type": "broadcast",
+        "isTyping": true
+      },
+      {
+        "id": "init-3",
+        "timestamp": "02:33:11",
+        "location": "本地",
+        "action": "每个输入写一行",
+        "message": "每个问题都会往日志里多写一行。继续，画面会越来越清楚。",
+        "tags": [
+          "输入：已记录",
+          "上下文：构建中"
+        ],
+        "type": "log",
+        "isTyping": true
+      }
     ]
   ]
 }

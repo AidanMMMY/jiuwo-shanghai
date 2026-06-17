@@ -265,9 +265,27 @@
   flex-shrink: 0;
 }
 
+.darkroom-portal-pill.blue {
+  border-color: rgba(58, 106, 138, 0.35);
+}
+
+.darkroom-portal-pill.blue:hover {
+  border-color: rgba(58, 106, 138, 0.6);
+  background: rgba(58, 106, 138, 0.08);
+}
+
 .darkroom-portal-pill.blue .darkroom-portal-pill-dot {
-  background: linear-gradient(180deg, #7a6320 0%, #2a2208 100%);
-  box-shadow: 0 0 12px rgba(138, 112, 32, 0.35);
+  background: linear-gradient(180deg, #3a6a8a 0%, #0f1f2a 100%);
+  box-shadow: 0 0 12px rgba(58, 106, 138, 0.35);
+}
+
+.darkroom-portal-pill.red {
+  border-color: rgba(176, 64, 48, 0.35);
+}
+
+.darkroom-portal-pill.red:hover {
+  border-color: rgba(176, 64, 48, 0.6);
+  background: rgba(176, 64, 48, 0.08);
 }
 
 .darkroom-portal-pill.red .darkroom-portal-pill-dot {

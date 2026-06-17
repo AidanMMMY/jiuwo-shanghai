@@ -19,6 +19,8 @@ export default function Navbar({
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
   const isZh = pathname.startsWith('/zh');
+  const isPortal =
+    pathname === '/darkroom/portal' || pathname === '/zh/darkroom/portal';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -107,28 +109,38 @@ export default function Navbar({
       }`}
     >
       <div className="mx-auto max-w-7xl md:max-w-none px-3 md:px-12 py-4 flex items-center justify-between">
-        <Link
-          href={isZh ? '/zh' : '/'}
-          className="flex items-center gap-2.5 text-lg font-medium tracking-wide text-[#f5f5f0] hover:text-[#c9a227] transition-colors duration-300 shrink-0 group"
-          onClick={(e) => {
-            // Only trigger counter on homepage
-            if (pathname === '/' || pathname === '/zh') {
-              e.preventDefault();
-              handleLogoClick();
-            }
-          }}
-        >
-          <div className="relative w-8 h-8">
-            <Image
-              src="/images/logo.png"
-              alt="logo"
-              fill
-              sizes="32px"
-              className={`object-contain transition-transform duration-100 ${logoPulse ? 'scale-110' : 'scale-100'}`}
-            />
+        {isPortal ? (
+          <div
+            className="flex items-center gap-2.5 text-lg font-medium tracking-wide text-[#f5f5f0] shrink-0 invisible"
+            aria-hidden="true"
+          >
+            <div className="relative w-8 h-8" />
+            <span className="hidden sm:inline">{name}</span>
           </div>
-          <span className="hidden sm:inline">{name}</span>
-        </Link>
+        ) : (
+          <Link
+            href={isZh ? '/zh' : '/'}
+            className="flex items-center gap-2.5 text-lg font-medium tracking-wide text-[#f5f5f0] hover:text-[#c9a227] transition-colors duration-300 shrink-0 group"
+            onClick={(e) => {
+              // Only trigger counter on homepage
+              if (pathname === '/' || pathname === '/zh') {
+                e.preventDefault();
+                handleLogoClick();
+              }
+            }}
+          >
+            <div className="relative w-8 h-8">
+              <Image
+                src="/images/logo.png"
+                alt="logo"
+                fill
+                sizes="32px"
+                className={`object-contain transition-transform duration-100 ${logoPulse ? 'scale-110' : 'scale-100'}`}
+              />
+            </div>
+            <span className="hidden sm:inline">{name}</span>
+          </Link>
+        )}
         <nav className="flex items-center gap-3 md:gap-6 lg:gap-8 overflow-x-auto">
           {nav.map((item) => {
             const localizedHref = isZh

@@ -36,7 +36,7 @@ export interface Conversation {
   created_at: string;
 }
 
-const MAX_MEMORIES_TOTAL = 1000;
+const MAX_MEMORIES_TOTAL = 3000;
 const MIN_MEMORY_CONFIDENCE = 0.6;
 
 const HIGH_CONFIDENCE_THRESHOLD = 0.85;

@@ -81,10 +81,22 @@ export async function POST(req: NextRequest) {
         typeof body?.batchSize === "number" ? body.batchSize : 50,
         100
       );
-      const updated = await backfillMissingEmbeddings(batchSize);
+      const maxBatches = Math.min(
+        typeof body?.maxBatches === "number" ? body.maxBatches : 20,
+        100
+      );
+      let totalUpdated = 0;
+      let updated = 0;
+      let batches = 0;
+      do {
+        updated = await backfillMissingEmbeddings(batchSize);
+        totalUpdated += updated;
+        batches++;
+      } while (updated > 0 && batches < maxBatches);
       return NextResponse.json({
         action: "backfill",
-        updated,
+        updated: totalUpdated,
+        batches,
         timestamp: new Date().toISOString(),
       });
     }

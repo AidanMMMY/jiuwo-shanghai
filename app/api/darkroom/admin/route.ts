@@ -5,6 +5,9 @@ import {
   getConversationStats,
   getRecentConversations,
   backfillMissingEmbeddings,
+  cleanupOldSessions,
+  cleanupOldConversations,
+  pruneMemoriesToTarget,
 } from "@/lib/darkroom-memory";
 
 function extractToken(req: NextRequest): string | null {
@@ -73,21 +76,49 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const action = body?.action || "backfill";
 
-    if (action !== "backfill") {
-      return NextResponse.json({ error: "Unsupported action" }, { status: 400 });
+    if (action === "backfill") {
+      const batchSize = Math.min(
+        typeof body?.batchSize === "number" ? body.batchSize : 50,
+        100
+      );
+      const updated = await backfillMissingEmbeddings(batchSize);
+      return NextResponse.json({
+        action: "backfill",
+        updated,
+        timestamp: new Date().toISOString(),
+      });
     }
 
-    const batchSize = Math.min(
-      typeof body?.batchSize === "number" ? body.batchSize : 50,
-      100
-    );
-    const updated = await backfillMissingEmbeddings(batchSize);
+    if (action === "cleanup") {
+      const days = Math.max(1, typeof body?.days === "number" ? body.days : 90);
+      const [sessionsDeleted, conversationsDeleted] = await Promise.all([
+        cleanupOldSessions(days),
+        cleanupOldConversations(days),
+      ]);
+      return NextResponse.json({
+        action: "cleanup",
+        days,
+        sessionsDeleted,
+        conversationsDeleted,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
-    return NextResponse.json({
-      action: "backfill",
-      updated,
-      timestamp: new Date().toISOString(),
-    });
+    if (action === "prune") {
+      const target = Math.max(
+        100,
+        typeof body?.target === "number" ? body.target : 1000
+      );
+      const deleted = await pruneMemoriesToTarget(target);
+      return NextResponse.json({
+        action: "prune",
+        target,
+        deleted,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    return NextResponse.json({ error: "Unsupported action" }, { status: 400 });
   } catch (error: unknown) {
     console.error("Darkroom admin backfill error:", error);
     return NextResponse.json(

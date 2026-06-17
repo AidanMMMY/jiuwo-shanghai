@@ -22,41 +22,89 @@ export interface TopicState {
   lastAssistantQuestionTopic?: string;
 }
 
+type JsonValue = Record<string, unknown> | unknown[];
+
+function findMatchingClose(s: string, start: number): number {
+  const open = s[start];
+  const close = open === "{" ? "}" : "]";
+  let depth = 1;
+  let inString = false;
+  let escaped = false;
+
+  for (let i = start + 1; i < s.length; i++) {
+    const ch = s[i];
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escaped = true;
+        continue;
+      }
+      if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+    if (ch === open) depth++;
+    else if (ch === close) {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+function extractFirstJsonValue(raw: string): string | null {
+  const cleaned = raw.replace(/```(?:json)?\s*|\s*```/g, "").trim();
+  for (let i = 0; i < cleaned.length; i++) {
+    const ch = cleaned[i];
+    if (ch === "{" || ch === "[") {
+      const end = findMatchingClose(cleaned, i);
+      if (end !== -1) {
+        return cleaned.slice(i, end + 1);
+      }
+    }
+  }
+  return null;
+}
+
+function tryParseJson(raw: string): JsonValue | null {
+  if (!raw || !raw.trim()) return null;
+  const value = extractFirstJsonValue(raw) ?? extractFirstJsonValue(raw.trim());
+  if (!value) return null;
+  try {
+    return JSON.parse(value) as JsonValue;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Extract and parse a JSON object from an LLM response.
- * Handles markdown fences, surrounding text, empty responses, and malformed
- * output. Returns null if no valid JSON object can be extracted.
+ * Handles markdown fences, surrounding text, multiple JSON values, empty
+ * responses, and malformed output. Returns null if no valid JSON object can
+ * be extracted.
  */
 export function safeJsonParse(raw: string): Record<string, unknown> | null {
-  if (!raw || !raw.trim()) return null;
-
-  // Strip markdown code fences.
-  let cleaned = raw.replace(/```(?:json)?\s*|\s*```/g, "").trim();
-
-  // Extract the first {...} block from surrounding text.
-  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-  if (jsonMatch) {
-    cleaned = jsonMatch[0];
+  const parsed = tryParseJson(raw);
+  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+    return parsed as Record<string, unknown>;
   }
+  return null;
+}
 
-  try {
-    const parsed = JSON.parse(cleaned);
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      return parsed as Record<string, unknown>;
-    }
-    return null;
-  } catch {
-    // Last resort: try the original raw string.
-    try {
-      const parsed = JSON.parse(raw.trim());
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        return parsed as Record<string, unknown>;
-      }
-      return null;
-    } catch {
-      return null;
-    }
-  }
+/**
+ * Extract and parse a JSON array from an LLM response.
+ * Same fence/surrounding-text handling as safeJsonParse, but returns arrays.
+ */
+export function safeJsonParseArray(raw: string): unknown[] | null {
+  const parsed = tryParseJson(raw);
+  if (Array.isArray(parsed)) return parsed;
+  return null;
 }
 
 const NAME_STOPWORDS_ZH = new Set([

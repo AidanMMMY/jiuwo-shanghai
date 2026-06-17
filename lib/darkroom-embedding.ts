@@ -46,6 +46,9 @@ export function getEmbeddingDimensions(): number {
 
 function truncateText(text: string): string {
   if (text.length <= MAX_INPUT_CHARS) return text;
+  console.warn(
+    `[darkroom:embedding] input truncated from ${text.length} to ${MAX_INPUT_CHARS} characters`
+  );
   return text.slice(0, MAX_INPUT_CHARS);
 }
 

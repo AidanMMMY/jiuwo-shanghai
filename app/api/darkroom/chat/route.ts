@@ -3,6 +3,7 @@ import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
 import { getDarkroomData, matchKnownEntity } from "@/lib/darkroom";
 import {
   TopicState,
+  HistoryMessage,
   buildTopicState,
   buildTopicReminder,
   classifyMessageWithModel,
@@ -21,9 +22,11 @@ import {
   filterMemoriesForChat,
   getSessionState,
   getDynamicEntities,
-  recordMentionedNames,
   getRecentConversationsBySession,
 } from "@/lib/darkroom-memory";
+import {
+  buildChatPromptWithinBudget,
+} from "@/lib/darkroom-budget";
 import {
   getClientIp,
   hashIp,
@@ -246,14 +249,6 @@ export async function POST(req: NextRequest) {
         const footer = isZh ? "=== 结束 ===" : "=== END ===";
         memoryBlock = `\n\n${header}\n\n${displayMemories.map((m) => `- ${m.content}`).join("\n")}\n\n${footer}`;
       }
-
-      // Persist any user-mentioned names so future sessions recognize them
-      const userMentioned = extractUserMentionedNames(history, isZh);
-      if (userMentioned.length > 0) {
-        recordMentionedNames(userMentioned).catch((err) =>
-          console.error("[darkroom:chat] record entities error:", err)
-        );
-      }
     } catch (err) {
       console.error("[darkroom:chat] preparation error:", err);
       topicState = buildTopicState(history, isZh);
@@ -266,19 +261,6 @@ export async function POST(req: NextRequest) {
       topicState.primaryEntity || (isZh ? "无" : "none"),
       isZh
     );
-
-    const finalSystemPrompt = [
-      data.knowledgeBase,
-      SYSTEM_PROMPT,
-      activeTimeContext,
-      sessionBlock,
-      memoryBlock,
-      identityReminder,
-      topicReminder,
-      topicLockInstruction,
-    ]
-      .filter(Boolean)
-      .join("\n\n");
 
     // ── Web search augmentation (only for out-of-scope queries) ───────────
     let searchBlock = "";
@@ -307,9 +289,26 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const systemPromptWithSearch = searchBlock
-      ? `${finalSystemPrompt}${searchBlock}`
-      : finalSystemPrompt;
+    const { systemContent, history: budgetedHistory, dropped } = buildChatPromptWithinBudget(
+      {
+        knowledgeBase: data.knowledgeBase,
+        systemPrompt: SYSTEM_PROMPT,
+        activeTimeContext,
+        sessionBlock,
+        memoryBlock,
+        identityReminder,
+        topicReminder,
+        topicLockInstruction,
+        searchBlock,
+        history,
+        userMessage: resolvedMessage || message,
+      },
+      isZh
+    );
+
+    if (dropped.length > 0) {
+      console.log("[darkroom:chat] token budget dropped:", dropped.join(","));
+    }
 
     interface DeepSeekMessage {
       role?: string;
@@ -319,13 +318,14 @@ export async function POST(req: NextRequest) {
 
     async function callModel(
       systemContent: string,
+      modelHistory: HistoryMessage[],
       isRetry = false
     ): Promise<string> {
       const completion = await deepseekClient.chat.completions.create({
         model: DEFAULT_MODEL,
         messages: [
           { role: "system" as const, content: systemContent },
-          ...history.slice(-10).map((h: { role: string; content: string }) => ({
+          ...modelHistory.slice(-10).map((h: { role: string; content: string }) => ({
             role: h.role as "user" | "assistant",
             content: h.content,
           })),
@@ -374,14 +374,14 @@ export async function POST(req: NextRequest) {
           const correction = isZh
             ? `[强制校正] 你刚才错误地把话题对象写成了 "${topic}"。当前话题对象必须是 "${topicState.primaryEntity}"。请重新输出 [TopicLock: ${topicState.primaryEntity}] 并围绕 ${topicState.primaryEntity} 回复。`
             : `[Correction] You incorrectly locked the topic as "${topic}". The current topic must be "${topicState.primaryEntity}". Re-output [TopicLock: ${topicState.primaryEntity}] and reply about ${topicState.primaryEntity}.`;
-          return callModel(`${systemContent}\n\n${correction}`, true);
+          return callModel(`${systemContent}\n\n${correction}`, budgetedHistory, true);
         }
       }
 
       return cleanContent;
     }
 
-    const content = await callModel(systemPromptWithSearch);
+    const content = await callModel(systemContent, budgetedHistory);
 
     return NextResponse.json({
       content,

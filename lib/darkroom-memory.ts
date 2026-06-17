@@ -17,6 +17,7 @@ export interface Memory {
   confidence: number;
   source_lang: 'en' | 'zh';
   created_at: string;
+  updated_at?: string;
 }
 
 export interface ExtractedMemory {
@@ -80,16 +81,51 @@ const SENSITIVE_EN_KEYWORDS = new Set([
   "hate",
 ]);
 
+const ZH_ALLOWED_PREFIXES = new Set([
+  "避免",
+  "防止",
+  "反对",
+  "拒绝",
+  "预防",
+  "制止",
+]);
+
+function hasSensitiveZhKeyword(content: string): boolean {
+  const lower = content.toLowerCase();
+  for (const kw of SENSITIVE_ZH_KEYWORDS) {
+    const idx = lower.indexOf(kw.toLowerCase());
+    if (idx === -1) continue;
+    // Allow benign prevention/discussion contexts.
+    const prefix = lower.slice(Math.max(0, idx - 8), idx);
+    let allowed = false;
+    for (const allow of ZH_ALLOWED_PREFIXES) {
+      if (prefix.includes(allow)) {
+        allowed = true;
+        break;
+      }
+    }
+    if (!allowed) return true;
+  }
+  return false;
+}
+
 export function isSensitiveMemory(content: string): boolean {
   if (!content) return false;
   const lower = content.toLowerCase();
-  for (const kw of SENSITIVE_ZH_KEYWORDS) {
-    if (lower.includes(kw.toLowerCase())) return true;
-  }
   for (const kw of SENSITIVE_EN_KEYWORDS) {
-    if (lower.includes(kw.toLowerCase())) return true;
+    const regex = new RegExp(`\\b${kw}\\b`, "i");
+    if (regex.test(lower)) return true;
   }
-  return false;
+  return hasSensitiveZhKeyword(content);
+}
+
+const PHONE_REGEX = /(?:\+?86[-\s]?)?1[3-9]\d[-\s]?\d{4}[-\s]?\d{4}/g;
+const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+export function scrubPii(text: string): string {
+  return text
+    .replace(PHONE_REGEX, "[PHONE]")
+    .replace(EMAIL_REGEX, "[EMAIL]");
 }
 
 export interface FilterMemoriesOptions {
@@ -191,6 +227,29 @@ export async function ensureConversationsTable(): Promise<void> {
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_conversations_unprocessed ON darkroom_conversations(source_lang, processed_for_memory, created_at ASC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_conversations_created_at ON darkroom_conversations(created_at DESC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_conversations_session ON darkroom_conversations(session_id, created_at DESC)`;
+
+  // Self-healing FK: ensures cleanup cascades on future deployments.
+  await ensureSessionsTable();
+  await sql`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'fk_darkroom_conversations_session'
+      ) THEN
+        DELETE FROM darkroom_conversations
+        WHERE session_id IS NOT NULL
+          AND NOT EXISTS (
+            SELECT 1 FROM darkroom_sessions WHERE session_id = darkroom_conversations.session_id
+          );
+        ALTER TABLE darkroom_conversations
+          ADD CONSTRAINT fk_darkroom_conversations_session
+          FOREIGN KEY (session_id) REFERENCES darkroom_sessions(session_id)
+          ON DELETE CASCADE;
+      END IF;
+    END
+    $$;
+  `;
 }
 
 export async function storeConversation(
@@ -242,9 +301,11 @@ export async function ensureMemoriesTable(): Promise<void> {
       keywords    TEXT[] NOT NULL DEFAULT '{}',
       confidence  NUMERIC(3,2) NOT NULL,
       source_lang VARCHAR(2) NOT NULL,
-      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
+  await sql`ALTER TABLE darkroom_memories ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_keywords ON darkroom_memories USING GIN(keywords)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_created_at ON darkroom_memories(created_at DESC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_confidence ON darkroom_memories(confidence DESC)`;
@@ -275,7 +336,7 @@ export async function pruneOldMemories(): Promise<void> {
   `;
 }
 
-const VECTOR_DEDUP_THRESHOLD = 0.92;
+const VECTOR_DEDUP_THRESHOLD = 0.85;
 
 function formatVector(embedding: number[]): string {
   return `[${embedding.join(',')}]`;
@@ -295,14 +356,83 @@ export async function storeMemory(
     ? await sql.query(
         `INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, embedding)
          VALUES ($1, $2, $3, $4, $5::vector(${dims}))
-         RETURNING id, content, keywords, confidence, source_lang, created_at`,
+         RETURNING id, content, keywords, confidence, source_lang, created_at, updated_at`,
         [memory.content, memory.keywords, memory.confidence, memory.source_lang, formatVector(embedding)]
       )
     : await sql.query(
         `INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, embedding)
          VALUES ($1, $2, $3, $4, NULL)
-         RETURNING id, content, keywords, confidence, source_lang, created_at`,
+         RETURNING id, content, keywords, confidence, source_lang, created_at, updated_at`,
         [memory.content, memory.keywords, memory.confidence, memory.source_lang]
+      );
+
+  return result.rows[0] as Memory;
+}
+
+export async function getMemoryById(id: number): Promise<Memory | null> {
+  await ensureMemoriesTable();
+  const sql = getSql();
+  const result = await sql`
+    SELECT id, content, keywords, confidence, source_lang, created_at, updated_at
+    FROM darkroom_memories
+    WHERE id = ${id}
+  `;
+  return result.rows.length > 0 ? (result.rows[0] as Memory) : null;
+}
+
+function mergeMemoryContent(existing: string, candidate: string): string {
+  const a = existing.trim();
+  const b = candidate.trim();
+  if (a === b) return a;
+  const aLower = a.toLowerCase();
+  const bLower = b.toLowerCase();
+  if (bLower.includes(aLower)) return b;
+  if (aLower.includes(bLower)) return a;
+  return `${a} / ${b}`;
+}
+
+export async function mergeSimilarMemory(
+  existingId: number,
+  candidate: Omit<Memory, 'id' | 'created_at' | 'updated_at'>
+): Promise<Memory | null> {
+  await ensureMemoriesTable();
+  const existing = await getMemoryById(existingId);
+  if (!existing) return null;
+
+  const mergedContent = mergeMemoryContent(existing.content, candidate.content);
+  const mergedKeywords = [...new Set([...existing.keywords, ...candidate.keywords])]
+    .map((k) => k.toLowerCase().trim())
+    .slice(0, 10);
+  const mergedConfidence = Math.max(
+    typeof existing.confidence === 'string' ? parseFloat(existing.confidence) : existing.confidence,
+    candidate.confidence
+  );
+
+  const embedding = await generateEmbedding(mergedContent);
+  const dims = getEmbeddingDimensions();
+  const sql = getSql();
+
+  const result = embedding
+    ? await sql.query(
+        `UPDATE darkroom_memories
+         SET content = $1,
+             keywords = $2,
+             confidence = $3,
+             updated_at = NOW(),
+             embedding = $4::vector(${dims})
+         WHERE id = $5
+         RETURNING id, content, keywords, confidence, source_lang, created_at, updated_at`,
+        [mergedContent, mergedKeywords, mergedConfidence, formatVector(embedding), existingId]
+      )
+    : await sql.query(
+        `UPDATE darkroom_memories
+         SET content = $1,
+             keywords = $2,
+             confidence = $3,
+             updated_at = NOW()
+         WHERE id = $4
+         RETURNING id, content, keywords, confidence, source_lang, created_at, updated_at`,
+        [mergedContent, mergedKeywords, mergedConfidence, existingId]
       );
 
   return result.rows[0] as Memory;
@@ -629,9 +759,11 @@ export async function ensureSessionsTable(): Promise<void> {
       summary        TEXT NOT NULL DEFAULT '',
       primary_entity VARCHAR(64),
       last_user_intent VARCHAR(32),
+      created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
+  await sql`ALTER TABLE darkroom_sessions ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_sessions_id ON darkroom_sessions(session_id)`;
 }
 
@@ -763,4 +895,43 @@ export async function recordMentionedNames(
       console.error("[darkroom:memory] recordMentionedNames failed:", err);
     }
   }
+}
+
+export async function cleanupOldSessions(days: number): Promise<number> {
+  await ensureSessionsTable();
+  const sql = getSql();
+  const result = await sql`
+    DELETE FROM darkroom_sessions
+    WHERE created_at < NOW() - ${days} * INTERVAL '1 day'
+  `;
+  return result.rowCount ?? 0;
+}
+
+export async function cleanupOldConversations(days: number): Promise<number> {
+  await ensureConversationsTable();
+  const sql = getSql();
+  const result = await sql`
+    DELETE FROM darkroom_conversations
+    WHERE processed_for_memory = TRUE
+      AND created_at < NOW() - ${days} * INTERVAL '1 day'
+  `;
+  return result.rowCount ?? 0;
+}
+
+export async function pruneMemoriesToTarget(targetCount: number = MAX_MEMORIES_TOTAL): Promise<number> {
+  await ensureMemoriesTable();
+  const sql = getSql();
+  const countResult = await sql`SELECT COUNT(*) as count FROM darkroom_memories`;
+  const count = Number((countResult.rows[0] as { count: number }).count);
+  if (count <= targetCount) return 0;
+  const toDelete = count - targetCount;
+  const result = await sql`
+    DELETE FROM darkroom_memories
+    WHERE id IN (
+      SELECT id FROM darkroom_memories
+      ORDER BY confidence ASC, created_at ASC
+      LIMIT ${toDelete}
+    )
+  `;
+  return result.rowCount ?? 0;
 }

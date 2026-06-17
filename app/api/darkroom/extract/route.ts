@@ -3,6 +3,7 @@ import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
 import { getDarkroomData } from "@/lib/darkroom";
 import {
   extractUserMentionedNames,
+  safeJsonParseArray,
   updateSessionSummary,
 } from "@/lib/darkroom-chat";
 import {
@@ -13,10 +14,12 @@ import {
   markConversationsProcessed,
   findSimilarMemory,
   recordMentionedNames,
+  mergeSimilarMemory,
+  scrubPii,
 } from "@/lib/darkroom-memory";
 
-const BATCH_SIZE = 2;
-const MAX_BATCHES_PER_REQUEST = 5; // Process up to 10 conversations per call
+const BATCH_SIZE = 5;
+const MAX_BATCHES_PER_REQUEST = 4; // Process up to 20 conversations per call
 
 export async function POST(req: NextRequest) {
   let isZh = false;
@@ -142,23 +145,11 @@ export async function POST(req: NextRequest) {
 
       let memories: unknown[] = [];
 
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          memories = parsed;
-        }
-      } catch {
-        const jsonMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-        if (jsonMatch) {
-          try {
-            const parsed = JSON.parse(jsonMatch[1]);
-            if (Array.isArray(parsed)) {
-              memories = parsed;
-            }
-          } catch {
-            console.log("[darkroom:extract] failed to parse markdown json block");
-          }
-        }
+      const parsed = safeJsonParseArray(raw);
+      if (parsed) {
+        memories = parsed;
+      } else {
+        console.log("[darkroom:extract] failed to parse memories JSON");
       }
 
       console.log(`[darkroom:extract] batch=${batchIndex + 1} raw_memories=${memories.length}`);
@@ -196,17 +187,28 @@ export async function POST(req: NextRequest) {
             continue;
           }
 
+          const scrubbedContent = scrubPii(trimmedContent);
+
           // Deduplication check across all languages
-          const similar = await findSimilarMemory(trimmedContent, undefined, 0.65);
+          const similar = await findSimilarMemory(scrubbedContent, undefined, 0.65);
           if (similar) {
             console.log(
-              `[darkroom:extract] deduplicated memory similar_to=${similar.id} content="${trimmedContent.slice(0, 40)}..."`
+              `[darkroom:extract] merging memory similar_to=${similar.id} content="${scrubbedContent.slice(0, 40)}..."`
             );
+            const merged = await mergeSimilarMemory(similar.id, {
+              content: scrubbedContent,
+              keywords,
+              confidence,
+              source_lang: sourceLang,
+            });
+            if (merged) {
+              batchStored.push(merged);
+            }
             continue;
           }
 
           const memory = await storeMemory({
-            content: trimmedContent,
+            content: scrubbedContent,
             keywords,
             confidence,
             source_lang: sourceLang,

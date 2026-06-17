@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
 import { getDarkroomData } from "@/lib/darkroom";
+import { safeJsonParse } from "@/lib/darkroom-chat";
 
 export async function POST(req: NextRequest) {
   let isZh = false;
@@ -41,12 +42,12 @@ export async function POST(req: NextRequest) {
 
       clearTimeout(timeout);
       const raw = completion.choices[0]?.message?.content || "";
-      const parsed = JSON.parse(raw);
+      const parsed = safeJsonParse(raw);
 
       let entries = [];
-      if (Array.isArray(parsed.entries)) {
+      if (parsed && Array.isArray(parsed.entries)) {
         entries = parsed.entries;
-      } else if (Array.isArray(parsed)) {
+      } else if (parsed && Array.isArray(parsed)) {
         entries = parsed;
       }
 

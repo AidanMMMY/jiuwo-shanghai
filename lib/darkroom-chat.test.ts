@@ -9,6 +9,7 @@ import {
   extractUserMentionedNames,
   isConcreteTopicEntityForTest,
   safeJsonParse,
+  safeJsonParseArray,
 } from './darkroom-chat';
 import type { HistoryMessage } from './darkroom-chat';
 
@@ -335,5 +336,34 @@ describe('safeJsonParse', () => {
   it('handles nested braces correctly', () => {
     const raw = '{"summary":"She said {hello} to him"}';
     expect(safeJsonParse(raw)).toEqual({ summary: 'She said {hello} to him' });
+  });
+
+  it('extracts the first object when multiple JSON values are present', () => {
+    const raw = 'prefix {"a":1} middle {"b":2} suffix';
+    expect(safeJsonParse(raw)).toEqual({ a: 1 });
+  });
+
+  it('extracts object from markdown fence with trailing text', () => {
+    const raw = 'Here is the JSON:\n```json\n{"x":true}\n```\nDone.';
+    expect(safeJsonParse(raw)).toEqual({ x: true });
+  });
+});
+
+describe('safeJsonParseArray', () => {
+  it('parses a clean JSON array', () => {
+    expect(safeJsonParseArray('[{"content":"a"}]')).toEqual([{ content: 'a' }]);
+  });
+
+  it('extracts an array from surrounding text', () => {
+    const raw = "Memories:\n```json\n[{\"content\":\"a\"},{\"content\":\"b\"}]\n```\nThat's all.";
+    expect(safeJsonParseArray(raw)).toEqual([{ content: 'a' }, { content: 'b' }]);
+  });
+
+  it('returns null for object responses', () => {
+    expect(safeJsonParseArray('{"entries":[]}')).toBeNull();
+  });
+
+  it('returns null for truncated arrays', () => {
+    expect(safeJsonParseArray('[{"content":"a"')).toBeNull();
   });
 });

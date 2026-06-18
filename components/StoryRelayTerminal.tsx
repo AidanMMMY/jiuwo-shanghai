@@ -27,10 +27,9 @@ interface Contributor {
 interface StoryRelayTerminalProps {
   initialSegments: Segment[];
   initialContributors: Contributor[];
-  token: string;
 }
 
-export function StoryRelayTerminal({ initialSegments, initialContributors, token }: StoryRelayTerminalProps) {
+export function StoryRelayTerminal({ initialSegments, initialContributors }: StoryRelayTerminalProps) {
   const [segments, setSegments] = useState<Segment[]>(initialSegments);
   const [contributors, setContributors] = useState<Contributor[]>(initialContributors);
   const [loading, setLoading] = useState(false);
@@ -55,7 +54,7 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, token
         const res = await fetch('/api/story-relay/continue', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ authorName, userInput, token }),
+          body: JSON.stringify({ authorName, userInput }),
         });
         const data = await res.json();
         if (!res.ok) {
@@ -69,7 +68,7 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, token
         setLoading(false);
       }
     },
-    [token]
+    []
   );
 
   return (

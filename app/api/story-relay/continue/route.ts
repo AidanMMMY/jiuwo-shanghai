@@ -15,10 +15,7 @@ import { generateStoryContinuation, extractNamesFromMemories } from '@/lib/story
 const continueSchema = z.object({
   authorName: z.string().min(1).max(64),
   userInput: z.string().min(1).max(2000),
-  token: z.string(),
 });
-
-const STORY_RELAY_TOKEN = process.env.STORY_RELAY_TOKEN || 'jiuwo';
 
 async function getOrCreateSessionId(): Promise<string> {
   const cookieStore = await cookies();
@@ -67,10 +64,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
 
-    const { authorName, userInput, token } = parsed.data;
-    if (token !== STORY_RELAY_TOKEN) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const { authorName, userInput } = parsed.data;
 
     const sessionId = await getOrCreateSessionId();
     const latest = await getLatestSegment();

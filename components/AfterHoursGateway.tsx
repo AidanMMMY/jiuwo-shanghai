@@ -8,6 +8,7 @@ interface AfterHoursGatewayProps {
 
 export default function AfterHoursGateway({ isZh = false }: AfterHoursGatewayProps) {
   const aiHref = isZh ? '/zh/darkroom/chat' : '/darkroom/chat';
+  const storyHref = isZh ? '/zh/story-relay' : '/story-relay';
 
   const content = {
     ai: {
@@ -106,39 +107,60 @@ export default function AfterHoursGateway({ isZh = false }: AfterHoursGatewayPro
             </Link>
 
             {/* Story relay entry */}
-            <div className="group relative overflow-hidden rounded-xl border border-[#2a2a2a] bg-gradient-to-br from-[#0f0f0f] via-[#0a0a0a] to-[#080808] p-5 md:p-6 transition-all duration-500 hover:border-[#c9a227]/25"
+            <Link
+              href={storyHref}
+              className="group relative overflow-hidden rounded-xl border border-[#c9a227]/30 bg-gradient-to-br from-[#141208] via-[#0e0e0a] to-[#0a0a0a] p-5 md:p-6 transition-all duration-500 hover:border-[#c9a227] hover:shadow-[0_0_50px_rgba(201,162,39,0.15)] hover:-translate-y-0.5"
             >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%)] pointer-events-none" />
+              {/* Top sheen line */}
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c9a227]/60 to-transparent" />
+
+              {/* Hover sweep */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#c9a227]/8 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
 
               <div className="relative z-10 flex flex-col h-full">
                 <div className="flex items-start justify-between mb-3">
-                  <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.2em] text-[#666]"
+                  <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.2em] text-[#c9a227]/80"
                   >
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                     </svg>
                     {content.story.eyebrow}
                   </span>
-                  <svg className="w-5 h-5 text-[#333]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                  <svg
+                    className="w-5 h-5 text-[#c9a227]/40 transition-all duration-300 group-hover:text-[#c9a227] group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
                   </svg>
                 </div>
 
-                <h3 className="text-xl md:text-2xl font-medium text-[#f5f5f0]/50 mb-1.5"
+                <h3 className="text-xl md:text-2xl font-medium text-[#f5f5f0] mb-1.5 transition-colors duration-300 group-hover:text-[#c9a227]"
                 >
                   {content.story.headline}
                 </h3>
-                <p className="text-sm text-[#a0a0a0]/50 leading-relaxed mb-5"
+                <p className="text-sm text-[#a0a0a0] leading-relaxed mb-5"
                 >
                   {content.story.subline}
                 </p>
 
-                <span className="mt-auto inline-flex items-center gap-2 self-start px-5 py-2 border border-[#2a2a2a] rounded-full text-xs tracking-[0.12em] text-[#555]"
+                <span className="mt-auto inline-flex items-center gap-2 self-start px-5 py-2 bg-[#c9a227] text-[#0a0a0a] text-xs tracking-[0.12em] font-semibold rounded-full transition-all duration-300 group-hover:bg-[#f5f5f0] group-hover:gap-3 group-hover:shadow-[0_0_20px_rgba(245,245,240,0.2)]"
                 >
-                  {isZh ? '即将开放' : 'Coming soon'}
+                  {content.story.cta}
+                  <svg
+                    className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
                 </span>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>

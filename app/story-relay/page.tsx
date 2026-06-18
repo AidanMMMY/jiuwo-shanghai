@@ -1,20 +1,10 @@
-import { notFound } from 'next/navigation';
 import { getSegments, buildContributors } from '@/lib/story-relay';
 import { StoryRelayTerminal } from '@/components/StoryRelayTerminal';
 import { StoryRelayContributors } from '@/components/StoryRelayContributors';
 
-interface Props {
-  searchParams: Promise<{ token?: string }>;
-}
+export const dynamic = 'force-dynamic';
 
-export default async function StoryRelayPage({ searchParams }: Props) {
-  const { token } = await searchParams;
-  const expectedToken = process.env.STORY_RELAY_TOKEN || 'jiuwo';
-
-  if (token !== expectedToken) {
-    notFound();
-  }
-
+export default async function StoryRelayPage() {
   const segments = await getSegments();
   const contributors = buildContributors(segments);
 
@@ -24,7 +14,6 @@ export default async function StoryRelayPage({ searchParams }: Props) {
         <StoryRelayTerminal
           initialSegments={segments}
           initialContributors={contributors}
-          token={token}
         />
         <aside className="hidden w-56 flex-shrink-0 lg:block">
           <StoryRelayContributors contributors={contributors} />

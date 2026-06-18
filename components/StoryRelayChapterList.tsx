@@ -8,6 +8,9 @@ interface ChapterSummary {
   createdAt: string;
   archivedAt: string;
   segmentCount: number;
+  contributorCount: number;
+  preview: string;
+  lastAuthor: string;
 }
 
 interface StoryRelayChapterListProps {
@@ -43,22 +46,33 @@ export function StoryRelayChapterList({ chapters, isZh }: StoryRelayChapterListP
               href={`${basePath}/${chapter.chapterNumber}`}
               className="group block rounded-lg border border-[#2a2a2a] bg-[#151515] p-5 transition-all duration-300 hover:border-[#c9a227]/50"
             >
-              <div className="mb-2 flex items-center justify-between">
+              <div className="mb-3 flex items-center justify-between">
                 <span className="text-xs uppercase tracking-widest text-[#c9a227]">
                   {t('Chapter', '第')} {chapter.chapterNumber} {t('', '章')}
                 </span>
                 <span className="text-xs text-[#666]">
-                  {chapter.segmentCount} {t('segments', '段')}
+                  {chapter.segmentCount} {t('segments', '段')} · {chapter.contributorCount} {t('contributors', '人')}
                 </span>
               </div>
-              <p className="text-sm text-[#888]">
-                {t('Archived', '归档于')}{' '}
-                {new Date(chapter.archivedAt).toLocaleDateString(isZh ? 'zh-CN' : 'en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </p>
+
+              {chapter.preview && (
+                <p className="mb-3 text-base leading-relaxed text-[#a0a0a0] group-hover:text-[#c9a227]/80 transition-colors">
+                  “{chapter.preview}”
+                </p>
+              )}
+
+              <div className="flex items-center justify-between text-xs text-[#666]">
+                <span>
+                  {t('Last by', '最后由')} {chapter.lastAuthor || t('AI', 'AI')}
+                </span>
+                <span>
+                  {new Date(chapter.archivedAt).toLocaleDateString(isZh ? 'zh-CN' : 'en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
+              </div>
             </Link>
           ))}
         </div>

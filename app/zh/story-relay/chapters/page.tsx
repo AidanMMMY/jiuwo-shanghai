@@ -12,13 +12,30 @@ export const metadata: Metadata = {
 
 export default async function StoryRelayChaptersPageZh() {
   const chapters = await getChapters();
-  const summaries = chapters.map((c) => ({
-    id: c.id,
-    chapterNumber: c.chapterNumber,
-    createdAt: c.createdAt,
-    archivedAt: c.archivedAt,
-    segmentCount: Array.isArray(c.segmentsJson) ? c.segmentsJson.length : 0,
-  }));
+  const summaries = chapters.map((c) => {
+    const segments = Array.isArray(c.segmentsJson) ? c.segmentsJson : [];
+    const firstSegment = segments[0] as Record<string, unknown> | undefined;
+    const lastSegment = segments[segments.length - 1] as Record<string, unknown> | undefined;
+    const names = new Set<string>();
+    for (const s of segments) {
+      const seg = s as Record<string, unknown>;
+      if (typeof seg.authorName === 'string') names.add(seg.authorName);
+    }
+    const preview = firstSegment?.storyZh
+      ? String(firstSegment.storyZh).replace(/\s+/g, ' ').trim().slice(0, 80).replace(/\s+[^\s]*$/, '') + '…'
+      : '';
+
+    return {
+      id: c.id,
+      chapterNumber: c.chapterNumber,
+      createdAt: c.createdAt,
+      archivedAt: c.archivedAt,
+      segmentCount: segments.length,
+      contributorCount: names.size,
+      preview,
+      lastAuthor: lastSegment?.authorName ? String(lastSegment.authorName) : '',
+    };
+  });
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] px-4 py-12 text-[#f5f5f0]">

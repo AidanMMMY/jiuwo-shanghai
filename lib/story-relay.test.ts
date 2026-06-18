@@ -38,6 +38,34 @@ describe('story-relay data layer', () => {
       { name: '小红', sessionId: 's2', segments: [2] },
     ]);
   });
+  it('getChapterByNumber returns chapter when found', async () => {
+    const mockSql = vi.fn().mockResolvedValue({
+      rows: [
+        {
+          id: 1,
+          chapter_number: 7,
+          segments_json: [{ sequence: 0 }],
+          created_at: '2026-06-01T00:00:00Z',
+          archived_at: '2026-06-02T00:00:00Z',
+        },
+      ],
+    });
+    (neon as unknown as ReturnType<typeof vi.fn>).mockReturnValue(mockSql);
+
+    const { getChapterByNumber } = await import('./story-relay');
+    const result = await getChapterByNumber(7);
+    expect(result).not.toBeNull();
+    expect(result?.chapterNumber).toBe(7);
+  });
+
+  it('getChapterByNumber returns null when not found', async () => {
+    const mockSql = vi.fn().mockResolvedValue({ rows: [] });
+    (neon as unknown as ReturnType<typeof vi.fn>).mockReturnValue(mockSql);
+
+    const { getChapterByNumber } = await import('./story-relay');
+    const result = await getChapterByNumber(99);
+    expect(result).toBeNull();
+  });
 });
 
 describe('story-relay-ai', () => {

@@ -18,6 +18,7 @@ import {
   scrubPii,
   normalizeKeywords,
   getSessionIdentities,
+  upsertSessionState,
 } from "@/lib/darkroom-memory";
 
 const BATCH_SIZE = 5;
@@ -52,6 +53,12 @@ export async function POST(req: NextRequest) {
 
     const sourceLang = isZh ? "zh" : "en";
     console.log(`[darkroom:extract] start lang=${sourceLang} session=${sessionId || "none"}`);
+
+    // Ensure the session row exists before storing conversations; the
+    // darkroom_conversations table has a foreign key on darkroom_sessions.
+    if (sessionId) {
+      await upsertSessionState(sessionId, {});
+    }
 
     // Step 1: always store the raw conversation exchange
     const storedConv = await storeConversation({

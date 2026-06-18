@@ -353,7 +353,7 @@ Format: {"intent":"...","topicEntity":"...","confidence":0.x}`;
         { role: "user", content: `Latest user message: ${message}` },
       ],
       temperature: 0.1,
-      max_tokens: 120,
+      max_tokens: 256,
     });
     const raw = completion.choices[0]?.message?.content || "";
     console.log("[darkroom:chat] classifier raw:", JSON.stringify(raw));
@@ -876,7 +876,7 @@ export async function updateSessionSummary(
         { role: "user", content: userPrompt },
       ],
       temperature: 0.2,
-      max_tokens: 256,
+      max_tokens: 512,
       response_format: { type: "json_object" },
     });
 

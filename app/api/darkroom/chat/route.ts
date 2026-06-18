@@ -224,8 +224,13 @@ export async function POST(req: NextRequest) {
 
       console.log("[darkroom:chat] history length:", history.length, "session:", sessionId || "none");
 
-      // Run classifier after history hydration so it has full context.
-      const classifierResult = await classifyMessageWithModel(message, history, isZh);
+      // Run classifier only when there is enough history to disambiguate intent.
+      // First-turn greetings are handled fine by the rule-based intent fallback,
+      // and skipping the classifier saves one LLM round-trip (~2–3s) on cold starts.
+      const shouldClassify = history.length > 1;
+      const classifierResult = shouldClassify
+        ? await classifyMessageWithModel(message, history, isZh)
+        : null;
       console.log("[darkroom:chat] classifier result:", JSON.stringify(classifierResult));
 
       if (sessionState?.summary) {

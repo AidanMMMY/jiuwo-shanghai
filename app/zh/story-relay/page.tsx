@@ -6,12 +6,12 @@ import { StoryRelayContributors } from '@/components/StoryRelayContributors';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Story Relay',
-  description: 'An open relay story set in JIUWO Shanghai. AI opens, you continue.',
-  alternates: { canonical: '/story-relay' },
+  title: '故事接力',
+  description: 'JIUWO 啾喔公开故事接力。AI 起头，你来续写。',
+  alternates: { canonical: '/zh/story-relay' },
 };
 
-export default async function StoryRelayPage() {
+export default async function StoryRelayPageZh() {
   const segments = await getSegments();
   const contributors = buildContributors(segments);
 
@@ -21,10 +21,10 @@ export default async function StoryRelayPage() {
         <StoryRelayTerminal
           initialSegments={segments}
           initialContributors={contributors}
-          isZh={false}
+          isZh={true}
         />
         <aside className="hidden w-56 flex-shrink-0 lg:block">
-          <StoryRelayContributors contributors={contributors} isZh={false} />
+          <StoryRelayContributors contributors={contributors} isZh={true} />
         </aside>
       </div>
     </main>

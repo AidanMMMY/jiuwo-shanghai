@@ -27,9 +27,10 @@ interface Contributor {
 interface StoryRelayTerminalProps {
   initialSegments: Segment[];
   initialContributors: Contributor[];
+  isZh?: boolean;
 }
 
-export function StoryRelayTerminal({ initialSegments, initialContributors }: StoryRelayTerminalProps) {
+export function StoryRelayTerminal({ initialSegments, initialContributors, isZh }: StoryRelayTerminalProps) {
   const [segments, setSegments] = useState<Segment[]>(initialSegments);
   const [contributors, setContributors] = useState<Contributor[]>(initialContributors);
   const [loading, setLoading] = useState(false);
@@ -95,7 +96,7 @@ export function StoryRelayTerminal({ initialSegments, initialContributors }: Sto
       />
 
       <div className="lg:hidden">
-        <StoryRelayContributors contributors={contributors} isMobile />
+        <StoryRelayContributors contributors={contributors} isMobile isZh={isZh} />
       </div>
     </div>
   );

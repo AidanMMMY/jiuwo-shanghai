@@ -7,8 +7,9 @@ interface Contributor {
   segments: number[];
 }
 
-export function StoryRelayContributors({ contributors, isMobile }: { contributors: Contributor[]; isMobile?: boolean }) {
+export function StoryRelayContributors({ contributors, isMobile, isZh }: { contributors: Contributor[]; isMobile?: boolean; isZh?: boolean }) {
   const [expanded, setExpanded] = useState(false);
+  const title = isZh ? '贡献者' : 'Contributors';
 
   if (isMobile) {
     return (
@@ -17,7 +18,7 @@ export function StoryRelayContributors({ contributors, isMobile }: { contributor
           onClick={() => setExpanded(!expanded)}
           className="mb-3 text-xs uppercase tracking-widest text-[#c9a227]"
         >
-          Contributors {expanded ? '▲' : '▼'}
+          {title} {expanded ? '▲' : '▼'}
         </button>
         {expanded && (
           <div className="space-y-3">
@@ -38,7 +39,7 @@ export function StoryRelayContributors({ contributors, isMobile }: { contributor
 
   return (
     <div className="rounded-lg border border-[#2a2a2a] bg-[#151515] p-4">
-      <div className="mb-4 text-xs uppercase tracking-widest text-[#c9a227]">Contributors</div>
+      <div className="mb-4 text-xs uppercase tracking-widest text-[#c9a227]">{title}</div>
       <div className="space-y-3">
         {contributors.map((c) => (
           <div key={c.name} className="flex items-start gap-2">

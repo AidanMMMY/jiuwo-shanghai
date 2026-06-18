@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   poweredByHeader: false,
+  outputFileTracingIncludes: {
+    '/**': ['./data/**/*'],
+  },
 };
 
 export default nextConfig;

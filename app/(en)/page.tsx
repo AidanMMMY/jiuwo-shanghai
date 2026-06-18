@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import HomePage from '@/app/components/pages/HomePage';
 import DarkroomClassRestorer from '@/components/DarkroomClassRestorer';
 import { getHeroSlides, getJournalEntries, getJournalEntriesDarkroom, getSiteData, getUpcomingEvents } from '@/lib/data';
-import { getShanghaiWeather, getWeatherRecommendation } from '@/lib/weather';
 import { listEntries, countEntries } from '@/lib/guestbook';
 import type { GuestbookHookLabels } from '@/lib/guestbook';
 
@@ -20,18 +19,15 @@ const guestbookLabels: GuestbookHookLabels = {
 };
 
 export default async function Page() {
-  const [site, slides, entries, entriesDarkroom, guestbookEntries, guestbookTotal, weather, upcomingEvents] = await Promise.all([
+  const [site, slides, entries, entriesDarkroom, guestbookEntries, guestbookTotal, upcomingEvents] = await Promise.all([
     getSiteData(),
     getHeroSlides(),
     getJournalEntries(),
     getJournalEntriesDarkroom(),
     listEntries(10),
     countEntries(),
-    getShanghaiWeather(),
     getUpcomingEvents(),
   ]);
-
-  const weatherRec = weather ? getWeatherRecommendation(weather.code, weather.temp, weather.humidity, false) : null;
 
   const upcomingEvent = upcomingEvents.length > 0 ? upcomingEvents[0] : null;
 
@@ -61,8 +57,6 @@ export default async function Page() {
         guestbookTotal={guestbookTotal}
         guestbookLabels={guestbookLabels}
         guestbookHref="/guestbook"
-        weather={weather}
-        weatherRec={weatherRec}
         isZh={false}
         specialEventCard={specialEventCard}
       />

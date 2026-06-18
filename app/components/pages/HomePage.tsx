@@ -1,10 +1,9 @@
 import HeroCarousel from '@/components/HeroCarousel';
 import JournalStream from '@/components/JournalStream';
 import GuestbookHook from '@/components/GuestbookHook';
-import WeatherVibe from '@/components/WeatherVibe';
+import AfterHoursGateway from '@/components/AfterHoursGateway';
 import type { HeroSlide, JournalEntry, SiteData } from '@/lib/data';
 import type { GuestbookEntry, GuestbookHookLabels } from '@/lib/guestbook';
-import type { WeatherData, WeatherRecommendation } from '@/lib/weather';
 
 export default function HomePage({
   site,
@@ -16,8 +15,6 @@ export default function HomePage({
   guestbookTotal,
   guestbookLabels,
   guestbookHref,
-  weather,
-  weatherRec,
   isZh,
   specialEventCard,
 }: {
@@ -30,8 +27,6 @@ export default function HomePage({
   guestbookTotal: number;
   guestbookLabels: GuestbookHookLabels;
   guestbookHref: string;
-  weather?: WeatherData | null;
-  weatherRec?: WeatherRecommendation | null;
   isZh?: boolean;
   specialEventCard?: { hero: string; hostName?: string; href: string; isUpcoming?: boolean };
 }) {
@@ -44,7 +39,7 @@ export default function HomePage({
         specialEvent={specialEventCard}
         isZh={isZh}
       />
-      <WeatherVibe weather={weather ?? null} recommendation={weatherRec ?? null} isZh={isZh} />
+      <AfterHoursGateway isZh={isZh} />
       <JournalStream entries={entries} entriesDarkroom={entriesDarkroom} title={journalTitle} />
       <GuestbookHook
         entries={guestbookEntries}

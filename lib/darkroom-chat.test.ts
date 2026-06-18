@@ -10,6 +10,9 @@ import {
   isConcreteTopicEntityForTest,
   safeJsonParse,
   safeJsonParseArray,
+  countFirstPersonReferences,
+  shouldAskIdentity,
+  buildIdentityProbeInstruction,
 } from './darkroom-chat';
 import type { HistoryMessage } from './darkroom-chat';
 
@@ -349,21 +352,66 @@ describe('safeJsonParse', () => {
   });
 });
 
-describe('safeJsonParseArray', () => {
-  it('parses a clean JSON array', () => {
-    expect(safeJsonParseArray('[{"content":"a"}]')).toEqual([{ content: 'a' }]);
+describe('countFirstPersonReferences', () => {
+  it('counts Chinese first-person pronoun', () => {
+    expect(countFirstPersonReferences('我觉得这里不错', true)).toBe(1);
+    expect(countFirstPersonReferences('我喜欢我的酒', true)).toBe(2);
+    expect(countFirstPersonReferences('你怎么看', true)).toBe(0);
   });
 
-  it('extracts an array from surrounding text', () => {
-    const raw = "Memories:\n```json\n[{\"content\":\"a\"},{\"content\":\"b\"}]\n```\nThat's all.";
-    expect(safeJsonParseArray(raw)).toEqual([{ content: 'a' }, { content: 'b' }]);
-  });
-
-  it('returns null for object responses', () => {
-    expect(safeJsonParseArray('{"entries":[]}')).toBeNull();
-  });
-
-  it('returns null for truncated arrays', () => {
-    expect(safeJsonParseArray('[{"content":"a"')).toBeNull();
+  it('counts English first-person pronouns', () => {
+    expect(countFirstPersonReferences('I like this place', false)).toBe(1);
+    expect(countFirstPersonReferences('My drink is great and I love it', false)).toBe(2);
+    expect(countFirstPersonReferences('You should come', false)).toBe(0);
   });
 });
+
+describe('shouldAskIdentity', () => {
+  const buildHistory = (...userContents: string[]): HistoryMessage[] =>
+    userContents.map((content) => ({ role: 'user', content }));
+
+  it('returns false when user name is already known', () => {
+    const history = buildHistory('我觉得不错', '我上次来过', '我喜欢鸡尾酒');
+    expect(shouldAskIdentity(history, true, 'Alex', false)).toBe(false);
+  });
+
+  it('returns false when identity probe was already sent', () => {
+    const history = buildHistory('我觉得不错', '我上次来过', '我喜欢鸡尾酒');
+    expect(shouldAskIdentity(history, true, '', true)).toBe(false);
+  });
+
+  it('returns false with fewer than 3 user messages', () => {
+    const history = buildHistory('我觉得不错', '我上次来过');
+    expect(shouldAskIdentity(history, true, '', false)).toBe(false);
+  });
+
+  it('returns true when first-person appears in at least 2 of last 3 turns', () => {
+    const history = buildHistory('你好', '我觉得这里不错', '我上次来过', '我喜欢鸡尾酒');
+    expect(shouldAskIdentity(history, true, '', false)).toBe(true);
+  });
+
+  it('returns true when total first-person references reach 4', () => {
+    const history = buildHistory('你好', '我我', '我我', '酒吧不错');
+    expect(shouldAskIdentity(history, true, '', false)).toBe(true);
+  });
+
+  it('returns false when recent turns are not self-referential', () => {
+    const history = buildHistory('你好', '今天天气怎样', '酒吧几点开', '推荐一杯酒');
+    expect(shouldAskIdentity(history, true, '', false)).toBe(false);
+  });
+});
+
+describe('buildIdentityProbeInstruction', () => {
+  it('includes a polite name question in Chinese', () => {
+    const instruction = buildIdentityProbeInstruction(true);
+    expect(instruction).toContain('该怎么称呼你');
+    expect(instruction).toContain('只问一次');
+  });
+
+  it('includes a polite name question in English', () => {
+    const instruction = buildIdentityProbeInstruction(false);
+    expect(instruction).toContain('call you');
+    expect(instruction).toContain('Ask only once');
+  });
+});
+

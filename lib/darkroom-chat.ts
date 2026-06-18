@@ -756,6 +756,64 @@ export function extractUserNameFromHistory(
   return null;
 }
 
+// ── Identity probing ───────────────────────────────────────────────────
+
+const FIRST_PERSON_ZH = /我/g;
+const FIRST_PERSON_EN = /\b(i|me|my|myself)\b/gi;
+
+/**
+ * Count first-person references in a message.
+ */
+export function countFirstPersonReferences(text: string, isZh: boolean): number {
+  if (!text) return 0;
+  const matches = text.match(isZh ? FIRST_PERSON_ZH : FIRST_PERSON_EN);
+  return matches ? matches.length : 0;
+}
+
+/**
+ * Decide whether the bot should politely ask the user for their name.
+ * Triggers only when:
+ * - we do not already know the user's name,
+ * - we have not already asked in this session,
+ * - there are at least 3 user messages,
+ * - first-person references appear often in recent turns.
+ */
+export function shouldAskIdentity(
+  history: HistoryMessage[],
+  isZh: boolean,
+  userName: string,
+  identityProbeSent: boolean
+): boolean {
+  if (userName) return false;
+  if (identityProbeSent) return false;
+
+  const userMessages = history.filter((m) => m.role === "user" && m.content);
+  if (userMessages.length < 3) return false;
+
+  const recent = userMessages.slice(-3);
+  let messagesWithFirstPerson = 0;
+  let totalReferences = 0;
+
+  for (const msg of recent) {
+    const count = countFirstPersonReferences(msg.content, isZh);
+    if (count > 0) messagesWithFirstPerson++;
+    totalReferences += count;
+  }
+
+  return messagesWithFirstPerson >= 2 || totalReferences >= 4;
+}
+
+/**
+ * Build a soft, boundary-aware instruction that encourages the user to share
+ * their name without pressure.
+ */
+export function buildIdentityProbeInstruction(isZh: boolean): string {
+  if (isZh) {
+    return `[身份提示] 聊了几句，系统还不知道该怎么称呼这位用户。请在回复末尾很自然、很有礼貌地问一次："如果你愿意，可以告诉我该怎么称呼你？不方便也完全没关系。" 只问一次，不要反复追问，也不要让用户感到被盘问。`;
+  }
+  return `[Identity prompt] We've chatted a few turns and the system still doesn't know what to call this user. Naturally and politely ask once: "If you're comfortable, feel free to tell me what I should call you — no pressure at all." Ask only once; do not push or repeat.`;
+}
+
 // ── TopicLock output parsing ───────────────────────────────────────────
 
 const TOPIC_LOCK_RE = /^\[TopicLock:\s*(.+?)\s*\]\s*\n?/;

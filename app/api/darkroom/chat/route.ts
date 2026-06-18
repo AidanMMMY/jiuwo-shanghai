@@ -14,6 +14,10 @@ import {
   formatTopicLockInstruction,
   parseTopicLock,
   resolvePronouns,
+  buildIdentityProbeInstruction,
+  shouldAskIdentity,
+  isNameQuestion,
+  looksLikeName,
 } from "@/lib/darkroom-chat";
 
 import {
@@ -23,6 +27,9 @@ import {
   getSessionState,
   getDynamicEntities,
   getRecentConversationsBySession,
+  storeMemory,
+  upsertSessionState,
+  findSimilarMemory,
 } from "@/lib/darkroom-memory";
 import {
   buildChatPromptWithinBudget,
@@ -77,6 +84,17 @@ export async function POST(req: NextRequest) {
     const data = getDarkroomData(isZh);
     const SYSTEM_PROMPT = data.systemPrompt;
 
+    // Fetch session state early so we know whether an identity has already
+    // been captured or if we have already asked for it this session.
+    let sessionState: Awaited<ReturnType<typeof getSessionState>> = null;
+    if (sessionId) {
+      try {
+        sessionState = await getSessionState(sessionId);
+      } catch (err) {
+        console.error("[darkroom:chat] early session fetch error:", err);
+      }
+    }
+
     const { timeString, hour } = getShanghaiTime();
     const open = isJiuwoOpen(hour);
     const timeContext = open
@@ -87,8 +105,9 @@ export async function POST(req: NextRequest) {
       : `[当前本地时间：${timeString}。JIUWO 当前非营业时间（周二至周日 19:00–02:00）。不要问假设用户此刻在店内的问题，比如「今晚跟谁一起喝酒」。不要声称知道谁此刻 physically 在场。你只有记录和记忆，没有实时监控。问题转向人际关系、心情、近况或计划来访。]`;
     const activeTimeContext = isZh ? timeContextZh : timeContext;
 
-    const userName = knownName || extractUserNameFromHistory(history, isZh) || extractExplicitName(message, isZh);
+    const userName = knownName || sessionState?.user_identity || extractUserNameFromHistory(history, isZh) || extractExplicitName(message, isZh);
     let identityReminder = "";
+    let identityProbeInstruction = "";
 
     if (userName) {
       const entity = matchKnownEntity(userName);
@@ -118,6 +137,18 @@ export async function POST(req: NextRequest) {
         if (nameMemories.length > 0) {
           identityReminder += `\n\n=== Collective memory traces related to this name ===\n${nameMemories.map((m) => `- ${m.content}`).join("\n")}\n\n=== END ===`;
         }
+      }
+    }
+
+    // If we still don't know the user's name and the conversation has been
+    // self-referential for a few turns, ask once — politely and without pressure.
+    if (sessionId && !userName) {
+      const probeSent = !!sessionState?.identity_probe_sent;
+      if (shouldAskIdentity(history, isZh, userName, probeSent)) {
+        identityProbeInstruction = buildIdentityProbeInstruction(isZh);
+        upsertSessionState(sessionId, { identity_probe_sent: true }).catch((err) =>
+          console.error("[darkroom:chat] failed to mark identity_probe_sent:", err)
+        );
       }
     }
 
@@ -163,14 +194,8 @@ export async function POST(req: NextRequest) {
       const memoryLimit = isAmbiguous ? 3 : 5;
       const shouldHydrateHistory = sessionId && history.length === 0;
 
-      const [sessionState, rawMemories, dynamicEntities, recentConversations] =
+      const [rawMemories, dynamicEntities, recentConversations] =
         await Promise.all([
-          sessionId
-            ? getSessionState(sessionId).catch((err) => {
-                console.error("[darkroom:chat] session fetch error:", err);
-                return null;
-              })
-            : Promise.resolve(null),
           retrieveMemories(message, isZh ? "zh" : "en", memoryLimit),
           getDynamicEntities().catch((err) => {
             console.error("[darkroom:chat] dynamic entities fetch error:", err);
@@ -297,6 +322,7 @@ export async function POST(req: NextRequest) {
         sessionBlock,
         memoryBlock,
         identityReminder,
+        identityProbeInstruction,
         topicReminder,
         topicLockInstruction,
         searchBlock,
@@ -383,10 +409,50 @@ export async function POST(req: NextRequest) {
 
     const content = await callModel(systemContent, budgetedHistory);
 
+    // Capture a name if the user just revealed it in this turn.
+    let capturedName = userName;
+    if (!capturedName && sessionId) {
+      let nameFromMessage = extractExplicitName(message, isZh);
+      if (!nameFromMessage && history.length > 0) {
+        const lastAssistant = history[history.length - 1];
+        if (
+          lastAssistant?.role === "assistant" &&
+          isNameQuestion(lastAssistant.content, isZh) &&
+          looksLikeName(message, isZh)
+        ) {
+          nameFromMessage = message.trim();
+        }
+      }
+      if (nameFromMessage && nameFromMessage !== sessionState?.user_identity) {
+        capturedName = nameFromMessage;
+        (async () => {
+          try {
+            const identityContent = isZh
+              ? `用户自我介绍为「${capturedName}」`
+              : `User introduced themselves as "${capturedName}"`;
+            const similar = await findSimilarMemory(identityContent, undefined, 0.65);
+            if (!similar) {
+              await storeMemory({
+                content: identityContent,
+                keywords: [capturedName!, isZh ? "名字" : "name", isZh ? "身份" : "identity", isZh ? "用户" : "user"],
+                confidence: 0.95,
+                source_lang: isZh ? "zh" : "en",
+                memory_type: "self_fact",
+                source_identity: capturedName,
+              });
+            }
+            await upsertSessionState(sessionId, { user_identity: capturedName });
+          } catch (err) {
+            console.error("[darkroom:chat] identity memory/store failed:", err);
+          }
+        })();
+      }
+    }
+
     return NextResponse.json({
       content,
       source: "deepseek",
-      recognizedName: userName || null,
+      recognizedName: capturedName || null,
       timestamp: new Date().toISOString(),
     });
   } catch (error: unknown) {

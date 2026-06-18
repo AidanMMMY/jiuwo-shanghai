@@ -17,6 +17,7 @@ import {
   mergeSimilarMemory,
   scrubPii,
   normalizeKeywords,
+  getSessionIdentities,
 } from "@/lib/darkroom-memory";
 
 const BATCH_SIZE = 5;
@@ -85,7 +86,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ stored: 0, batched: false, reason: "no_extraction_prompt" });
     }
 
-    // Step 2: process backlog in batches
+    // Step 2: process backlog in batches, grouped by session so that known
+    // user identity can be passed into the extraction prompt and attached to
+    // stored memories as source_identity.
     let totalStored = 0;
     let totalProcessed = 0;
     let totalBatches = 0;
@@ -96,58 +99,91 @@ export async function POST(req: NextRequest) {
       confidence: number;
     }> = [];
 
-    for (let batchIndex = 0; batchIndex < MAX_BATCHES_PER_REQUEST; batchIndex++) {
-      const pending = await getUnprocessedConversations(sourceLang, BATCH_SIZE);
-      console.log(`[darkroom:extract] batch=${batchIndex + 1} pending=${pending.length}`);
+    const maxConversations = BATCH_SIZE * MAX_BATCHES_PER_REQUEST;
+    const pending = await getUnprocessedConversations(sourceLang, maxConversations);
+    console.log(`[darkroom:extract] pending=${pending.length}`);
 
-      if (pending.length < BATCH_SIZE) {
-        break;
+    if (pending.length > 0) {
+      const sessionIds = [
+        ...new Set(pending.map((c) => c.session_id).filter((s): s is string => !!s)),
+      ];
+      const identityMap = await getSessionIdentities(sessionIds);
+
+      // Group by session_id so each batch has consistent identity context.
+      const groups = new Map<string, typeof pending>();
+      for (const conv of pending) {
+        const sid = conv.session_id || "__none__";
+        if (!groups.has(sid)) groups.set(sid, []);
+        groups.get(sid)!.push(conv);
       }
 
-      totalBatches++;
+      batchLoop: for (const [sessionId, group] of groups) {
+        const identity = identityMap[sessionId];
 
-      const transcript = pending
-        .map(
-          (c, i) =>
-            isZh
-              ? `--- 对话 ${i + 1} ---\n用户：${c.user_message}\n系统：${c.assistant_response}`
-              : `--- Exchange ${i + 1} ---\nUser: ${c.user_message}\nSystem: ${c.assistant_response}`
-        )
-        .join("\n\n");
+        for (let i = 0; i < group.length; i += BATCH_SIZE) {
+          if (totalBatches >= MAX_BATCHES_PER_REQUEST) break batchLoop;
 
-      const batchPrompt = isZh
-        ? `基于以下 ${BATCH_SIZE} 段连续对话，提取 0–4 个值得持久化的记忆。每条记忆必须包含以下字段：
+          const batch = group.slice(i, i + BATCH_SIZE);
+          totalBatches++;
+
+          const transcript = batch
+            .map((c, idx) => {
+              const identityPrefix = identity
+                ? isZh
+                  ? `[用户身份：${identity}]`
+                  : `[User identity: ${identity}]`
+                : "";
+              return isZh
+                ? `--- 对话 ${idx + 1} ${identityPrefix} ---\n用户：${c.user_message}\n系统：${c.assistant_response}`
+                : `--- Exchange ${idx + 1} ${identityPrefix} ---\nUser: ${c.user_message}\nSystem: ${c.assistant_response}`;
+            })
+            .join("\n\n");
+
+          const identityHint = identity
+            ? isZh
+              ? `注意：以上对话中标记了 [用户身份：${identity}] 的，表示用户已表明自己叫 ${identity}。用户用“我/我的”说出的内容，是关于 ${identity} 自己的事实，请标记为 memory_type: self_fact。`
+              : `Note: exchanges tagged with [User identity: ${identity}] mean the user has identified themselves as ${identity}. Statements using "I/my" are about ${identity} themselves; tag them as memory_type: self_fact.`
+            : "";
+
+          const batchPrompt = isZh
+            ? `基于以下 ${batch.length} 段连续对话，提取 0–4 个值得持久化的记忆。每条记忆必须包含以下字段：
 
 {
   "content": "记忆内容（简洁、具体、不含敏感信息）",
   "keywords": ["关键词1", "keyword1", "关键词2", "keyword2"],
   "confidence": 0.85,
-  "memory_type": "user_fact | system_inferred | correction"
+  "memory_type": "user_fact | system_inferred | correction | self_fact"
 }
 
 类型说明：
 - user_fact：用户明确说出的具体事实（偏好、提到的人、计划、情绪）。
 - correction：用户纠正、否认或澄清系统之前的理解。
 - system_inferred：系统从对话中合理推断出的关系动态或总结，但不是用户直接陈述的事实。
+- self_fact：当已知用户身份且用户用第一人称讲关于自己的事实（偏好、计划、情绪）。
+
+${identityHint}
 
 注意跨对话的重复主题。如果某条信息与已有记忆高度重复，请降低其优先级或不包含。
 
 ${transcript}
 
 请提取记忆，只返回 JSON 数组：`
-        : `Based on the following ${BATCH_SIZE} consecutive exchanges, extract 0–4 memories worth persisting. Each memory must include these fields:
+            : `Based on the following ${batch.length} consecutive exchanges, extract 0–4 memories worth persisting. Each memory must include these fields:
 
 {
   "content": "Concise, specific memory content without sensitive info",
   "keywords": ["keyword1", "关键词1", "keyword2", "关键词2"],
   "confidence": 0.85,
-  "memory_type": "user_fact | system_inferred | correction"
+  "memory_type": "user_fact | system_inferred | correction | self_fact"
 }
 
 Types:
 - user_fact: a concrete fact the user explicitly stated (preference, person, plan, mood).
 - correction: the user corrects, denies, or clarifies something the system previously said.
 - system_inferred: a reasonable inference about relationship dynamics or summary, not directly stated by the user.
+- self_fact: when the user's identity is known and they use first-person to state a fact about themselves (preference, plan, mood).
+
+${identityHint}
 
 Look for recurring themes across exchanges. If a memory overlaps heavily with existing traces, deprioritize or omit it.
 
@@ -155,149 +191,156 @@ ${transcript}
 
 Extract memories as a JSON array only:`;
 
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000);
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 15000);
 
-      let raw = "";
-      try {
-        const completion = await deepseekClient.chat.completions.create(
-          {
-            model: DEFAULT_MODEL,
-            messages: [
-              { role: "system", content: extractionPrompt },
-              { role: "user", content: batchPrompt },
-            ],
-            temperature: 0.3,
-            max_tokens: 600,
-          },
-          { signal: controller.signal }
-        );
-        clearTimeout(timeout);
-        raw = completion.choices[0]?.message?.content || "";
-      } catch (fetchError: unknown) {
-        clearTimeout(timeout);
-        console.error("[darkroom:extract] deepseek call failed:", fetchError);
-        throw fetchError;
-      }
-
-      let memories: unknown[] = [];
-
-      const parsed = safeJsonParseArray(raw);
-      if (parsed) {
-        memories = parsed;
-      } else {
-        console.log("[darkroom:extract] failed to parse memories JSON");
-      }
-
-      console.log(`[darkroom:extract] batch=${batchIndex + 1} raw_memories=${memories.length}`);
-
-      const batchStored = [];
-
-      for (const rawMemory of memories) {
-        if (typeof rawMemory !== "object" || rawMemory === null) continue;
-
-        const m = rawMemory as Record<string, unknown>;
-        const content = m.content;
-        const confidence = m.confidence;
-
-        if (
-          typeof content === "string" &&
-          content.length > 5 &&
-          content.length < 500 &&
-          typeof confidence === "number" &&
-          confidence >= 0.6 &&
-          confidence <= 1.0
-        ) {
-          const trimmedContent = content.trim();
-          let rawKeywords = Array.isArray(m.keywords)
-            ? (m.keywords as unknown[])
-                .filter((k): k is string => typeof k === "string" && k.length > 0)
-                .map((k) => k.trim())
-            : [];
-
-          if (rawKeywords.length === 0) {
-            rawKeywords = extractKeywords(trimmedContent);
-          }
-
-          const keywords = normalizeKeywords(rawKeywords);
-
-          if (keywords.length === 0) {
-            continue;
-          }
-
-          const memoryType =
-            typeof m.memory_type === "string" &&
-            ["user_fact", "system_inferred", "correction"].includes(m.memory_type)
-              ? (m.memory_type as "user_fact" | "system_inferred" | "correction")
-              : /纠正|更正|否认|澄清|correction|deny|clarify/i.test(trimmedContent)
-              ? "correction"
-              : "user_fact";
-
-          const scrubbedContent = scrubPii(trimmedContent);
-
-          // Corrections should be stored as clean, separate memories rather than
-          // merged into the false memory they contradict. Merging would dilute the
-          // correction or resurrect the false claim.
-          if (memoryType === "correction") {
-            const memory = await storeMemory({
-              content: scrubbedContent,
-              keywords,
-              confidence,
-              source_lang: sourceLang,
-              memory_type: memoryType,
-            });
-            batchStored.push(memory);
-            continue;
-          }
-
-          // Deduplication check across all languages
-          const similar = await findSimilarMemory(scrubbedContent, undefined, 0.65);
-          if (similar) {
-            // If the existing memory is a correction, do not overwrite it with a
-            // potentially contradictory user_fact. Keep the correction authoritative.
-            if (similar.memory_type === "correction") {
-              console.log(
-                `[darkroom:extract] skipping store: similar_to_correction=${similar.id} content="${scrubbedContent.slice(0, 40)}..."`
-              );
-              continue;
-            }
-            console.log(
-              `[darkroom:extract] merging memory similar_to=${similar.id} content="${scrubbedContent.slice(0, 40)}..."`
+          let raw = "";
+          try {
+            const completion = await deepseekClient.chat.completions.create(
+              {
+                model: DEFAULT_MODEL,
+                messages: [
+                  { role: "system", content: extractionPrompt },
+                  { role: "user", content: batchPrompt },
+                ],
+                temperature: 0.3,
+                max_tokens: 600,
+              },
+              { signal: controller.signal }
             );
-            const merged = await mergeSimilarMemory(similar.id, {
-              content: scrubbedContent,
-              keywords,
-              confidence,
-              source_lang: sourceLang,
-              memory_type: memoryType,
-            });
-            if (merged) {
-              batchStored.push(merged);
-            }
-            continue;
+            clearTimeout(timeout);
+            raw = completion.choices[0]?.message?.content || "";
+          } catch (fetchError: unknown) {
+            clearTimeout(timeout);
+            console.error("[darkroom:extract] deepseek call failed:", fetchError);
+            throw fetchError;
           }
 
-          const memory = await storeMemory({
-            content: scrubbedContent,
-            keywords,
-            confidence,
-            source_lang: sourceLang,
-            memory_type: memoryType,
-          });
-          batchStored.push(memory);
+          let memories: unknown[] = [];
+
+          const parsed = safeJsonParseArray(raw);
+          if (parsed) {
+            memories = parsed;
+          } else {
+            console.log("[darkroom:extract] failed to parse memories JSON");
+          }
+
+          console.log(
+            `[darkroom:extract] batch=${totalBatches} session=${sessionId || "none"} raw_memories=${memories.length}`
+          );
+
+          const batchStored = [];
+
+          for (const rawMemory of memories) {
+            if (typeof rawMemory !== "object" || rawMemory === null) continue;
+
+            const m = rawMemory as Record<string, unknown>;
+            const content = m.content;
+            const confidence = m.confidence;
+
+            if (
+              typeof content === "string" &&
+              content.length > 5 &&
+              content.length < 500 &&
+              typeof confidence === "number" &&
+              confidence >= 0.6 &&
+              confidence <= 1.0
+            ) {
+              const trimmedContent = content.trim();
+              let rawKeywords = Array.isArray(m.keywords)
+                ? (m.keywords as unknown[])
+                    .filter((k): k is string => typeof k === "string" && k.length > 0)
+                    .map((k) => k.trim())
+                : [];
+
+              if (rawKeywords.length === 0) {
+                rawKeywords = extractKeywords(trimmedContent);
+              }
+
+              const keywords = normalizeKeywords(rawKeywords);
+
+              if (keywords.length === 0) {
+                continue;
+              }
+
+              const memoryType =
+                typeof m.memory_type === "string" &&
+                ["user_fact", "system_inferred", "correction", "self_fact"].includes(m.memory_type)
+                  ? (m.memory_type as "user_fact" | "system_inferred" | "correction" | "self_fact")
+                  : /纠正|更正|否认|澄清|correction|deny|clarify/i.test(trimmedContent)
+                  ? "correction"
+                  : "user_fact";
+
+              const scrubbedContent = scrubPii(trimmedContent);
+
+              // Corrections should be stored as clean, separate memories rather than
+              // merged into the false memory they contradict. Merging would dilute the
+              // correction or resurrect the false claim.
+              if (memoryType === "correction") {
+                const memory = await storeMemory({
+                  content: scrubbedContent,
+                  keywords,
+                  confidence,
+                  source_lang: sourceLang,
+                  memory_type: memoryType,
+                  source_identity: identity,
+                });
+                batchStored.push(memory);
+                continue;
+              }
+
+              // Deduplication check across all languages
+              const similar = await findSimilarMemory(scrubbedContent, undefined, 0.65);
+              if (similar) {
+                // If the existing memory is a correction, do not overwrite it with a
+                // potentially contradictory user_fact. Keep the correction authoritative.
+                if (similar.memory_type === "correction") {
+                  console.log(
+                    `[darkroom:extract] skipping store: similar_to_correction=${similar.id} content="${scrubbedContent.slice(0, 40)}..."`
+                  );
+                  continue;
+                }
+                console.log(
+                  `[darkroom:extract] merging memory similar_to=${similar.id} content="${scrubbedContent.slice(0, 40)}..."`
+                );
+                const merged = await mergeSimilarMemory(similar.id, {
+                  content: scrubbedContent,
+                  keywords,
+                  confidence,
+                  source_lang: sourceLang,
+                  memory_type: memoryType,
+                  source_identity: identity,
+                });
+                if (merged) {
+                  batchStored.push(merged);
+                }
+                continue;
+              }
+
+              const memory = await storeMemory({
+                content: scrubbedContent,
+                keywords,
+                confidence,
+                source_lang: sourceLang,
+                memory_type: memoryType,
+                source_identity: identity,
+              });
+              batchStored.push(memory);
+            }
+          }
+
+          // Mark conversations as processed even if no new memories were stored
+          // (otherwise they will loop forever)
+          await markConversationsProcessed(batch.map((c) => c.id));
+          totalProcessed += batch.length;
+          totalStored += batchStored.length;
+          storedMemories.push(...batchStored);
+
+          console.log(
+            `[darkroom:extract] batch=${totalBatches} session=${sessionId || "none"} stored=${batchStored.length} processed=${batch.length}`
+          );
         }
       }
-
-      // Mark conversations as processed even if no new memories were stored
-      // (otherwise they will loop forever)
-      await markConversationsProcessed(pending.map((c) => c.id));
-      totalProcessed += pending.length;
-      totalStored += batchStored.length;
-      storedMemories.push(...batchStored);
-
-      console.log(
-        `[darkroom:extract] batch=${batchIndex + 1} stored=${batchStored.length} processed=${pending.length}`
-      );
     }
 
     console.log(

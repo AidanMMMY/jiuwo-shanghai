@@ -16,7 +16,8 @@ export interface Memory {
   keywords: string[];
   confidence: number;
   source_lang: 'en' | 'zh';
-  memory_type?: 'user_fact' | 'system_inferred' | 'correction';
+  memory_type?: 'user_fact' | 'system_inferred' | 'correction' | 'self_fact';
+  source_identity?: string;
   retrieval_count?: number;
   last_retrieved_at?: string;
   created_at: string;
@@ -317,7 +318,7 @@ export async function getUnprocessedConversations(
   await ensureConversationsTable();
   const sql = getSql();
   const result = await sql`
-    SELECT id, user_message, assistant_response, source_lang, processed_for_memory, created_at
+    SELECT id, user_message, assistant_response, source_lang, processed_for_memory, session_id, created_at
     FROM darkroom_conversations
     WHERE source_lang = ${sourceLang} AND processed_for_memory = FALSE
     ORDER BY created_at ASC
@@ -352,12 +353,14 @@ export async function ensureMemoriesTable(): Promise<void> {
   `;
   await sql`ALTER TABLE darkroom_memories ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`;
   await sql`ALTER TABLE darkroom_memories ADD COLUMN IF NOT EXISTS memory_type VARCHAR(32) NOT NULL DEFAULT 'user_fact'`;
+  await sql`ALTER TABLE darkroom_memories ADD COLUMN IF NOT EXISTS source_identity VARCHAR(64)`;
   await sql`ALTER TABLE darkroom_memories ADD COLUMN IF NOT EXISTS retrieval_count INTEGER NOT NULL DEFAULT 0`;
   await sql`ALTER TABLE darkroom_memories ADD COLUMN IF NOT EXISTS last_retrieved_at TIMESTAMPTZ`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_keywords ON darkroom_memories USING GIN(keywords)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_created_at ON darkroom_memories(created_at DESC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_confidence ON darkroom_memories(confidence DESC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_type ON darkroom_memories(memory_type)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_source_identity ON darkroom_memories(source_identity)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_last_retrieved ON darkroom_memories(last_retrieved_at)`;
 }
 
@@ -406,16 +409,16 @@ export async function storeMemory(
 
   const result = embedding
     ? await sql.query(
-        `INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, memory_type, embedding)
-         VALUES ($1, $2, $3, $4, $5, $6::vector(${dims}))
-         RETURNING id, content, keywords, confidence, source_lang, memory_type, retrieval_count, last_retrieved_at, created_at, updated_at`,
-        [memory.content, keywords, memory.confidence, memory.source_lang, memoryType, formatVector(embedding)]
+        `INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, memory_type, source_identity, embedding)
+         VALUES ($1, $2, $3, $4, $5, $6, $7::vector(${dims}))
+         RETURNING id, content, keywords, confidence, source_lang, memory_type, source_identity, retrieval_count, last_retrieved_at, created_at, updated_at`,
+        [memory.content, keywords, memory.confidence, memory.source_lang, memoryType, memory.source_identity ?? null, formatVector(embedding)]
       )
     : await sql.query(
-        `INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, memory_type, embedding)
-         VALUES ($1, $2, $3, $4, $5, NULL)
-         RETURNING id, content, keywords, confidence, source_lang, memory_type, retrieval_count, last_retrieved_at, created_at, updated_at`,
-        [memory.content, keywords, memory.confidence, memory.source_lang, memoryType]
+        `INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, memory_type, source_identity, embedding)
+         VALUES ($1, $2, $3, $4, $5, $6, NULL)
+         RETURNING id, content, keywords, confidence, source_lang, memory_type, source_identity, retrieval_count, last_retrieved_at, created_at, updated_at`,
+        [memory.content, keywords, memory.confidence, memory.source_lang, memoryType, memory.source_identity ?? null]
       );
 
   return result.rows[0] as Memory;
@@ -425,7 +428,7 @@ export async function getMemoryById(id: number): Promise<Memory | null> {
   await ensureMemoriesTable();
   const sql = getSql();
   const result = await sql`
-    SELECT id, content, keywords, confidence, source_lang, created_at, updated_at
+    SELECT id, content, keywords, confidence, source_lang, memory_type, source_identity, created_at, updated_at
     FROM darkroom_memories
     WHERE id = ${id}
   `;
@@ -457,10 +460,13 @@ export async function mergeSimilarMemory(
     typeof existing.confidence === 'string' ? parseFloat(existing.confidence) : existing.confidence,
     candidate.confidence
   );
+  const mergedSourceIdentity = existing.source_identity || candidate.source_identity || undefined;
   // Preserve the more authoritative memory_type when merging.
   const mergedType: Memory['memory_type'] =
     existing.memory_type === 'correction' || candidate.memory_type === 'correction'
       ? 'correction'
+      : existing.memory_type === 'self_fact' || candidate.memory_type === 'self_fact'
+      ? 'self_fact'
       : existing.memory_type === 'user_fact' || candidate.memory_type === 'user_fact'
       ? 'user_fact'
       : existing.memory_type;
@@ -476,11 +482,12 @@ export async function mergeSimilarMemory(
              keywords = $2,
              confidence = $3,
              memory_type = $4,
+             source_identity = $5,
              updated_at = NOW(),
-             embedding = $5::vector(${dims})
-         WHERE id = $6
-         RETURNING id, content, keywords, confidence, source_lang, memory_type, retrieval_count, last_retrieved_at, created_at, updated_at`,
-        [mergedContent, mergedKeywords, mergedConfidence, mergedType, formatVector(embedding), existingId]
+             embedding = $6::vector(${dims})
+         WHERE id = $7
+         RETURNING id, content, keywords, confidence, source_lang, memory_type, source_identity, retrieval_count, last_retrieved_at, created_at, updated_at`,
+        [mergedContent, mergedKeywords, mergedConfidence, mergedType, mergedSourceIdentity ?? null, formatVector(embedding), existingId]
       )
     : await sql.query(
         `UPDATE darkroom_memories
@@ -488,10 +495,11 @@ export async function mergeSimilarMemory(
              keywords = $2,
              confidence = $3,
              memory_type = $4,
+             source_identity = $5,
              updated_at = NOW()
-         WHERE id = $5
-         RETURNING id, content, keywords, confidence, source_lang, memory_type, retrieval_count, last_retrieved_at, created_at, updated_at`,
-        [mergedContent, mergedKeywords, mergedConfidence, mergedType, existingId]
+         WHERE id = $6
+         RETURNING id, content, keywords, confidence, source_lang, memory_type, source_identity, retrieval_count, last_retrieved_at, created_at, updated_at`,
+        [mergedContent, mergedKeywords, mergedConfidence, mergedType, mergedSourceIdentity ?? null, existingId]
       );
 
   return result.rows[0] as Memory;
@@ -512,7 +520,7 @@ export async function retrieveMemories(
   if (queryEmbedding) {
     const dims = getEmbeddingDimensions();
     const vectorResult = await sql.query(
-      `SELECT id, content, keywords, confidence, source_lang, memory_type, created_at,
+      `SELECT id, content, keywords, confidence, source_lang, memory_type, source_identity, created_at,
         (1 - (embedding <=> $1::vector(${dims}))) AS score
       FROM darkroom_memories
       WHERE confidence >= $2
@@ -530,7 +538,7 @@ export async function retrieveMemories(
 
   if (keywords.length > 0) {
     const keywordResult = await sql`
-      SELECT id, content, keywords, confidence, source_lang, memory_type, created_at,
+      SELECT id, content, keywords, confidence, source_lang, memory_type, source_identity, created_at,
         (
           COALESCE(array_length(
             ARRAY(SELECT UNNEST(keywords) INTERSECT SELECT UNNEST(${keywords}::text[])),
@@ -567,6 +575,7 @@ export async function retrieveMemories(
 
   const typePriority: Record<string, number> = {
     correction: 1.5,
+    self_fact: 1.2,
     user_fact: 1.0,
     system_inferred: -0.5,
   };
@@ -584,13 +593,14 @@ export async function retrieveMemories(
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 
-  const result = ranked.map(({ id, content, keywords, confidence, source_lang, memory_type, created_at }) => ({
+  const result = ranked.map(({ id, content, keywords, confidence, source_lang, memory_type, source_identity, created_at }) => ({
     id,
     content,
     keywords,
     confidence,
     source_lang,
     memory_type,
+    source_identity,
     created_at,
   }));
 
@@ -611,7 +621,7 @@ export async function retrieveMemories(
 
   // ── Final fallback: recent high-confidence memories ───────────────────
   const fallback = await sql`
-    SELECT id, content, keywords, confidence, source_lang, memory_type, created_at
+    SELECT id, content, keywords, confidence, source_lang, memory_type, source_identity, created_at
     FROM darkroom_memories
     WHERE confidence >= ${MIN_MEMORY_CONFIDENCE}
     ORDER BY created_at DESC
@@ -633,7 +643,7 @@ export async function findSimilarMemory(
   if (embedding) {
     const dims = getEmbeddingDimensions();
     const result = await sql.query(
-      `SELECT id, content, keywords, confidence, source_lang, created_at,
+      `SELECT id, content, keywords, confidence, source_lang, source_identity, created_at,
         (1 - (embedding <=> $1::vector(${dims}))) AS similarity
       FROM darkroom_memories
       WHERE embedding IS NOT NULL
@@ -654,7 +664,7 @@ export async function findSimilarMemory(
   if (keywords.length === 0) return null;
 
   const result = await sql`
-    SELECT id, content, keywords, confidence, source_lang, created_at,
+    SELECT id, content, keywords, confidence, source_lang, source_identity, created_at,
       (
         COALESCE(
           array_length(
@@ -776,7 +786,7 @@ export async function searchMemoriesByKeyword(
   const sql = getSql();
   const pattern = `%${keyword}%`;
   const result = await sql`
-    SELECT id, content, keywords, confidence, source_lang, created_at
+    SELECT id, content, keywords, confidence, source_lang, memory_type, source_identity, created_at
     FROM darkroom_memories
     WHERE content ILIKE ${pattern}
        OR ${keyword} = ANY(keywords)
@@ -794,7 +804,7 @@ export async function getRecentMemories(limit: number = 20): Promise<Memory[]> {
   await ensureMemoriesTable();
   const sql = getSql();
   const result = await sql`
-    SELECT id, content, keywords, confidence, source_lang, memory_type, retrieval_count, created_at
+    SELECT id, content, keywords, confidence, source_lang, memory_type, source_identity, retrieval_count, created_at
     FROM darkroom_memories
     ORDER BY created_at DESC
     LIMIT ${limit}
@@ -894,6 +904,8 @@ export interface SessionState {
   summary: string;
   primary_entity?: string;
   last_user_intent?: string;
+  user_identity?: string;
+  identity_probe_sent?: boolean;
   updated_at: string;
 }
 
@@ -906,11 +918,15 @@ export async function ensureSessionsTable(): Promise<void> {
       summary        TEXT NOT NULL DEFAULT '',
       primary_entity VARCHAR(64),
       last_user_intent VARCHAR(32),
+      user_identity  VARCHAR(64),
+      identity_probe_sent BOOLEAN NOT NULL DEFAULT FALSE,
       created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
   await sql`ALTER TABLE darkroom_sessions ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`;
+  await sql`ALTER TABLE darkroom_sessions ADD COLUMN IF NOT EXISTS user_identity VARCHAR(64)`;
+  await sql`ALTER TABLE darkroom_sessions ADD COLUMN IF NOT EXISTS identity_probe_sent BOOLEAN NOT NULL DEFAULT FALSE`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_sessions_id ON darkroom_sessions(session_id)`;
 }
 
@@ -920,7 +936,7 @@ export async function getSessionState(
   await ensureSessionsTable();
   const sql = getSql();
   const result = await sql`
-    SELECT session_id, summary, primary_entity, last_user_intent, updated_at
+    SELECT session_id, summary, primary_entity, last_user_intent, user_identity, identity_probe_sent, updated_at
     FROM darkroom_sessions
     WHERE session_id = ${sessionId}
   `;
@@ -934,17 +950,38 @@ export async function upsertSessionState(
   await ensureSessionsTable();
   const sql = getSql();
   const result = await sql`
-    INSERT INTO darkroom_sessions (session_id, summary, primary_entity, last_user_intent)
-    VALUES (${sessionId}, ${state.summary ?? ""}, ${state.primary_entity ?? null}, ${state.last_user_intent ?? null})
+    INSERT INTO darkroom_sessions (session_id, summary, primary_entity, last_user_intent, user_identity, identity_probe_sent)
+    VALUES (${sessionId}, ${state.summary ?? ""}, ${state.primary_entity ?? null}, ${state.last_user_intent ?? null}, ${state.user_identity ?? null}, ${state.identity_probe_sent ?? false})
     ON CONFLICT (session_id)
     DO UPDATE SET
       summary = EXCLUDED.summary,
       primary_entity = EXCLUDED.primary_entity,
       last_user_intent = EXCLUDED.last_user_intent,
+      user_identity = EXCLUDED.user_identity,
+      identity_probe_sent = EXCLUDED.identity_probe_sent,
       updated_at = NOW()
-    RETURNING session_id, summary, primary_entity, last_user_intent, updated_at
+    RETURNING session_id, summary, primary_entity, last_user_intent, user_identity, identity_probe_sent, updated_at
   `;
   return result.rows[0] as SessionState;
+}
+
+export async function getSessionIdentities(
+  sessionIds: string[]
+): Promise<Record<string, string>> {
+  if (sessionIds.length === 0) return {};
+  await ensureSessionsTable();
+  const sql = getSql();
+  const result = await sql`
+    SELECT session_id, user_identity
+    FROM darkroom_sessions
+    WHERE session_id = ANY(${sessionIds}::text[])
+      AND user_identity IS NOT NULL
+  `;
+  const map: Record<string, string> = {};
+  for (const row of result.rows as { session_id: string; user_identity: string }[]) {
+    map[row.session_id] = row.user_identity;
+  }
+  return map;
 }
 
 // ── Dynamic entities (names mentioned by users, beyond KNOWN_ENTITIES) ──

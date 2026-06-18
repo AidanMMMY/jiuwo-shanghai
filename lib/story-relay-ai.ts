@@ -66,7 +66,7 @@ export function parseStoryRelayResponse(raw: string): StoryRelayResponse | null 
   for (const key of keys) {
     if (typeof parsed[key] !== "string") return null;
   }
-  return parsed as StoryRelayResponse;
+  return parsed as unknown as StoryRelayResponse;
 }
 
 export function isContentAllowed(storyZh: string, storyEn: string): { allowed: boolean; reason?: string } {

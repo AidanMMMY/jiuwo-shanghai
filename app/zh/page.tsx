@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import HomePage from '@/app/components/pages/HomePage';
 import DarkroomClassRestorer from '@/components/DarkroomClassRestorer';
-import { getHeroSlides, getJournalEntriesZh, getJournalEntriesZhDarkroom, getSiteDataZh, getUpcomingEventsZh } from '@/lib/data';
+import { getHeroSlides, getJournalEntriesZh, getJournalEntriesZhDarkroom, getSiteDataZh, getUpcomingEventsZh, getFeaturedZh, getCalendarEventsZh } from '@/lib/data';
 import { listEntries, countEntries } from '@/lib/guestbook';
 import type { GuestbookHookLabels } from '@/lib/guestbook';
 
@@ -23,7 +23,7 @@ const guestbookLabels: GuestbookHookLabels = {
 };
 
 export default async function Page() {
-  const [site, slides, entries, entriesDarkroom, guestbookEntries, guestbookTotal, upcomingEvents] = await Promise.all([
+  const [site, slides, entries, entriesDarkroom, guestbookEntries, guestbookTotal, upcomingEvents, featured, calendarEvents] = await Promise.all([
     getSiteDataZh(),
     getHeroSlides(),
     getJournalEntriesZh(),
@@ -31,6 +31,8 @@ export default async function Page() {
     listEntries(10),
     countEntries(),
     getUpcomingEventsZh(),
+    getFeaturedZh().catch(() => undefined),
+    getCalendarEventsZh().catch(() => undefined),
   ]);
 
   const upcomingEvent = upcomingEvents.length > 0 ? upcomingEvents[0] : null;
@@ -63,6 +65,8 @@ export default async function Page() {
         guestbookHref="/zh/guestbook"
         isZh={true}
         specialEventCard={specialEventCard}
+        featured={featured}
+        calendarEvents={calendarEvents}
       />
     </>
   );

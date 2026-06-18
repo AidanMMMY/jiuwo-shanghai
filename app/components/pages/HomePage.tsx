@@ -2,7 +2,9 @@ import HeroCarousel from '@/components/HeroCarousel';
 import JournalStream from '@/components/JournalStream';
 import GuestbookHook from '@/components/GuestbookHook';
 import AfterHoursGateway from '@/components/AfterHoursGateway';
-import type { HeroSlide, JournalEntry, SiteData } from '@/lib/data';
+import DrinkSpotlight from '@/components/DrinkSpotlight';
+import EventCalendar from '@/components/EventCalendar';
+import type { HeroSlide, JournalEntry, SiteData, FeaturedData, CalendarEventsData } from '@/lib/data';
 import type { GuestbookEntry, GuestbookHookLabels } from '@/lib/guestbook';
 
 export default function HomePage({
@@ -17,6 +19,8 @@ export default function HomePage({
   guestbookHref,
   isZh,
   specialEventCard,
+  featured,
+  calendarEvents,
 }: {
   site: SiteData;
   slides: HeroSlide[];
@@ -29,6 +33,8 @@ export default function HomePage({
   guestbookHref: string;
   isZh?: boolean;
   specialEventCard?: { hero: string; hostName?: string; href: string; isUpcoming?: boolean };
+  featured?: FeaturedData;
+  calendarEvents?: CalendarEventsData;
 }) {
   return (
     <>
@@ -41,6 +47,8 @@ export default function HomePage({
       />
       <AfterHoursGateway isZh={isZh} />
       <JournalStream entries={entries} entriesDarkroom={entriesDarkroom} title={journalTitle} />
+      {featured && <DrinkSpotlight data={featured} isZh={isZh} />}
+      {calendarEvents && <EventCalendar data={calendarEvents} isZh={isZh} />}
       <GuestbookHook
         entries={guestbookEntries}
         totalCount={guestbookTotal}

@@ -1,0 +1,20 @@
+{
+  "events": [
+    {
+      "date": "2026-06-28",
+      "titleEn": "Guest Bartender Night",
+      "titleZh": "客座调酒师之夜",
+      "descriptionEn": "A special guest from Hong Kong joins us behind the bar, mixing signature cocktails for one night only.",
+      "descriptionZh": "来自香港的特邀调酒师今晚加入我们吧台，仅此一晚，带来招牌鸡尾酒。",
+      "type": "special"
+    },
+    {
+      "date": "2026-07-05",
+      "titleEn": "New Wine Tasting",
+      "titleZh": "新酒品鉴会",
+      "descriptionEn": "Three new natural wines just arrived. Drop by for a taste and meet the people behind the bottles.",
+      "descriptionZh": "本周新到 3 款自然酒，欢迎来尝，也欢迎认识酒瓶背后的人。",
+      "type": "tasting"
+    }
+  ]
+}

@@ -129,6 +129,39 @@ export type EventItemResolved = EventItem & {
   isUpcoming: boolean;
 };
 
+export type FeaturedDrink = {
+  nameEn: string;
+  nameZh: string;
+  category: string;
+  categoryLabelEn: string;
+  categoryLabelZh: string;
+  descriptionEn: string;
+  descriptionZh: string;
+  storyEn?: string;
+  storyZh?: string;
+  image: string;
+  menuLink?: string;
+};
+
+export type FeaturedData = {
+  titleEn: string;
+  titleZh: string;
+  current: FeaturedDrink;
+};
+
+export type CalendarEventItem = {
+  date: string;
+  titleEn: string;
+  titleZh: string;
+  descriptionEn: string;
+  descriptionZh: string;
+  type?: string;
+};
+
+export type CalendarEventsData = {
+  events: CalendarEventItem[];
+};
+
 function localizeSite(site: SiteData): SiteData {
   const zh: SiteData = {
     ...site,
@@ -380,6 +413,52 @@ export async function getEventBySlugZh(slug: string): Promise<EventItemResolved 
   return events.find((e) => e.slug === slug);
 }
 
+// ── Spotlight / homepage content loaders ──
+
+export async function getFeatured(): Promise<FeaturedData> {
+  return readAndValidateJson('featured.json', featuredDataSchema);
+}
+
+export async function getFeaturedZh(): Promise<FeaturedData> {
+  const data = await getFeatured();
+  return {
+    titleEn: data.titleZh,
+    titleZh: data.titleZh,
+    current: {
+      ...data.current,
+      nameEn: data.current.nameZh,
+      categoryLabelEn: data.current.categoryLabelZh,
+      descriptionEn: data.current.descriptionZh,
+      storyEn: data.current.storyZh,
+    },
+  };
+}
+
+function isCalendarEventUpcoming(eventDate: string): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const d = new Date(eventDate + 'T00:00:00');
+  return d >= today;
+}
+
+export async function getCalendarEvents(): Promise<CalendarEventsData> {
+  const data = await readAndValidateJson('events-calendar.json', calendarEventsDataSchema);
+  return {
+    events: data.events.filter((e) => isCalendarEventUpcoming(e.date)),
+  };
+}
+
+export async function getCalendarEventsZh(): Promise<CalendarEventsData> {
+  const data = await getCalendarEvents();
+  return {
+    events: data.events.map((e) => ({
+      ...e,
+      titleEn: e.titleZh,
+      descriptionEn: e.descriptionZh,
+    })),
+  };
+}
+
 // ── Zod schemas for runtime validation ──
 
 const navItemSchema = z.object({
@@ -509,6 +588,39 @@ const eventItemSchema = z.object({
 
 const eventsDataSchema = z.object({
   events: z.array(eventItemSchema),
+});
+
+const featuredDrinkSchema = z.object({
+  nameEn: z.string(),
+  nameZh: z.string(),
+  category: z.string(),
+  categoryLabelEn: z.string(),
+  categoryLabelZh: z.string(),
+  descriptionEn: z.string(),
+  descriptionZh: z.string(),
+  storyEn: z.string().optional(),
+  storyZh: z.string().optional(),
+  image: z.string(),
+  menuLink: z.string().optional(),
+});
+
+const featuredDataSchema = z.object({
+  titleEn: z.string(),
+  titleZh: z.string(),
+  current: featuredDrinkSchema,
+});
+
+const calendarEventItemSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+  titleEn: z.string(),
+  titleZh: z.string(),
+  descriptionEn: z.string(),
+  descriptionZh: z.string(),
+  type: z.string().optional(),
+});
+
+const calendarEventsDataSchema = z.object({
+  events: z.array(calendarEventItemSchema),
 });
 
 async function readAndValidateJson<T>(filename: string, schema: z.ZodSchema<T>): Promise<T> {

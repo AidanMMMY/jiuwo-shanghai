@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1067" width="800" height="1067">
+  <rect width="800" height="1067" fill="#141208"/>
+  <text x="400" y="520" text-anchor="middle" font-family="Georgia, serif" font-size="48" fill="#c9a227">Negroni</text>
+  <text x="400" y="575" text-anchor="middle" font-family="Georgia, serif" font-size="24" fill="#a0a0a0">placeholder</text>
+  <line x1="350" y1="600" x2="450" y2="600" stroke="#c9a227" stroke-width="1"/>
+</svg>

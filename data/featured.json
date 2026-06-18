@@ -1,0 +1,17 @@
+{
+  "titleEn": "Bartender's Pick",
+  "titleZh": "调酒师之选",
+  "current": {
+    "nameEn": "Negroni",
+    "nameZh": "尼格罗尼",
+    "category": "cocktails",
+    "categoryLabelEn": "Cocktail",
+    "categoryLabelZh": "鸡尾酒",
+    "descriptionEn": "A classic Italian cocktail with equal parts gin, Campari, and sweet vermouth. Bold, bitter, and perfectly balanced over a single large ice cube.",
+    "descriptionZh": "经典意大利鸡尾酒，金酒、金巴利和甜味美思等量调和。浓烈、苦涩、完美平衡，配上一颗大方冰。",
+    "storyEn": "Our bartender's go-to drink when the night needs a little more character.",
+    "storyZh": "当夜晚需要多一点性格时，调酒师的首选。",
+    "image": "/images/featured/negroni.svg",
+    "menuLink": "/menu#cocktails"
+  }
+}

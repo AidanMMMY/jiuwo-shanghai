@@ -10,10 +10,10 @@ interface MatrixRainProps {
 }
 
 export default function MatrixRain({
-  color = '#c9a227',
-  fontSize = 12,
-  speed = 1.2,
-  density = 0.8,
+  color = '#22c55e',
+  fontSize = 14,
+  speed = 1.5,
+  density = 1,
 }: MatrixRainProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | null>(null);
@@ -29,7 +29,7 @@ export default function MatrixRain({
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return;
 
-    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ';
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞﾟ';
 
     const resize = () => {
       const rect = canvas.parentElement?.getBoundingClientRect();
@@ -42,14 +42,14 @@ export default function MatrixRain({
       ctx.scale(dpr, dpr);
 
       const columns = Math.floor(rect.width / fontSize);
-      columnsRef.current = new Array(columns).fill(0).map(() => Math.random() * -100);
+      columnsRef.current = new Array(columns).fill(0).map(() => Math.random() * -150);
     };
 
     resize();
     window.addEventListener('resize', resize);
 
     let lastTime = 0;
-    const frameInterval = 1000 / (15 * speed);
+    const frameInterval = 1000 / (18 * speed);
 
     const draw = (time: number) => {
       animationRef.current = requestAnimationFrame(draw);
@@ -59,7 +59,8 @@ export default function MatrixRain({
       const rect = canvas.parentElement?.getBoundingClientRect();
       if (!rect) return;
 
-      ctx.fillStyle = 'rgba(10, 10, 10, 0.18)';
+      // Longer trails for denser Matrix feel
+      ctx.fillStyle = 'rgba(8, 8, 8, 0.12)';
       ctx.fillRect(0, 0, rect.width, rect.height);
 
       ctx.font = `${fontSize}px var(--font-share-tech-mono), var(--font-space-mono), monospace`;
@@ -72,12 +73,25 @@ export default function MatrixRain({
         const x = i * fontSize;
         const y = columns[i] * fontSize;
 
-        // Fade in/out based on vertical position for depth
-        const alpha = Math.max(0.05, Math.min(0.45, (y / rect.height) * 0.4 + 0.05));
-        ctx.fillStyle = color + Math.round(alpha * 255).toString(16).padStart(2, '0');
+        // Head is bright, tail fades
+        const headAlpha = 0.85;
+        const tailAlpha = Math.max(0.08, Math.min(0.45, (y / rect.height) * 0.4 + 0.1));
+
+        // Draw bright head
+        ctx.fillStyle = color + Math.round(headAlpha * 255).toString(16).padStart(2, '0');
         ctx.fillText(char, x, y);
 
-        if (y > rect.height && Math.random() > 0.975) {
+        // Draw a few trailing characters below head
+        for (let t = 1; t <= 4; t++) {
+          const trailY = y - t * fontSize;
+          if (trailY < 0) break;
+          const trailChar = chars[Math.floor(Math.random() * chars.length)];
+          const trailAlpha = Math.max(0, headAlpha - t * 0.18);
+          ctx.fillStyle = color + Math.round(trailAlpha * 255).toString(16).padStart(2, '0');
+          ctx.fillText(trailChar, x, trailY);
+        }
+
+        if (y > rect.height + 80 && Math.random() > 0.985) {
           columns[i] = 0;
         } else {
           columns[i]++;
@@ -96,7 +110,7 @@ export default function MatrixRain({
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full opacity-[0.22] group-hover:opacity-[0.45] transition-opacity duration-700 pointer-events-none"
+      className="absolute inset-0 w-full h-full opacity-40 group-hover:opacity-70 transition-opacity duration-500 pointer-events-none"
       aria-hidden="true"
     />
   );

@@ -1,8 +1,18 @@
 import { deepseekClient, DEFAULT_MODEL } from "./deepseek/client";
 import { safeJsonParse as _safeJsonParse } from "./darkroom-chat";
-import seeds from "../data/story-relay-seeds.json";
 
 export { _safeJsonParse as safeJsonParse };
+
+const FALLBACK_NAMES = [
+  "Aidan",
+  "老王",
+  "小夏",
+  "Leo",
+  "阿杰",
+  "Mina",
+  "东东",
+  "Evan",
+];
 
 export interface StoryRelayResponse {
   storyZh: string;
@@ -127,7 +137,7 @@ function isLikelyZhName(name: string): boolean {
   return true;
 }
 
-export function extractNamesFromMemories(memories: MemoryLike[], fallbackNames: string[] = seeds.fallbackNames): string[] {
+export function extractNamesFromMemories(memories: MemoryLike[], fallbackNames: string[] = FALLBACK_NAMES): string[] {
   const candidates = new Map<string, number>();
 
   for (const m of memories) {

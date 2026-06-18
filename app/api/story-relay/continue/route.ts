@@ -8,6 +8,7 @@ import {
   buildContributors,
   getMemoriesForNameExtraction,
   getSegments,
+  type StorySegment,
 } from '@/lib/story-relay';
 import { generateStoryContinuation, extractNamesFromMemories } from '@/lib/story-relay-ai';
 
@@ -31,6 +32,31 @@ async function getOrCreateSessionId(): Promise<string> {
     maxAge: 60 * 60 * 24 * 365,
   });
   return sessionId;
+}
+
+function isUniqueViolation(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  const message = err.message.toLowerCase();
+  return message.includes('unique constraint') || message.includes('23505');
+}
+
+async function insertSegmentWithRetry(segment: Omit<StorySegment, 'id' | 'createdAt'>): Promise<StorySegment> {
+  try {
+    return await insertSegment(segment);
+  } catch (err) {
+    if (isUniqueViolation(err)) {
+      segment.sequence = await getNextSequence();
+      try {
+        return await insertSegment(segment);
+      } catch (err2) {
+        if (isUniqueViolation(err2)) {
+          throw new Error('CONCURRENCY_CONFLICT');
+        }
+        throw err2;
+      }
+    }
+    throw err;
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -65,12 +91,12 @@ export async function POST(req: NextRequest) {
     );
 
     const nextSequence = await getNextSequence();
-    const newSegment = await insertSegment({
+    const newSegment = await insertSegmentWithRetry({
       sequence: nextSequence,
       authorName,
       userPrompt: userInput,
-      aiQuestionZh: latest.aiQuestionZh || null,
-      aiQuestionEn: latest.aiQuestionEn || null,
+      aiQuestionZh: generated.questionZh || null,
+      aiQuestionEn: generated.questionEn || null,
       storyZh: generated.storyZh,
       storyEn: generated.storyEn,
       suggestion1Zh: generated.suggestion1Zh,
@@ -103,6 +129,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'AI 觉得这一段写得太直白了，啾喔的故事更喜欢用氛围和隐喻来说。换一种含蓄点的写法？' },
         { status: 400 }
+      );
+    }
+    if (message === 'CONCURRENCY_CONFLICT') {
+      return NextResponse.json(
+        { error: '有人刚刚接龙了，请刷新后再试' },
+        { status: 409 }
       );
     }
     return NextResponse.json({ error: 'AI 走神了，请重试' }, { status: 500 });

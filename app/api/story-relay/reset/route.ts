@@ -7,10 +7,13 @@ const resetSchema = z.object({
   token: z.string(),
 });
 
-const STORY_RELAY_ADMIN_TOKEN = process.env.STORY_RELAY_ADMIN_TOKEN || 'admin-token';
+const STORY_RELAY_ADMIN_TOKEN = process.env.STORY_RELAY_ADMIN_TOKEN;
 
 export async function POST(req: NextRequest) {
   try {
+    if (!STORY_RELAY_ADMIN_TOKEN) {
+      return NextResponse.json({ error: 'Admin token not configured' }, { status: 500 });
+    }
     const body = await req.json();
     const parsed = resetSchema.safeParse(body);
     if (!parsed.success) {

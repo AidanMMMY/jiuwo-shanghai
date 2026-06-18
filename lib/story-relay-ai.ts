@@ -64,7 +64,8 @@ export function parseStoryRelayResponse(raw: string): StoryRelayResponse | null 
     "suggestion1Zh", "suggestion1En", "suggestion2Zh", "suggestion2En",
   ];
   for (const key of keys) {
-    if (typeof parsed[key] !== "string") return null;
+    const value = parsed[key];
+    if (typeof value !== "string" || value.trim().length === 0) return null;
   }
   return parsed as unknown as StoryRelayResponse;
 }
@@ -189,6 +190,12 @@ export async function generateStoryOpening(names: string[]): Promise<StoryRelayR
   const raw = completion.choices[0]?.message?.content || "";
   const parsed = parseStoryRelayResponse(raw);
   if (!parsed) throw new Error("Failed to parse opening response: " + raw);
+
+  const check = isContentAllowed(parsed.storyZh, parsed.storyEn);
+  if (!check.allowed) {
+    throw new Error("CONTENT_BLOCKED:" + check.reason);
+  }
+
   return parsed;
 }
 

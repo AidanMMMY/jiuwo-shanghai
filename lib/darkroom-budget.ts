@@ -41,6 +41,7 @@ export interface ChatPromptComponents {
   sessionBlock: string;
   memoryBlock: string;
   identityReminder: string;
+  identityProbeInstruction?: string;
   topicReminder: string;
   topicLockInstruction: string;
   searchBlock: string;
@@ -114,6 +115,7 @@ export function buildChatPromptWithinBudget(
     sessionBlock,
     memoryBlock,
     identityReminder,
+    identityProbeInstruction,
     topicReminder,
     topicLockInstruction,
     searchBlock,
@@ -124,6 +126,7 @@ export function buildChatPromptWithinBudget(
   const dropped: string[] = [];
   let currentMemoryBlock = memoryBlock;
   let currentIdentityReminder = identityReminder;
+  const currentIdentityProbe = identityProbeInstruction ?? '';
   let currentHistory = history;
   let currentSearchBlock = searchBlock;
   let currentKnowledgeBase = knowledgeBase;
@@ -136,6 +139,7 @@ export function buildChatPromptWithinBudget(
       sessionBlock,
       currentMemoryBlock,
       currentIdentityReminder,
+      currentIdentityProbe,
       topicReminder,
       topicLockInstruction,
       currentSearchBlock,
@@ -198,6 +202,7 @@ export function buildChatPromptWithinBudget(
     countTokens(sessionBlock) +
     countTokens(currentMemoryBlock) +
     countTokens(currentIdentityReminder) +
+    countTokens(currentIdentityProbe) +
     countTokens(topicReminder) +
     countTokens(topicLockInstruction) +
     countTokens(userMessage) +

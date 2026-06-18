@@ -146,7 +146,7 @@ export default function HeroCarousel({
       {specialEvent && (
         <div
           className="z-10 flex justify-center pointer-events-none"
-          style={{ position: 'absolute', left: 0, right: 0, bottom: 'clamp(8rem, 16vh, 14rem)' }}
+          style={{ position: 'absolute', left: 0, right: 0, bottom: 'clamp(9rem, 18vh, 15rem)' }}
         >
           <Link
             href={specialEvent.href}
@@ -156,25 +156,23 @@ export default function HeroCarousel({
               animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 1200ms forwards',
             }}
           >
-            {/* Aurora background — only for upcoming events */}
-            {specialEvent.isUpcoming !== false && (
+            {/* Aurora / retro glow background */}
+            {specialEvent.isUpcoming !== false ? (
               <div className="event-aurora-bg" aria-hidden="true" />
+            ) : (
+              <div className="event-retro-glow" aria-hidden="true" />
             )}
             {/* Content */}
             <div className={`relative rounded-xl px-6 py-3.5 inline-flex flex-col items-center gap-2 transition-all duration-300 ${
               specialEvent.isUpcoming === false
-                ? 'bg-black/40 backdrop-blur-md border border-white/10 shadow-none group-hover:bg-black/50 group-hover:border-white/20'
+                ? 'hero-event-retro-breathe bg-black/30 backdrop-blur-md border border-[#c9a227]/20 shadow-none group-hover:bg-black/40 group-hover:border-[#c9a227]/40'
                 : 'border border-[#c9a227]/20 shadow-[0_0_18px_rgba(201,162,39,0.08),inset_0_0_16px_rgba(201,162,39,0.05)] group-hover:border-[#c9a227]/50 group-hover:shadow-[0_0_24px_rgba(201,162,39,0.12),inset_0_0_20px_rgba(201,162,39,0.06)]'
             }`}
             style={specialEvent.isUpcoming !== false ? {
               backgroundColor: 'rgba(15, 15, 15, 0.30)',
             } : undefined}>
               {/* Line 1: hero text */}
-              <span className={`text-base md:text-lg tracking-wider ${
-                specialEvent.isUpcoming === false
-                  ? 'text-white/90 event-text-breathe'
-                  : 'event-text-shimmer'
-              }`}>
+              <span className="text-base md:text-lg tracking-wider event-text-shimmer">
                 {specialEvent.hero}
               </span>
               {/* Line 2: host name with dual lines + arrow */}
@@ -182,11 +180,7 @@ export default function HeroCarousel({
                 <span className="inline-flex items-center gap-3">
                   <span className="event-line group-hover:w-12 md:group-hover:w-20 transition-all duration-300" />
                   <span
-                    className={`text-xl md:text-2xl tracking-[0.22em] group-hover:drop-shadow-[0_0_10px_rgba(201,162,39,0.45)] transition-all duration-300 ${
-                      specialEvent.isUpcoming === false
-                        ? 'text-white/80'
-                        : 'event-name-shimmer'
-                    }`}
+                    className={`text-xl md:text-2xl tracking-[0.22em] group-hover:drop-shadow-[0_0_10px_rgba(201,162,39,0.45)] transition-all duration-300 event-name-shimmer`}
                     style={{ fontFamily: 'var(--font-bodoni), Georgia, serif' }}
                   >
                     {specialEvent.hostName}

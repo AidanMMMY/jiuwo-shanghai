@@ -575,6 +575,51 @@ a:not([class*="no-link-style"]) {
     .event-line, .event-line-r { width: 3.5rem; }
 }
 
+/* ── Hero retrospective event: breathing glow + scale ── */
+.event-retro-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+.event-retro-glow::before {
+    content: '';
+    position: absolute;
+    inset: -70%;
+    background:
+        radial-gradient(ellipse 55% 45% at 50% 50%, rgba(201,162,39,0.28) 0%, transparent 55%),
+        radial-gradient(ellipse 42% 32% at 28% 38%, rgba(220,160,60,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 42% 32% at 74% 42%, rgba(200,130,80,0.15) 0%, transparent 55%);
+    filter: blur(18px);
+    animation: retroGlowDrift 8s ease-in-out infinite, retroGlowBreathe 4s ease-in-out infinite;
+    will-change: opacity, transform;
+}
+@keyframes retroGlowDrift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(2%, -2%) scale(1.06); }
+}
+@keyframes retroGlowBreathe {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.95; }
+}
+
+.hero-event-retro-breathe {
+    animation: heroEventBreathe 3.5s ease-in-out infinite;
+    will-change: transform, box-shadow;
+}
+@keyframes heroEventBreathe {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(201,162,39,0.08), inset 0 0 12px rgba(201,162,39,0.04);
+    }
+    50% {
+        transform: scale(1.035);
+        box-shadow: 0 0 38px rgba(201,162,39,0.20), inset 0 0 20px rgba(201,162,39,0.08);
+    }
+}
+
 .hero-title-breathe {
     animation: titleBreathe 5s ease-in-out infinite;
     animation-delay: 1.2s;
@@ -621,6 +666,8 @@ a:not([class*="no-link-style"]) {
     .event-text-shimmer { animation: none !important; background-image: none !important; color: #c9a227 !important; -webkit-text-fill-color: #c9a227 !important; }
     .event-name-shimmer { animation: none !important; background-image: none !important; color: #c9a227 !important; -webkit-text-fill-color: #c9a227 !important; }
     .event-aurora-bg::before { animation: none !important; transform: none !important; }
+    .event-retro-glow::before { animation: none !important; transform: none !important; opacity: 0.6 !important; }
+    .hero-event-retro-breathe { animation: none !important; transform: none !important; box-shadow: 0 0 12px rgba(201,162,39,0.10) !important; }
 }
 
 /* ── After Hours Darkroom Mode ── */

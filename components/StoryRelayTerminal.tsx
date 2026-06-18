@@ -87,7 +87,12 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh 
 
       <div className="mb-8">
         {segments.map((segment, idx) => (
-          <StoryRelaySegment key={segment.sequence} segment={segment} isLatest={idx === segments.length - 1} />
+          <StoryRelaySegment
+            key={segment.sequence}
+            segment={segment}
+            isLatest={idx === segments.length - 1}
+            isZh={isZh}
+          />
         ))}
       </div>
 
@@ -102,6 +107,7 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh 
         suggestions={latestSuggestions}
         onSubmit={handleSubmit}
         disabled={loading}
+        isZh={isZh}
       />
 
       <div className="lg:hidden">

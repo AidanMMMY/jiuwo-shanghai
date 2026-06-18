@@ -7,19 +7,30 @@ interface Segment {
   aiQuestionEn?: string | null;
 }
 
-export function StoryRelaySegment({ segment, isLatest }: { segment: Segment; isLatest?: boolean }) {
+export function StoryRelaySegment({
+  segment,
+  isLatest,
+  isZh,
+}: {
+  segment: Segment;
+  isLatest?: boolean;
+  isZh?: boolean;
+}) {
+  const story = isZh ? segment.storyZh : segment.storyEn;
+  const question = isZh ? segment.aiQuestionZh : segment.aiQuestionEn;
+  const questionLabel = isZh ? 'AI 提问' : 'AI asks';
+  const segmentLabel = isZh
+    ? `${segment.authorName} ${segment.sequence === 0 ? '起头' : '续写'} · 第 ${segment.sequence} 段`
+    : `${segment.authorName} ${segment.sequence === 0 ? 'opened' : 'continued'} · Segment ${segment.sequence}`;
+
   return (
     <div className="mb-8 border-l-2 border-[#2a2a2a] pl-5 last:mb-0">
-      <div className="mb-2 text-xs uppercase tracking-widest text-[#888]">
-        {segment.authorName} {segment.sequence === 0 ? '起头' : '续写'} · 第 {segment.sequence} 段
-      </div>
-      <p className="mb-4 text-lg leading-relaxed text-[#f5f5f0]">{segment.storyZh}</p>
-      <p className="mb-4 text-base leading-relaxed text-[#888]">{segment.storyEn}</p>
-      {isLatest && segment.aiQuestionZh && (
+      <div className="mb-2 text-xs uppercase tracking-widest text-[#888]">{segmentLabel}</div>
+      <p className="mb-4 text-lg leading-relaxed text-[#f5f5f0]">{story}</p>
+      {isLatest && question && (
         <div className="rounded border border-[#2a2a2a] bg-[#151515] p-4">
-          <div className="mb-2 text-xs uppercase tracking-widest text-[#888]">AI 提问</div>
-          <p className="mb-2 text-lg text-[#f5f5f0]">{segment.aiQuestionZh}</p>
-          <p className="text-base text-[#888]">{segment.aiQuestionEn}</p>
+          <div className="mb-2 text-xs uppercase tracking-widest text-[#888]">{questionLabel}</div>
+          <p className="text-lg text-[#f5f5f0]">{question}</p>
         </div>
       )}
     </div>

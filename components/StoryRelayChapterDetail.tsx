@@ -67,15 +67,17 @@ export function StoryRelayChapterDetail({ chapter, isZh }: StoryRelayChapterDeta
       </div>
 
       <div className="mb-10 space-y-8">
-        {chapter.segments.map((segment) => (
-          <div key={segment.sequence} className="border-l-2 border-[#2a2a2a] pl-5">
-            <div className="mb-2 text-xs uppercase tracking-widest text-[#888]">
-              {segment.authorName} {segment.sequence === 0 ? t('opened', '起头') : t('continued', '续写')} · {t('Segment', '段')} {segment.sequence}
+        {chapter.segments.map((segment) => {
+          const story = isZh ? segment.storyZh : segment.storyEn;
+          return (
+            <div key={segment.sequence} className="border-l-2 border-[#2a2a2a] pl-5">
+              <div className="mb-2 text-xs uppercase tracking-widest text-[#888]">
+                {segment.authorName} {segment.sequence === 0 ? t('opened', '起头') : t('continued', '续写')} · {t('Segment', '段')} {segment.sequence}
+              </div>
+              <p className="text-lg leading-relaxed text-[#f5f5f0]">{story}</p>
             </div>
-            <p className="mb-4 text-lg leading-relaxed text-[#f5f5f0]">{segment.storyZh}</p>
-            <p className="text-base leading-relaxed text-[#888]">{segment.storyEn}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="flex flex-col gap-4 border-t border-[#2a2a2a] pt-6 sm:flex-row sm:items-center sm:justify-between">

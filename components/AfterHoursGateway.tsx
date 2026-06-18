@@ -10,10 +10,10 @@ export default function AfterHoursGateway({ isZh = false }: AfterHoursGatewayPro
 
   const content = {
     ai: {
-      eyebrow: isZh ? '未注册对话扇区' : 'UNREGISTERED SECTOR',
-      headline: isZh ? '这里有人记得你' : 'Someone here remembers you',
-      subline: isZh ? '今晚看见了什么，说给我听听。' : 'Tell me what you saw tonight.',
-      cta: isZh ? '聊两句 →' : 'Step in →',
+      eyebrow: isZh ? '深夜之后' : 'AFTER HOURS',
+      headline: isZh ? '我们得聊聊' : 'We need to talk',
+      subline: isZh ? '关于你今晚看到的事。' : 'About what you saw tonight.',
+      cta: isZh ? '进来 →' : 'Step in →',
     },
     story: {
       eyebrow: isZh ? '公开接龙' : 'OPEN RELAY',

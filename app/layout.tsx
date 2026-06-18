@@ -139,7 +139,7 @@ export default function RootLayout({
         />
         {children}
         <Analytics />
-        <SpeedInsights />
+        <SpeedInsights sampleRate={0.1} />
       </body>
     </html>
   );

@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -130,12 +129,10 @@ export default function Navbar({
             }}
           >
             <div className="relative w-8 h-8">
-              <Image
+              <img
                 src="/images/logo.png"
                 alt="logo"
-                fill
-                sizes="32px"
-                className={`object-contain transition-transform duration-100 ${logoPulse ? 'scale-110' : 'scale-100'}`}
+                className={`w-full h-full object-contain transition-transform duration-100 ${logoPulse ? 'scale-110' : 'scale-100'}`}
               />
             </div>
             <span className="hidden sm:inline">{name}</span>

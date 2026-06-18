@@ -1,5 +1,7 @@
+// @vitest-environment node
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { neon } from '@neondatabase/serverless';
+import { safeJsonParse, extractNamesFromMemories, OPENING_PROMPT } from './story-relay-ai';
 
 vi.mock('@neondatabase/serverless', () => ({
   neon: vi.fn(),
@@ -35,5 +37,31 @@ describe('story-relay data layer', () => {
       { name: '小明', sessionId: 's1', segments: [1, 3] },
       { name: '小红', sessionId: 's2', segments: [2] },
     ]);
+  });
+});
+
+describe('story-relay-ai', () => {
+  it('safeJsonParse extracts JSON from markdown fences', () => {
+    const raw = '```json\n{"storyZh":"中文","storyEn":"en"}\n```';
+    const parsed = safeJsonParse(raw);
+    expect(parsed).toEqual({ storyZh: '中文', storyEn: 'en' });
+  });
+
+  it('extractNamesFromMemories returns unique names', () => {
+    const memories = [
+      { content: '小明和老王常来喝酒', confidence: 0.8 },
+      { content: 'Leo 喜欢坐吧台', confidence: 0.9 },
+      { content: '今天天气不错', confidence: 0.7 },
+    ];
+    const names = extractNamesFromMemories(memories, ['保底']);
+    expect(names).toContain('小明');
+    expect(names).toContain('老王');
+    expect(names).toContain('Leo');
+    expect(names).toContain('保底');
+  });
+
+  it('OPENING_PROMPT contains required keys', () => {
+    expect(OPENING_PROMPT).toContain('storyZh');
+    expect(OPENING_PROMPT).toContain('suggestion1Zh');
   });
 });

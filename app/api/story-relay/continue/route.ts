@@ -87,7 +87,8 @@ export async function POST(req: NextRequest) {
       names,
       segments.length,
       latestQuestion,
-      userInput
+      userInput,
+      authorName
     );
 
     const nextSequence = await getNextSequence();

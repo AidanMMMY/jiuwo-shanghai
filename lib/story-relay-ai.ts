@@ -29,6 +29,7 @@ export const CONTINUE_PROMPT = `你是 JIUWO（啾喔）酒吧的驻场 storytel
 请用以下人名作为故事角色：{names}
 当前故事已有 {n} 段。上一段结尾的问题是：{latestQuestion}
 用户的回答是：{userInput}
+用户的名字是：{userName}。如果合适，可以以微妙、自然的方式将这个名字融入剧情（例如作为一个新推门而入的客人、一个被提及的旧友、或一个暗示性的旁白视角），但不要强行插入，也不要破坏叙事节奏。
 要求：
 1. 续写 300-500 字，保持酒吧场景和社群感。
 2. 结尾提出一个开放性问题，推动剧情。
@@ -47,13 +48,15 @@ export function buildContinuePrompt(
   names: string[],
   n: number,
   latestQuestion: string,
-  userInput: string
+  userInput: string,
+  userName: string
 ): string {
   return CONTINUE_PROMPT
     .replace("{names}", names.join("、"))
     .replace("{n}", String(n))
     .replace("{latestQuestion}", latestQuestion)
-    .replace("{userInput}", userInput);
+    .replace("{userInput}", userInput)
+    .replace("{userName}", userName);
 }
 
 export function parseStoryRelayResponse(raw: string): StoryRelayResponse | null {
@@ -203,9 +206,10 @@ export async function generateStoryContinuation(
   names: string[],
   segmentCount: number,
   latestQuestion: string,
-  userInput: string
+  userInput: string,
+  userName: string
 ): Promise<StoryRelayResponse> {
-  const prompt = buildContinuePrompt(names, segmentCount, latestQuestion, userInput);
+  const prompt = buildContinuePrompt(names, segmentCount, latestQuestion, userInput, userName);
   const completion = await deepseekClient.chat.completions.create({
     model: DEFAULT_MODEL,
     messages: [

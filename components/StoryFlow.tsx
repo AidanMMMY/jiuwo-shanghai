@@ -210,7 +210,7 @@ export default function StoryFlow({
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full opacity-60 group-hover:opacity-90 transition-opacity duration-700 pointer-events-none"
+      className="absolute inset-0 w-full h-full opacity-75 group-hover:opacity-95 transition-opacity duration-700 pointer-events-none"
       aria-hidden="true"
     />
   );

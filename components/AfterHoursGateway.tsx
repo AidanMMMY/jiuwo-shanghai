@@ -72,7 +72,7 @@ export default function AfterHoursGateway({ isZh = false }: AfterHoursGatewayPro
                     {content.ai.eyebrow}
                   </span>
                   <svg
-                    className="w-5 h-5 text-[#c9a227]/40 transition-all duration-300 group-hover:text-[#c9a227] group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    className="w-5 h-5 text-[#c9a227]/25 transition-all duration-300 group-hover:text-[#c9a227]/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -110,13 +110,22 @@ export default function AfterHoursGateway({ isZh = false }: AfterHoursGatewayPro
             {/* Story relay entry */}
             <Link
               href={storyHref}
-              className="group relative overflow-hidden rounded-xl border border-[#c9a227]/30 bg-gradient-to-br from-[#141208] via-[#0e0e0a] to-[#0a0a0a] p-5 md:p-6 transition-all duration-500 hover:border-[#c9a227] hover:shadow-[0_0_50px_rgba(201,162,39,0.15)] hover:-translate-y-0.5"
+              className="group relative overflow-hidden rounded-xl border border-[#c9a227]/15 bg-gradient-to-br from-[#1a160c] via-[#0f0d08] to-[#080808] p-5 md:p-6 transition-all duration-500 hover:border-[#c9a227]/40 hover:shadow-[0_0_50px_rgba(201,162,39,0.12)] hover:-translate-y-0.5"
             >
               {/* Abstract living forms background */}
               <StoryFlow />
 
+              {/* Warm ambient base glow */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background:
+                    'radial-gradient(ellipse at 50% 60%, rgba(201,162,39,0.10) 0%, rgba(201,162,39,0.04) 35%, transparent 70%)',
+                }}
+              />
+
               {/* Top sheen line */}
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c9a227]/60 to-transparent" />
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c9a227]/30 to-transparent" />
 
               {/* Hover sweep */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#c9a227]/8 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
@@ -125,13 +134,13 @@ export default function AfterHoursGateway({ isZh = false }: AfterHoursGatewayPro
                 <div className="flex items-start justify-between mb-3">
                   <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.2em] text-[#c9a227]/80"
                   >
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-3 h-3 text-[#c9a227]/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                     </svg>
                     {content.story.eyebrow}
                   </span>
                   <svg
-                    className="w-5 h-5 text-[#c9a227]/40 transition-all duration-300 group-hover:text-[#c9a227] group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    className="w-5 h-5 text-[#c9a227]/25 transition-all duration-300 group-hover:text-[#c9a227]/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

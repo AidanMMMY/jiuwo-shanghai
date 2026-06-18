@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import DarkroomTerminal from './DarkroomTerminal';
 import MatrixRain from './MatrixRain';
+import StoryFlow from './StoryFlow';
 
 interface AfterHoursGatewayProps {
   isZh?: boolean;
@@ -111,6 +112,9 @@ export default function AfterHoursGateway({ isZh = false }: AfterHoursGatewayPro
               href={storyHref}
               className="group relative overflow-hidden rounded-xl border border-[#c9a227]/30 bg-gradient-to-br from-[#141208] via-[#0e0e0a] to-[#0a0a0a] p-5 md:p-6 transition-all duration-500 hover:border-[#c9a227] hover:shadow-[0_0_50px_rgba(201,162,39,0.15)] hover:-translate-y-0.5"
             >
+              {/* Abstract living forms background */}
+              <StoryFlow />
+
               {/* Top sheen line */}
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c9a227]/60 to-transparent" />
 

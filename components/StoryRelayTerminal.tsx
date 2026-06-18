@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import Link from 'next/link';
 import { StoryRelaySegment } from './StoryRelaySegment';
 import { StoryRelayContributors } from './StoryRelayContributors';
 import { StoryRelayInput } from './StoryRelayInput';
@@ -74,7 +75,15 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh 
 
   return (
     <div className="mx-auto max-w-[680px]">
-      <h1 className="mb-8 text-2xl font-semibold tracking-wide text-[#c9a227]">啾喔故事接力</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-wide text-[#c9a227]">啾喔故事接力</h1>
+        <Link
+          href={isZh ? '/zh/story-relay/chapters' : '/story-relay/chapters'}
+          className="text-sm text-[#888] hover:text-[#c9a227] transition-colors"
+        >
+          {isZh ? '往期篇章' : 'Past chapters'}
+        </Link>
+      </div>
 
       <div className="mb-8">
         {segments.map((segment, idx) => (

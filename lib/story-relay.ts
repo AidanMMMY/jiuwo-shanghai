@@ -32,7 +32,7 @@ export interface Contributor {
 }
 
 function getSql() {
-  const url = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+  const url = process.env.POSTGRES_URL || process.env.DATABASE_URL || process.env.GUESTBOOK_POSTGRES_URL;
   if (!url) throw new Error('POSTGRES_URL or DATABASE_URL is not set');
   return neon(url, { fullResults: true });
 }
@@ -139,6 +139,21 @@ export async function getMemoriesForNameExtraction(limit: number = 100): Promise
     content: r.content,
     confidence: typeof r.confidence === 'string' ? parseFloat(r.confidence) : r.confidence,
   }));
+}
+
+export async function getChapterByNumber(chapterNumber: number): Promise<Chapter | null> {
+  const sql = getSql();
+  const result = await sql`SELECT * FROM story_relay_chapters WHERE chapter_number = ${chapterNumber}`;
+  const rows = result.rows as Record<string, unknown>[];
+  if (rows.length === 0) return null;
+  const row = rows[0];
+  return {
+    id: row.id as number,
+    chapterNumber: row.chapter_number as number,
+    segmentsJson: row.segments_json as unknown,
+    createdAt: row.created_at as string,
+    archivedAt: row.archived_at as string,
+  };
 }
 
 export async function getChapters(): Promise<Chapter[]> {

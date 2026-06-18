@@ -11,6 +11,7 @@ import {
   type StorySegment,
 } from '@/lib/story-relay';
 import { generateStoryContinuation, extractNamesFromMemories } from '@/lib/story-relay-ai';
+import { rateLimitByIp } from '@/lib/rate-limit';
 
 const continueSchema = z.object({
   authorName: z.string().min(1).max(64),
@@ -58,6 +59,15 @@ async function insertSegmentWithRetry(segment: Omit<StorySegment, 'id' | 'create
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'anonymous';
+    const limit = rateLimitByIp(`story-relay-continue:${ip}`, 10, 60 * 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: '本小时接力次数已达上限，请稍后再试。' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((limit.resetAt - Date.now()) / 1000)) } }
+      );
+    }
+
     const body = await req.json();
     const parsed = continueSchema.safeParse(body);
     if (!parsed.success) {

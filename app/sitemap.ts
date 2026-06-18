@@ -3,7 +3,7 @@ import { getJournalEntries, getGalleryAlbums, getEvents } from '@/lib/data';
 
 const BASE_URL = 'https://jiuwoshanghai.net';
 
-const STATIC_ROUTES = ['', '/about', '/menu', '/gallery', '/guestbook', '/special'];
+const STATIC_ROUTES = ['', '/about', '/menu', '/gallery', '/guestbook', '/special', '/story-relay', '/story-relay/chapters'];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [entries, albums, events] = await Promise.all([

@@ -4,14 +4,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { HeroSlide } from '@/lib/data';
 
-function AnimatedTitle({ text }: { text: string }) {
+function AnimatedTitle({ text, isZh }: { text: string; isZh?: boolean }) {
   return (
     <h1
-      className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl tracking-[0.14em] hero-title-shine"
+      className={`tracking-[0.14em] hero-title-shine ${
+        isZh
+          ? 'text-7xl sm:text-8xl md:text-9xl lg:text-[10rem]'
+          : 'text-6xl sm:text-7xl md:text-8xl lg:text-9xl'
+      }`}
       style={{
         fontFamily: 'var(--font-bodoni), Georgia, serif',
         fontWeight: 700,
-        textShadow: '0 2px 20px rgba(0,0,0,0.5), 0 0 60px rgba(0,0,0,0.3)',
+        textShadow: '0 2px 20px rgba(0,0,0,0.5), 0 0 60px rgba(0,0,0,0.3), 0 0 120px rgba(201,162,39,0.12)',
       }}
     >
       {text.split('\n').map((line, i, arr) => (
@@ -71,7 +75,7 @@ export default function HeroCarousel({
         style={{ paddingBottom: 'clamp(10rem, 22vh, 16rem)' }}
       >
         <div className="hero-title-breathe hero-normal-title">
-          <AnimatedTitle text={title} />
+          <AnimatedTitle text={title} isZh={isZh} />
         </div>
         <div className="hero-title-breathe hero-darkroom-title hidden">
           <h1
@@ -107,9 +111,12 @@ export default function HeroCarousel({
           </h1>
         </div>
         <p
-          className="hero-normal-tagline mt-5 text-xl md:text-2xl lg:text-3xl tracking-wide text-[#f5f5f0]"
+          className={`hero-normal-tagline mt-5 tracking-wide text-[#f5f5f0] ${
+            isZh ? 'text-2xl md:text-3xl lg:text-4xl' : 'text-xl md:text-2xl lg:text-3xl'
+          }`}
           style={{
             opacity: 0,
+            textShadow: isZh ? '0 0 30px rgba(201,162,39,0.25), 0 0 60px rgba(201,162,39,0.1)' : '0 0 20px rgba(0,0,0,0.5)',
             animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 800ms forwards, taglineShimmer 4s ease-in-out 1600ms infinite',
             WebkitMaskImage:
               'linear-gradient(110deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 35%, rgba(0,0,0,1) 50%, rgba(0,0,0,0.3) 65%, rgba(0,0,0,0.3) 100%)',

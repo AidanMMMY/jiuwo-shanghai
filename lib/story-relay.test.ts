@@ -25,13 +25,13 @@ describe('story-relay data layer', () => {
 
   it('buildContributors groups segments by author', async () => {
     const { buildContributors } = await import('./story-relay');
-    const segments = [
+    const segments: { sequence: number; authorName: string; sessionId: string }[] = [
       { sequence: 0, authorName: 'AI', sessionId: 'ai' },
       { sequence: 1, authorName: '小明', sessionId: 's1' },
       { sequence: 2, authorName: '小红', sessionId: 's2' },
       { sequence: 3, authorName: '小明', sessionId: 's1' },
     ];
-    const contributors = buildContributors(segments as any);
+    const contributors = buildContributors(segments as unknown as import('./story-relay').StorySegment[]);
     expect(contributors).toEqual([
       { name: 'AI', sessionId: 'ai', segments: [0] },
       { name: '小明', sessionId: 's1', segments: [1, 3] },

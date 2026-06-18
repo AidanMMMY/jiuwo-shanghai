@@ -235,9 +235,32 @@ Extract memories as a JSON array only:`;
 
           const scrubbedContent = scrubPii(trimmedContent);
 
+          // Corrections should be stored as clean, separate memories rather than
+          // merged into the false memory they contradict. Merging would dilute the
+          // correction or resurrect the false claim.
+          if (memoryType === "correction") {
+            const memory = await storeMemory({
+              content: scrubbedContent,
+              keywords,
+              confidence,
+              source_lang: sourceLang,
+              memory_type: memoryType,
+            });
+            batchStored.push(memory);
+            continue;
+          }
+
           // Deduplication check across all languages
           const similar = await findSimilarMemory(scrubbedContent, undefined, 0.65);
           if (similar) {
+            // If the existing memory is a correction, do not overwrite it with a
+            // potentially contradictory user_fact. Keep the correction authoritative.
+            if (similar.memory_type === "correction") {
+              console.log(
+                `[darkroom:extract] skipping store: similar_to_correction=${similar.id} content="${scrubbedContent.slice(0, 40)}..."`
+              );
+              continue;
+            }
             console.log(
               `[darkroom:extract] merging memory similar_to=${similar.id} content="${scrubbedContent.slice(0, 40)}..."`
             );

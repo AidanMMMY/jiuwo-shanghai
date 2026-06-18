@@ -838,6 +838,24 @@ export async function getRecentConversationsBySession(
   return (result.rows as Conversation[]).reverse();
 }
 
+export async function searchConversationsByKeyword(
+  keyword: string,
+  limit: number = 50
+): Promise<Conversation[]> {
+  await ensureConversationsTable();
+  const sql = getSql();
+  const pattern = `%${keyword}%`;
+  const result = await sql`
+    SELECT id, user_message, assistant_response, source_lang, processed_for_memory, session_id, created_at
+    FROM darkroom_conversations
+    WHERE user_message ILIKE ${pattern}
+       OR assistant_response ILIKE ${pattern}
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+  return result.rows as Conversation[];
+}
+
 export async function getRecentConversations(limit: number = 20): Promise<Conversation[]> {
   await ensureConversationsTable();
   const sql = getSql();
@@ -848,6 +866,25 @@ export async function getRecentConversations(limit: number = 20): Promise<Conver
     LIMIT ${limit}
   `;
   return result.rows as Conversation[];
+}
+
+export async function deleteMemoryById(id: number): Promise<boolean> {
+  await ensureMemoriesTable();
+  const sql = getSql();
+  const result = await sql`
+    DELETE FROM darkroom_memories WHERE id = ${id}
+  `;
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function deleteMemoriesByIds(ids: number[]): Promise<number> {
+  if (ids.length === 0) return 0;
+  await ensureMemoriesTable();
+  const sql = getSql();
+  const result = await sql`
+    DELETE FROM darkroom_memories WHERE id = ANY(${ids}::int[])
+  `;
+  return result.rowCount ?? 0;
 }
 
 // ── Session-level rolling summary ──────────────────────────────────────

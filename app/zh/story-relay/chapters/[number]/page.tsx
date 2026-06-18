@@ -4,6 +4,7 @@ import { getChapterByNumber } from '@/lib/story-relay';
 import { StoryRelayChapterDetail } from '@/components/StoryRelayChapterDetail';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 interface Props {
   params: Promise<{ number: string }>;

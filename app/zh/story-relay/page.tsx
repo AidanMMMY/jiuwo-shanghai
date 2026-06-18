@@ -4,6 +4,7 @@ import { StoryRelayTerminal } from '@/components/StoryRelayTerminal';
 import { StoryRelayContributors } from '@/components/StoryRelayContributors';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export const metadata: Metadata = {
   title: '故事接力',

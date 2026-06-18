@@ -3,6 +3,7 @@ import { getChapters } from '@/lib/story-relay';
 import { StoryRelayChapterList } from '@/components/StoryRelayChapterList';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export const metadata: Metadata = {
   title: '往期篇章',

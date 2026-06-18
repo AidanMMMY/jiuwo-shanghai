@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>啾喔故事接力：分步实施方案选项</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f5f5f0;
+      --gold: #c9a227;
+      --muted: #888;
+      --code-bg: #151515;
+      --border: #2a2a2a;
+      --cyan: #4a7a8a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 64px 24px;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin: 0 0 16px;
+      letter-spacing: -0.02em;
+    }
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin: 48px 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--fg);
+      margin: 32px 0 12px;
+    }
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--cyan);
+      margin: 24px 0 10px;
+    }
+    p { margin: 0 0 16px; }
+    ul, ol { margin: 0 0 20px; padding-left: 22px; }
+    li { margin-bottom: 8px; }
+    a {
+      color: var(--gold);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.3);
+    }
+    a:hover { border-bottom-color: var(--gold); }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      background: var(--code-bg);
+      color: var(--gold);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+      overflow-x: auto;
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+    blockquote {
+      margin: 24px 0;
+      padding: 16px 20px;
+      border-left: 3px solid var(--gold);
+      background: var(--code-bg);
+      color: var(--muted);
+    }
+    blockquote p { margin: 0 0 8px; }
+    blockquote p:last-child { margin-bottom: 0; }
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 40px 0;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.9em;
+      margin-bottom: 32px;
+    }
+    .recommended {
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 24px 0;
+      background: rgba(201, 162, 39, 0.05);
+    }
+    .recommended h2 {
+      margin-top: 0;
+      border-bottom: 0;
+      color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>啾喔故事接力：分步实施方案选项</h1>
+    <div class="meta">
+      <p>记录日期：2026-06-18</p>
+      <p>状态：方案讨论稿，待确认后进入详细设计</p>
+      <p>用途：保存当前思路与迭代方向，供后续查询</p>
+    </div>
+
+    <h2>已确认的核心需求</h2>
+    <ul>
+      <li><strong>故事模式：</strong>公共接龙。全站只有一篇正在进行的啾喔故事，任何人都能贡献一段。</li>
+      <li><strong>测试期入口：</strong>秘密路径 + Token，例如 <code>/story-relay?token=jiuwo</code>，暂时不放入主导航。</li>
+      <li><strong>AI 提问形式：</strong>混合模式。AI 先问开放性问题，同时在问题下方给出 2 个建议方向。</li>
+      <li><strong>Milestone 展示：</strong>桌面端用右侧 contributor 时间线；移动端用行内标签 + 可折叠底部 contributor 墙。</li>
+      <li><strong>语言策略：</strong>双语界面，AI 同时生成中英文两个版本的故事段落。</li>
+      <li><strong>持久化：</strong>复用现有 Neon Postgres，新增故事接力相关表。</li>
+      <li><strong>重置与归档：</strong>需要管理员一键「开启新章」，旧故事归档为历史篇章。</li>
+      <li><strong>人名来源：</strong>动态从 <code>darkroom_memories</code> 抽取 + <code>data/story-relay-seeds.json</code> 手动保底名单。</li>
+      <li><strong>用户姓名：</strong>服务端 session 记录，首次提交后提示「姓名后续很难更改」。</li>
+    </ul>
+
+    <hr>
+
+    <h2>方案 A：最小可用版（推荐）</h2>
+    <h3>核心结构</h3>
+    <p>只维护「一篇正在进行的公共故事」+「历史归档篇章」。</p>
+    <p>当前故事的所有段落存在同一张表 <code>story_relay_segments</code>。当管理员触发重置时，系统把当前故事整体复制到 <code>story_relay_chapters</code> 表，然后清空 <code>story_relay_segments</code>，并重新调用 AI 生成开头。</p>
+
+    <h4>优点</h4>
+    <ul>
+      <li>数据表最少，实现最快。</li>
+      <li>适合「先测试、暂时不上入口」的节奏。</li>
+      <li>已经保留了归档能力，未来扩展成章节浏览不困难。</li>
+    </ul>
+
+    <h4>缺点</h4>
+    <ul>
+      <li>当前故事只有一篇，无法同时存在多个并行的实验故事。</li>
+      <li>归档是「复制后清空」，历史章节和当前章节的数据结构略有不同。</li>
+    </ul>
+
+    <h4>关键文件（预估）</h4>
+    <ul>
+      <li><code>app/story-relay/page.tsx</code>：故事接力页（测试期带 token 校验）</li>
+      <li><code>app/api/story-relay/chat/route.ts</code>：AI 续写接口</li>
+      <li><code>app/api/story-relay/segments/route.ts</code>：提交新段落接口</li>
+      <li><code>app/api/story-relay/reset/route.ts</code>：管理员重置/归档接口</li>
+      <li><code>lib/story-relay.ts</code>：数据库操作</li>
+      <li><code>data/story-relay-seeds.json</code>：保底人名与故事种子</li>
+    </ul>
+
+    <hr>
+
+    <h2>方案 B：一开始就按「章节」设计</h2>
+    <h3>核心结构</h3>
+    <p>故事天然分章节，每一章独立成篇。</p>
+    <ul>
+      <li><code>story_relay_chapters</code>：所有章节（包括当前进行中的）</li>
+      <li><code>story_relay_segments</code>：所有段落，通过 <code>chapter_id</code> 关联</li>
+      <li>当前进行中的章节 ID 存在 <code>site.json</code> 或单独配置里</li>
+      <li>用户永远在最新章节上接龙，但前端提供往期章节切换</li>
+    </ul>
+
+    <h4>优点</h4>
+    <ul>
+      <li>归档概念更自然，「第 1 章 / 第 2 章」的展示很清晰。</li>
+      <li>表结构统一，当前章节和历史章节没有差异。</li>
+      <li>未来可以支持多线故事或限定主题章节。</li>
+    </ul>
+
+    <h4>缺点</h4>
+    <ul>
+      <li>表结构和前端路由都要多一层。</li>
+      <li>测试周期更长，不适合「先快速验证玩法」的阶段。</li>
+    </ul>
+
+    <h4>适用时机</h4>
+    <p>如果方案 A 验证成功、决定长期保留并扩大玩法，再迁移或重构到方案 B。</p>
+
+    <hr>
+
+    <h2>方案 C：Admin 预审版</h2>
+    <h3>核心结构</h3>
+    <p>用户提交后不立刻写入故事，而是进入 <code>story_relay_pending_segments</code> 待审队列。管理员在后台审阅后点击「采纳」，段落才成为正式故事的一部分。</p>
+
+    <h4>优点</h4>
+    <ul>
+      <li>完全可控，不怕有人把故事带偏或提交不合适内容。</li>
+      <li>适合对品牌调性要求极高、希望人工把关的场景。</li>
+    </ul>
+
+    <h4>缺点</h4>
+    <ul>
+      <li>体验不实时，用户提交后看不到立刻生效，失去接龙爽感。</li>
+      <li>管理员需要经常上线审核，增加运营成本。</li>
+      <li>与「AI 自动续写」的循环节奏冲突较大。</li>
+    </ul>
+
+    <h4>适用时机</h4>
+    <p>仅在内容风险不可控、或上线后 abuse 严重时才考虑引入。</p>
+
+    <hr>
+
+    <div class="recommended">
+      <h2>推荐结论</h2>
+      <p><strong>优先实施方案 A。</strong></p>
+      <p>理由：</p>
+      <ol>
+        <li>符合「先测试、不公开入口」的当前目标。</li>
+        <li>数据模型足够简单，一周内可以跑通完整循环。</li>
+        <li>归档表的存在已经为未来迁移到方案 B 留下了空间。</li>
+        <li>方案 C 的预审机制会显著降低产品趣味，暂不作为首版。</li>
+      </ol>
+    </div>
+
+    <h2>后续迭代方向</h2>
+    <ol>
+      <li><strong>章节浏览：</strong>在方案 A 稳定后，把归档页做成可浏览的「往期篇章」。</li>
+      <li><strong>预审兜底：</strong>如果公共接龙出现 abuse，再引入方案 C 的待审队列作为开关。</li>
+      <li><strong>章节主题：</strong>迁移到方案 B 的数据模型后，可以推出「限定主题周」，每章一个主题。</li>
+      <li><strong>人名池优化：</strong>根据 darkroom 记忆的增长，调整人名抽取逻辑和手动保底名单。</li>
+      <li><strong>视觉入口：</strong>测试完成后，从秘密路径改为固定路由，并考虑放入「关于」或「活动」页面的低调入口。</li>
+    </ol>
+
+    <h2>相关记忆与文档</h2>
+    <ul>
+      <li><a href="2026-06-14-darkroom-memory-flow-design.html">Darkroom 记忆流设计</a>：是人名动态抽取的基础。</li>
+      <li><a href="../plans/2026-06-14-darkroom-portal-plan.html">Darkroom Portal 计划</a>：可参考其页面隔离思路。</li>
+      <li>项目记忆：Dark Side 工作约定 —— 所有改动基于 Darkroom 彩蛋模式，影响正常模式显示时需提示冲突。</li>
+    </ul>
+  </main>
+</body>
+</html>

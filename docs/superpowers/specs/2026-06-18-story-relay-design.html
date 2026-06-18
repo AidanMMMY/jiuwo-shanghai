@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>啾喔故事接力：详细设计</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f5f5f0;
+      --gold: #c9a227;
+      --muted: #888;
+      --code-bg: #151515;
+      --border: #2a2a2a;
+      --cyan: #4a7a8a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 64px 24px;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin: 0 0 16px;
+      letter-spacing: -0.02em;
+    }
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin: 48px 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--fg);
+      margin: 32px 0 12px;
+    }
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--cyan);
+      margin: 24px 0 10px;
+    }
+    p { margin: 0 0 16px; }
+    ul, ol { margin: 0 0 20px; padding-left: 22px; }
+    li { margin-bottom: 8px; }
+    a {
+      color: var(--gold);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.3);
+    }
+    a:hover { border-bottom-color: var(--gold); }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      background: var(--code-bg);
+      color: var(--gold);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+      overflow-x: auto;
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.9em;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--code-bg);
+      color: var(--gold);
+      font-weight: 600;
+    }
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 40px 0;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.9em;
+      margin-bottom: 32px;
+    }
+    .meta p { margin: 0 0 6px; }
+    .checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+    .checklist li {
+      padding-left: 28px;
+      position: relative;
+    }
+    .checklist li::before {
+      content: "☐";
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>啾喔故事接力：详细设计</h1>
+
+    <div class="meta">
+      <p>记录日期：2026-06-18</p>
+      <p>状态：设计定稿，待进入实现计划</p>
+      <p>关联文档：<a href="2026-06-18-story-relay-approaches.html">方案选项</a></p>
+    </div>
+
+    <h2>目标</h2>
+    <p>为 JIUWO 啾喔网站增加一个「故事接力」彩蛋功能。AI 以酒吧为背景、以网站和 Darkroom 记忆中出现的人名为角色写一个 300-500 字的开头，然后向用户提问；用户输入自己的名字并回答后，AI 继续续写 300-500 字并再次提问，循环往复。所有贡献者以 milestone 形式被记录在故事中。</p>
+    <p>测试期间不放置公开入口，仅通过秘密路径访问。</p>
+
+    <hr>
+
+    <h2>已确认的核心决策</h2>
+    <ul>
+      <li><strong>故事模式：</strong>公共接龙，全站仅一篇正在进行的公共故事。</li>
+      <li><strong>测试期入口：</strong>秘密路径 + Token，例如 <code>/story-relay?token=jiuwo</code>。</li>
+      <li><strong>AI 提问形式：</strong>混合模式。AI 先问开放性问题，同时给出 2 个建议方向。</li>
+      <li><strong>Milestone 展示：</strong>桌面端右侧 contributor 时间线；移动端行内标签 + 可折叠底部 contributor 墙。</li>
+      <li><strong>语言策略：</strong>双语界面，AI 同时生成中英文两个版本的故事段落。</li>
+      <li><strong>持久化：</strong>复用现有 Neon Postgres，新增两张表。</li>
+      <li><strong>重置与归档：</strong>管理员一键「开启新章」，旧故事以 JSON 快照形式归档。</li>
+      <li><strong>人名来源：</strong>动态从 <code>darkroom_memories</code> 抽取 + <code>data/story-relay-seeds.json</code> 手动保底名单。</li>
+      <li><strong>用户姓名：</strong>服务端 session 记录，首次提交后提示「姓名后续很难更改」。</li>
+    </ul>
+
+    <hr>
+
+    <h2>数据模型</h2>
+    <h3><code>story_relay_segments</code></h3>
+    <p>每段故事一个记录。</p>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td><code>id</code></td><td>serial PK</td><td>自增</td></tr>
+      <tr><td><code>sequence</code></td><td>integer</td><td>段落顺序，从 0 开始</td></tr>
+      <tr><td><code>author_name</code></td><td>varchar(64)</td><td>贡献者姓名，AI 起头时为 "AI"</td></tr>
+      <tr><td><code>user_prompt</code></td><td>text</td><td>用户对 AI 问题的回答 / 其他要求</td></tr>
+      <tr><td><code>ai_question_zh / ai_question_en</code></td><td>text</td><td>AI 上一段结尾提出的中英文问题</td></tr>
+      <tr><td><code>story_zh / story_en</code></td><td>text</td><td>本段中英文故事正文</td></tr>
+      <tr><td><code>suggestion_1_zh / suggestion_1_en</code></td><td>text</td><td>第一个建议方向</td></tr>
+      <tr><td><code>suggestion_2_zh / suggestion_2_en</code></td><td>text</td><td>第二个建议方向</td></tr>
+      <tr><td><code>session_id</code></td><td>varchar(255)</td><td>匿名会话 ID（来自 HTTP cookie），用于关联同一位贡献者</td></tr>
+      <tr><td><code>created_at</code></td><td>timestamp</td><td>创建时间</td></tr>
+    </table>
+
+    <h3><code>story_relay_chapters</code></h3>
+    <p>重置时把当前故事归档到这里。</p>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td><code>id</code></td><td>serial PK</td><td>自增</td></tr>
+      <tr><td><code>chapter_number</code></td><td>integer</td><td>第几章</td></tr>
+      <tr><td><code>segments_json</code></td><td>jsonb</td><td>整章所有 segment 的完整快照</td></tr>
+      <tr><td><code>created_at / archived_at</code></td><td>timestamp</td><td>本章起始时间与归档时间</td></tr>
+    </table>
+
+    <h3>数据流说明</h3>
+    <ul>
+      <li>当前故事永远从 <code>story_relay_segments</code> 按 <code>sequence</code> 顺序读取。</li>
+      <li>重置时：将 <code>story_relay_segments</code> 整体打包为 <code>segments_json</code>，写入 <code>story_relay_chapters</code>，然后清空 <code>story_relay_segments</code>，并插入 AI 生成的全新开头作为 <code>sequence = 0</code>。</li>
+      <li><code>session_id</code> 来自 HTTP cookie，让同一浏览器连续贡献时显示同一人名，也便于未来做简单频率限制。用户首次打开页面时若不存在，后端生成一个并写入 cookie。</li>
+    </ul>
+
+    <hr>
+
+    <h2>接口设计</h2>
+    <h3><code>GET /api/story-relay/state</code></h3>
+    <p>页面加载时调用，返回当前故事完整状态。</p>
+    <pre>{
+  "segments": [
+    {
+      "sequence": 0,
+      "authorName": "AI",
+      "storyZh": "...",
+      "storyEn": "...",
+      "aiQuestionZh": "...",
+      "aiQuestionEn": "...",
+      "suggestion1Zh": "...",
+      "suggestion1En": "...",
+      "suggestion2Zh": "...",
+      "suggestion2En": "..."
+    }
+  ],
+  "latestQuestion": { "zh": "...", "en": "..." },
+  "latestSuggestions": [
+    { "zh": "...", "en": "..." },
+    { "zh": "...", "en": "..." }
+  ],
+  "contributors": [
+    { "name": "小明", "segments": [1, 3] }
+  ]
+}</pre>
+
+    <h3><code>POST /api/story-relay/continue</code></h3>
+    <p>用户提交回答后调用。</p>
+    <pre>{
+  "authorName": "小明",
+  "userInput": "我觉得主角应该留下来",
+  "token": "jiuwo"
+}</pre>
+    <p>处理流程：</p>
+    <ol>
+      <li>校验 <code>token</code>（测试期）。</li>
+      <li>从 HTTP cookie 读取 <code>story_relay_session_id</code>，不存在则生成并设置 cookie。</li>
+      <li>取 <code>story_relay_segments</code> 最新段落作为上下文。</li>
+      <li>调用 DeepSeek API，要求 AI 根据 <code>userInput</code> 续写 300-500 字，并生成新的中英文问题 + 两个建议方向。</li>
+      <li>将新段落写入 <code>story_relay_segments</code>，<code>session_id</code> 使用 cookie 中的值。</li>
+      <li>返回新段落给前端展示。</li>
+    </ol>
+
+    <h3><code>POST /api/story-relay/reset</code></h3>
+    <p>管理员重置故事。</p>
+    <pre>{
+  "token": "admin-token"
+}</pre>
+    <p>处理流程：</p>
+    <ol>
+      <li>校验 admin token。</li>
+      <li>将当前 <code>story_relay_segments</code> 打包写入 <code>story_relay_chapters</code>。</li>
+      <li>清空 <code>story_relay_segments</code>。</li>
+      <li>调用 AI 生成新的开头（300-500 字，中英文），并附带初始问题 + 两个建议方向。</li>
+      <li>写入 <code>story_relay_segments</code> 作为 <code>sequence = 0</code>。</li>
+    </ol>
+
+    <h3><code>GET /api/story-relay/chapters</code></h3>
+    <p>获取历史归档篇章列表（首版可只做基础返回，供未来章节浏览页使用）。</p>
+
+    <hr>
+
+    <h2>前端页面结构</h2>
+    <h3>URL</h3>
+    <ul>
+      <li>测试期：<code>/story-relay?token=jiuwo</code></li>
+      <li>正式上线后可改为 <code>/story-relay</code></li>
+    </ul>
+
+    <h3>页面布局</h3>
+    <p><strong>桌面端</strong></p>
+    <ul>
+      <li>主栏：故事流 + 当前 AI 提问卡片 + 输入区</li>
+      <li>右侧边栏：contributor 时间线</li>
+    </ul>
+    <p><strong>移动端</strong></p>
+    <ul>
+      <li>主栏：故事流，每段末尾保留「由谁续写」小标签</li>
+      <li>底部：可折叠 contributor 墙</li>
+    </ul>
+
+    <h3>输入区</h3>
+    <ul>
+      <li>姓名输入框（首次提交后提示很难更改）</li>
+      <li>回答/要求输入框</li>
+      <li>「续写故事」按钮</li>
+      <li>显示 AI 当前问题 + 两个建议方向作为可点击快捷输入</li>
+    </ul>
+
+    <h3>视觉风格</h3>
+    <ul>
+      <li>沿用 JIUWO 品牌色：#c9a227（金）、#0a0a0a（纯黑）、#f5f5f0（米白）。</li>
+      <li>故事正文以阅读舒适为优先：
+        <ul>
+          <li>桌面端字体 18px / 移动端 16px，行高 1.8。</li>
+          <li>段落最大宽度约 680px，避免过长的行距造成阅读疲劳。</li>
+          <li>段间距 24-32px，让故事有呼吸感。</li>
+          <li>每段故事使用轻微的首行缩进或段落间距，营造小说阅读节奏。</li>
+        </ul>
+      </li>
+      <li>故事段落之间用细色线或小型装饰符号分隔，暗示时间/叙事的推进。</li>
+      <li>contributor 时间线 / 标签使用较小字号、低对比色，避免抢夺故事主体注意力。</li>
+      <li>输入区与故事流之间用明显但不刺眼的边界分开，让用户知道「下面轮到你」。</li>
+      <li>整体保持现有暗色极简风格，不引入额外 glow 效果；但可在故事卡片边缘使用极细的 #2a2a2a 边框营造层次感。</li>
+      <li>长文字区域避免纯黑背景与纯白文字的强对比，正文使用 #f5f5f0，辅助信息使用 #888，降低长时间阅读的眼压。</li>
+    </ul>
+
+    <hr>
+
+    <h2>AI Prompt 策略</h2>
+    <p>复用现有 DeepSeek 调用方式，使用独立的 system prompt。</p>
+
+    <h3>续写请求 prompt</h3>
+    <pre>你是 JIUWO（啾喔）酒吧的驻场 storyteller。酒吧位于上海巨鹿路 397 号，氛围像"朋友的客厅"。
+请用以下人名作为故事角色：{names_from_darkroom_memories + manual_seeds}
+当前故事已有 {n} 段。上一段结尾的问题是：{latest_question}
+用户的回答是：{user_input}
+要求：
+1. 续写 300-500 字，保持酒吧场景和社群感。
+2. 结尾提出一个开放性问题，推动剧情。
+3. 同时给出两个简短的剧情建议方向（A / B）。
+4. 输出 JSON：{ storyZh, storyEn, questionZh, questionEn, suggestion1Zh, suggestion1En, suggestion2Zh, suggestion2En }
+5. 中英文都要自然、有文学感，不要直译。
+6. 故事可以暧昧、性感、有情欲张力，允许对身体和性器官使用暗示性、文学化的描写，但避免直白、机械、色情片的写法。保持文学感和留白。</pre>
+
+    <h3>起头 prompt</h3>
+    <pre>你是 JIUWO（啾喔）酒吧的驻场 storyteller。请用以下人名：{names}，围绕酒吧写一段 300-500 字的开头。
+要求：
+1. 场景在上海巨鹿路 397 号的 JIUWO 酒吧。
+2. 风格温暖、神秘、有社群感。
+3. 结尾提出一个开放性问题。
+4. 给出两个建议方向。
+5. 输出 JSON：{ storyZh, storyEn, questionZh, questionEn, suggestion1Zh, suggestion1En, suggestion2Zh, suggestion2En }
+6. 中英文都要自然、有文学感，不要直译。
+7. 故事可以暧昧、性感、有情欲张力，允许对身体和性器官使用暗示性、文学化的描写，但避免直白、机械、色情片的写法。保持文学感和留白。</pre>
+
+    <h3>人名来源</h3>
+    <ul>
+      <li>每次调用前，后端从 <code>darkroom_memories</code> 中读取所有置信度 ≥ 0.6 的记忆。</li>
+      <li>使用简单启发式规则提取候选：连续 2-4 个汉字的词组、英文首字母大写的单词。</li>
+      <li>再用一个小型 LLM 调用（或正则 + 常见姓氏表）过滤出真实人名，按出现频次或置信度排序，取前 3-5 个。</li>
+      <li>如果动态抽取不足 3 个，从 <code>data/story-relay-seeds.json</code> 补足。</li>
+      <li>保底名单由运营者维护。</li>
+    </ul>
+
+    <h3>内容尺度</h3>
+    <p><strong>允许</strong></p>
+    <ul>
+      <li>暧昧、情欲张力、调情与亲密场景</li>
+      <li>对性器官或身体的暗示性、隐喻性描写</li>
+      <li>queer 情感与身体亲密</li>
+      <li>醉酒、脆弱、靠近、耳语等场景</li>
+    </ul>
+    <p><strong>不允许</strong></p>
+    <ul>
+      <li>直白、暴露、机械式的性行为细节描写</li>
+      <li>强迫、非自愿、权力不对等的性暗示</li>
+      <li>未成年相关内容</li>
+      <li>仇恨、歧视、侮辱性内容</li>
+    </ul>
+    <p><strong>越界处理</strong>：AI 返回拒绝信息，不写入数据库。前端显示：「AI 觉得这一段写得太直白了，啾喔的故事更喜欢用氛围和隐喻来说。换一种含蓄点的写法？」</p>
+
+    <hr>
+
+    <h2>异常处理</h2>
+    <table>
+      <tr><th>场景</th><th>处理</th></tr>
+      <tr><td>AI 返回非 JSON</td><td>后端尝试提取，失败则返回「AI 走神了，请重试」</td></tr>
+      <tr><td>数据库写入失败</td><td>不返回成功状态，前端提示重试</td></tr>
+      <tr><td>并发冲突</td><td>后端重试一次，仍冲突则提示「有人刚刚接龙了，请刷新后再试」</td></tr>
+      <tr><td>token 错误</td><td>返回 403，页面显示「测试期入口暂未开放」</td></tr>
+      <tr><td>用户没填名字</td><td>前端校验，提交前拦截</td></tr>
+      <tr><td>用户输入为空</td><td>前端校验</td></tr>
+    </table>
+
+    <hr>
+
+    <h2>测试计划</h2>
+    <h3>本地测试</h3>
+    <ul>
+      <li>用 mock token 验证页面能正常加载。</li>
+      <li>模拟多次续写，检查 <code>sequence</code> 递增、contributor 列表更新。</li>
+      <li>测试重置接口，确认旧故事进入 <code>story_relay_chapters</code>。</li>
+    </ul>
+
+    <h3>AI 输出测试</h3>
+    <ul>
+      <li>跑 10 轮起头，检查中英文是否都自然、是否围绕酒吧、是否含有人名。</li>
+      <li>跑 10 轮续写，检查是否根据 user input 推进、问题是否相关、建议方向是否合理。</li>
+      <li>测试越界输入，确认拒绝分支生效。</li>
+    </ul>
+
+    <h3>并发测试</h3>
+    <ul>
+      <li>用两个浏览器同时提交，验证是否只有一个成功，另一个收到友好提示。</li>
+    </ul>
+
+    <h3>移动端测试</h3>
+    <ul>
+      <li>检查 contributor 墙折叠/展开、输入框在键盘弹出时的表现。</li>
+    </ul>
+
+    <hr>
+
+    <h2>上线前检查清单</h2>
+    <ul class="checklist">
+      <li>环境变量配置 <code>STORY_RELAY_TOKEN</code> 和 <code>STORY_RELAY_ADMIN_TOKEN</code></li>
+      <li>DeepSeek API 配额足够（每段生成中英文，token 消耗约为单语 2 倍）</li>
+      <li>Neon 表结构 migration 已执行</li>
+      <li>测试期入口没有出现在任何导航或 sitemap 中</li>
+      <li>内容尺度护栏已写入 prompt 并测试</li>
+    </ul>
+
+    <hr>
+
+    <h2>关键文件（预估）</h2>
+    <ul>
+      <li><code>app/story-relay/page.tsx</code>：故事接力页（测试期带 token 校验）</li>
+      <li><code>components/StoryRelayTerminal.tsx</code>：故事流、输入区、contributor 墙</li>
+      <li><code>app/api/story-relay/state/route.ts</code>：获取当前故事状态</li>
+      <li><code>app/api/story-relay/continue/route.ts</code>：用户续写接口</li>
+      <li><code>app/api/story-relay/reset/route.ts</code>：管理员重置/归档接口</li>
+      <li><code>app/api/story-relay/chapters/route.ts</code>：历史归档列表</li>
+      <li><code>lib/story-relay.ts</code>：数据库操作</li>
+      <li><code>lib/story-relay-ai.ts</code>：AI prompt 构建与解析</li>
+      <li><code>data/story-relay-seeds.json</code>：保底人名与故事种子</li>
+      <li><code>migrations/20260618_add_story_relay.sql</code>：数据库迁移</li>
+    </ul>
+
+    <hr>
+
+    <h2>后续迭代方向</h2>
+    <ol>
+      <li><strong>章节浏览：</strong>把归档页做成可浏览的「往期篇章」。</li>
+      <li><strong>预审兜底：</strong>如果公共接龙出现 abuse，引入待审队列作为开关。</li>
+      <li><strong>章节主题：</strong>支持限定主题周，每章一个主题。</li>
+      <li><strong>人名池优化：</strong>根据 Darkroom 记忆增长，调整抽取逻辑和保底名单。</li>
+      <li><strong>视觉入口：</strong>测试完成后改为固定路由，并考虑低调放入「关于」或「活动」页面。</li>
+    </ol>
+
+    <hr>
+
+    <h2>相关文档</h2>
+    <ul>
+      <li><a href="2026-06-18-story-relay-approaches.html">方案选项</a></li>
+      <li><a href="2026-06-14-darkroom-memory-flow-design.html">Darkroom 记忆流设计</a></li>
+      <li><a href="../plans/2026-06-14-darkroom-portal-plan.html">Darkroom Portal 计划</a></li>
+    </ul>
+  </main>
+</body>
+</html>

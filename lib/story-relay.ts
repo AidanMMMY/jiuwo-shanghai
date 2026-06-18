@@ -37,6 +37,12 @@ function getSql() {
   return neon(url, { fullResults: true });
 }
 
+function toIsoString(value: unknown): string {
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === 'string') return value;
+  return String(value);
+}
+
 function rowToSegment(row: Record<string, unknown>): StorySegment {
   return {
     id: row.id as number,
@@ -52,7 +58,7 @@ function rowToSegment(row: Record<string, unknown>): StorySegment {
     suggestion2Zh: row.suggestion_2_zh as string | null,
     suggestion2En: row.suggestion_2_en as string | null,
     sessionId: row.session_id as string | null,
-    createdAt: row.created_at as string,
+    createdAt: toIsoString(row.created_at),
   };
 }
 
@@ -151,8 +157,8 @@ export async function getChapterByNumber(chapterNumber: number): Promise<Chapter
     id: row.id as number,
     chapterNumber: row.chapter_number as number,
     segmentsJson: row.segments_json as unknown,
-    createdAt: row.created_at as string,
-    archivedAt: row.archived_at as string,
+    createdAt: toIsoString(row.created_at),
+    archivedAt: toIsoString(row.archived_at),
   };
 }
 
@@ -163,7 +169,7 @@ export async function getChapters(): Promise<Chapter[]> {
     id: row.id as number,
     chapterNumber: row.chapter_number as number,
     segmentsJson: row.segments_json as unknown,
-    createdAt: row.created_at as string,
-    archivedAt: row.archived_at as string,
+    createdAt: toIsoString(row.created_at),
+    archivedAt: toIsoString(row.archived_at),
   }));
 }

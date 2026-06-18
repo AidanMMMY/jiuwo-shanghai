@@ -714,6 +714,12 @@ export async function backfillMissingEmbeddings(batchSize: number = 50): Promise
 export interface MemoryStats {
   total: number;
   byLang: { source_lang: string; count: number }[];
+  byType: { memory_type: string; count: number }[];
+  retrieval: {
+    totalRetrievals: number;
+    neverRetrieved: number;
+    avgRetrievalCount: number;
+  };
 }
 
 export interface ConversationStats {
@@ -732,9 +738,33 @@ export async function getMemoryStats(): Promise<MemoryStats> {
     GROUP BY source_lang
     ORDER BY source_lang
   `;
+  const byTypeResult = await sql`
+    SELECT memory_type, COUNT(*) as count
+    FROM darkroom_memories
+    GROUP BY memory_type
+    ORDER BY count DESC
+  `;
+  const retrievalResult = await sql`
+    SELECT
+      COALESCE(SUM(retrieval_count), 0) as total_retrievals,
+      COUNT(*) FILTER (WHERE retrieval_count = 0 OR last_retrieved_at IS NULL) as never_retrieved,
+      ROUND(AVG(retrieval_count)::numeric, 2) as avg_retrieval_count
+    FROM darkroom_memories
+  `;
+  const retrievalRow = retrievalResult.rows[0] as {
+    total_retrievals: number;
+    never_retrieved: number;
+    avg_retrieval_count: number;
+  };
   return {
     total: Number((totalResult.rows[0] as { count: number }).count),
     byLang: byLangResult.rows as { source_lang: string; count: number }[],
+    byType: byTypeResult.rows as { memory_type: string; count: number }[],
+    retrieval: {
+      totalRetrievals: Number(retrievalRow.total_retrievals),
+      neverRetrieved: Number(retrievalRow.never_retrieved),
+      avgRetrievalCount: Number(retrievalRow.avg_retrieval_count),
+    },
   };
 }
 
@@ -764,7 +794,7 @@ export async function getRecentMemories(limit: number = 20): Promise<Memory[]> {
   await ensureMemoriesTable();
   const sql = getSql();
   const result = await sql`
-    SELECT id, content, keywords, confidence, source_lang, created_at
+    SELECT id, content, keywords, confidence, source_lang, memory_type, retrieval_count, created_at
     FROM darkroom_memories
     ORDER BY created_at DESC
     LIMIT ${limit}

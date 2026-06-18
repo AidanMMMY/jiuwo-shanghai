@@ -1,5 +1,14 @@
 [
   {
+    "slug": "still-going",
+    "title": "Residual Signal",
+    "titleZh": "余波信号",
+    "date": "2026-06-13",
+    "cover": "/images/journal/20260613-02.webp",
+    "content": "The feast is over. The transmission persists. Three faces locked in the frame; the rest hum just beyond the static. The birthday continues until the last signal fades.",
+    "contentZh": "宴席已尽。信号未绝。画面里三张脸，杂音后还有更多人。庆生并未结束，直到最后一丝余波也熄灭。"
+  },
+  {
     "slug": "full-house",
     "title": "Density Anomaly",
     "titleZh": "密度异常",

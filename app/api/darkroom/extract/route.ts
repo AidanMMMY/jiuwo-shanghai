@@ -16,6 +16,7 @@ import {
   recordMentionedNames,
   mergeSimilarMemory,
   scrubPii,
+  normalizeKeywords,
 } from "@/lib/darkroom-memory";
 
 const BATCH_SIZE = 5;
@@ -115,8 +116,44 @@ export async function POST(req: NextRequest) {
         .join("\n\n");
 
       const batchPrompt = isZh
-        ? `基于以下 ${BATCH_SIZE} 段连续对话，提取 0–4 个值得持久化的记忆。提取两类：\n\n1. **用户事实**：从用户说的话里提取的具体事实（偏好、提到的人、纠正、计划、情绪）。只提取用户明确说过的内容。\n2. **对话综合**：结合用户和系统的多轮内容，提取跨轮的主题、关系动态、用户纠正后的共识、情绪走向。可以从上下文中合理推断，但不要编造系统回复里没有依据的内容。\n\n注意跨对话的重复主题。如果某条信息与已有记忆高度重复，请降低其优先级或不包含。\n\n每条记忆的 keywords 必须同时包含中文和英文表达，覆盖该记忆的核心概念。例如：涉及“酒”的记忆应包含 ['酒', 'drink', 'alcohol']；涉及“喜欢”的记忆应包含 ['喜欢', 'like']。这样不同语言的查询都能召回这条记忆。\n\n${transcript}\n\n请提取记忆：`
-        : `Based on the following ${BATCH_SIZE} consecutive exchanges, extract 0–4 memories worth persisting. Extract two types:\n\n1. **User facts**: specific facts from what the user said (preferences, people mentioned, corrections, plans, moods). Only extract what the user explicitly stated.\n2. **Conversation synthesis**: higher-level themes, relationship dynamics, post-correction consensus, or emotional arcs that emerge across the full exchange. You may reasonably infer these from context, but do not fabricate details with no basis in the conversation.\n\nLook for recurring themes across exchanges. If a memory overlaps heavily with existing traces, deprioritize or omit it.\n\nEach memory's keywords MUST include both Chinese and English expressions of its core concepts. For example, a memory involving "drink" should include ['drink', 'alcohol', '酒']; a memory involving "like" should include ['like', '喜欢']. This allows queries in either language to recall the memory.\n\n${transcript}\n\nExtract memories:`;
+        ? `基于以下 ${BATCH_SIZE} 段连续对话，提取 0–4 个值得持久化的记忆。每条记忆必须包含以下字段：
+
+{
+  "content": "记忆内容（简洁、具体、不含敏感信息）",
+  "keywords": ["关键词1", "keyword1", "关键词2", "keyword2"],
+  "confidence": 0.85,
+  "memory_type": "user_fact | system_inferred | correction"
+}
+
+类型说明：
+- user_fact：用户明确说出的具体事实（偏好、提到的人、计划、情绪）。
+- correction：用户纠正、否认或澄清系统之前的理解。
+- system_inferred：系统从对话中合理推断出的关系动态或总结，但不是用户直接陈述的事实。
+
+注意跨对话的重复主题。如果某条信息与已有记忆高度重复，请降低其优先级或不包含。
+
+${transcript}
+
+请提取记忆，只返回 JSON 数组：`
+        : `Based on the following ${BATCH_SIZE} consecutive exchanges, extract 0–4 memories worth persisting. Each memory must include these fields:
+
+{
+  "content": "Concise, specific memory content without sensitive info",
+  "keywords": ["keyword1", "关键词1", "keyword2", "关键词2"],
+  "confidence": 0.85,
+  "memory_type": "user_fact | system_inferred | correction"
+}
+
+Types:
+- user_fact: a concrete fact the user explicitly stated (preference, person, plan, mood).
+- correction: the user corrects, denies, or clarifies something the system previously said.
+- system_inferred: a reasonable inference about relationship dynamics or summary, not directly stated by the user.
+
+Look for recurring themes across exchanges. If a memory overlaps heavily with existing traces, deprioritize or omit it.
+
+${transcript}
+
+Extract memories as a JSON array only:`;
 
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000);
@@ -172,20 +209,29 @@ export async function POST(req: NextRequest) {
           confidence <= 1.0
         ) {
           const trimmedContent = content.trim();
-          let keywords = Array.isArray(m.keywords)
+          let rawKeywords = Array.isArray(m.keywords)
             ? (m.keywords as unknown[])
                 .filter((k): k is string => typeof k === "string" && k.length > 0)
-                .map((k) => k.toLowerCase().trim())
-                .slice(0, 10)
+                .map((k) => k.trim())
             : [];
 
-          if (keywords.length === 0) {
-            keywords = extractKeywords(trimmedContent);
+          if (rawKeywords.length === 0) {
+            rawKeywords = extractKeywords(trimmedContent);
           }
+
+          const keywords = normalizeKeywords(rawKeywords);
 
           if (keywords.length === 0) {
             continue;
           }
+
+          const memoryType =
+            typeof m.memory_type === "string" &&
+            ["user_fact", "system_inferred", "correction"].includes(m.memory_type)
+              ? (m.memory_type as "user_fact" | "system_inferred" | "correction")
+              : /纠正|更正|否认|澄清|correction|deny|clarify/i.test(trimmedContent)
+              ? "correction"
+              : "user_fact";
 
           const scrubbedContent = scrubPii(trimmedContent);
 
@@ -200,6 +246,7 @@ export async function POST(req: NextRequest) {
               keywords,
               confidence,
               source_lang: sourceLang,
+              memory_type: memoryType,
             });
             if (merged) {
               batchStored.push(merged);
@@ -212,6 +259,7 @@ export async function POST(req: NextRequest) {
             keywords,
             confidence,
             source_lang: sourceLang,
+            memory_type: memoryType,
           });
           batchStored.push(memory);
         }

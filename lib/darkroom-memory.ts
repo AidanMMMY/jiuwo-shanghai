@@ -16,6 +16,9 @@ export interface Memory {
   keywords: string[];
   confidence: number;
   source_lang: 'en' | 'zh';
+  memory_type?: 'user_fact' | 'system_inferred' | 'correction';
+  retrieval_count?: number;
+  last_retrieved_at?: string;
   created_at: string;
   updated_at?: string;
 }
@@ -132,6 +135,7 @@ export interface FilterMemoriesOptions {
   minConfidence?: number;
   excludeSensitive?: boolean;
   maxMediumConfidence?: number;
+  maxSystemInferred?: number;
 }
 
 export function filterMemoriesForChat(
@@ -142,6 +146,7 @@ export function filterMemoriesForChat(
     minConfidence = CHAT_MIN_CONFIDENCE,
     excludeSensitive = true,
     maxMediumConfidence = 2,
+    maxSystemInferred = 1,
   } = options;
 
   const filtered = memories.filter((m) => {
@@ -166,7 +171,16 @@ export function filterMemoriesForChat(
     })
     .slice(0, maxMediumConfidence);
 
-  return [...high, ...medium].sort(
+  let combined = [...high, ...medium];
+
+  // Cap system_inferred memories so authoritative facts and corrections dominate.
+  const systemInferred = combined.filter((m) => m.memory_type === "system_inferred");
+  if (systemInferred.length > maxSystemInferred) {
+    const keep = new Set(systemInferred.slice(0, maxSystemInferred).map((m) => m.id));
+    combined = combined.filter((m) => m.memory_type !== "system_inferred" || keep.has(m.id));
+  }
+
+  return combined.sort(
     (a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
@@ -206,7 +220,38 @@ export function extractKeywords(text: string): string[] {
     .replace(/[^a-z0-9\s]/g, ' ')
     .split(/\s+/)
     .filter((w) => w.length > 2 && !EN_STOPWORDS.has(w));
-  return [...new Set([...chars, ...enWords])].slice(0, 10);
+  return normalizeKeywords([...new Set([...chars, ...enWords])]);
+}
+
+const KEYWORD_CANONICAL_MAP: Record<string, string> = {
+  'xiao ma': '小马',
+  phillip: '小马',
+  jiuwo: '啾喔',
+  'lao wang': '老王',
+  alin: '阿林',
+  situ: '司徒',
+  aidan: 'Aidan',
+  devil: 'Devil',
+  dex: 'Dex',
+  zack: 'Zack',
+  bob: 'Bob',
+  tee: 'Tee',
+  arthur: 'Arthur',
+  gary: 'Gary',
+  ethan: 'Ethan',
+  chris: 'Chris',
+  owen: 'Owen',
+  alex: 'Alex',
+  ray: 'Ray',
+};
+
+export function normalizeKeywords(keywords: string[]): string[] {
+  return [...new Set(
+    keywords
+      .map((k) => k.trim())
+      .filter((k) => k.length > 0)
+      .map((k) => KEYWORD_CANONICAL_MAP[k.toLowerCase()] || k)
+  )].slice(0, 10);
 }
 
 export async function ensureConversationsTable(): Promise<void> {
@@ -306,9 +351,14 @@ export async function ensureMemoriesTable(): Promise<void> {
     )
   `;
   await sql`ALTER TABLE darkroom_memories ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`;
+  await sql`ALTER TABLE darkroom_memories ADD COLUMN IF NOT EXISTS memory_type VARCHAR(32) NOT NULL DEFAULT 'user_fact'`;
+  await sql`ALTER TABLE darkroom_memories ADD COLUMN IF NOT EXISTS retrieval_count INTEGER NOT NULL DEFAULT 0`;
+  await sql`ALTER TABLE darkroom_memories ADD COLUMN IF NOT EXISTS last_retrieved_at TIMESTAMPTZ`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_keywords ON darkroom_memories USING GIN(keywords)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_created_at ON darkroom_memories(created_at DESC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_confidence ON darkroom_memories(confidence DESC)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_type ON darkroom_memories(memory_type)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_memories_last_retrieved ON darkroom_memories(last_retrieved_at)`;
 }
 
 export async function countAllMemories(): Promise<number> {
@@ -348,22 +398,24 @@ export async function storeMemory(
   await ensureMemoriesTable();
   await pruneOldMemories();
 
+  const keywords = normalizeKeywords(memory.keywords);
+  const memoryType = memory.memory_type ?? 'user_fact';
   const embedding = await generateEmbedding(memory.content);
   const dims = getEmbeddingDimensions();
   const sql = getSql();
 
   const result = embedding
     ? await sql.query(
-        `INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, embedding)
-         VALUES ($1, $2, $3, $4, $5::vector(${dims}))
-         RETURNING id, content, keywords, confidence, source_lang, created_at, updated_at`,
-        [memory.content, memory.keywords, memory.confidence, memory.source_lang, formatVector(embedding)]
+        `INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, memory_type, embedding)
+         VALUES ($1, $2, $3, $4, $5, $6::vector(${dims}))
+         RETURNING id, content, keywords, confidence, source_lang, memory_type, retrieval_count, last_retrieved_at, created_at, updated_at`,
+        [memory.content, keywords, memory.confidence, memory.source_lang, memoryType, formatVector(embedding)]
       )
     : await sql.query(
-        `INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, embedding)
-         VALUES ($1, $2, $3, $4, NULL)
-         RETURNING id, content, keywords, confidence, source_lang, created_at, updated_at`,
-        [memory.content, memory.keywords, memory.confidence, memory.source_lang]
+        `INSERT INTO darkroom_memories (content, keywords, confidence, source_lang, memory_type, embedding)
+         VALUES ($1, $2, $3, $4, $5, NULL)
+         RETURNING id, content, keywords, confidence, source_lang, memory_type, retrieval_count, last_retrieved_at, created_at, updated_at`,
+        [memory.content, keywords, memory.confidence, memory.source_lang, memoryType]
       );
 
   return result.rows[0] as Memory;
@@ -400,13 +452,18 @@ export async function mergeSimilarMemory(
   if (!existing) return null;
 
   const mergedContent = mergeMemoryContent(existing.content, candidate.content);
-  const mergedKeywords = [...new Set([...existing.keywords, ...candidate.keywords])]
-    .map((k) => k.toLowerCase().trim())
-    .slice(0, 10);
+  const mergedKeywords = normalizeKeywords([...existing.keywords, ...candidate.keywords]);
   const mergedConfidence = Math.max(
     typeof existing.confidence === 'string' ? parseFloat(existing.confidence) : existing.confidence,
     candidate.confidence
   );
+  // Preserve the more authoritative memory_type when merging.
+  const mergedType: Memory['memory_type'] =
+    existing.memory_type === 'correction' || candidate.memory_type === 'correction'
+      ? 'correction'
+      : existing.memory_type === 'user_fact' || candidate.memory_type === 'user_fact'
+      ? 'user_fact'
+      : existing.memory_type;
 
   const embedding = await generateEmbedding(mergedContent);
   const dims = getEmbeddingDimensions();
@@ -418,21 +475,23 @@ export async function mergeSimilarMemory(
          SET content = $1,
              keywords = $2,
              confidence = $3,
+             memory_type = $4,
              updated_at = NOW(),
-             embedding = $4::vector(${dims})
-         WHERE id = $5
-         RETURNING id, content, keywords, confidence, source_lang, created_at, updated_at`,
-        [mergedContent, mergedKeywords, mergedConfidence, formatVector(embedding), existingId]
+             embedding = $5::vector(${dims})
+         WHERE id = $6
+         RETURNING id, content, keywords, confidence, source_lang, memory_type, retrieval_count, last_retrieved_at, created_at, updated_at`,
+        [mergedContent, mergedKeywords, mergedConfidence, mergedType, formatVector(embedding), existingId]
       )
     : await sql.query(
         `UPDATE darkroom_memories
          SET content = $1,
              keywords = $2,
              confidence = $3,
+             memory_type = $4,
              updated_at = NOW()
-         WHERE id = $4
-         RETURNING id, content, keywords, confidence, source_lang, created_at, updated_at`,
-        [mergedContent, mergedKeywords, mergedConfidence, existingId]
+         WHERE id = $5
+         RETURNING id, content, keywords, confidence, source_lang, memory_type, retrieval_count, last_retrieved_at, created_at, updated_at`,
+        [mergedContent, mergedKeywords, mergedConfidence, mergedType, existingId]
       );
 
   return result.rows[0] as Memory;
@@ -453,7 +512,7 @@ export async function retrieveMemories(
   if (queryEmbedding) {
     const dims = getEmbeddingDimensions();
     const vectorResult = await sql.query(
-      `SELECT id, content, keywords, confidence, source_lang, created_at,
+      `SELECT id, content, keywords, confidence, source_lang, memory_type, created_at,
         (1 - (embedding <=> $1::vector(${dims}))) AS score
       FROM darkroom_memories
       WHERE confidence >= $2
@@ -471,7 +530,7 @@ export async function retrieveMemories(
 
   if (keywords.length > 0) {
     const keywordResult = await sql`
-      SELECT id, content, keywords, confidence, source_lang, created_at,
+      SELECT id, content, keywords, confidence, source_lang, memory_type, created_at,
         (
           COALESCE(array_length(
             ARRAY(SELECT UNNEST(keywords) INTERSECT SELECT UNNEST(${keywords}::text[])),
@@ -506,6 +565,12 @@ export async function retrieveMemories(
     }
   }
 
+  const typePriority: Record<string, number> = {
+    correction: 1.5,
+    user_fact: 1.0,
+    system_inferred: -0.5,
+  };
+
   const ranked = Array.from(merged.values())
     .map((row) => {
       const days = Math.max(
@@ -513,25 +578,40 @@ export async function retrieveMemories(
         (Date.now() - new Date(row.created_at).getTime()) / 86400000
       );
       const recency = 1.0 / (days + 1.0);
-      return { ...row, score: row.score + recency * 0.1 };
+      const typeBoost = typePriority[row.memory_type ?? 'user_fact'] ?? 0;
+      return { ...row, score: row.score + recency * 0.1 + typeBoost };
     })
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 
-  if (ranked.length > 0) {
-    return ranked.map(({ id, content, keywords, confidence, source_lang, created_at }) => ({
-      id,
-      content,
-      keywords,
-      confidence,
-      source_lang,
-      created_at,
-    }));
+  const result = ranked.map(({ id, content, keywords, confidence, source_lang, memory_type, created_at }) => ({
+    id,
+    content,
+    keywords,
+    confidence,
+    source_lang,
+    memory_type,
+    created_at,
+  }));
+
+  // Track retrieval usage asynchronously.
+  if (result.length > 0) {
+    const ids = result.map((m) => m.id);
+    sql`
+      UPDATE darkroom_memories
+      SET retrieval_count = retrieval_count + 1,
+          last_retrieved_at = NOW()
+      WHERE id = ANY(${ids}::int[])
+    `.catch((err) => console.error('[darkroom:memory] retrieval tracking error:', err));
+  }
+
+  if (result.length > 0) {
+    return result;
   }
 
   // ── Final fallback: recent high-confidence memories ───────────────────
   const fallback = await sql`
-    SELECT id, content, keywords, confidence, source_lang, created_at
+    SELECT id, content, keywords, confidence, source_lang, memory_type, created_at
     FROM darkroom_memories
     WHERE confidence >= ${MIN_MEMORY_CONFIDENCE}
     ORDER BY created_at DESC

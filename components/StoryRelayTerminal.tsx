@@ -33,9 +33,10 @@ interface StoryRelayTerminalProps {
   initialSegments: Segment[];
   initialContributors: Contributor[];
   isZh?: boolean;
+  defaultAuthorName?: string;
 }
 
-export function StoryRelayTerminal({ initialSegments, initialContributors, isZh }: StoryRelayTerminalProps) {
+export function StoryRelayTerminal({ initialSegments, initialContributors, isZh, defaultAuthorName }: StoryRelayTerminalProps) {
   const [segments, setSegments] = useState<Segment[]>(initialSegments);
   const [contributors, setContributors] = useState<Contributor[]>(initialContributors);
   const [loading, setLoading] = useState(false);
@@ -124,6 +125,7 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh 
         onSubmit={handleSubmit}
         disabled={loading}
         isZh={isZh}
+        defaultName={defaultAuthorName}
       />
 
       <div className="lg:hidden">

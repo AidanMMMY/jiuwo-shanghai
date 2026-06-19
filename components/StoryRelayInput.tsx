@@ -8,10 +8,11 @@ interface StoryRelayInputProps {
   onSubmit: (authorName: string, userInput: string) => void;
   disabled?: boolean;
   isZh?: boolean;
+  defaultName?: string;
 }
 
-export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disabled, isZh }: StoryRelayInputProps) {
-  const [authorName, setAuthorName] = useState('');
+export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disabled, isZh, defaultName }: StoryRelayInputProps) {
+  const [authorName, setAuthorName] = useState(defaultName ?? '');
   const [userInput, setUserInput] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {

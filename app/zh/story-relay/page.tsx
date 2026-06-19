@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { getSegments, buildContributors } from '@/lib/story-relay';
 import { StoryRelayTerminal } from '@/components/StoryRelayTerminal';
 import { StoryRelayContributors } from '@/components/StoryRelayContributors';
@@ -15,6 +16,8 @@ export const metadata: Metadata = {
 export default async function StoryRelayPageZh() {
   const segments = await getSegments();
   const contributors = buildContributors(segments);
+  const cookieStore = await cookies();
+  const defaultAuthorName = cookieStore.get('story_relay_author_name')?.value ?? '';
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] px-4 pt-20 pb-12 text-[#f5f5f0] md:pt-24">
@@ -23,6 +26,7 @@ export default async function StoryRelayPageZh() {
           initialSegments={segments}
           initialContributors={contributors}
           isZh={true}
+          defaultAuthorName={defaultAuthorName}
         />
         <aside className="hidden w-56 flex-shrink-0 lg:block">
           <StoryRelayContributors contributors={contributors} isZh={true} />

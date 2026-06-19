@@ -129,6 +129,14 @@ export async function POST(req: NextRequest) {
       console.error('[story-relay/continue] summary generation failed:', summaryErr);
     }
 
+    const cookieStore = await cookies();
+    cookieStore.set('story_relay_author_name', authorName, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 365,
+    });
+
     const allSegments = [...segments, newSegment];
     return NextResponse.json({
       segment: {

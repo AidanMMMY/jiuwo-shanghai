@@ -150,27 +150,30 @@ export default function HeroCarousel({
         >
           <Link
             href={specialEvent.href}
-            className="event-entry-wrapper pointer-events-auto cursor-pointer group"
+            className={`event-entry-wrapper pointer-events-auto cursor-pointer group ${
+              specialEvent.isUpcoming === false ? 'event-entry-retro' : ''
+            }`}
             style={{
               opacity: 0,
               animation: 'taglineEntrance 800ms cubic-bezier(0.16, 1, 0.3, 1) 1200ms forwards',
             }}
           >
-            {/* Aurora / retro glow background */}
-            {specialEvent.isUpcoming !== false ? (
-              <div className="event-aurora-bg" aria-hidden="true" />
-            ) : (
-              <div className="event-retro-glow" aria-hidden="true" />
-            )}
             {/* Content */}
-            <div className={`relative rounded-xl px-6 py-3.5 inline-flex flex-col items-center gap-2 transition-all duration-300 ${
+            <div className={`relative z-10 rounded-xl px-6 py-3.5 inline-flex flex-col items-center gap-2 overflow-visible transition-all duration-300 ${
               specialEvent.isUpcoming === false
-                ? 'hero-event-retro-breathe bg-black/30 backdrop-blur-md border border-[#c9a227]/20 shadow-none group-hover:bg-black/40 group-hover:border-[#c9a227]/40'
+                ? 'hero-event-retro-breathe bg-black/30 backdrop-blur-md border border-[#c9a227]/25 shadow-none group-hover:bg-black/40 group-hover:border-[#c9a227]/45'
                 : 'border border-[#c9a227]/20 shadow-[0_0_18px_rgba(201,162,39,0.08),inset_0_0_16px_rgba(201,162,39,0.05)] group-hover:border-[#c9a227]/50 group-hover:shadow-[0_0_24px_rgba(201,162,39,0.12),inset_0_0_20px_rgba(201,162,39,0.06)]'
             }`}
             style={specialEvent.isUpcoming !== false ? {
               backgroundColor: 'rgba(15, 15, 15, 0.30)',
             } : undefined}>
+              {/* Retro outward glow — sits behind content and scales with the box */}
+              {specialEvent.isUpcoming === false && (
+                <div className="event-retro-glow" aria-hidden="true" />
+              )}
+              {specialEvent.isUpcoming !== false && (
+                <div className="event-aurora-bg" aria-hidden="true" />
+              )}
               {/* Line 1: hero text */}
               <span className="text-base md:text-lg tracking-wider event-text-shimmer">
                 {specialEvent.hero}

@@ -3,14 +3,13 @@
 import { useState } from 'react';
 
 interface StoryRelayInputProps {
-  latestQuestion: { zh: string | null; en: string | null } | null;
   suggestions: { zh: string | null; en: string | null }[];
   onSubmit: (authorName: string, userInput: string) => void;
   disabled?: boolean;
   isZh?: boolean;
 }
 
-export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disabled, isZh }: StoryRelayInputProps) {
+export function StoryRelayInput({ suggestions, onSubmit, disabled, isZh }: StoryRelayInputProps) {
   const [authorName, setAuthorName] = useState('');
   const [userInput, setUserInput] = useState('');
 
@@ -20,7 +19,6 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
     onSubmit(authorName.trim(), userInput.trim());
   };
 
-  const questionText = isZh ? latestQuestion?.zh : latestQuestion?.en;
   const inputLabels = {
     nameLabel: isZh ? '你的名字' : 'Your name',
     namePlaceholder: isZh ? '首次提交后将很难更改' : 'Hard to change later',
@@ -34,12 +32,6 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
 
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border border-[#2a2a2a] bg-[#151515] p-5">
-      {questionText && (
-        <div className="mb-5">
-          <p className="text-lg leading-relaxed text-[#f5f5f0]">{questionText}</p>
-        </div>
-      )}
-
       <div className="mb-3">
         <label className="mb-1 flex items-center gap-1 text-xs text-[#888]">
           {inputLabels.nameLabel}

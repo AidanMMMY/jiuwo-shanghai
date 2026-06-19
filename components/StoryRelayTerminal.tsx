@@ -38,9 +38,6 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh 
   const [error, setError] = useState<string | null>(null);
 
   const latestSegment = segments[segments.length - 1];
-  const latestQuestion = latestSegment
-    ? { zh: latestSegment.aiQuestionZh || null, en: latestSegment.aiQuestionEn || null }
-    : null;
   const latestSuggestions = latestSegment
     ? [
         { zh: latestSegment.suggestion1Zh || null, en: latestSegment.suggestion1En || null },
@@ -115,7 +112,6 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh 
       )}
 
       <StoryRelayInput
-        latestQuestion={latestQuestion}
         suggestions={latestSuggestions}
         onSubmit={handleSubmit}
         disabled={loading}

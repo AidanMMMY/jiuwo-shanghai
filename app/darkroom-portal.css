@@ -565,7 +565,7 @@
 }
 
 .darkroom-log-entry.user {
-  color: #c0d0d0;
+  color: #6a8a8a;
   border-left-color: #6a8a8a;
 }
 
@@ -648,7 +648,7 @@
   border: none;
   border-bottom: 1px solid rgba(106, 138, 138, 0.25);
   border-radius: 0;
-  color: #c0d0d0;
+  color: #6a8a8a;
   font-family: var(--font-share-tech-mono), var(--font-ark-pixel), 'PingFang SC', monospace;
   font-size: 16px; /* Prevents iOS Safari auto-zoom on focus */
   outline: none;

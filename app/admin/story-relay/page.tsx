@@ -107,7 +107,7 @@ export default async function StoryRelayAdminPage({ searchParams }: PageProps) {
                 >
                   <div className="mb-2 flex items-center gap-3 text-xs text-[#a0a0a0]">
                     <span className="text-[#c9a227]">#{segment.sequence}</span>
-                    <span>{segment.authorName}</span>
+                    <span>{segment.authorName === 'AI' ? '匿名酒保' : segment.authorName}</span>
                     <span>{new Date(segment.createdAt).toLocaleString('zh-CN')}</span>
                   </div>
                   <p className="line-clamp-3 text-sm leading-relaxed text-[#f5f5f0]">

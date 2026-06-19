@@ -7,6 +7,11 @@ interface Contributor {
   segments: number[];
 }
 
+function getDisplayName(name: string, isZh?: boolean): string {
+  if (name === 'AI') return isZh ? '匿名酒保' : 'The Anonymous Bartender';
+  return name;
+}
+
 export function StoryRelayContributors({ contributors, isMobile, isZh }: { contributors: Contributor[]; isMobile?: boolean; isZh?: boolean }) {
   const [expanded, setExpanded] = useState(false);
   const title = isZh ? '贡献者' : 'Contributors';
@@ -26,7 +31,7 @@ export function StoryRelayContributors({ contributors, isMobile, isZh }: { contr
               <div key={c.name} className="flex items-start gap-2">
                 <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#c9a227]" />
                 <div>
-                  <div className="text-sm text-[#f5f5f0]">{c.name}</div>
+                  <div className="text-sm text-[#f5f5f0]">{getDisplayName(c.name, isZh)}</div>
                   <div className="text-xs text-[#888]">
                     {isZh ? '段' : 'Segment'} {c.segments.join(', ')}
                   </div>

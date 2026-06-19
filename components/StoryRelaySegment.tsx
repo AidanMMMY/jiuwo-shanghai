@@ -7,6 +7,11 @@ interface Segment {
   aiQuestionEn?: string | null;
 }
 
+function getDisplayName(authorName: string, isZh?: boolean): string {
+  if (authorName === 'AI') return isZh ? '匿名酒保' : 'The Anonymous Bartender';
+  return authorName;
+}
+
 export function StoryRelaySegment({
   segment,
   isZh,
@@ -15,9 +20,10 @@ export function StoryRelaySegment({
   isZh?: boolean;
 }) {
   const story = isZh ? segment.storyZh : segment.storyEn;
+  const displayName = getDisplayName(segment.authorName, isZh);
   const segmentLabel = isZh
-    ? `${segment.authorName} ${segment.sequence === 0 ? '起头' : '续写'} · 第 ${segment.sequence} 段`
-    : `${segment.authorName} ${segment.sequence === 0 ? 'opened' : 'continued'} · Segment ${segment.sequence}`;
+    ? `${displayName} ${segment.sequence === 0 ? '起头' : '接棒'} · 第 ${segment.sequence} 段`
+    : `${displayName} ${segment.sequence === 0 ? 'opened' : 'took the baton'} · Segment ${segment.sequence}`;
 
   return (
     <div className="mb-8 border-l-2 border-[#2a2a2a] pl-5 last:mb-0">

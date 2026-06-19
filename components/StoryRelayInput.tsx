@@ -24,7 +24,7 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
   const questionLabel = isZh ? '接下来' : 'What next?';
   const inputLabels = {
     nameLabel: isZh ? '你的名字' : 'Your name',
-    namePlaceholder: isZh ? '首次提交后将很难更改' : 'Hard to change later',
+    namePlaceholder: isZh ? '想好笔名，一经采纳概不退换' : 'Pick a pen name — no refunds once used',
     inputPlaceholder: isZh ? '写下你的续写，或提出你想让故事怎么发展...' : 'Write your continuation, or steer the story...',
     submit: isZh ? '续写故事' : 'Continue story',
     submitting: isZh ? '续写中...' : 'Continuing...',

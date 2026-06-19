@@ -53,6 +53,8 @@ export default async function StoryRelayAdminPage({ searchParams }: PageProps) {
       suggestion2En: generated.suggestion2En,
       suggestion3Zh: generated.suggestion3Zh,
       suggestion3En: generated.suggestion3En,
+      summaryZh: null,
+      summaryEn: null,
       sessionId: null,
     });
 
@@ -111,6 +113,12 @@ export default async function StoryRelayAdminPage({ searchParams }: PageProps) {
                   <p className="line-clamp-3 text-sm leading-relaxed text-[#f5f5f0]">
                     {segment.storyZh}
                   </p>
+                  {segment.summaryZh && (
+                    <p className="mt-2 text-xs text-[#666]">
+                      <span className="text-[#888]">摘要：</span>
+                      {segment.summaryZh}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

@@ -43,7 +43,18 @@ export const OPENING_PROMPT = `你是 JIUWO（啾喔）酒吧的驻场 storytell
 
 export const CONTINUE_PROMPT = `你是 JIUWO（啾喔）酒吧的驻场 storyteller。JIUWO 是上海巨鹿路 397 号一家 gay bar，客群以男同性恋为主，氛围像"朋友的客厅"。
 请用以下人名作为故事角色：{names}
-当前故事已有 {n} 段。上一段结尾的问题是：{latestQuestion}
+当前故事已有 {n} 段。
+
+【前文回顾】
+{recentSummaries}
+
+【上一段结尾】
+{previousStoryZh}
+
+Previous segment:
+{previousStoryEn}
+
+上一段结尾的问题是：{latestQuestion}
 用户的回答是：{userInput}
 用户的名字是：{userName}。如果合适，可以以微妙、自然的方式将这个名字融入剧情（例如作为一个新推门而入的客人、一个被提及的旧友、或一个旁观的酒保），但不要强行插入，更不要为了出现用户名字而抢占上一段的主角或主线。
 要求：
@@ -65,19 +76,84 @@ export function buildOpeningPrompt(names: string[]): string {
   return OPENING_PROMPT.replace("{names}", names.join("、"));
 }
 
+export interface SegmentSummary {
+  summaryZh: string;
+  summaryEn: string;
+}
+
+const SUMMARY_SCHEMA = `{ "summaryZh": "...", "summaryEn": "..." }`;
+
+export const SUMMARY_PROMPT = `你是 JIUWO（啾喔）酒吧的故事摘要器。请根据以下故事段落，生成一段简短摘要（中文 30-50 字，英文 20-40 words）。
+摘要必须包含：1) 核心事件 2) 焦点人物 3) 当前悬念 4) 关键关系变化。
+只输出事实，不要抒情或评价。输出严格 JSON：{ summaryZh, summaryEn }
+
+故事段落：
+{storyZh}
+
+英文段落：
+{storyEn}`;
+
+export function buildSummaryPrompt(storyZh: string, storyEn: string): string {
+  return SUMMARY_PROMPT
+    .replace("{storyZh}", storyZh)
+    .replace("{storyEn}", storyEn);
+}
+
+export function parseSummaryResponse(raw: string): SegmentSummary | null {
+  const parsed = _safeJsonParse(raw);
+  if (!parsed) return null;
+  if (typeof parsed.summaryZh !== "string" || typeof parsed.summaryEn !== "string") return null;
+  if (parsed.summaryZh.trim().length === 0 || parsed.summaryEn.trim().length === 0) return null;
+  return {
+    summaryZh: parsed.summaryZh.trim(),
+    summaryEn: parsed.summaryEn.trim(),
+  };
+}
+
+export async function generateSegmentSummary(storyZh: string, storyEn: string): Promise<SegmentSummary> {
+  const prompt = buildSummaryPrompt(storyZh, storyEn);
+  const completion = await deepseekClient.chat.completions.create({
+    model: DEFAULT_MODEL,
+    messages: [
+      { role: "system", content: "You are a bilingual story summarizer. Always respond with valid JSON matching the requested schema." },
+      { role: "user", content: prompt + "\n\n必须输出 JSON：" + SUMMARY_SCHEMA },
+    ],
+    temperature: 0.3,
+    max_tokens: 256,
+  });
+
+  const raw = completion.choices[0]?.message?.content || "";
+  const parsed = parseSummaryResponse(raw);
+  if (!parsed) throw new Error("Failed to parse summary response: " + raw);
+
+  return parsed;
+}
+
 export function buildContinuePrompt(
   names: string[],
   n: number,
   latestQuestion: string,
   userInput: string,
-  userName: string
+  userName: string,
+  previousStoryZh: string,
+  previousStoryEn: string,
+  recentSummaries: SegmentSummary[]
 ): string {
+  const summariesText = recentSummaries.length > 0
+    ? recentSummaries
+        .map((s, i) => `第 ${i + 1} 段摘要：${s.summaryZh}\nSegment ${i + 1} summary: ${s.summaryEn}`)
+        .join("\n\n")
+    : "（暂无更早摘要）\n(No earlier summaries yet)";
+
   return CONTINUE_PROMPT
     .replace("{names}", names.join("、"))
     .replace("{n}", String(n))
     .replace("{latestQuestion}", latestQuestion)
     .replace("{userInput}", userInput)
-    .replace("{userName}", userName);
+    .replace("{userName}", userName)
+    .replace("{previousStoryZh}", previousStoryZh)
+    .replace("{previousStoryEn}", previousStoryEn)
+    .replace("{recentSummaries}", summariesText);
 }
 
 export function parseStoryRelayResponse(raw: string): StoryRelayResponse | null {
@@ -228,9 +304,21 @@ export async function generateStoryContinuation(
   segmentCount: number,
   latestQuestion: string,
   userInput: string,
-  userName: string
+  userName: string,
+  previousStoryZh: string,
+  previousStoryEn: string,
+  recentSummaries: SegmentSummary[]
 ): Promise<StoryRelayResponse> {
-  const prompt = buildContinuePrompt(names, segmentCount, latestQuestion, userInput, userName);
+  const prompt = buildContinuePrompt(
+    names,
+    segmentCount,
+    latestQuestion,
+    userInput,
+    userName,
+    previousStoryZh,
+    previousStoryEn,
+    recentSummaries
+  );
   const completion = await deepseekClient.chat.completions.create({
     model: DEFAULT_MODEL,
     messages: [

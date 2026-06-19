@@ -15,6 +15,8 @@ export interface StorySegment {
   suggestion2En: string | null;
   suggestion3Zh: string | null;
   suggestion3En: string | null;
+  summaryZh: string | null;
+  summaryEn: string | null;
   sessionId: string | null;
   createdAt: string;
 }
@@ -61,6 +63,8 @@ function rowToSegment(row: Record<string, unknown>): StorySegment {
     suggestion2En: row.suggestion_2_en as string | null,
     suggestion3Zh: row.suggestion_3_zh as string | null,
     suggestion3En: row.suggestion_3_en as string | null,
+    summaryZh: row.summary_zh as string | null,
+    summaryEn: row.summary_en as string | null,
     sessionId: row.session_id as string | null,
     createdAt: toIsoString(row.created_at),
   };
@@ -92,6 +96,39 @@ export async function insertSegment(segment: Omit<StorySegment, 'id' | 'createdA
     RETURNING *
   `;
   return rowToSegment((result.rows as Record<string, unknown>[])[0]);
+}
+
+export async function updateSegmentSummary(
+  id: number,
+  summaryZh: string,
+  summaryEn: string
+): Promise<StorySegment> {
+  const sql = getSql();
+  const result = await sql`
+    UPDATE story_relay_segments
+    SET summary_zh = ${summaryZh}, summary_en = ${summaryEn}
+    WHERE id = ${id}
+    RETURNING *
+  `;
+  return rowToSegment((result.rows as Record<string, unknown>[])[0]);
+}
+
+export async function getRecentSummaries(limit: number = 4): Promise<
+  { sequence: number; summaryZh: string; summaryEn: string }[]
+> {
+  const sql = getSql();
+  const result = await sql`
+    SELECT sequence, summary_zh, summary_en
+    FROM story_relay_segments
+    WHERE summary_zh IS NOT NULL AND summary_en IS NOT NULL
+    ORDER BY sequence DESC
+    LIMIT ${limit}
+  `;
+  return (result.rows as Record<string, unknown>[]).map((row) => ({
+    sequence: row.sequence as number,
+    summaryZh: row.summary_zh as string,
+    summaryEn: row.summary_en as string,
+  }));
 }
 
 export async function getNextSequence(): Promise<number> {

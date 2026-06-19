@@ -20,6 +20,8 @@ interface Segment {
   suggestion2En?: string | null;
   suggestion3Zh?: string | null;
   suggestion3En?: string | null;
+  summaryZh?: string | null;
+  summaryEn?: string | null;
 }
 
 interface Contributor {

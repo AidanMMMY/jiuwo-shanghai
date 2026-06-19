@@ -14,8 +14,9 @@ import {
   formatTopicLockInstruction,
   parseTopicLock,
   resolvePronouns,
-  buildIdentityProbeInstruction,
+  selectIdentityProbePrompt,
   shouldAskIdentity,
+  isIdentityRefusal,
   isNameQuestion,
   looksLikeName,
 } from "@/lib/darkroom-chat";
@@ -30,6 +31,7 @@ import {
   storeMemory,
   upsertSessionState,
   findSimilarMemory,
+  updateIdentityProbeState,
 } from "@/lib/darkroom-memory";
 import {
   buildChatPromptWithinBudget,
@@ -76,7 +78,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { message } = body;
-    let history = Array.isArray(body.history) ? body.history : [];
+    let history: HistoryMessage[] = Array.isArray(body.history) ? body.history : [];
     const knownName = typeof body.knownName === "string" ? body.knownName : "";
     const sessionId = typeof body.sessionId === "string" ? body.sessionId : "";
     isZh = !!body.isZh;
@@ -140,15 +142,24 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // If we still don't know the user's name and the conversation has been
-    // self-referential for a few turns, ask once — politely and without pressure.
+    // Identity probing: mild version. Ask after the user has self-referenced
+    // twice, then follow up a couple more times if they don't answer.
     if (sessionId && !userName) {
-      const probeSent = !!sessionState?.identity_probe_sent;
-      if (shouldAskIdentity(history, isZh, userName, probeSent)) {
-        identityProbeInstruction = buildIdentityProbeInstruction(isZh);
-        upsertSessionState(sessionId, { identity_probe_sent: true }).catch((err) =>
-          console.error("[darkroom:chat] failed to mark identity_probe_sent:", err)
+      const probeCount = sessionState?.identity_probe_count ?? 0;
+      const declined = sessionState?.identity_probe_declined ?? false;
+      const lastProbeTurn = sessionState?.identity_probe_last_turn ?? 0;
+      if (shouldAskIdentity(history, isZh, userName, probeCount, declined, lastProbeTurn)) {
+        identityProbeInstruction = selectIdentityProbePrompt(
+          data.identityProbePrompts,
+          probeCount
         );
+        const userMessages = history.filter((m: { role: string; content?: unknown }) => m.role === "user" && m.content);
+        updateIdentityProbeState(sessionId, {
+          count: probeCount + 1,
+          lastTurn: userMessages.length,
+        }).catch((err) => {
+          console.error("[darkroom:chat] failed to update identity probe state:", err);
+        });
       }
     }
 
@@ -451,6 +462,16 @@ export async function POST(req: NextRequest) {
             console.error("[darkroom:chat] identity memory/store failed:", err);
           }
         })();
+      } else if (
+        !capturedName &&
+        sessionId &&
+        sessionState?.identity_probe_count &&
+        sessionState.identity_probe_count > 0 &&
+        isIdentityRefusal(message, isZh)
+      ) {
+        updateIdentityProbeState(sessionId, { declined: true }).catch((err) => {
+          console.error("[darkroom:chat] failed to mark identity_probe_declined:", err);
+        });
       }
     }
 

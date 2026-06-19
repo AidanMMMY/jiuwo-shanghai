@@ -20,6 +20,10 @@ export async function GET() {
         suggestion1En: s.suggestion1En,
         suggestion2Zh: s.suggestion2Zh,
         suggestion2En: s.suggestion2En,
+        suggestion3Zh: s.suggestion3Zh,
+        suggestion3En: s.suggestion3En,
+        summaryZh: s.summaryZh,
+        summaryEn: s.summaryEn,
       })),
       latestQuestion: latest
         ? { zh: latest.aiQuestionZh, en: latest.aiQuestionEn }
@@ -28,6 +32,7 @@ export async function GET() {
         ? [
             { zh: latest.suggestion1Zh, en: latest.suggestion1En },
             { zh: latest.suggestion2Zh, en: latest.suggestion2En },
+            { zh: latest.suggestion3Zh, en: latest.suggestion3En },
           ]
         : [],
       contributors,

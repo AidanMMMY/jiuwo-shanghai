@@ -45,6 +45,8 @@ export async function POST(req: NextRequest) {
       suggestion2En: generated.suggestion2En,
       suggestion3Zh: generated.suggestion3Zh,
       suggestion3En: generated.suggestion3En,
+      summaryZh: null,
+      summaryEn: null,
       sessionId: null,
     });
 

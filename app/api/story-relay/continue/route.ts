@@ -8,9 +8,11 @@ import {
   buildContributors,
   getMemoriesForNameExtraction,
   getSegments,
+  getRecentSummaries,
+  updateSegmentSummary,
   type StorySegment,
 } from '@/lib/story-relay';
-import { generateStoryContinuation, extractNamesFromMemories } from '@/lib/story-relay-ai';
+import { generateStoryContinuation, extractNamesFromMemories, generateSegmentSummary } from '@/lib/story-relay-ai';
 import { rateLimitByIp } from '@/lib/rate-limit';
 
 const continueSchema = z.object({
@@ -87,16 +89,21 @@ export async function POST(req: NextRequest) {
 
     const segments = await getSegments();
     const latestQuestion = latest.aiQuestionZh || latest.aiQuestionEn || '';
+    const recentSummaries = (await getRecentSummaries(4)).reverse();
+
     const generated = await generateStoryContinuation(
       names,
       segments.length,
       latestQuestion,
       userInput,
-      authorName
+      authorName,
+      latest.storyZh,
+      latest.storyEn,
+      recentSummaries
     );
 
     const nextSequence = await getNextSequence();
-    const newSegment = await insertSegmentWithRetry({
+    let newSegment = await insertSegmentWithRetry({
       sequence: nextSequence,
       authorName,
       userPrompt: userInput,
@@ -110,8 +117,17 @@ export async function POST(req: NextRequest) {
       suggestion2En: generated.suggestion2En,
       suggestion3Zh: generated.suggestion3Zh,
       suggestion3En: generated.suggestion3En,
+      summaryZh: null,
+      summaryEn: null,
       sessionId,
     });
+
+    try {
+      const summary = await generateSegmentSummary(newSegment.storyZh, newSegment.storyEn);
+      newSegment = await updateSegmentSummary(newSegment.id, summary.summaryZh, summary.summaryEn);
+    } catch (summaryErr) {
+      console.error('[story-relay/continue] summary generation failed:', summaryErr);
+    }
 
     const allSegments = [...segments, newSegment];
     return NextResponse.json({
@@ -128,6 +144,8 @@ export async function POST(req: NextRequest) {
         suggestion2En: newSegment.suggestion2En,
         suggestion3Zh: newSegment.suggestion3Zh,
         suggestion3En: newSegment.suggestion3En,
+        summaryZh: newSegment.summaryZh,
+        summaryEn: newSegment.summaryEn,
       },
       contributors: buildContributors(allSegments),
     });

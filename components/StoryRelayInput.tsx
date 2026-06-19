@@ -19,6 +19,7 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
     e.preventDefault();
     if (!authorName.trim() || !userInput.trim()) return;
     onSubmit(authorName.trim(), userInput.trim());
+    setUserInput('');
   };
 
   const questionText = isZh ? latestQuestion?.zh : latestQuestion?.en;
@@ -33,13 +34,16 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
   const hintText = isZh
     ? '不想自己写？直接选一个剧情方向：'
     : "Don't want to write? Pick a direction:";
+  const loadingText = isZh
+    ? '匿名酒保正在接棒'
+    : 'The Anonymous Bartender is taking the baton';
 
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border border-[#2a2a2a] bg-[#151515] p-5">
       {questionText && (
-        <div className="mb-5 rounded border border-[#2a2a2a] bg-[#0a0a0a] p-4">
-          <div className="mb-2 text-xs uppercase tracking-widest text-[#888]">{questionLabel}</div>
-          <p className="text-lg leading-relaxed text-[#f5f5f0]">{questionText}</p>
+        <div className="mb-6 border-l-2 border-[#c9a227] pl-4">
+          <div className="mb-1 text-xs uppercase tracking-widest text-[#888]">{questionLabel}</div>
+          <p className="text-lg leading-relaxed text-[#d4d4d4]">{questionText}</p>
         </div>
       )}
 
@@ -94,6 +98,16 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
       >
         {disabled ? inputLabels.submitting : inputLabels.submit}
       </button>
+
+      {disabled && (
+        <div className="mt-4 flex items-center gap-2 text-xs text-[#888]">
+          <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#3a3a3a] border-t-[#c9a227]" />
+          <span>{loadingText}</span>
+          <span className="inline-flex w-6">
+            <span className="animate-pulse">…</span>
+          </span>
+        </div>
+      )}
     </form>
   );
 }

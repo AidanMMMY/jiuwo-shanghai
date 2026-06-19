@@ -41,6 +41,7 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh,
   const [contributors, setContributors] = useState<Contributor[]>(initialContributors);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [animatingSequence, setAnimatingSequence] = useState<number | null>(null);
 
   const latestSegment = segments[segments.length - 1];
   const latestQuestion = latestSegment
@@ -53,6 +54,10 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh,
         { zh: latestSegment.suggestion3Zh || null, en: latestSegment.suggestion3En || null },
       ]
     : [];
+
+  const handleAnimationDone = useCallback(() => {
+    setAnimatingSequence(null);
+  }, []);
 
   const handleSubmit = useCallback(
     async (authorName: string, userInput: string) => {
@@ -70,6 +75,7 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh,
         }
         setSegments((prev) => [...prev, data.segment]);
         setContributors(data.contributors);
+        setAnimatingSequence(data.segment.sequence);
       } catch (err) {
         setError(err instanceof Error ? err.message : '续写失败');
       } finally {
@@ -104,11 +110,13 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh,
       </div>
 
       <div className="mb-8">
-        {segments.map((segment) => (
+        {segments.map((segment, idx) => (
           <StoryRelaySegment
             key={segment.sequence}
             segment={segment}
             isZh={isZh}
+            animate={segment.sequence === animatingSequence}
+            onAnimationDone={idx === segments.length - 1 ? handleAnimationDone : undefined}
           />
         ))}
       </div>

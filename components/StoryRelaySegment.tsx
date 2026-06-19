@@ -9,16 +9,12 @@ interface Segment {
 
 export function StoryRelaySegment({
   segment,
-  isLatest,
   isZh,
 }: {
   segment: Segment;
-  isLatest?: boolean;
   isZh?: boolean;
 }) {
   const story = isZh ? segment.storyZh : segment.storyEn;
-  const question = isZh ? segment.aiQuestionZh : segment.aiQuestionEn;
-  const questionLabel = isZh ? 'AI 提问' : 'AI asks';
   const segmentLabel = isZh
     ? `${segment.authorName} ${segment.sequence === 0 ? '起头' : '续写'} · 第 ${segment.sequence} 段`
     : `${segment.authorName} ${segment.sequence === 0 ? 'opened' : 'continued'} · Segment ${segment.sequence}`;
@@ -32,12 +28,6 @@ export function StoryRelaySegment({
             {paragraph.trim()}
           </p>
         ) : null
-      )}
-      {isLatest && question && (
-        <div className="rounded border border-[#2a2a2a] bg-[#151515] p-4">
-          <div className="mb-2 text-xs uppercase tracking-widest text-[#888]">{questionLabel}</div>
-          <p className="text-lg text-[#f5f5f0]">{question}</p>
-        </div>
       )}
     </div>
   );

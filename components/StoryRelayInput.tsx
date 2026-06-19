@@ -21,7 +21,7 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
   };
 
   const questionText = isZh ? latestQuestion?.zh : latestQuestion?.en;
-  const questionLabel = isZh ? 'AI 提问' : 'AI asks';
+  const questionLabel = isZh ? '接下来' : 'What next?';
   const inputLabels = {
     nameLabel: isZh ? '你的名字' : 'Your name',
     namePlaceholder: isZh ? '首次提交后将很难更改' : 'Hard to change later',
@@ -69,7 +69,8 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
           <p className="mb-2 text-xs text-[#888]">{hintText}</p>
           <div className="flex flex-col gap-2">
             {suggestions.map((s, idx) => {
-              const text = isZh ? s.zh : s.en;
+              const raw = isZh ? s.zh : s.en;
+              const text = raw ? raw.replace(/^[A-C][.．、]?\s*/, '') : '';
               return text ? (
                 <button
                   key={idx}

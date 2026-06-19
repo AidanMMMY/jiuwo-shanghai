@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story Relay 剧情连贯性优化方案</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f5f5f0;
+      --muted: #a0a0a0;
+      --accent: #c9a227;
+      --border: #2a2a2a;
+    }
+    body {
+      margin: 0;
+      padding: 2rem 1rem;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.7;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    h1, h2, h3 {
+      color: var(--accent);
+      font-weight: 600;
+      margin-top: 2.5rem;
+    }
+    h1 { font-size: 1.75rem; margin-top: 0; }
+    h2 { font-size: 1.35rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; }
+    p { margin: 1rem 0; }
+    ul, ol { margin: 1rem 0; padding-left: 1.5rem; }
+    li { margin: 0.5rem 0; }
+    code {
+      background: #151515;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #151515;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+    }
+    blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 1rem 0;
+      padding-left: 1rem;
+      color: var(--muted);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem;
+      text-align: left;
+    }
+    th {
+      background: #151515;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Story Relay 剧情连贯性优化方案</h1>
+
+    <p>当前故事接力的连贯性主要靠 <strong>prompt 里的上下文注入 + 生成规则约束</strong> 来控制，没有额外的“剧情一致性模型”或记忆检索。</p>
+
+    <h2>当前机制</h2>
+    <p>每次用户提交续写时，<code>app/api/story-relay/continue/route.ts</code> 会调用：</p>
+    <pre><code>generateStoryContinuation(
+  names,             // 从 darkroom memories 提取的人名
+  segments.length,   // 当前已有几段
+  latestQuestion,    // 上一段结尾的 AI 提问
+  userInput,         // 用户这次写的内容 / 选的选项
+  authorName         // 用户的名字
+);</code></pre>
+
+    <p>这些变量会被填进 <code>lib/story-relay-ai.ts</code> 的 <code>CONTINUE_PROMPT</code> 模板里，AI 看到的是：</p>
+    <ul>
+      <li>当前故事已有 {n} 段</li>
+      <li>上一段结尾的问题是：{latestQuestion}</li>
+      <li>用户的回答是：{userInput}</li>
+      <li>用户的名字是：{userName}</li>
+    </ul>
+
+    <p>也就是说，AI 只知道“上一段结尾的问题 + 用户这次回答 + 用户名字”，<strong>看不到完整的故事全文</strong>，所以它主要靠 <code>latestQuestion</code> 来推断该往哪走。</p>
+
+    <h3>当前规则约束</h3>
+    <ul>
+      <li>必须紧接上一段结尾</li>
+      <li>不得擅自切换主角</li>
+      <li>女性角色少出场</li>
+      <li>第三人称、无第一人称</li>
+      <li>长度控制在 150–250 字</li>
+      <li>对话按说话人分段</li>
+    </ul>
+
+    <h3>为什么还会断</h3>
+    <p>因为 AI 只看到 <strong>一个问题 + 一个回答</strong>，中间没有真正的“故事记忆”：</p>
+    <ul>
+      <li>如果用户回答比较发散，AI 容易顺着用户名字另开一条线。</li>
+      <li>如果上一段结尾的问题本身比较开放，AI 可能选一个“更好写”的方向，而不是真正延续上段结尾的画面。</li>
+      <li>它看不到更早的情节，所以人物状态、关系线可能前后不一致。</li>
+    </ul>
+
+    <h2>优化方向</h2>
+
+    <h3>1. 把上一段的故事正文也喂给 AI</h3>
+    <p class="muted"><strong>实现方式</strong></p>
+    <p><code>generateStoryContinuation</code> 里不只传 <code>latestQuestion</code>，也把 <code>latestSegment.storyZh</code> / <code>storyEn</code> 一起放进 prompt。AI 看到：上一段完整正文、上一段结尾的问题、用户回答、用户名字。</p>
+
+    <p class="muted"><strong>优点</strong></p>
+    <ul>
+      <li><strong>上下文更完整</strong>：AI 知道“老王手机屏幕亮了一条未读消息”，不会把主角突然换成 Aidan。</li>
+      <li><strong>人物状态更一致</strong>：上一段里谁在做什么、什么情绪，能直接继承。</li>
+      <li><strong>实现简单</strong>：数据库里已经存了 <code>storyZh</code>，只需改 prompt 模板和传参。</li>
+    </ul>
+
+    <p class="muted"><strong>代价/风险</strong></p>
+    <ul>
+      <li><strong>token 变长，成本上升</strong>：每续写一次都要多付上一段正文的长度。故事长了之后会更明显。</li>
+      <li><strong>仍然看不到更早的情节</strong>：只能保证“上一段 → 下一段”连贯，第 5 段和第 1 段的人物关系仍可能脱钩。</li>
+      <li><strong>AI 可能照搬/复述</strong>：如果 prompt 没写好，AI 容易把上一段内容又改头换面写一遍，而不是推进剧情。</li>
+    </ul>
+
+    <p class="muted"><strong>适合场景</strong></p>
+    <p>想低成本先把“相邻两段不断线”这个问题解决掉。</p>
+
+    <h3>2. 给每段生成剧情摘要，续写时喂最近 3–5 段摘要</h3>
+    <p class="muted"><strong>实现方式</strong></p>
+    <p>每次生成新段落后，让 AI（或规则）生成一句“剧情摘要”，例如：</p>
+    <blockquote>老王收到匿名消息，Aidan 偷瞄被发现，小马调侃老王。</blockquote>
+    <p>后续续写时，prompt 里带上最近 N 条摘要 + 上一段完整正文 + 用户回答。</p>
+
+    <p class="muted"><strong>优点</strong></p>
+    <ul>
+      <li><strong>长程记忆</strong>：AI 能记住 5 段之前的关键事件，人物关系和伏笔不容易丢。</li>
+      <li><strong>token 可控</strong>：摘要比全文短很多，story 长了也不爆炸。</li>
+      <li><strong>方便做“往期章节”</strong>：摘要可以直接用来展示章节梗概。</li>
+    </ul>
+
+    <p class="muted"><strong>代价/风险</strong></p>
+    <ul>
+      <li><strong>需要多一次 AI 调用</strong>：每生成一段后，再调用一次生成摘要，延迟和成本都增加。</li>
+      <li><strong>摘要质量不可控</strong>：如果摘要漏了关键细节，后续剧情会沿着错误方向走。</li>
+      <li><strong>实现复杂度高</strong>：需要新增 <code>segment_summary_zh/en</code> 字段，新增 API 逻辑，还要考虑失败回退。</li>
+    </ul>
+
+    <p class="muted"><strong>适合场景</strong></p>
+    <p>故事经常写很长（10 段以上），需要保持跨段连贯。</p>
+
+    <h3>3. 限制用户输入必须回应上一段的问题</h3>
+    <p class="muted"><strong>实现方式</strong></p>
+    <p>前端或后端加一个校验：如果 <code>userInput</code> 和 <code>latestQuestion</code> 明显无关，就拒绝提交并提示“请回应 AI 的问题”。可以用简单规则（关键词匹配）或让 AI 判断相关性。</p>
+
+    <p class="muted"><strong>优点</strong></p>
+    <ul>
+      <li><strong>强制连贯</strong>：用户不能突然把故事拐到火星，剧情发展方向可控。</li>
+      <li><strong>减少 AI 乱编</strong>：输入越贴近问题，AI 越容易写出合理的续写。</li>
+      <li><strong>体验一致</strong>：每个用户都在回答同一个悬念，故事更像“接力”。</li>
+    </ul>
+
+    <p class="muted"><strong>代价/风险</strong></p>
+    <ul>
+      <li><strong>挫败感</strong>：用户可能想自由发挥，被拦截会觉得 rigid。</li>
+      <li><strong>判断容易出错</strong>：规则太严会误杀；用 AI 判断又增加延迟和成本。</li>
+      <li><strong>失去惊喜</strong>：故事接力的魅力之一是用户把剧情带到 AI 想不到的地方，全限制住就太 scripted。</li>
+    </ul>
+
+    <p class="muted"><strong>适合场景</strong></p>
+    <p>当前最大问题是“用户输入和上一段脱节”，想先快速止血。</p>
+
+    <h3>4. 用结构化状态表（焦点人物、悬念、人物关系）</h3>
+    <p class="muted"><strong>实现方式</strong></p>
+    <p>维护一个 JSON 状态对象，每次生成后更新：</p>
+    <pre><code>{
+  "focusCharacter": "老王",
+  "openQuestion": "未读消息是谁发的？",
+  "mood": "悬疑、轻松",
+  "relationships": {
+    "Aidan-老王": "互相调侃",
+    "Ethan-小刘": "Ethan 捉弄小刘"
+  }
+}</code></pre>
+    <p>续写 prompt 里把这张表作为系统提示一起给 AI，并要求 AI 生成时也输出更新后的状态表。</p>
+
+    <p class="muted"><strong>优点</strong></p>
+    <ul>
+      <li><strong>最强的连贯性</strong>：AI 明确知道“现在主线是谁、悬念是什么、人物关系如何”，不容易跑偏。</li>
+      <li><strong>方便人工干预</strong>：你可以在 admin 页面直接改状态表，手动纠正剧情。</li>
+      <li><strong>可做剧情推荐</strong>：根据焦点人物和关系，AI 生成的 suggestions 会更贴合。</li>
+    </ul>
+
+    <p class="muted"><strong>代价/风险</strong></p>
+    <ul>
+      <li><strong>实现最重</strong>：需要新增表/字段、状态解析逻辑、状态更新逻辑、错误回退。</li>
+      <li><strong>AI 可能不遵守</strong>：要求 AI 每次输出状态更新，需要更复杂的 JSON schema，解析失败率上升。</li>
+      <li><strong>灵活性下降</strong>：故事被框在状态表里，意外转折和群像戏会变少。</li>
+      <li><strong>需要 prompt engineering</strong>：状态怎么用、怎么更新，要反复调。</li>
+    </ul>
+
+    <p class="muted"><strong>适合场景</strong></p>
+    <p>故事接力长期运营，剧情复杂、人物多，愿意投入开发量。</p>
+
+    <h2>对比总览</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>方向</th>
+          <th>开发量</th>
+          <th>连贯性提升</th>
+          <th>灵活性损失</th>
+          <th>成本增加</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>只喂上一段正文</td>
+          <td>小</td>
+          <td>中</td>
+          <td>小</td>
+          <td>中</td>
+        </tr>
+        <tr>
+          <td>维护剧情摘要</td>
+          <td>中</td>
+          <td>高</td>
+          <td>小</td>
+          <td>高</td>
+        </tr>
+        <tr>
+          <td>限制用户输入</td>
+          <td>小</td>
+          <td>中</td>
+          <td>高</td>
+          <td>低</td>
+        </tr>
+        <tr>
+          <td>结构化状态表</td>
+          <td>大</td>
+          <td>最高</td>
+          <td>中</td>
+          <td>中</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>建议</h2>
+    <p><strong>先做方向 1（喂上一段正文）</strong>，这是投入产出比最高的；如果后续还出现长程脱线，再考虑方向 2（摘要）或方向 4（状态表）。方向 3 可以作为临时止血，但长期用会太死板。</p>
+  </div>
+</body>
+</html>

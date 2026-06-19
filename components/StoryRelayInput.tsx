@@ -43,7 +43,7 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
       {questionText && (
         <div className="mb-6 border-l-2 border-[#c9a227] pl-4">
           <div className="mb-1 text-xs uppercase tracking-widest text-[#888]">{questionLabel}</div>
-          <p className="text-lg leading-relaxed text-[#d4d4d4]">{questionText}</p>
+          <p className="text-lg font-semibold leading-relaxed text-[#c9a227]">{questionText}</p>
         </div>
       )}
 

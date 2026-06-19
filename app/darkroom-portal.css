@@ -426,6 +426,31 @@
   justify-content: center;
 }
 
+.darkroom-chat-header-fullscreen {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0;
+  justify-content: initial;
+}
+
+.darkroom-chat-header-fullscreen .darkroom-chat-back {
+  justify-self: start;
+}
+
+.darkroom-chat-header-fullscreen .darkroom-chat-header-extra {
+  justify-self: end;
+}
+
+.darkroom-chat-header-fullscreen .darkroom-chat-signal-center {
+  position: static;
+  left: auto;
+  transform: none;
+  justify-self: center;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
 .darkroom-chat-back {
   color: #8a7020;
   font-size: clamp(11px, 3.2vw, 13px);

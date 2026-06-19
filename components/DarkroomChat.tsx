@@ -422,14 +422,14 @@ export default function DarkroomChat({
       <div className={rootClass} ref={terminalRef}>
         <div className="darkroom-chat-display" ref={displayRef}>
           {/* Fullscreen header */}
-          <div className="darkroom-chat-header">
+          <div className="darkroom-chat-header darkroom-chat-header-fullscreen">
             {onBack && (
               <button className="darkroom-chat-back" onClick={onBack} type="button">
                 {isZh ? '← 返回' : '← Back'}
               </button>
             )}
             <SignalHeader isZh={isZh} centered />
-            {header}
+            {header && <div className="darkroom-chat-header-extra">{header}</div>}
           </div>
 
           <div className="darkroom-chat-screen" ref={scrollRef}>

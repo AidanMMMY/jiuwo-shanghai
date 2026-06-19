@@ -27,7 +27,9 @@ export function StoryRelayContributors({ contributors, isMobile, isZh }: { contr
                 <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#c9a227]" />
                 <div>
                   <div className="text-sm text-[#f5f5f0]">{c.name}</div>
-                  <div className="text-xs text-[#888]">段 {c.segments.join(', ')}</div>
+                  <div className="text-xs text-[#888]">
+                    {isZh ? '段' : 'Segment'} {c.segments.join(', ')}
+                  </div>
                 </div>
               </div>
             ))}

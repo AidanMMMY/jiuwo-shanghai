@@ -17,7 +17,7 @@ export default async function StoryRelayPageZh() {
   const contributors = buildContributors(segments);
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] px-4 py-12 text-[#f5f5f0]">
+    <main className="min-h-screen bg-[#0a0a0a] px-4 pt-20 pb-12 text-[#f5f5f0] md:pt-24">
       <div className="mx-auto flex max-w-6xl gap-8">
         <StoryRelayTerminal
           initialSegments={segments}

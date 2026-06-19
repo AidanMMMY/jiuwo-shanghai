@@ -75,6 +75,16 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh 
 
   return (
     <div className="mx-auto max-w-[680px]">
+      <div className="mb-4">
+        <Link
+          href={isZh ? '/zh' : '/'}
+          className="inline-flex items-center gap-1 text-xs text-[#888] hover:text-[#c9a227] transition-colors"
+        >
+          <span aria-hidden="true">←</span>
+          {isZh ? '返回首页' : 'Back to home'}
+        </Link>
+      </div>
+
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-wide text-[#c9a227]">
           {isZh ? '啾喔故事接力' : 'Story Relay'}

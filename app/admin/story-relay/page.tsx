@@ -51,6 +51,8 @@ export default async function StoryRelayAdminPage({ searchParams }: PageProps) {
       suggestion1En: generated.suggestion1En,
       suggestion2Zh: generated.suggestion2Zh,
       suggestion2En: generated.suggestion2En,
+      suggestion3Zh: generated.suggestion3Zh,
+      suggestion3En: generated.suggestion3En,
       sessionId: null,
     });
 

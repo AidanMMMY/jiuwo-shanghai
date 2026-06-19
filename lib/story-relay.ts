@@ -13,6 +13,8 @@ export interface StorySegment {
   suggestion1En: string | null;
   suggestion2Zh: string | null;
   suggestion2En: string | null;
+  suggestion3Zh: string | null;
+  suggestion3En: string | null;
   sessionId: string | null;
   createdAt: string;
 }
@@ -57,6 +59,8 @@ function rowToSegment(row: Record<string, unknown>): StorySegment {
     suggestion1En: row.suggestion_1_en as string | null,
     suggestion2Zh: row.suggestion_2_zh as string | null,
     suggestion2En: row.suggestion_2_en as string | null,
+    suggestion3Zh: row.suggestion_3_zh as string | null,
+    suggestion3En: row.suggestion_3_en as string | null,
     sessionId: row.session_id as string | null,
     createdAt: toIsoString(row.created_at),
   };
@@ -80,10 +84,10 @@ export async function insertSegment(segment: Omit<StorySegment, 'id' | 'createdA
   const result = await sql`
     INSERT INTO story_relay_segments (
       sequence, author_name, user_prompt, ai_question_zh, ai_question_en,
-      story_zh, story_en, suggestion_1_zh, suggestion_1_en, suggestion_2_zh, suggestion_2_en, session_id
+      story_zh, story_en, suggestion_1_zh, suggestion_1_en, suggestion_2_zh, suggestion_2_en, suggestion_3_zh, suggestion_3_en, session_id
     ) VALUES (
       ${segment.sequence}, ${segment.authorName}, ${segment.userPrompt}, ${segment.aiQuestionZh}, ${segment.aiQuestionEn},
-      ${segment.storyZh}, ${segment.storyEn}, ${segment.suggestion1Zh}, ${segment.suggestion1En}, ${segment.suggestion2Zh}, ${segment.suggestion2En}, ${segment.sessionId}
+      ${segment.storyZh}, ${segment.storyEn}, ${segment.suggestion1Zh}, ${segment.suggestion1En}, ${segment.suggestion2Zh}, ${segment.suggestion2En}, ${segment.suggestion3Zh}, ${segment.suggestion3En}, ${segment.sessionId}
     )
     RETURNING *
   `;

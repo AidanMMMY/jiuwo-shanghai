@@ -18,6 +18,8 @@ interface Segment {
   suggestion1En?: string | null;
   suggestion2Zh?: string | null;
   suggestion2En?: string | null;
+  suggestion3Zh?: string | null;
+  suggestion3En?: string | null;
 }
 
 interface Contributor {
@@ -42,6 +44,7 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh 
     ? [
         { zh: latestSegment.suggestion1Zh || null, en: latestSegment.suggestion1En || null },
         { zh: latestSegment.suggestion2Zh || null, en: latestSegment.suggestion2En || null },
+        { zh: latestSegment.suggestion3Zh || null, en: latestSegment.suggestion3En || null },
       ]
     : [];
 

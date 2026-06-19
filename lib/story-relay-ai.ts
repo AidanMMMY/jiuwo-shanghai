@@ -23,6 +23,8 @@ export interface StoryRelayResponse {
   suggestion1En: string;
   suggestion2Zh: string;
   suggestion2En: string;
+  suggestion3Zh: string;
+  suggestion3En: string;
 }
 
 export const OPENING_PROMPT = `你是 JIUWO（啾喔）酒吧的驻场 storyteller。JIUWO 是上海巨鹿路 397 号一家 gay bar，客群以男同性恋为主，氛围像"朋友的客厅"。请用以下人名：{names}，围绕酒吧写一段 300-500 字的开头。
@@ -32,8 +34,8 @@ export const OPENING_PROMPT = `你是 JIUWO（啾喔）酒吧的驻场 storytell
 3. 故事要分段，每段 2-3 句话，段落之间用换行符（\\n）分隔，增强可读性。
 4. 性别与取向：Mavis、摄影、梦子用"她"；小刘和卡特是直男；其他男性角色默认是 gay，用"他"。英文里 Mavis, Sheying, Mengzi 用 she/her；Xiao Liu 和 Carter（卡特）是 straight men；其他男性用 he/him。
 5. 结尾提出一个开放性问题。
-6. 给出两个剧情建议方向（A / B），每个建议一句话，聚焦剧情走向，不要细节描写、动作描写或场景描写。
-7. 输出 JSON：{ storyZh, storyEn, questionZh, questionEn, suggestion1Zh, suggestion1En, suggestion2Zh, suggestion2En }
+6. 给出三个剧情建议方向（A / B / C），每个建议一句话，聚焦剧情走向，不要细节描写、动作描写或场景描写。
+7. 输出 JSON：{ storyZh, storyEn, questionZh, questionEn, suggestion1Zh, suggestion1En, suggestion2Zh, suggestion2En, suggestion3Zh, suggestion3En }
 8. 中英文都要自然、有文学感，不要直译。
 9. 故事可以暧昧、性感、有情欲张力，允许对身体和性器官使用暗示性、文学化的描写，但避免直白、机械、色情片的写法。保持文学感和留白。`;
 
@@ -53,7 +55,7 @@ export const CONTINUE_PROMPT = `你是 JIUWO（啾喔）酒吧的驻场 storytel
 8. 中英文都要自然、有文学感，不要直译。
 9. 故事可以暧昧、性感、有情欲张力，允许对身体和性器官使用暗示性、文学化的描写，但避免直白、机械、色情片的写法。保持文学感和留白。`;
 
-const OUTPUT_SCHEMA = `{ "storyZh": "...", "storyEn": "...", "questionZh": "...", "questionEn": "...", "suggestion1Zh": "...", "suggestion1En": "...", "suggestion2Zh": "...", "suggestion2En": "..." }`;
+const OUTPUT_SCHEMA = `{ "storyZh": "...", "storyEn": "...", "questionZh": "...", "questionEn": "...", "suggestion1Zh": "...", "suggestion1En": "...", "suggestion2Zh": "...", "suggestion2En": "...", "suggestion3Zh": "...", "suggestion3En": "..." }`;
 
 export function buildOpeningPrompt(names: string[]): string {
   return OPENING_PROMPT.replace("{names}", names.join("、"));
@@ -79,7 +81,7 @@ export function parseStoryRelayResponse(raw: string): StoryRelayResponse | null 
   if (!parsed) return null;
   const keys: (keyof StoryRelayResponse)[] = [
     "storyZh", "storyEn", "questionZh", "questionEn",
-    "suggestion1Zh", "suggestion1En", "suggestion2Zh", "suggestion2En",
+    "suggestion1Zh", "suggestion1En", "suggestion2Zh", "suggestion2En", "suggestion3Zh", "suggestion3En",
   ];
   for (const key of keys) {
     const value = parsed[key];

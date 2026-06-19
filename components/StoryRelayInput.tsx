@@ -65,7 +65,7 @@ export function StoryRelayInput({ suggestions, onSubmit, disabled, isZh }: Story
                   key={idx}
                   type="button"
                   onClick={() => setUserInput(text)}
-                  className="w-full rounded border border-[#3a3a3a] px-3 py-2 text-left text-sm text-[#c9a227] hover:border-[#c9a227]"
+                  className="w-full rounded border border-[#3a3a3a] px-3 py-2.5 text-left text-base text-[#c9a227] hover:border-[#c9a227]"
                 >
                   {String.fromCharCode(65 + idx)}. {text}
                 </button>

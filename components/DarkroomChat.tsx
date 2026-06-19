@@ -409,13 +409,6 @@ export default function DarkroomChat({
     </div>
   );
 
-  const embeddedScreenContent = (
-    <>
-      {entriesContent}
-      {inputLine}
-    </>
-  );
-
   // ── Fullscreen mode ──
   if (mode === 'fullscreen') {
     return (
@@ -449,8 +442,9 @@ export default function DarkroomChat({
         <SignalHeader isZh={isZh} />
       </div>
       <div className="darkroom-chat-screen" ref={scrollRef}>
-        {embeddedScreenContent}
+        {entriesContent}
       </div>
+      {inputLine}
     </div>
   );
 }

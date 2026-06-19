@@ -26,7 +26,13 @@ export function StoryRelaySegment({
   return (
     <div className="mb-8 border-l-2 border-[#2a2a2a] pl-5 last:mb-0">
       <div className="mb-2 text-xs uppercase tracking-widest text-[#888]">{segmentLabel}</div>
-      <p className="mb-4 text-lg leading-relaxed text-[#f5f5f0]">{story}</p>
+      {story.split(/\n+/).map((paragraph, i) =>
+        paragraph.trim() ? (
+          <p key={i} className="mb-4 text-lg leading-relaxed text-[#f5f5f0] last:mb-0">
+            {paragraph.trim()}
+          </p>
+        ) : null
+      )}
       {isLatest && question && (
         <div className="rounded border border-[#2a2a2a] bg-[#151515] p-4">
           <div className="mb-2 text-xs uppercase tracking-widest text-[#888]">{questionLabel}</div>

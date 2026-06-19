@@ -81,7 +81,7 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh 
           className="inline-flex items-center gap-1 text-xs text-[#888] hover:text-[#c9a227] transition-colors"
         >
           <span aria-hidden="true">←</span>
-          {isZh ? '返回首页' : 'Back to home'}
+          {isZh ? '返回' : 'Back'}
         </Link>
       </div>
 

@@ -43,6 +43,9 @@ next-env.d.ts
 # vercel
 .vercel
 
+# local webui secret
+.webui_secret_key
+
 # macOS finder duplicates
 *\ 2/
 *\ 3/

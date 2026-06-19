@@ -32,7 +32,7 @@ export const OPENING_PROMPT = `你是 JIUWO（啾喔）酒吧的驻场 storytell
 3. 故事要分段，每段 2-3 句话，段落之间用换行符（\\n）分隔，增强可读性。
 4. 性别代词注意：Mavis、摄影、梦子用"她"，其他角色用"他"。英文里 Mavis, Sheying, Mengzi 用 she/her，其他用 he/him。
 5. 结尾提出一个开放性问题。
-6. 给出两个建议方向。
+6. 给出两个剧情建议方向（A / B），每个建议一句话，聚焦剧情走向，不要细节描写、动作描写或场景描写。
 7. 输出 JSON：{ storyZh, storyEn, questionZh, questionEn, suggestion1Zh, suggestion1En, suggestion2Zh, suggestion2En }
 8. 中英文都要自然、有文学感，不要直译。
 9. 故事可以暧昧、性感、有情欲张力，允许对身体和性器官使用暗示性、文学化的描写，但避免直白、机械、色情片的写法。保持文学感和留白。`;
@@ -48,7 +48,7 @@ export const CONTINUE_PROMPT = `你是 JIUWO（啾喔）酒吧的驻场 storytel
 3. 故事要分段，每段 2-3 句话，段落之间用换行符（\\n）分隔，增强可读性。
 4. 性别代词注意：Mavis、摄影、梦子用"她"，其他角色用"他"。英文里 Mavis, Sheying, Mengzi 用 she/her，其他用 he/him。
 5. 结尾提出一个开放性问题，推动剧情。
-6. 同时给出两个简短的剧情建议方向（A / B）。
+6. 同时给出两个剧情建议方向（A / B），每个建议一句话，聚焦剧情走向，不要细节描写、动作描写或场景描写。
 7. 输出 JSON：{ storyZh, storyEn, questionZh, questionEn, suggestion1Zh, suggestion1En, suggestion2Zh, suggestion2En }
 8. 中英文都要自然、有文学感，不要直译。
 9. 故事可以暧昧、性感、有情欲张力，允许对身体和性器官使用暗示性、文学化的描写，但避免直白、机械、色情片的写法。保持文学感和留白。`;

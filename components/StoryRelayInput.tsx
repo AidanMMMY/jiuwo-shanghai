@@ -22,50 +22,67 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
 
   const questionText = isZh ? latestQuestion?.zh : latestQuestion?.en;
   const inputLabels = {
-    yourTurn: isZh ? '轮到你了' : 'Your turn',
-    namePlaceholder: isZh ? '你的名字（首次提交后将很难更改）' : 'Your name (hard to change later)',
-    inputPlaceholder: isZh ? '回答 AI 的问题，或提出你的要求...' : 'Answer the question or steer the story...',
+    nameLabel: isZh ? '你的名字' : 'Your name',
+    namePlaceholder: isZh ? '首次提交后将很难更改' : 'Hard to change later',
+    inputPlaceholder: isZh ? '写下你的续写，或提出你想让故事怎么发展...' : 'Write your continuation, or steer the story...',
     submit: isZh ? '续写故事' : 'Continue story',
     submitting: isZh ? '续写中...' : 'Continuing...',
   };
+  const hintText = isZh
+    ? '不想自己写？直接选一个剧情方向：'
+    : "Don't want to write? Pick a direction:";
 
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border border-[#2a2a2a] bg-[#151515] p-5">
-      <div className="mb-3 text-xs uppercase tracking-widest text-[#888]">{inputLabels.yourTurn}</div>
       {questionText && (
-        <div className="mb-4">
-          <p className="text-lg text-[#f5f5f0]">{questionText}</p>
+        <div className="mb-5">
+          <p className="text-lg leading-relaxed text-[#f5f5f0]">{questionText}</p>
         </div>
       )}
-      <div className="mb-3 flex flex-wrap gap-2">
-        {suggestions.map((s, idx) => {
-          const text = isZh ? s.zh : s.en;
-          return text ? (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => setUserInput(text)}
-              className="rounded border border-[#3a3a3a] px-3 py-1 text-sm text-[#c9a227] hover:border-[#c9a227]"
-            >
-              {String.fromCharCode(65 + idx)}. {text}
-            </button>
-          ) : null;
-        })}
+
+      <div className="mb-3">
+        <label className="mb-1 flex items-center gap-1 text-xs text-[#888]">
+          {inputLabels.nameLabel}
+          <span className="text-red-400">*</span>
+        </label>
+        <input
+          type="text"
+          value={authorName}
+          onChange={(e) => setAuthorName(e.target.value)}
+          placeholder={inputLabels.namePlaceholder}
+          className="w-full rounded border border-[#2a2a2a] bg-[#0a0a0a] px-3 py-2 text-[#f5f5f0] placeholder:text-[#555] focus:border-[#c9a227] focus:outline-none"
+        />
       </div>
-      <input
-        type="text"
-        value={authorName}
-        onChange={(e) => setAuthorName(e.target.value)}
-        placeholder={inputLabels.namePlaceholder}
-        className="mb-3 w-full rounded border border-[#2a2a2a] bg-[#0a0a0a] px-3 py-2 text-[#f5f5f0] placeholder:text-[#555] focus:border-[#c9a227] focus:outline-none"
-      />
+
       <textarea
         value={userInput}
         onChange={(e) => setUserInput(e.target.value)}
         placeholder={inputLabels.inputPlaceholder}
         rows={4}
-        className="mb-3 w-full rounded border border-[#2a2a2a] bg-[#0a0a0a] px-3 py-2 text-[#f5f5f0] placeholder:text-[#555] focus:border-[#c9a227] focus:outline-none"
+        className="mb-4 w-full rounded border border-[#2a2a2a] bg-[#0a0a0a] px-3 py-2 text-[#f5f5f0] placeholder:text-[#555] focus:border-[#c9a227] focus:outline-none"
       />
+
+      {suggestions.some((s) => (isZh ? s.zh : s.en)) && (
+        <div className="mb-4">
+          <p className="mb-2 text-xs text-[#888]">{hintText}</p>
+          <div className="flex flex-col gap-2">
+            {suggestions.map((s, idx) => {
+              const text = isZh ? s.zh : s.en;
+              return text ? (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setUserInput(text)}
+                  className="w-full rounded border border-[#3a3a3a] px-3 py-2 text-left text-sm text-[#c9a227] hover:border-[#c9a227]"
+                >
+                  {String.fromCharCode(65 + idx)}. {text}
+                </button>
+              ) : null;
+            })}
+          </div>
+        </div>
+      )}
+
       <button
         type="submit"
         disabled={disabled || !authorName.trim() || !userInput.trim()}

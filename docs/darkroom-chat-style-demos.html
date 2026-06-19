@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Darkroom Chat 样式方案示意</title>
+  <style>
+    :root {
+      --bg-page: #030303;
+      --bg-terminal: #080808;
+      --bg-screen: #050505;
+      --text-main: #c0d0d0;
+      --text-dim: #5a7a7a;
+      --text-system: #4a6a6a;
+      --accent: #c9a227;
+      --accent-cold: #6a8a8a;
+      --border: #1a1a1a;
+      --font-mono: "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Share Tech Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      padding: 48px 24px;
+    }
+
+    h1 {
+      font-size: 18px;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      margin: 0 0 8px;
+      font-weight: 400;
+    }
+
+    .intro {
+      max-width: 960px;
+      margin: 0 auto 48px;
+      color: var(--text-dim);
+    }
+
+    .intro p { margin: 0 0 12px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 1024px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .scheme {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      background: rgba(10, 10, 10, 0.6);
+    }
+
+    .scheme-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    .scheme-note {
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* ── 通用 terminal 结构 ── */
+    .terminal {
+      width: 100%;
+      height: 420px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .screen {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 18px;
+    }
+
+    .entry {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meta {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--text-system);
+    }
+
+    .body {
+      color: var(--text-main);
+      padding-left: 12px;
+      border-left: 1px solid #1a2a2a;
+    }
+
+    .body.observer {
+      border-left-color: var(--accent-cold);
+      color: #d8e0e0;
+    }
+
+    .input-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 7px;
+      height: 14px;
+      background: var(--accent-cold);
+      animation: blink 1.2s step-end infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── 方案 A：当前扁平风格 ── */
+    .scheme-a .terminal {
+      background: #020202;
+      border-radius: 12px;
+      border: 1px solid #111;
+    }
+
+    /* ── 方案 B：CRT 外框 + 状态栏 ── */
+    .scheme-b .terminal {
+      background: #0a0a0a;
+      border-radius: 18px;
+      padding: 10px;
+      box-shadow:
+        inset 0 0 24px rgba(0,0,0,0.9),
+        0 0 0 1px #1a1a1a,
+        0 0 0 3px #0a0a0a,
+        0 0 40px rgba(106,138,138,0.06);
+    }
+
+    .scheme-b .bezel-screen {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-screen);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .scheme-b .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      border-bottom: 1px solid #111;
+      background: linear-gradient(180deg, rgba(20,20,20,0.5), transparent);
+    }
+
+    .scheme-b .status-bar .freq { color: var(--accent); }
+
+    .scheme-b .scanlines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.25) 2px,
+        rgba(0,0,0,0.25) 4px
+      );
+      opacity: 0.4;
+      z-index: 2;
+    }
+
+    .scheme-b .vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at center, transparent 50%, rgba(0,0,0,0.5) 100%);
+      z-index: 3;
+    }
+
+    /* ── 方案 C：层次玻璃 + 侧光 ── */
+    .scheme-c .terminal {
+      background: #080808;
+      border-radius: 20px;
+      border: 1px solid #151515;
+      box-shadow:
+        0 24px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(106,138,138,0.08);
+    }
+
+    .scheme-c .screen {
+      background: rgba(5,5,5,0.85);
+      margin: 10px;
+      border-radius: 14px;
+      border: 1px solid #111;
+    }
+
+    .scheme-c .body {
+      border-left-width: 2px;
+      padding-left: 14px;
+    }
+
+    .scheme-c .body.system { border-left-color: #2a2a2a; color: var(--text-dim); }
+    .scheme-c .body.observer { border-left-color: var(--accent); color: #e8e8d0; }
+    .scheme-c .body.user { border-left-color: var(--accent-cold); color: var(--text-main); }
+
+    .scheme-c .input-line {
+      background: rgba(5,5,5,0.85);
+      margin: 0 10px 10px;
+      border-radius: 14px;
+      border-top: none;
+      border: 1px solid #111;
+    }
+
+    /* ── 方案 D：高对比 HUD ── */
+    .scheme-d .terminal {
+      background: #020202;
+      border-radius: 4px;
+      border: 1px solid #222;
+      box-shadow: 0 0 0 6px #0a0a0a, 0 0 30px rgba(0,0,0,0.8);
+    }
+
+    .scheme-d .hud-bar {
+      display: flex;
+      gap: 16px;
+      padding: 10px 16px;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      color: var(--text-system);
+      border-bottom: 1px solid #151515;
+      background: #050505;
+    }
+
+    .scheme-d .hud-bar span { display: inline-flex; align-items: center; gap: 6px; }
+
+    .scheme-d .hud-bar .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .scheme-d .entry + .entry { padding-top: 14px; border-top: 1px dashed #151515; }
+
+    .scheme-d .body { border-left: none; padding-left: 0; }
+    .scheme-d .body.system { color: var(--text-system); }
+    .scheme-d .body.observer { color: #d8e0e0; }
+
+    .scheme-d .input-line {
+      background: #050505;
+      border-top: 1px solid #151515;
+    }
+  </style>
+</head>
+<body>
+  <div class="intro">
+    <h1>DARKROOM CHAT / 样式方案示意</h1>
+    <p>下面是四种不同的暗房对话界面气质，只做视觉方向演示，没有接入真实逻辑。可以在浏览器里直接对比，看哪一种更接近你想要的“设备感”和“层次感”。</p>
+    <p>建议用桌面端和移动端分别看一下比例。</p>
+  </div>
+
+  <div class="grid">
+    <!-- 方案 A -->
+    <div class="scheme scheme-a">
+      <div class="scheme-label">A. 当前扁平风格</div>
+      <div class="terminal">
+        <div class="screen">
+          <div class="entry">
+            <div class="meta">[02:33:08] · 系统</div>
+            <div class="body system">非营业信号已保留</div>
+          </div>
+          <div class="entry">
+            <div class="meta">[02:33:09] · ? ? ?</div>
+            <div class="body observer">非营业时段的信号通常被忽略。你的这次没有被忽略。</div>
+          </div>
+          <div class="entry">
+            <div class="meta">[02:33:11] · 本地</div>
+            <div class="body user">侧门日志已写入。你目前处于未归档状态。</div>
+          </div>
+        </div>
+        <div class="input-line">
+          <span>&gt;</span>
+          <span>输入指令...</span>
+          <span class="cursor"></span>
+        </div>
+      </div>
+      <div class="scheme-note">和现有实现最接近，干净但缺少“屏幕”实体感，信息层级主要靠缩进和颜色区分。</div>
+    </div>
+
+    <!-- 方案 B -->
+    <div class="scheme scheme-b">
+      <div class="scheme-label">B. CRT 外框 + 状态栏</div>
+      <div class="terminal">
+        <div class="bezel-screen">
+          <div class="scanlines"></div>
+          <div class="vignette"></div>
+          <div class="status-bar">
+            <span class="freq">◉ 118.7 MHz</span>
+            <span>未追踪 · 营业时间外</span>
+            <span>SYNC OK</span>
+          </div>
+          <div class="screen">
+            <div class="entry">
+              <div class="meta">[02:33:08] · 系统</div>
+              <div class="body system">非营业信号已保留</div>
+            </div>
+            <div class="entry">
+              <div class="meta">[02:33:09] · ? ? ?</div>
+              <div class="body observer">非营业时段的信号通常被忽略。你的这次没有被忽略。</div>
+            </div>
+            <div class="entry">
+              <div class="meta">[02:33:11] · 本地</div>
+              <div class="body user">侧门日志已写入。你目前处于未归档状态。</div>
+            </div>
+          </div>
+          <div class="input-line">
+            <span>&gt;</span>
+            <span>输入指令...</span>
+            <span class="cursor"></span>
+          </div>
+        </div>
+      </div>
+      <div class="scheme-note">给对话框加上 CRT 显示器外壳、扫描线和边角暗角，顶部状态栏强化“接收机”印象。内部更暗，文字浮在屏幕之上。</div>
+    </div>
+
+    <!-- 方案 C -->
+    <div class="scheme scheme-c">
+      <div class="scheme-label">C. 层次玻璃 + 侧光</div>
+      <div class="terminal">
+        <div class="screen">
+          <div class="entry">
+            <div class="meta">[02:33:08] · 系统</div>
+            <div class="body system">非营业信号已保留</div>
+          </div>
+          <div class="entry">
+            <div class="meta">[02:33:09] · ? ? ?</div>
+            <div class="body observer">非营业时段的信号通常被忽略。你的这次没有被忽略。</div>
+          </div>
+          <div class="entry">
+            <div class="meta">[02:33:11] · 本地</div>
+            <div class="body user">侧门日志已写入。你目前处于未归档状态。</div>
+          </div>
+        </div>
+        <div class="input-line">
+          <span>&gt;</span>
+          <span>输入指令...</span>
+          <span class="cursor"></span>
+        </div>
+      </div>
+      <div class="scheme-note">终端像一块悬浮的玻璃，外层有柔光。屏幕区和输入区都有独立底色与边框；每条消息用左侧色块区分角色，层级更清楚。</div>
+    </div>
+
+    <!-- 方案 D -->
+    <div class="scheme scheme-d">
+      <div class="scheme-label">D. 高对比 HUD</div>
+      <div class="terminal">
+        <div class="hud-bar">
+          <span><span class="dot"></span> LIVE</span>
+          <span>118.7 MHz</span>
+          <span>OFF-AIR MODE</span>
+          <span>TRACE: NONE</span>
+        </div>
+        <div class="screen">
+          <div class="entry">
+            <div class="meta">[02:33:08] · 系统</div>
+            <div class="body system">非营业信号已保留</div>
+          </div>
+          <div class="entry">
+            <div class="meta">[02:33:09] · ? ? ?</div>
+            <div class="body observer">非营业时段的信号通常被忽略。你的这次没有被忽略。</div>
+          </div>
+          <div class="entry">
+            <div class="meta">[02:33:11] · 本地</div>
+            <div class="body user">侧门日志已写入。你目前处于未归档状态。</div>
+          </div>
+        </div>
+        <div class="input-line">
+          <span>&gt;</span>
+          <span>输入指令...</span>
+          <span class="cursor"></span>
+        </div>
+      </div>
+      <div class="scheme-note">更硬朗的军事/监控终端风格，顶部 HUD 信息密度更高，消息之间用虚线分隔。适合让 Darkroom 更像一个“后台监听界面”。</div>
+    </div>
+  </div>
+</body>
+</html>

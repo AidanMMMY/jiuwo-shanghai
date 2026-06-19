@@ -761,6 +761,9 @@ export function extractUserNameFromHistory(
 const FIRST_PERSON_ZH = /我/g;
 const FIRST_PERSON_EN = /\b(i|me|my|myself)\b/gi;
 
+const IDENTITY_REFUSAL_ZH = /(?:不用|算了|不想说|不方便|别问|保密|匿名|不要|没必要|跳过|无可奉告|不想告诉|不想讲|不说)/i;
+const IDENTITY_REFUSAL_EN = /\b(no|nah|pass|skip|rather not|don't want to|not comfortable|prefer not|anonymous|keep it private|none of your business)\b/i;
+
 /**
  * Count first-person references in a message.
  */
@@ -771,47 +774,71 @@ export function countFirstPersonReferences(text: string, isZh: boolean): number 
 }
 
 /**
- * Decide whether the bot should politely ask the user for their name.
- * Triggers only when:
- * - we do not already know the user's name,
- * - we have not already asked in this session,
- * - there are at least 3 user messages,
- * - first-person references appear often in recent turns.
+ * Detect when the user is explicitly declining to share their name/identity.
+ */
+export function isIdentityRefusal(text: string, isZh: boolean): boolean {
+  if (!text) return false;
+  return isZh ? IDENTITY_REFUSAL_ZH.test(text) : IDENTITY_REFUSAL_EN.test(text);
+}
+
+/**
+ * Decide whether the bot should ask the user for their name.
+ *
+ * Rules (mild version B):
+ * - Never ask if we already know the name or the user has declined.
+ * - Ask at most 3 times in one session.
+ * - First ask: after at least 2 user messages and 2 consecutive self-referential
+ *   messages, or at least 2 total first-person references.
+ * - Follow-up asks: at least 2 new user messages since the last probe, with at
+ *   least one first-person reference among them.
  */
 export function shouldAskIdentity(
   history: HistoryMessage[],
   isZh: boolean,
   userName: string,
-  identityProbeSent: boolean
+  probeCount: number,
+  declined: boolean,
+  lastProbeTurn: number
 ): boolean {
   if (userName) return false;
-  if (identityProbeSent) return false;
+  if (declined) return false;
+  if (probeCount >= 3) return false;
 
   const userMessages = history.filter((m) => m.role === "user" && m.content);
-  if (userMessages.length < 3) return false;
+  if (userMessages.length < 2) return false;
 
-  const recent = userMessages.slice(-3);
-  let messagesWithFirstPerson = 0;
-  let totalReferences = 0;
-
-  for (const msg of recent) {
-    const count = countFirstPersonReferences(msg.content, isZh);
-    if (count > 0) messagesWithFirstPerson++;
-    totalReferences += count;
+  if (probeCount === 0) {
+    const recent = userMessages.slice(-2);
+    const messagesWithFirstPerson = recent.filter(
+      (m) => countFirstPersonReferences(m.content, isZh) > 0
+    ).length;
+    const totalReferences = userMessages.reduce(
+      (sum, m) => sum + countFirstPersonReferences(m.content, isZh),
+      0
+    );
+    return messagesWithFirstPerson >= 2 || totalReferences >= 2;
   }
 
-  return messagesWithFirstPerson >= 2 || totalReferences >= 4;
+  // Follow-up: need some spacing and continued self-reference.
+  const sinceLast = userMessages.slice(lastProbeTurn);
+  if (sinceLast.length < 2) return false;
+  const selfRefsSince = sinceLast.reduce(
+    (sum, m) => sum + countFirstPersonReferences(m.content, isZh),
+    0
+  );
+  return selfRefsSince > 0;
 }
 
 /**
- * Build a soft, boundary-aware instruction that encourages the user to share
- * their name without pressure.
+ * Pick a probe prompt that varies by attempt count so the bot doesn't sound
+ * like a broken record.
  */
-export function buildIdentityProbeInstruction(isZh: boolean): string {
-  if (isZh) {
-    return `[身份提示] 聊了几句，系统还不知道该怎么称呼这位用户。请在回复末尾很自然、很有礼貌地问一次："如果你愿意，可以告诉我该怎么称呼你？不方便也完全没关系。" 只问一次，不要反复追问，也不要让用户感到被盘问。`;
-  }
-  return `[Identity prompt] We've chatted a few turns and the system still doesn't know what to call this user. Naturally and politely ask once: "If you're comfortable, feel free to tell me what I should call you — no pressure at all." Ask only once; do not push or repeat.`;
+export function selectIdentityProbePrompt(
+  prompts: string[],
+  probeCount: number
+): string {
+  if (!prompts.length) return "";
+  return prompts[probeCount % prompts.length];
 }
 
 // ── TopicLock output parsing ───────────────────────────────────────────

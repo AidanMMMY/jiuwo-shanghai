@@ -906,6 +906,9 @@ export interface SessionState {
   last_user_intent?: string;
   user_identity?: string;
   identity_probe_sent?: boolean;
+  identity_probe_count?: number;
+  identity_probe_declined?: boolean;
+  identity_probe_last_turn?: number;
   updated_at: string;
 }
 
@@ -920,6 +923,9 @@ export async function ensureSessionsTable(): Promise<void> {
       last_user_intent VARCHAR(32),
       user_identity  VARCHAR(64),
       identity_probe_sent BOOLEAN NOT NULL DEFAULT FALSE,
+      identity_probe_count INTEGER NOT NULL DEFAULT 0,
+      identity_probe_declined BOOLEAN NOT NULL DEFAULT FALSE,
+      identity_probe_last_turn INTEGER,
       created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
@@ -927,6 +933,9 @@ export async function ensureSessionsTable(): Promise<void> {
   await sql`ALTER TABLE darkroom_sessions ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`;
   await sql`ALTER TABLE darkroom_sessions ADD COLUMN IF NOT EXISTS user_identity VARCHAR(64)`;
   await sql`ALTER TABLE darkroom_sessions ADD COLUMN IF NOT EXISTS identity_probe_sent BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE darkroom_sessions ADD COLUMN IF NOT EXISTS identity_probe_count INTEGER NOT NULL DEFAULT 0`;
+  await sql`ALTER TABLE darkroom_sessions ADD COLUMN IF NOT EXISTS identity_probe_declined BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE darkroom_sessions ADD COLUMN IF NOT EXISTS identity_probe_last_turn INTEGER`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_sessions_id ON darkroom_sessions(session_id)`;
 }
 
@@ -936,7 +945,7 @@ export async function getSessionState(
   await ensureSessionsTable();
   const sql = getSql();
   const result = await sql`
-    SELECT session_id, summary, primary_entity, last_user_intent, user_identity, identity_probe_sent, updated_at
+    SELECT session_id, summary, primary_entity, last_user_intent, user_identity, identity_probe_sent, identity_probe_count, identity_probe_declined, identity_probe_last_turn, updated_at
     FROM darkroom_sessions
     WHERE session_id = ${sessionId}
   `;
@@ -963,6 +972,38 @@ export async function upsertSessionState(
     RETURNING session_id, summary, primary_entity, last_user_intent, user_identity, identity_probe_sent, updated_at
   `;
   return result.rows[0] as SessionState;
+}
+
+export async function updateIdentityProbeState(
+  sessionId: string,
+  state: {
+    count?: number;
+    declined?: boolean;
+    lastTurn?: number;
+  }
+): Promise<void> {
+  await ensureSessionsTable();
+  if (state.count === undefined && state.declined === undefined && state.lastTurn === undefined) {
+    return;
+  }
+  const sql = getSql();
+  const setClauses: string[] = [];
+  const values: (number | boolean | string)[] = [];
+  if (state.count !== undefined) {
+    values.push(state.count);
+    setClauses.push(`identity_probe_count = $${values.length}`);
+  }
+  if (state.declined !== undefined) {
+    values.push(state.declined);
+    setClauses.push(`identity_probe_declined = $${values.length}`);
+  }
+  if (state.lastTurn !== undefined) {
+    values.push(state.lastTurn);
+    setClauses.push(`identity_probe_last_turn = $${values.length}`);
+  }
+  values.push(sessionId);
+  const query = `UPDATE darkroom_sessions SET ${setClauses.join(", ")}, updated_at = NOW() WHERE session_id = $${values.length}`;
+  await sql.query(query, values);
 }
 
 export async function getSessionIdentities(

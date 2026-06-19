@@ -19,6 +19,7 @@ export interface DarkroomData {
   systemPrompt: string;
   extractionPrompt: string;
   fallbackResponses: Record<string, string>;
+  identityProbePrompts: string[];
 }
 
 export function getDarkroomData(isZh?: boolean): DarkroomData {

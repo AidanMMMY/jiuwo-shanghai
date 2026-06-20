@@ -7,6 +7,7 @@ import { neon } from '@neondatabase/serverless';
 dotenv.config({ path: '.env.local' });
 
 const url = process.env.POSTGRES_URL || process.env.GUESTBOOK_POSTGRES_URL || process.env.DATABASE_URL;
+if (!url) throw new Error('POSTGRES_URL or DATABASE_URL is not set');
 const sql = neon(url, { fullResults: true });
 
 const BASE_URL = process.env.DARKROOM_BASE_URL || 'https://www.jiuwoshanghai.net';

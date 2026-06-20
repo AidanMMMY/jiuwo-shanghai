@@ -316,6 +316,13 @@ export async function POST(req: NextRequest) {
 - 保留用户原话中的相对时间描述，不要换算成绝对日期。例如「去年夏天」保留为「去年夏天」，不要写成「2025年夏天」。
 - 同时把时间描述词加入 keywords 数组，例如「去年夏天」、「最近」、「目前」、「计划中」。
 
+关系提取规则（重要）：
+- 当用户明确提到两人之间的关系时，必须在 relations 数组中输出对应关系。
+- 用户原话明确说「X 和 Y 在一起过」「X 是 Y 的前任」「X 和 Y 在约会」「X 喜欢 Y（且是恋爱意义上的喜欢）」「X 和 Y 睡过」等，都应输出具体关系类型。
+- 如果用户只是在问问题，或者系统猜测而用户没有确认，不要输出关系。
+- 尽量选择最具体的关系类型。优先级参考：ex（前任）> partner（伴侣/恋人）> lover（恋人/爱人）> fwb（炮友/床伴）> date（约会中/约会过）> affair（婚外情/外遇/私情）> friend（朋友）> colleague（同事）> sibling（兄弟姐妹）> knows（认识）> mentioned_with（一起被提到）。
+- 如果只知道两人一起被提到，但没有具体关系线索，使用 mentioned_with。
+
 输出格式改为单个 JSON 对象：
 {
   "memories": [...],
@@ -352,6 +359,13 @@ Temporal information:
 - If the user's message contains a time reference (e.g. "last summer", "last Wednesday", "recently", "before", "currently", "planning next month"), include that time reference at the beginning of the content field.
 - Keep the user's original relative time wording; do NOT convert it into an absolute date. For example, "last summer" stays "last summer", not "summer 2025".
 - Also add the time reference words to the keywords array, e.g. "last summer", "recently", "currently", "planning".
+
+Relation extraction rules (important):
+- When the user explicitly mentions a relationship between two people, you MUST output it in the relations array.
+- If the user's own words say "X and Y were together", "X is Y's ex", "X and Y are dating", "X is romantically interested in Y", "X and Y slept together", etc., output the corresponding relation type.
+- If the user is only asking a question, or the system guessed and the user did not confirm, do NOT output a relation.
+- Prefer the most specific relation type. Priority: ex > partner > lover > fwb > date > affair > friend > colleague > sibling > knows > mentioned_with.
+- If you only know that two people were mentioned together with no specific relationship clue, use mentioned_with.
 
 Output a single JSON object:
 {

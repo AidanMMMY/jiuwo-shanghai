@@ -79,7 +79,7 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
           <div className="flex flex-col gap-2">
             {suggestions.map((s, idx) => {
               const raw = isZh ? s.zh : s.en;
-              const text = raw ? raw.replace(/^[A-C][.．、]?\s*/, '') : '';
+              const text = raw ? raw.replace(/^[A-C][.．、]\s*/, '') : '';
               return text ? (
                 <button
                   key={idx}

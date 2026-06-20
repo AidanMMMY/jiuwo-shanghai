@@ -887,63 +887,59 @@ export async function getRecentConversationsGroupedBySession(): Promise<SessionC
   await ensureConversationsTable();
   const sql = getSql();
 
-  const sessionResult = await sql`
+  const result = await sql`
     SELECT
+      c.id,
+      c.user_message,
+      c.assistant_response,
+      c.source_lang,
+      c.processed_for_memory,
       COALESCE(c.session_id, 'unassigned') AS session_id,
-      COALESCE(s.summary, '') AS summary,
-      MIN(c.created_at) AS first_message_at,
-      MAX(c.created_at) AS last_message_at
+      c.created_at,
+      s.summary
     FROM darkroom_conversations c
     LEFT JOIN darkroom_sessions s ON c.session_id = s.session_id
-    GROUP BY COALESCE(c.session_id, 'unassigned'), s.summary
-    ORDER BY MAX(c.created_at) DESC
+    ORDER BY c.created_at ASC
   `;
 
-  if (sessionResult.rows.length === 0) {
-    return [];
-  }
+  const groups = new Map<string, SessionConversationGroup>();
 
-  const sessionIds = sessionResult.rows.map((row) => row.session_id as string);
-  if (sessionIds.length === 0) {
-    return [];
-  }
+  for (const row of result.rows) {
+    const sid = row.session_id as string;
+    const createdAt = new Date(row.created_at as string).toISOString();
 
-  const convResult = await sql`
-    SELECT
-      id,
-      user_message,
-      assistant_response,
-      source_lang,
-      processed_for_memory,
-      COALESCE(session_id, 'unassigned') AS session_id,
-      created_at
-    FROM darkroom_conversations
-    WHERE COALESCE(session_id, 'unassigned') = ANY(${sessionIds}::text[])
-    ORDER BY created_at ASC
-  `;
-
-  const conversationsBySession = new Map<string, Conversation[]>();
-  for (const conv of convResult.rows as Conversation[]) {
-    const sid = conv.session_id as string;
-    if (!conversationsBySession.has(sid)) {
-      conversationsBySession.set(sid, []);
+    if (!groups.has(sid)) {
+      const summary = sid === 'unassigned'
+        ? 'Unassigned'
+        : (row.summary as string | null) || shortenSessionId(sid);
+      groups.set(sid, {
+        sessionId: sid,
+        summary,
+        firstMessageAt: createdAt,
+        lastMessageAt: createdAt,
+        conversations: [],
+      });
     }
-    conversationsBySession.get(sid)!.push(conv);
+
+    const group = groups.get(sid)!;
+    const ts = new Date(row.created_at as string).getTime();
+    group.firstMessageAt = new Date(Math.min(new Date(group.firstMessageAt).getTime(), ts)).toISOString();
+    group.lastMessageAt = new Date(Math.max(new Date(group.lastMessageAt).getTime(), ts)).toISOString();
+
+    group.conversations.push({
+      id: row.id as number,
+      user_message: row.user_message as string,
+      assistant_response: row.assistant_response as string,
+      source_lang: row.source_lang as 'en' | 'zh',
+      processed_for_memory: row.processed_for_memory as boolean,
+      session_id: sid === 'unassigned' ? undefined : sid,
+      created_at: createdAt,
+    });
   }
 
-  return sessionResult.rows.map((row) => {
-    const sid = (row.session_id as string) ?? "unassigned";
-    const summary = sid === "unassigned"
-      ? "Unassigned"
-      : (row.summary as string) || shortenSessionId(sid);
-    return {
-      sessionId: sid,
-      summary,
-      firstMessageAt: (row.first_message_at as string) ?? new Date(0).toISOString(),
-      lastMessageAt: (row.last_message_at as string) ?? new Date(0).toISOString(),
-      conversations: conversationsBySession.get(sid) ?? [],
-    };
-  });
+  return Array.from(groups.values()).sort(
+    (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+  );
 }
 
 export async function getRecentConversations(limit: number = 20): Promise<Conversation[]> {

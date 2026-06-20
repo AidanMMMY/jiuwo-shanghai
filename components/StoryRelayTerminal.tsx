@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { StoryRelaySegment } from './StoryRelaySegment';
 import { StoryRelayContributors } from './StoryRelayContributors';
 import { StoryRelayInput } from './StoryRelayInput';
+import { StoryRelayPendingBlock } from './StoryRelayPendingBlock';
 
 interface Segment {
   sequence: number;
@@ -119,6 +120,7 @@ export function StoryRelayTerminal({ initialSegments, initialContributors, isZh,
             onAnimationDone={idx === segments.length - 1 ? handleAnimationDone : undefined}
           />
         ))}
+        {loading && <StoryRelayPendingBlock isZh={isZh} />}
       </div>
 
       {error && (

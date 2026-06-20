@@ -48,7 +48,7 @@ export default function AfterHoursGateway({ isZh = false }: AfterHoursGatewayPro
               className="group relative flex items-center gap-4 md:gap-5 p-4 md:p-5 overflow-hidden transition-colors duration-300 hover:bg-white/[0.025]"
             >
               {/* Background animation — dimmed on mobile */}
-              <div className="absolute inset-0 opacity-[0.35] md:opacity-100 transition-opacity duration-500 pointer-events-none">
+              <div className="absolute inset-0 opacity-55 md:opacity-100 transition-opacity duration-500 pointer-events-none">
                 <MatrixRain />
               </div>
 
@@ -85,7 +85,7 @@ export default function AfterHoursGateway({ isZh = false }: AfterHoursGatewayPro
               className="group relative flex items-center gap-4 md:gap-5 p-4 md:p-5 overflow-hidden transition-colors duration-300 hover:bg-white/[0.025]"
             >
               {/* Background animation — dimmed on mobile */}
-              <div className="absolute inset-0 opacity-[0.35] md:opacity-100 transition-opacity duration-500 pointer-events-none">
+              <div className="absolute inset-0 opacity-55 md:opacity-100 transition-opacity duration-500 pointer-events-none">
                 <StoryFlow />
               </div>
 

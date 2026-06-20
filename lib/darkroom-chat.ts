@@ -122,6 +122,31 @@ const NAME_STOPWORDS_ZH = new Set([
   "一个",
   "有人",
   "没人",
+  "吧",
+  "吗",
+  "呢",
+  "啊",
+  "哦",
+  "嗯",
+  "呗",
+  "嘛",
+  "哪",
+  "谁",
+  "什么",
+  "怎么",
+  "为什么",
+  "多少",
+  "几",
+  "的话",
+  "出来",
+  "一下",
+  "就行",
+  "可以",
+  "不要",
+  "没有",
+  "算了",
+  "罢了",
+  "而已",
 ]);
 
 const NAME_STOPWORDS_EN = new Set([
@@ -137,6 +162,13 @@ const NAME_STOPWORDS_EN = new Set([
   "mine",
   "someone",
   "nobody",
+  "no",
+  "thanks",
+  "thank",
+  "pass",
+  "skip",
+  "nah",
+  "nope",
 ]);
 
 const ZH_PRONOUNS = /他|她|ta|这个|那个|那人|这位|那位/;
@@ -180,9 +212,14 @@ export function looksLikeName(text: string, isZh: boolean): boolean {
   const trimmed = text.trim();
   if (!trimmed) return false;
   if (isZh) {
-    if (/[，。！？；]/.test(trimmed)) return false;
-    if (trimmed.length > 8) return false;
+    if (/[，。！？；,!?;:]/.test(trimmed)) return false;
+    if (trimmed.length < 1 || trimmed.length > 4) return false;
     if (NAME_STOPWORDS_ZH.has(trimmed)) return false;
+    // Reject fragments that contain question words, particles, or common short phrases.
+    if (/[吗呢吧啊哦嗯呗嘛]/.test(trimmed)) return false;
+    if (/的话|出来|一下|就行|可以|不要|没有|算了|罢了|而已/.test(trimmed)) return false;
+    // Reject common function words / sentence fragments that do not read as a name.
+    if (/也|都|不|没|是|的|有|和|与|或|但|为|以|可|要|会|能|应|吗|呢|吧|啊|哦|嗯|呗|嘛|谁|什么|怎么|为什么|多少|几/.test(trimmed)) return false;
     return true;
   }
   const words = trimmed.split(/\s+/);
@@ -804,12 +841,23 @@ export function extractExplicitName(
   if (!trimmed) return null;
 
   if (isZh) {
-    const patterns = [
-      /(?:我叫|我是|我就是|称呼我(?:为)?|叫我)([^，。！？\s]{1,20})(?=[，。！？\s]|$)/i,
+    // Strong patterns: user explicitly states their name.
+    const strongPatterns = [
+      /(?:我叫|(?<![一-龥a-zA-Z0-9])叫我|你叫我|请叫我|就叫我|可以叫我|称呼我(?:为)?)([^，。！？\s]{1,20})(?=[，。！？\s]|$)/i,
     ];
-    for (const p of patterns) {
+    for (const p of strongPatterns) {
       const m = trimmed.match(p);
       if (m && m[1] && !NAME_STOPWORDS_ZH.has(m[1])) return m[1];
+    }
+
+    // "我是/我就是" is ambiguous (e.g. "我就是这么想的"). Only accept if the captured
+    // fragment actually looks like a short name.
+    const weakPatterns = [
+      /(?:我是|我就是)([^，。！？\s]{1,20})(?=[，。！？\s]|$)/i,
+    ];
+    for (const p of weakPatterns) {
+      const m = trimmed.match(p);
+      if (m && m[1] && m[1].length <= 3 && looksLikeName(m[1], true)) return m[1];
     }
   } else {
     const patterns = [
@@ -856,6 +904,7 @@ export function extractUserNameFromHistory(
 
     const prev = history[i - 1];
     if (prev && prev.role === "assistant" && isNameQuestion(prev.content, isZh)) {
+      if (isIdentityRefusal(msg.content, isZh)) continue;
       if (looksLikeName(msg.content, isZh)) return msg.content.trim();
     }
   }

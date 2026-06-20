@@ -16,6 +16,8 @@ import {
   shouldAskIdentity,
   isIdentityRefusal,
   selectIdentityProbePrompt,
+  looksLikeName,
+  extractUserNameFromHistory,
 } from './darkroom-chat';
 import type { HistoryMessage } from './darkroom-chat';
 
@@ -437,6 +439,77 @@ describe('isIdentityRefusal', () => {
     expect(isIdentityRefusal('I\'d rather not', false)).toBe(true);
     expect(isIdentityRefusal('keep it private', false)).toBe(true);
     expect(isIdentityRefusal('I am Alex', false)).toBe(false);
+  });
+});
+
+describe('looksLikeName', () => {
+  it('accepts short Chinese names', () => {
+    expect(looksLikeName('阿林', true)).toBe(true);
+    expect(looksLikeName('司徒', true)).toBe(true);
+    expect(looksLikeName('小马', true)).toBe(true);
+  });
+
+  it('rejects Chinese phrases that are not names', () => {
+    expect(looksLikeName('喝酒的话', true)).toBe(false);
+    expect(looksLikeName('谁吗', true)).toBe(false);
+    expect(looksLikeName('出来', true)).toBe(false);
+    expect(looksLikeName('算了吧', true)).toBe(false);
+    expect(looksLikeName('指我和朋友两个小时', true)).toBe(false);
+    expect(looksLikeName('听得最多的人之一', true)).toBe(false);
+  });
+
+  it('accepts short English names', () => {
+    expect(looksLikeName('Alex', false)).toBe(true);
+    expect(looksLikeName('nemo', false)).toBe(true);
+  });
+
+  it('rejects English sentences', () => {
+    expect(looksLikeName('I am not sure', false)).toBe(false);
+    expect(looksLikeName('no thanks', false)).toBe(false);
+  });
+});
+
+describe('extractUserNameFromHistory', () => {
+  it('extracts "I am X" only when X looks like a name', () => {
+    expect(extractUserNameFromHistory([{ role: 'user', content: '我是阿林' }], true)).toBe('阿林');
+    expect(extractUserNameFromHistory([{ role: 'user', content: '我就是这么想的' }], true)).toBeNull();
+    expect(extractUserNameFromHistory([{ role: 'user', content: '我是个很能聊天的人' }], true)).toBeNull();
+  });
+
+  it('extracts "you can call me X"', () => {
+    const history: HistoryMessage[] = [{ role: 'user', content: '你可以叫我阿林' }];
+    expect(extractUserNameFromHistory(history, true)).toBe('阿林');
+  });
+
+  it('does not extract name from "he asked me to drink"', () => {
+    const history: HistoryMessage[] = [
+      { role: 'user', content: '明天他叫我喝酒的话，我还去不去呢' },
+    ];
+    expect(extractUserNameFromHistory(history, true)).toBeNull();
+  });
+
+  it('extracts name after assistant asks for it', () => {
+    const history: HistoryMessage[] = [
+      { role: 'assistant', content: '该怎么称呼你？' },
+      { role: 'user', content: '阿林' },
+    ];
+    expect(extractUserNameFromHistory(history, true)).toBe('阿林');
+  });
+
+  it('does not treat refusal as a name', () => {
+    const history: HistoryMessage[] = [
+      { role: 'assistant', content: '该怎么称呼你？' },
+      { role: 'user', content: '算了吧' },
+    ];
+    expect(extractUserNameFromHistory(history, true)).toBeNull();
+  });
+
+  it('does not treat questions as names', () => {
+    const history: HistoryMessage[] = [
+      { role: 'assistant', content: '你叫什么？' },
+      { role: 'user', content: '谁吗' },
+    ];
+    expect(extractUserNameFromHistory(history, true)).toBeNull();
   });
 });
 

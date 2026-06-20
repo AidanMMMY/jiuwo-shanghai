@@ -885,6 +885,7 @@ export async function searchConversationsByKeyword(
 
 export async function getRecentConversationsGroupedBySession(): Promise<SessionConversationGroup[]> {
   await ensureConversationsTable();
+  await ensureSessionsTable();
   const sql = getSql();
 
   const result = await sql`
@@ -932,7 +933,7 @@ export async function getRecentConversationsGroupedBySession(): Promise<SessionC
       assistant_response: row.assistant_response as string,
       source_lang: row.source_lang as 'en' | 'zh',
       processed_for_memory: row.processed_for_memory as boolean,
-      session_id: sid === 'unassigned' ? undefined : sid,
+      session_id: sid,
       created_at: createdAt,
     });
   }

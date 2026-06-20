@@ -317,9 +317,10 @@ export async function POST(req: NextRequest) {
 - 同时把时间描述词加入 keywords 数组，例如「去年夏天」、「最近」、「目前」、「计划中」。
 
 关系提取规则（重要）：
-- 当用户明确提到两人之间的关系时，必须在 relations 数组中输出对应关系。
-- 用户原话明确说「X 和 Y 在一起过」「X 是 Y 的前任」「X 和 Y 在约会」「X 喜欢 Y（且是恋爱意义上的喜欢）」「X 和 Y 睡过」等，都应输出具体关系类型。
-- 如果用户只是在问问题，或者系统猜测而用户没有确认，不要输出关系。
+- 当用户提到两人之间存在恋爱、约会、前任、暧昧、亲密或性关系时，必须在 relations 数组中输出对应关系。
+- 触发信号包括但不限于：前任、现任、ex、约会、date、在一起、分手、暧昧、喜欢（恋爱意义）、睡过、上床、炮友、fwb、关系不一般、有点故事、有过一段、好过、谈过、追过、暗恋、热恋、婚外情、出轨、劈腿、三角恋、开放式关系、一夜情等。
+- 用户用委婉/八卦说法陈述事实时也要提取，例如「X 和 Y 之前有点故事」「X 和 Y 关系不一般」「X 追过 Y」「X 和 Y 暧昧过一阵」「X 和 Y 好过一段时间」。
+- 如果用户只是在问问题（如「X 和 Y 是什么关系？」），或者系统猜测而用户没有确认，不要输出关系。
 - 尽量选择最具体的关系类型。优先级参考：ex（前任）> partner（伴侣/恋人）> lover（恋人/爱人）> fwb（炮友/床伴）> date（约会中/约会过）> affair（婚外情/外遇/私情）> friend（朋友）> colleague（同事）> sibling（兄弟姐妹）> knows（认识）> mentioned_with（一起被提到）。
 - 如果只知道两人一起被提到，但没有具体关系线索，使用 mentioned_with。
 
@@ -361,9 +362,10 @@ Temporal information:
 - Also add the time reference words to the keywords array, e.g. "last summer", "recently", "currently", "planning".
 
 Relation extraction rules (important):
-- When the user explicitly mentions a relationship between two people, you MUST output it in the relations array.
-- If the user's own words say "X and Y were together", "X is Y's ex", "X and Y are dating", "X is romantically interested in Y", "X and Y slept together", etc., output the corresponding relation type.
-- If the user is only asking a question, or the system guessed and the user did not confirm, do NOT output a relation.
+- When the user mentions a romantic, dating, ex, ambiguous, intimate, or sexual relationship between two people, you MUST output it in the relations array.
+- Trigger signals include but are not limited to: ex, current partner, dating, together, broke up, ambiguous, like (romantic), slept together, hook up, fwb, more than friends, had a thing, had a history, chased, had a crush, affair, cheated, love triangle, open relationship, one night stand, etc.
+- Also extract when the user states facts in a gossipy or indirect way, e.g. "X and Y had a little history", "X and Y are more than friends", "X had a thing for Y", "X and Y were ambiguous for a while", "X and Y were together for a while".
+- If the user is only asking a question (e.g. "What's the relationship between X and Y?"), or the system guessed and the user did not confirm, do NOT output a relation.
 - Prefer the most specific relation type. Priority: ex > partner > lover > fwb > date > affair > friend > colleague > sibling > knows > mentioned_with.
 - If you only know that two people were mentioned together with no specific relationship clue, use mentioned_with.
 

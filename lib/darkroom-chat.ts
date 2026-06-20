@@ -1,6 +1,6 @@
 import { deepseekClient, DEFAULT_MODEL } from "./deepseek/client";
 import { KNOWN_ENTITIES, matchKnownEntity } from "./darkroom";
-import { DynamicEntity, getRecentConversationsBySession, getSessionState, upsertSessionState } from "./darkroom-memory";
+import { Entity, getRecentConversationsBySession, getSessionState, upsertSessionState } from "./darkroom-memory";
 
 export interface HistoryMessage {
   role: string;
@@ -256,6 +256,71 @@ export function extractUserMentionedNames(
   return names;
 }
 
+/**
+ * Extract likely person names from a single piece of text.
+ * This is intentionally conservative: it only returns short candidates that
+ * pass looksLikeName, and it focuses on natural mentions (not explicit questions).
+ */
+export function extractEntitiesFromText(
+  text: string,
+  isZh: boolean
+): string[] {
+  if (!text) return [];
+  const trimmed = text.trim();
+  if (!trimmed) return [];
+
+  const names: string[] = [];
+  const seen = new Set<string>();
+
+  const zhPatterns = [
+    // 我/他/她和 XX 一起...
+    /[我和他跟与同](.+?)(?:一起|一块儿|去|来|到|在|喝|吃|看|听|聊|坐|站|找|约|等|说|问|答|觉得|想|要|准备|打算|计划|昨天|今天|明天|上周|下周|晚上|白天)/,
+    // XX 推荐/说/介绍/告诉/喜欢...
+    /(.+?)(?:推荐|介绍|告诉|说|问|回答|喜欢|讨厌|想|要|觉得|认为|知道|认识|见过|听过|问过)/,
+    // 昨天/今天/上周 见到/遇到/碰到 XX
+    /(?:见到|遇到|碰到|看到|找了|约了)(.+?)(?:，|。|$)/,
+  ];
+
+  const enPatterns = [
+    // I/he/they went with XX to...
+    /\b(?:I|we|he|she|they)(?:\s+(?:went|went out|hung out|talked|met|had|drank|ate|saw|visited))(?:\s+with)?\s+(.+?)(?:\s+(?:to|at|yesterday|today|last|this|next|and|but|because|who|which|that\.|,|!|\?)|$)/i,
+    // XX recommended/said/told/introduced...
+    /(.+?)\s+(?:recommended|said|told|asked|answered|likes|hates|wants|thinks|knows|introduced)\b/i,
+    // XX and I / XX and him
+    /(.+?)\s+and\s+(?:I|me|him|her|them|we|us)\b/i,
+  ];
+
+  const patterns = isZh ? zhPatterns : enPatterns;
+
+  for (const p of patterns) {
+    const match = trimmed.match(p);
+    if (match && match[1]) {
+      const raw = match[1].trim();
+      // The regex may capture surrounding words (e.g. "昨天和阿林" or "out with Alex").
+      // Try to isolate the name by splitting on common conjunctions/prepositions
+      // and keeping the segment that looks like a name.
+      const candidates = isZh
+        ? raw.split(/[和跟与同]/)
+        : raw.split(/\s+(?:with|and|to|for|from)\s+/i);
+
+      for (const candidate of candidates) {
+        const cleaned = candidate
+          .replace(/[，。！？、；：\.\,\!\?\;\:]/g, "")
+          .trim();
+        if (cleaned.length >= 2 && cleaned.length <= 20 && looksLikeName(cleaned, isZh)) {
+          const key = cleaned.toLowerCase();
+          if (!seen.has(key)) {
+            names.push(cleaned);
+            seen.add(key);
+          }
+        }
+      }
+    }
+  }
+
+  return names;
+}
+
 export function classifyUserIntent(
   message: string,
   previousAssistant: string | undefined,
@@ -301,6 +366,47 @@ export function classifyUserIntent(
   if (isQuestion(trimmed, isZh)) return "ask";
 
   return "gossip";
+}
+
+/**
+ * Detect if the user is asking the system to forget them or another person.
+ * Returns the name to forget, or "__self__" if the user wants to be forgotten.
+ */
+export function detectForgetRequest(
+  message: string,
+  isZh: boolean
+): { name: string; isSelf: boolean } | null {
+  const trimmed = message.trim();
+  if (!trimmed) return null;
+
+  if (isZh) {
+    const selfMatch = /(?:忘了我|别提我|删除我|忘掉我|不要记我|把我忘了|清除我的记忆)/.test(trimmed);
+    if (selfMatch) return { name: "__self__", isSelf: true };
+
+    const otherMatch = trimmed.match(
+      /(?:忘掉|忘记|别提|删除|清除).{0,3}?(?:关于|的)?\s*([一-龥a-zA-Z]{2,12})/
+    );
+    if (otherMatch && otherMatch[1]) {
+      const cleaned = otherMatch[1].replace(/[了吧啊呢吗么的]+$/g, '').trim();
+      if (cleaned.length >= 2) {
+        return { name: cleaned, isSelf: false };
+      }
+    }
+  } else {
+    const selfMatch = /\b(forget me|don't mention me|delete my memory|forget about me|don't record me)\b/i.test(
+      trimmed
+    );
+    if (selfMatch) return { name: "__self__", isSelf: true };
+
+    const otherMatch = trimmed.match(
+      /\b(?:forget about|forget|don't mention|delete|remove)\s+(?:about\s+)?([a-zA-Z]{2,20})\b/i
+    );
+    if (otherMatch && otherMatch[1]) {
+      return { name: otherMatch[1].trim(), isSelf: false };
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -388,7 +494,7 @@ Format: {"intent":"...","topicEntity":"...","confidence":0.x}`;
   }
 }
 
-function toKnownEntity(entity: DynamicEntity) {
+function toKnownEntity(entity: Entity) {
   return {
     name: entity.name,
     aliases: entity.aliases,
@@ -408,7 +514,7 @@ function toKnownEntity(entity: DynamicEntity) {
 export function buildTopicState(
   history: HistoryMessage[],
   isZh: boolean,
-  dynamicEntities: DynamicEntity[] = [],
+  dynamicEntities: Entity[] = [],
   classifier?: ClassifierResult | null,
   sessionPrimaryEntity?: string
 ): TopicState {

@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { extractKeywords } from './darkroom-memory';
+import { extractKeywords, buildEntityCard } from './darkroom-memory';
 import { generateEmbedding } from './darkroom-embedding';
+
+const mockSql = vi.fn();
+
+vi.mock('@neondatabase/serverless', () => ({
+  neon: vi.fn(() => mockSql),
+}));
 
 describe('extractKeywords', () => {
   it('extracts English keywords', () => {
@@ -123,5 +129,161 @@ describe('generateEmbedding', () => {
     });
 
     expect(await generateEmbedding('hello')).toBeNull();
+  });
+});
+
+// Entity helpers are tested with a mocked neon client because they hit Postgres.
+describe('entity helpers', () => {
+  const baseEntity = {
+    id: 1,
+    name: '小马',
+    aliases: ['Phillip'],
+    source: 'knowledge_base',
+    entity_type: 'person',
+    profile: {},
+    mention_count: 5,
+    first_seen_at: '',
+    last_mentioned_at: '',
+    created_at: '',
+  };
+
+  beforeEach(() => {
+    mockSql.mockReset();
+    process.env.POSTGRES_URL = 'postgresql://user:pass@localhost/db';
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('findEntityByName queries by name and aliases', async () => {
+    mockSql.mockResolvedValue({ rows: [baseEntity] });
+
+    const { findEntityByName } = await import('./darkroom-memory');
+    const entity = await findEntityByName('Phillip');
+    expect(entity?.name).toBe('小马');
+    expect(mockSql).toHaveBeenCalled();
+  });
+
+  it('upsertEntity merges aliases with existing entity', async () => {
+    mockSql.mockImplementation((_strings: TemplateStringsArray | string[], ..._values: unknown[]) => {
+      const text = typeof _strings === 'string' ? _strings : _strings.join('?');
+      if (text.includes('FROM darkroom_entities') && text.includes('LIMIT 1')) {
+        return Promise.resolve({
+          rows: [{ ...baseEntity, profile: { is_known_entity: true } }],
+        });
+      }
+      if (text.includes('INSERT INTO darkroom_entities')) {
+        return Promise.resolve({
+          rows: [
+            {
+              ...baseEntity,
+              aliases: ['Phillip', '马哥'],
+              profile: { is_known_entity: true, is_user: false },
+            },
+          ],
+        });
+      }
+      return Promise.resolve({ rows: [] });
+    });
+
+    const { upsertEntity } = await import('./darkroom-memory');
+    const entity = await upsertEntity('小马', {
+      aliases: ['马哥'],
+      source: 'knowledge_base',
+      profile: { is_user: false },
+      bumpMention: false,
+    });
+
+    expect(entity?.aliases).toContain('马哥');
+    expect(entity?.profile.is_user).toBe(false);
+  });
+
+  it('linkMemoryToEntities skips names shorter than 2 chars', async () => {
+    const { linkMemoryToEntities } = await import('./darkroom-memory');
+    await linkMemoryToEntities(42, ['A', ''], { subjectName: 'A' });
+    // The function returns early before any SQL is issued.
+    expect(mockSql).not.toHaveBeenCalled();
+  });
+});
+
+describe('buildEntityCard', () => {
+  const baseEntity = {
+    id: 1,
+    name: '小马',
+    aliases: ['Phillip'],
+    source: 'knowledge_base' as const,
+    entity_type: 'person',
+    profile: {
+      description: '酒吧熟客，常与阿林一起来',
+      preferences: ['金汤力', '吧台座位'],
+    },
+    mention_count: 5,
+    first_seen_at: '',
+    last_mentioned_at: '',
+    created_at: '',
+  };
+
+  it('includes identity, relations, preferences and memories', () => {
+    const card = buildEntityCard(
+      baseEntity,
+      true,
+      [
+        { relation_type: 'partner', other_name: '阿林' },
+        { relation_type: 'friend', other_name: 'Dex' },
+      ],
+      [
+        { id: 1, content: '上次和阿林一起来坐在吧台', keywords: [], confidence: 0.8, source_lang: 'zh', created_at: '' },
+      ]
+    );
+
+    expect(card).toContain('[人物卡：小马]');
+    expect(card).toContain('酒吧熟客');
+    expect(card).toContain('阿林（partner）');
+    expect(card).toContain('金汤力');
+    expect(card).toContain('上次和阿林一起来坐在吧台');
+  });
+
+  it('renders English card when isZh is false', () => {
+    const card = buildEntityCard(
+      { ...baseEntity, name: 'Phillip' },
+      false,
+      [],
+      []
+    );
+    expect(card).toContain('[Person card: Phillip]');
+  });
+
+  it('limits displayed relations and memories', () => {
+    const relations = Array.from({ length: 5 }, (_, i) => ({
+      relation_type: 'friend',
+      other_name: `Friend${i}`,
+    }));
+    const memories = Array.from({ length: 5 }, (_, i) => ({
+      id: i,
+      content: `memory ${i}`,
+      keywords: [],
+      confidence: 0.8,
+      source_lang: 'zh' as const,
+      created_at: '',
+    }));
+
+    const card = buildEntityCard(baseEntity, true, relations, memories);
+    const relationCount = (card.match(/Friend/g) || []).length;
+    const memoryCount = (card.match(/memory /g) || []).length;
+    expect(relationCount).toBeLessThanOrEqual(3);
+    expect(memoryCount).toBeLessThanOrEqual(3);
+  });
+
+  it('shows a fallback identity note for memory-only entities without a description', () => {
+    const memoryOnlyEntity = {
+      ...baseEntity,
+      source: 'user_mentioned' as const,
+      profile: {},
+      mention_count: 7,
+    };
+    const card = buildEntityCard(memoryOnlyEntity, true, [], []);
+    expect(card).toContain('[人物卡：小马]');
+    expect(card).toContain('从 7 条聊天记忆中识别出的人物');
   });
 });

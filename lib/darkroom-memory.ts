@@ -391,6 +391,10 @@ export async function pruneOldMemories(): Promise<void> {
 
 const VECTOR_DEDUP_THRESHOLD = 0.85;
 
+// Privacy and TTL features are designed but currently disabled.
+// Set to true to enable "forget me" handling and automatic profile degradation.
+export const PRIVACY_FEATURES_ENABLED = false;
+
 function formatVector(embedding: number[]): string {
   return `[${embedding.join(',')}]`;
 }
@@ -1025,13 +1029,41 @@ export async function getSessionIdentities(
   return map;
 }
 
-// ── Dynamic entities (names mentioned by users, beyond KNOWN_ENTITIES) ──
+// ── Entities (people, places, concepts mentioned in Darkroom) ────────────
 
-export interface DynamicEntity {
+export interface Entity {
   id: number;
   name: string;
   aliases: string[];
   source: "user_mentioned" | "memory" | "knowledge_base";
+  entity_type: string;
+  profile: Record<string, unknown>;
+  mention_count: number;
+  first_seen_at: string;
+  last_mentioned_at: string;
+  created_at: string;
+}
+
+/** @deprecated Use Entity instead. */
+export type DynamicEntity = Entity;
+
+export type MemoryEntityRole = "subject" | "object" | "co_mention" | "mentioned";
+
+export interface MemoryEntity {
+  memory_id: number;
+  entity_id: number;
+  role: MemoryEntityRole;
+  confidence: number;
+  created_at: string;
+}
+
+export interface EntityRelation {
+  id: number;
+  entity_a_id: number;
+  entity_b_id: number;
+  relation_type: string;
+  evidence_memory_id?: number;
+  confidence: number;
   created_at: string;
 }
 
@@ -1039,66 +1071,186 @@ export async function ensureEntitiesTable(): Promise<void> {
   const sql = getSql();
   await sql`
     CREATE TABLE IF NOT EXISTS darkroom_entities (
-      id         SERIAL PRIMARY KEY,
-      name       VARCHAR(64) NOT NULL UNIQUE,
-      aliases    TEXT[] NOT NULL DEFAULT '{}',
-      source     VARCHAR(32) NOT NULL DEFAULT 'user_mentioned',
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      id                SERIAL PRIMARY KEY,
+      name              VARCHAR(64) NOT NULL UNIQUE,
+      aliases           TEXT[] NOT NULL DEFAULT '{}',
+      source            VARCHAR(32) NOT NULL DEFAULT 'user_mentioned',
+      entity_type       VARCHAR(32) NOT NULL DEFAULT 'person',
+      profile           JSONB NOT NULL DEFAULT '{}',
+      mention_count     INTEGER NOT NULL DEFAULT 0,
+      first_seen_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      last_mentioned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
+  await sql`ALTER TABLE darkroom_entities ADD COLUMN IF NOT EXISTS entity_type VARCHAR(32) NOT NULL DEFAULT 'person'`;
+  await sql`ALTER TABLE darkroom_entities ADD COLUMN IF NOT EXISTS profile JSONB NOT NULL DEFAULT '{}'`;
+  await sql`ALTER TABLE darkroom_entities ADD COLUMN IF NOT EXISTS mention_count INTEGER NOT NULL DEFAULT 0`;
+  await sql`ALTER TABLE darkroom_entities ADD COLUMN IF NOT EXISTS first_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`;
+  await sql`ALTER TABLE darkroom_entities ADD COLUMN IF NOT EXISTS last_mentioned_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_entities_name ON darkroom_entities(name)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_entities_aliases ON darkroom_entities USING GIN(aliases)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_entities_type ON darkroom_entities(entity_type)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_darkroom_entities_last_mentioned ON darkroom_entities(last_mentioned_at DESC)`;
 }
 
-export async function getDynamicEntities(): Promise<DynamicEntity[]> {
+export async function ensureMemoryEntitiesTable(): Promise<void> {
+  const sql = getSql();
+  await sql`
+    CREATE TABLE IF NOT EXISTS darkroom_memory_entities (
+      memory_id  INTEGER NOT NULL REFERENCES darkroom_memories(id) ON DELETE CASCADE,
+      entity_id  INTEGER NOT NULL REFERENCES darkroom_entities(id) ON DELETE CASCADE,
+      role       VARCHAR(16) NOT NULL DEFAULT 'mentioned',
+      confidence NUMERIC(3,2) NOT NULL DEFAULT 0.8,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (memory_id, entity_id, role)
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_memory_entities_entity ON darkroom_memory_entities(entity_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_memory_entities_memory ON darkroom_memory_entities(memory_id)`;
+}
+
+export async function ensureEntityRelationsTable(): Promise<void> {
+  const sql = getSql();
+  await sql`
+    CREATE TABLE IF NOT EXISTS darkroom_entity_relations (
+      id                SERIAL PRIMARY KEY,
+      entity_a_id       INTEGER NOT NULL REFERENCES darkroom_entities(id) ON DELETE CASCADE,
+      entity_b_id       INTEGER NOT NULL REFERENCES darkroom_entities(id) ON DELETE CASCADE,
+      relation_type     VARCHAR(32) NOT NULL,
+      evidence_memory_id INTEGER REFERENCES darkroom_memories(id) ON DELETE SET NULL,
+      confidence        NUMERIC(3,2) NOT NULL DEFAULT 0.7,
+      created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (entity_a_id, entity_b_id, relation_type)
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_entity_relations_a ON darkroom_entity_relations(entity_a_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_entity_relations_b ON darkroom_entity_relations(entity_b_id)`;
+}
+
+export async function getDynamicEntities(): Promise<Entity[]> {
   await ensureEntitiesTable();
   const sql = getSql();
   const result = await sql`
-    SELECT id, name, aliases, source, created_at
+    SELECT id, name, aliases, source, entity_type, profile, mention_count, first_seen_at, last_mentioned_at, created_at
     FROM darkroom_entities
     ORDER BY updated_at DESC
   `;
-  return result.rows as DynamicEntity[];
+  return result.rows as Entity[];
 }
 
-export async function findDynamicEntity(
+export async function findEntityByName(
   name: string
-): Promise<DynamicEntity | null> {
+): Promise<Entity | null> {
   await ensureEntitiesTable();
   const sql = getSql();
-  const lower = name.toLowerCase();
+  const lower = name.trim().toLowerCase();
+  if (!lower) return null;
   const result = await sql`
-    SELECT id, name, aliases, source, created_at
+    SELECT id, name, aliases, source, entity_type, profile, mention_count, first_seen_at, last_mentioned_at, created_at
     FROM darkroom_entities
     WHERE LOWER(name) = ${lower}
-       OR LOWER(aliases) @> ARRAY[${lower}]::text[]
+       OR EXISTS (
+         SELECT 1 FROM unnest(aliases) AS alias
+         WHERE LOWER(alias) = ${lower}
+       )
     LIMIT 1
   `;
-  return result.rows.length > 0 ? (result.rows[0] as DynamicEntity) : null;
+  return result.rows.length > 0 ? (result.rows[0] as Entity) : null;
 }
 
+/** @deprecated Use findEntityByName instead. */
+export async function findDynamicEntity(
+  name: string
+): Promise<Entity | null> {
+  return findEntityByName(name);
+}
+
+export async function upsertEntity(
+  name: string,
+  options: {
+    aliases?: string[];
+    source?: Entity["source"];
+    entityType?: string;
+    profile?: Record<string, unknown>;
+    bumpMention?: boolean;
+  } = {}
+): Promise<Entity | null> {
+  await ensureEntitiesTable();
+  const sql = getSql();
+  const {
+    aliases = [],
+    source = "user_mentioned",
+    entityType = "person",
+    profile = {},
+    bumpMention = true,
+  } = options;
+
+  const trimmed = name.trim();
+  if (!trimmed || trimmed.length < 2) return null;
+
+  try {
+    // Merge with existing aliases/profile if entity already exists.
+    // Preserve the existing source for already-known entities so that
+    // knowledge_base or user_mentioned sources are not downgraded to 'memory'
+    // when they are later mentioned in extracted memories.
+    const existing = await findEntityByName(trimmed);
+    const mergedAliases = existing
+      ? [...new Set([...existing.aliases, ...aliases, trimmed])].slice(0, 10)
+      : [...new Set([...aliases, trimmed])].slice(0, 10);
+    const mergedProfile = existing
+      ? { ...existing.profile, ...profile }
+      : { ...profile };
+    const mergedSource = existing ? existing.source : source;
+
+    // For newly created user_mentioned entities, set a default privacy TTL.
+    // Currently disabled until the privacy feature set is explicitly enabled.
+    if (PRIVACY_FEATURES_ENABLED && !existing && mergedSource === "user_mentioned") {
+      const privacy = (mergedProfile.privacy as Record<string, unknown> | undefined) || {};
+      mergedProfile.privacy = {
+        consent: "implicit",
+        ttl_days: 90,
+        sensitive: false,
+        ...privacy,
+      };
+    }
+
+    const result = await sql`
+      INSERT INTO darkroom_entities (name, aliases, source, entity_type, profile, mention_count, last_mentioned_at)
+      VALUES (
+        ${trimmed},
+        ${mergedAliases},
+        ${mergedSource},
+        ${entityType},
+        ${JSON.stringify(mergedProfile)},
+        ${bumpMention ? 1 : 0},
+        NOW()
+      )
+      ON CONFLICT (name) DO UPDATE SET
+        aliases = EXCLUDED.aliases,
+        source = EXCLUDED.source,
+        entity_type = EXCLUDED.entity_type,
+        profile = EXCLUDED.profile,
+        mention_count = darkroom_entities.mention_count + ${bumpMention ? 1 : 0},
+        last_mentioned_at = NOW(),
+        updated_at = NOW()
+      RETURNING id, name, aliases, source, entity_type, profile, mention_count, first_seen_at, last_mentioned_at, created_at
+    `;
+    return result.rows[0] as Entity;
+  } catch (err) {
+    console.error("[darkroom:memory] upsertEntity failed:", err);
+    return null;
+  }
+}
+
+/** @deprecated Use upsertEntity instead. */
 export async function createDynamicEntity(
   name: string,
   aliases: string[] = [],
-  source: DynamicEntity["source"] = "user_mentioned"
-): Promise<DynamicEntity | null> {
-  await ensureEntitiesTable();
-  const sql = getSql();
-  try {
-    const result = await sql`
-      INSERT INTO darkroom_entities (name, aliases, source)
-      VALUES (${name}, ${aliases}, ${source})
-      ON CONFLICT (name) DO UPDATE SET
-        aliases = EXCLUDED.aliases,
-        updated_at = NOW()
-      RETURNING id, name, aliases, source, created_at
-    `;
-    return result.rows[0] as DynamicEntity;
-  } catch (err) {
-    console.error("[darkroom:memory] createDynamicEntity failed:", err);
-    return null;
-  }
+  source: Entity["source"] = "user_mentioned"
+): Promise<Entity | null> {
+  return upsertEntity(name, { aliases, source });
 }
 
 export async function recordMentionedNames(
@@ -1112,14 +1264,321 @@ export async function recordMentionedNames(
     if (!trimmed || trimmed.length < 2) continue;
     try {
       await sql`
-        INSERT INTO darkroom_entities (name, aliases, source)
-        VALUES (${trimmed}, ${[]}, 'user_mentioned')
-        ON CONFLICT (name) DO UPDATE SET updated_at = NOW()
+        INSERT INTO darkroom_entities (name, aliases, source, entity_type, mention_count, last_mentioned_at)
+        VALUES (${trimmed}, ${[]}, 'user_mentioned', 'person', 1, NOW())
+        ON CONFLICT (name) DO UPDATE SET
+          mention_count = darkroom_entities.mention_count + 1,
+          last_mentioned_at = NOW(),
+          updated_at = NOW()
       `;
     } catch (err) {
       console.error("[darkroom:memory] recordMentionedNames failed:", err);
     }
   }
+}
+
+export async function linkMemoryToEntities(
+  memoryId: number,
+  entityNames: string[],
+  options: {
+    subjectName?: string;
+    confidence?: number;
+    source?: Entity["source"];
+  } = {}
+): Promise<void> {
+  const validNames = entityNames
+    .map((n) => n.trim())
+    .filter((n) => n.length >= 2);
+  if (validNames.length === 0) return;
+
+  await ensureMemoryEntitiesTable();
+  const sql = getSql();
+  const { subjectName, confidence = 0.8, source = "memory" } = options;
+
+  const seen = new Set<number>();
+  for (const name of validNames) {
+    const entity = await upsertEntity(name, { source, bumpMention: false });
+    if (!entity || seen.has(entity.id)) continue;
+    seen.add(entity.id);
+
+    const role: MemoryEntityRole =
+      subjectName && name.toLowerCase() === subjectName.toLowerCase()
+        ? "subject"
+        : "mentioned";
+
+    try {
+      await sql`
+        INSERT INTO darkroom_memory_entities (memory_id, entity_id, role, confidence)
+        VALUES (${memoryId}, ${entity.id}, ${role}, ${confidence})
+        ON CONFLICT (memory_id, entity_id, role) DO UPDATE SET
+          confidence = EXCLUDED.confidence,
+          created_at = NOW()
+      `;
+      // Also bump mention count on the entity.
+      await sql`
+        UPDATE darkroom_entities
+        SET mention_count = mention_count + 1,
+            last_mentioned_at = NOW(),
+            updated_at = NOW()
+        WHERE id = ${entity.id}
+      `;
+    } catch (err) {
+      console.error("[darkroom:memory] linkMemoryToEntities failed:", err);
+    }
+  }
+}
+
+export async function recordEntityRelation(
+  entityAName: string,
+  entityBName: string,
+  relationType: string,
+  options: {
+    evidenceMemoryId?: number;
+    confidence?: number;
+  } = {}
+): Promise<EntityRelation | null> {
+  const entityA = await findEntityByName(entityAName);
+  const entityB = await findEntityByName(entityBName);
+  if (!entityA || !entityB) return null;
+
+  await ensureEntityRelationsTable();
+  const sql = getSql();
+  const { evidenceMemoryId, confidence = 0.7 } = options;
+
+  try {
+    const result = await sql`
+      INSERT INTO darkroom_entity_relations (entity_a_id, entity_b_id, relation_type, evidence_memory_id, confidence)
+      VALUES (${entityA.id}, ${entityB.id}, ${relationType}, ${evidenceMemoryId ?? null}, ${confidence})
+      ON CONFLICT (entity_a_id, entity_b_id, relation_type) DO UPDATE SET
+        evidence_memory_id = COALESCE(EXCLUDED.evidence_memory_id, darkroom_entity_relations.evidence_memory_id),
+        confidence = GREATEST(EXCLUDED.confidence, darkroom_entity_relations.confidence),
+        created_at = NOW()
+      RETURNING id, entity_a_id, entity_b_id, relation_type, evidence_memory_id, confidence, created_at
+    `;
+    return result.rows[0] as EntityRelation;
+  } catch (err) {
+    console.error("[darkroom:memory] recordEntityRelation failed:", err);
+    return null;
+  }
+}
+
+export async function getEntityRelations(
+  entityId: number
+): Promise<EntityRelation[]> {
+  await ensureEntityRelationsTable();
+  const sql = getSql();
+  const result = await sql`
+    SELECT id, entity_a_id, entity_b_id, relation_type, evidence_memory_id, confidence, created_at
+    FROM darkroom_entity_relations
+    WHERE entity_a_id = ${entityId} OR entity_b_id = ${entityId}
+    ORDER BY confidence DESC, created_at DESC
+  `;
+  return result.rows as EntityRelation[];
+}
+
+export async function getMemoriesForEntity(
+  entityId: number,
+  limit: number = 10
+): Promise<Memory[]> {
+  await ensureMemoriesTable();
+  await ensureMemoryEntitiesTable();
+  const sql = getSql();
+  const result = await sql`
+    SELECT m.id, m.content, m.keywords, m.confidence, m.source_lang, m.memory_type, m.source_identity, m.created_at
+    FROM darkroom_memories m
+    JOIN darkroom_memory_entities me ON m.id = me.memory_id
+    WHERE me.entity_id = ${entityId}
+    ORDER BY
+      CASE me.role WHEN 'subject' THEN 1 ELSE 2 END,
+      m.confidence DESC,
+      m.created_at DESC
+    LIMIT ${limit}
+  `;
+  return result.rows as Memory[];
+}
+
+/** @deprecated Use getMemoriesForEntity instead. */
+export async function retrieveMemoriesForEntity(
+  entityId: number,
+  limit: number = 10
+): Promise<Memory[]> {
+  return getMemoriesForEntity(entityId, limit);
+}
+
+export interface FormattedEntityRelation {
+  relation_type: string;
+  other_name: string;
+}
+
+export function buildEntityCard(
+  entity: Entity,
+  isZh: boolean,
+  relations: FormattedEntityRelation[] = [],
+  memories: Memory[] = []
+): string {
+  const lines: string[] = [];
+  lines.push(isZh ? `[人物卡：${entity.name}]` : `[Person card: ${entity.name}]`);
+
+  const profile = entity.profile || {};
+  const description =
+    typeof profile.description === "string" ? profile.description : undefined;
+  if (description) {
+    lines.push(isZh ? `- 身份：${description}` : `- Identity: ${description}`);
+  } else if (memories.length > 0 || entity.mention_count > 0) {
+    const sourceNote = isZh
+      ? `- 身份：从 ${entity.mention_count || memories.length} 条聊天记忆中识别出的人物`
+      : `- Identity: Recognized from ${entity.mention_count || memories.length} chat memories`;
+    lines.push(sourceNote);
+  }
+
+  const knownFacts = Array.isArray(profile.known_facts)
+    ? profile.known_facts.filter((f): f is string => typeof f === "string").slice(0, 5)
+    : [];
+  if (knownFacts.length > 0) {
+    lines.push(
+      isZh
+        ? `- 已知事实：${knownFacts.join("；")}`
+        : `- Known facts: ${knownFacts.join("; ")}`
+    );
+  }
+
+  const relationshipHints =
+    typeof profile.relationship_hints === "string" ? profile.relationship_hints : undefined;
+  if (relationshipHints) {
+    lines.push(
+      isZh ? `- 关系线索：${relationshipHints}` : `- Relationship hints: ${relationshipHints}`
+    );
+  }
+
+  if (relations.length > 0) {
+    const relationLines = relations
+      .slice(0, 3)
+      .map((r) => `${r.other_name}（${r.relation_type}）`);
+    lines.push(
+      isZh
+        ? `- 关系：${relationLines.join("、")}`
+        : `- Relations: ${relationLines.join(", ")}`
+    );
+  }
+
+  const preferences = Array.isArray(profile.preferences)
+    ? profile.preferences.filter((p): p is string => typeof p === "string")
+    : [];
+  if (preferences.length > 0) {
+    lines.push(
+      isZh
+        ? `- 偏好：${preferences.join("、")}`
+        : `- Preferences: ${preferences.join(", ")}`
+    );
+  }
+
+  if (memories.length > 0) {
+    lines.push(isZh ? `- 近期记忆：` : `- Recent memories:`);
+    for (const m of memories.slice(0, 3)) {
+      lines.push(`  - ${m.content}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+export interface EntityPrivacy {
+  consent?: "implicit" | "explicit" | "declined";
+  ttl_days?: number;
+  sensitive?: boolean;
+}
+
+export async function forgetEntity(name: string): Promise<boolean> {
+  const entity = await findEntityByName(name);
+  if (!entity) return false;
+
+  await ensureEntitiesTable();
+  const sql = getSql();
+  const profile = {
+    ...entity.profile,
+    privacy: {
+      ...(entity.profile?.privacy as Record<string, unknown> | undefined),
+      consent: "declined",
+    },
+    description: undefined,
+    preferences: undefined,
+    known_facts: undefined,
+    relationship_hints: undefined,
+  };
+
+  try {
+    await sql`
+      UPDATE darkroom_entities
+      SET profile = ${JSON.stringify(profile)},
+          updated_at = NOW()
+      WHERE id = ${entity.id}
+    `;
+    // Also remove relations to protect privacy.
+    await ensureEntityRelationsTable();
+    await sql`
+      DELETE FROM darkroom_entity_relations
+      WHERE entity_a_id = ${entity.id} OR entity_b_id = ${entity.id}
+    `;
+    console.log(`[darkroom:memory] forgot entity: ${name}`);
+    return true;
+  } catch (err) {
+    console.error("[darkroom:memory] forgetEntity failed:", err);
+    return false;
+  }
+}
+
+export async function pruneExpiredEntityProfiles(
+  defaultTtlDays = 90
+): Promise<number> {
+  await ensureEntitiesTable();
+  const sql = getSql();
+
+  const result = await sql`
+    UPDATE darkroom_entities
+    SET profile = jsonb_build_object(
+      'privacy',
+      COALESCE(profile->'privacy', '{}'::jsonb) || jsonb_build_object('ttl_expired', true)
+    ),
+        updated_at = NOW()
+    WHERE source = 'user_mentioned'
+      AND (profile->'privacy'->>'consent' IS DISTINCT FROM 'declined')
+      AND (
+        (
+          (profile->'privacy'->>'ttl_days')::int IS NULL
+          AND last_mentioned_at < NOW() - ${defaultTtlDays} * INTERVAL '1 day'
+        )
+        OR
+        (
+          (profile->'privacy'->>'ttl_days')::int IS NOT NULL
+          AND last_mentioned_at < NOW() - ((profile->'privacy'->>'ttl_days')::int) * INTERVAL '1 day'
+        )
+      )
+  `;
+  return result.rowCount ?? 0;
+}
+
+export async function getEntityNamesByIds(ids: number[]): Promise<Map<number, string>> {
+  if (ids.length === 0) return new Map();
+  await ensureEntitiesTable();
+  const sql = getSql();
+  const result = await sql`
+    SELECT id, name FROM darkroom_entities WHERE id = ANY(${ids}::int[])
+  `;
+  return new Map(
+    (result.rows as Array<{ id: number; name: string }>).map((row) => [row.id, row.name])
+  );
+}
+
+export async function getEntityById(id: number): Promise<Entity | null> {
+  await ensureEntitiesTable();
+  const sql = getSql();
+  const result = await sql`
+    SELECT id, name, aliases, source, entity_type, profile, mention_count, first_seen_at, last_mentioned_at, created_at
+    FROM darkroom_entities
+    WHERE id = ${id}
+    LIMIT 1
+  `;
+  return result.rows.length > 0 ? (result.rows[0] as Entity) : null;
 }
 
 export async function cleanupOldSessions(days: number): Promise<number> {

@@ -19,10 +19,11 @@
 
 .darkroom-chat-embedded {
   border-radius: 20px;
-  border: 1px solid #151515;
+  border: 1px solid #202020;
   box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.6),
-    0 0 60px rgba(106, 138, 138, 0.08);
+    0 24px 80px rgba(0, 0, 0, 0.65),
+    0 0 80px rgba(106, 138, 138, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
   overflow: hidden;
   position: relative;
 }
@@ -378,10 +379,11 @@
   overflow: hidden;
   background: #080808;
   border-radius: 20px;
-  border: 1px solid #151515;
+  border: 1px solid #202020;
   box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.6),
-    0 0 60px rgba(106, 138, 138, 0.08);
+    0 24px 80px rgba(0, 0, 0, 0.65),
+    0 0 80px rgba(106, 138, 138, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 /* CRT scanlines overlay */
@@ -411,7 +413,7 @@
   background: radial-gradient(
     ellipse at center,
     transparent 55%,
-    rgba(0, 0, 0, 0.55) 100%
+    rgba(0, 0, 0, 0.45) 100%
   );
 }
 
@@ -544,7 +546,7 @@
   background: rgba(5, 5, 5, 0.85);
   margin: 10px;
   border-radius: 14px;
-  border: 1px solid #111;
+  border: 1px solid #181818;
 }
 
 .darkroom-chat-entries {
@@ -630,7 +632,7 @@
   padding: 14px 16px;
   background: rgba(5, 5, 5, 0.85);
   border-radius: 14px;
-  border: 1px solid #111;
+  border: 1px solid #181818;
   font-size: clamp(14px, 4vw, 17px);
 }
 
@@ -717,7 +719,7 @@ body.darkroom-chat-active .back-to-top-btn {
     padding: 14px 20px;
     background: rgba(5, 5, 5, 0.85);
     border-radius: 14px;
-    border: 1px solid #111;
+    border: 1px solid #181818;
     font-size: 17px;
   }
 
@@ -731,11 +733,12 @@ body.darkroom-chat-active .back-to-top-btn {
 @media (min-width: 1024px) {
   .darkroom-chat-embedded {
     border-radius: 20px;
-    border: 1px solid #151515;
+    border: 1px solid #202020;
     background: #080808;
     box-shadow:
-      0 24px 80px rgba(0, 0, 0, 0.6),
-      0 0 60px rgba(106, 138, 138, 0.08);
+      0 24px 80px rgba(0, 0, 0, 0.65),
+      0 0 80px rgba(106, 138, 138, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
     overflow: hidden;
     position: relative;
   }

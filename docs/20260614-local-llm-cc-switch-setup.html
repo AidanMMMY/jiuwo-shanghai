@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>本地大模型 + CC Switch + Claude Code 配置备忘</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --text: #f5f5f0;
+      --text-secondary: #a0a0a0;
+      --accent: #c9a227;
+      --accent-dark: #a08220;
+      --border: #2a2a2a;
+      --code-bg: #1a1a1a;
+      --ok: #4ade80;
+      --warn: #fbbf24;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0 0 12px;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+
+    .meta {
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 40px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 28px 0 12px;
+      color: var(--accent);
+    }
+
+    p {
+      margin: 12px 0;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    code {
+      background: var(--code-bg);
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+      font-size: 13px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: var(--text);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--surface);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    tr:hover td {
+      background: rgba(201, 162, 39, 0.05);
+    }
+
+    .diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+      font-size: 13px;
+      line-height: 2;
+      margin: 16px 0;
+    }
+
+    .note {
+      background: var(--surface);
+      border-left: 3px solid var(--accent);
+      padding: 14px 18px;
+      margin: 16px 0;
+      border-radius: 0 8px 8px 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .note strong {
+      color: var(--text);
+    }
+
+    .status-ok {
+      color: var(--ok);
+    }
+
+    ul, ol {
+      margin: 12px 0;
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>本地大模型 + CC Switch + Claude Code 配置备忘</h1>
+      <div class="meta">
+        创建时间：2026-06-14 · 适用环境：macOS / Apple Silicon / Ollama / CC Switch v3.12.2 / Claude Code CLI
+      </div>
+    </header>
+
+    <h2>一、整体链路</h2>
+    <div class="diagram">
+      VS Code（终端运行 claude / Claude Code 扩展）<br>
+      ↓<br>
+      Claude Code CLI<br>
+      ↓<br>
+      CC Switch 本地代理（127.0.0.1:15721）<br>
+      ↓<br>
+      Ollama（127.0.0.1:11434）<br>
+      ↓<br>
+      本地模型
+    </div>
+    <p>说明：Claude Code 使用 Anthropic API 协议，Ollama 只提供 OpenAI 兼容接口，所以需要 CC Switch 的本地代理做协议转换。</p>
+
+    <h2>二、已下载/计划下载的本地模型</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>模型名</th>
+          <th>参数</th>
+          <th>原生上下文</th>
+          <th>建议用途</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>deepseek-r1:70b</code></td>
+          <td>70B</td>
+          <td>128K</td>
+          <td>推理、复杂问题</td>
+        </tr>
+        <tr>
+          <td><code>qwen2.5-coder:32b</code></td>
+          <td>32B</td>
+          <td>128K</td>
+          <td>代码补全、快速任务</td>
+        </tr>
+        <tr>
+          <td><code>qwen2.5:72b</code></td>
+          <td>72B</td>
+          <td>128K</td>
+          <td>通用最强、大上下文</td>
+        </tr>
+        <tr>
+          <td><code>llama3.3:70b</code></td>
+          <td>70B</td>
+          <td>128K</td>
+          <td>英文创意、英文任务</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>注意：</strong>Ollama 默认只启用 2048 tokens 上下文。如需更大上下文，需在运行模型时设置 <code>num_ctx</code>，但会显著增加内存占用。
+    </div>
+
+    <h2>三、CC Switch 配置步骤</h2>
+
+    <h3>3.1 启用本地代理</h3>
+    <p>打开 <strong>CC Switch</strong> → <strong>Settings</strong>：</p>
+    <table>
+      <thead>
+        <tr><th>设置项</th><th>值</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Enable Local Proxy</td><td>✅ 开启</td></tr>
+        <tr><td>Listen Address</td><td><code>127.0.0.1</code></td></tr>
+        <tr><td>Listen Port</td><td><code>15721</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.2 添加 Ollama Provider</h3>
+    <p>进入 <strong>Providers</strong> → <strong>Add Provider</strong>：</p>
+    <table>
+      <thead>
+        <tr><th>字段</th><th>值</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Name</td><td><code>Local Ollama</code></td></tr>
+        <tr><td>App</td><td><code>Claude</code></td></tr>
+        <tr><td>Provider Type</td><td>OpenAI-compatible / Custom / Local（选本地/OpenAI 兼容项）</td></tr>
+        <tr><td>Base URL</td><td><code>http://127.0.0.1:11434/v1</code></td></tr>
+        <tr><td>API Key</td><td><code>ollama</code>（占位符即可，Ollama 不校验）</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.3 模型角色映射</h3>
+    <p>Claude Code 内部使用 <code>haiku</code> / <code>sonnet</code> / <code>opus</code> / <code>reasoning</code> 四种角色请求模型。CC Switch 必须把它们映射到本地模型名：</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Claude Code 角色</th>
+          <th>映射到本地模型</th>
+          <th>用途</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>haiku</code></td><td><code>qwen2.5-coder:32b</code></td><td>快速/轻量任务</td></tr>
+        <tr><td><code>sonnet</code></td><td><code>deepseek-r1:70b</code></td><td>默认主力、推理</td></tr>
+        <tr><td><code>opus</code></td><td><code>qwen2.5:72b</code></td><td>最强模型、大上下文</td></tr>
+        <tr><td><code>reasoning</code></td><td><code>deepseek-r1:70b</code></td><td>推理模式</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      如需偏重英文创意，可将 <code>sonnet</code> 或 <code>opus</code> 改为 <code>llama3.3:70b</code>。
+    </div>
+
+    <h3>3.4 环境变量配置</h3>
+    <p>在该 Provider 的环境变量区域填写：</p>
+    <pre><code>ANTHROPIC_BASE_URL=http://127.0.0.1:11434/v1
+ANTHROPIC_AUTH_TOKEN=ollama
+ANTHROPIC_DEFAULT_HAIKU_MODEL=qwen2.5-coder:32b
+ANTHROPIC_DEFAULT_SONNET_MODEL=deepseek-r1:70b
+ANTHROPIC_DEFAULT_OPUS_MODEL=qwen2.5:72b
+ANTHROPIC_REASONING_MODEL=deepseek-r1:70b</code></pre>
+
+    <h3>3.5 激活 Provider</h3>
+    <p>在 CC Switch 中将 <strong>Local Ollama</strong> 设为 <strong>Claude 的当前 Provider</strong>。</p>
+
+    <h2>四、在 VS Code 中使用</h2>
+
+    <h3>方式 A：终端直接运行</h3>
+    <pre><code>claude
+# 或带指令
+claude "帮我解释这段代码"</code></pre>
+
+    <h3>方式 B：Claude Code VS Code 扩展</h3>
+    <p>安装 Claude Code 官方扩展后，其底层同样调用 Claude Code CLI，配置正确后会自动走本地模型。</p>
+
+    <h2>五、验证是否走通本地</h2>
+    <p>在终端运行：</p>
+    <pre><code>claude --verbose "你好"</code></pre>
+
+    <p>或在 Ollama 侧观察模型是否被加载：</p>
+    <pre><code>ollama ps</code></pre>
+
+    <p>若看到对应模型出现在 <code>ollama ps</code> 列表中，说明请求已到达本地。</p>
+
+    <h2>六、常见问题</h2>
+    <p><strong>Q：为什么 VS Code 里的 Claude 官方扩展不能直接接本地模型？</strong><br>
+    A：该扩展只支持 Anthropic 官方 API，不走 Claude Code CLI，因此无法被 CC Switch 接管。</p>
+
+    <p><strong>Q：上下文长度能不能直接用到 128K？</strong><br>
+    A：模型架构支持，但 Ollama 默认 2048。开启更大上下文会显著增加内存，64GB 内存跑 70B 模型时建议控制在 4K–8K 以内。</p>
+
+    <p><strong>Q：本地 70B 模型速度如何？</strong><br>
+    A：明显慢于云端 Claude。建议轻量任务用 <code>qwen2.5-coder:32b</code>，复杂任务才用 70B/72B。</p>
+
+    <h2>七、相关命令速查</h2>
+    <pre><code># 查看已下载模型
+ollama list
+
+# 查看正在运行的模型
+ollama ps
+
+# 手动运行某个模型（测试用）
+ollama run deepseek-r1:70b
+
+# 查看模型信息
+ollama show deepseek-r1:70b</code></pre>
+
+    <footer>
+      本文件为操作备忘，随环境变化可能需要更新。
+    </footer>
+  </div>
+</body>
+</html>

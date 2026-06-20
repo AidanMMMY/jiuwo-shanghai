@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Darkroom 人物档案与实体关系网络改造报告</title>
+  <style>
+    :root {
+      --gold: #c9a227;
+      --black: #0a0a0a;
+      --off-white: #f5f5f0;
+      --gray: #888;
+      --light-gray: #e5e5e5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--black);
+      color: var(--off-white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    header {
+      border-bottom: 1px solid rgba(201, 162, 39, 0.3);
+      padding-bottom: 24px;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      color: var(--gold);
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0 0 12px;
+      line-height: 1.3;
+    }
+
+    .meta {
+      color: var(--gray);
+      font-size: 13px;
+    }
+
+    h2 {
+      color: var(--gold);
+      font-size: 20px;
+      font-weight: 600;
+      margin: 40px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+    }
+
+    h3 {
+      color: var(--off-white);
+      font-size: 16px;
+      font-weight: 600;
+      margin: 28px 0 12px;
+    }
+
+    p {
+      margin: 12px 0;
+    }
+
+    ul, ol {
+      margin: 12px 0;
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 8px 0;
+    }
+
+    code {
+      background-color: rgba(245, 245, 240, 0.08);
+      color: var(--gold);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+      font-size: 13px;
+    }
+
+    pre {
+      background-color: rgba(245, 245, 240, 0.06);
+      border-left: 3px solid var(--gold);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: var(--off-white);
+      display: block;
+      line-height: 1.6;
+    }
+
+    .highlight-box {
+      background-color: rgba(201, 162, 39, 0.08);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+
+    .highlight-box h3 {
+      margin-top: 0;
+      color: var(--gold);
+    }
+
+    .check-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .check-list li {
+      position: relative;
+      padding-left: 28px;
+    }
+
+    .check-list li::before {
+      content: "☐";
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(245, 245, 240, 0.1);
+    }
+
+    th {
+      color: var(--gold);
+      font-weight: 600;
+      background-color: rgba(201, 162, 39, 0.08);
+    }
+
+    tr:hover td {
+      background-color: rgba(245, 245, 240, 0.03);
+    }
+
+    .phase-badge {
+      display: inline-block;
+      background-color: rgba(201, 162, 39, 0.15);
+      color: var(--gold);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+
+    footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(201, 162, 39, 0.2);
+      color: var(--gray);
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 32px 16px;
+      }
+      h1 {
+        font-size: 22px;
+      }
+      h2 {
+        font-size: 17px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Darkroom 人物档案与实体关系网络改造报告</h1>
+      <div class="meta">
+        生成时间：2026-06-20 &nbsp;|&nbsp; 范围：Darkroom Chat 记忆系统人物/实体管理全流程改造
+      </div>
+    </header>
+
+    <section>
+      <h2>一、改造目标</h2>
+      <p>把 Darkroom 的记忆管理从「零散提及」升级为「围绕人物的档案系统」：</p>
+      <ul>
+        <li>覆盖所有人物实体：酒吧已知人物、已识别用户、用户提到的第三方</li>
+        <li>把记忆挂接到实体，支持按人物召回</li>
+        <li>建立人物关系图（friend / partner / colleague / ex / sibling / knows / mentioned_with）</li>
+        <li>聊天时针对提到的人物注入「人物卡」</li>
+        <li>保留隐私控制：第三方档案 TTL、用户可要求被遗忘</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>二、Phase 1：数据层升级</h2>
+      <h3>新增/修改的表</h3>
+      <ol>
+        <li>
+          <strong><code>darkroom_entities</code>（扩展）</strong>
+          <ul>
+            <li>新增 <code>entity_type</code>、<code>profile</code> (JSONB)、<code>mention_count</code>、<code>first_seen_at</code>、<code>last_mentioned_at</code></li>
+            <li><code>profile</code> 包含 description、preferences、known_facts、relationship_hints、confidence、privacy 等</li>
+          </ul>
+        </li>
+        <li>
+          <strong><code>darkroom_memory_entities</code>（新建）</strong>：关联记忆与实体，role 包含 subject / object / co_mention / mentioned</li>
+        <li>
+          <strong><code>darkroom_entity_relations</code>（新建）</strong>：人物关系边</li>
+      </ol>
+
+      <h3>迁移结果</h3>
+      <p>运行 <code>scripts/seed-known-entities-to-db.ts</code> 后：</p>
+      <pre><code>entities by source:
+  knowledge_base: 11
+  memory:          3
+  user_mentioned: 47
+relations: 0
+memory_links: 150</code></pre>
+      <ul>
+        <li>11 个 <code>KNOWN_ENTITIES</code>（Tee/老王、小马/Phillip、Dex、Aidan 等）已写入 DB</li>
+        <li>698 条记忆被扫描，106 条与实体建立关联</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>三、Phase 2：提取层增强</h2>
+      <ul>
+        <li><code>lib/darkroom-chat.ts</code> 新增 <code>extractEntitiesFromText(text, isZh)</code>，识别自然提及并过滤 MBTI、停用词</li>
+        <li><code>data/darkroom-messages-zh.json</code> / <code>-messages.json</code> 的 <code>extractionPrompt</code> 要求 LLM 返回 <code>memories</code> + <code>entities</code> + <code>relations</code>，同时兼容旧格式</li>
+        <li><code>app/api/darkroom/extract/route.ts</code> 解析新格式、写入实体/关系/关联，并注入已知实体别名提示（老王 → Tee）</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>四、Phase 3：聊天层人物卡</h2>
+      <ul>
+        <li><code>lib/darkroom-memory.ts</code> 新增 <code>buildEntityCard(...)</code></li>
+        <li><code>app/api/darkroom/chat/route.ts</code> 识别话题实体，最多生成 2 张人物卡注入 prompt，并优先召回实体关联记忆</li>
+        <li><code>lib/darkroom-budget.ts</code> 新增 <code>entityCards</code> 字段，预算紧张时人物卡优先于无关 memory 保留</li>
+      </ul>
+
+      <div class="highlight-box">
+        <h3>人物卡示例</h3>
+        <pre><code>[人物卡：小马]
+- 身份：酒吧熟客，常与阿林一起来
+- 关系：阿林（partner）、Dex（friend）
+- 偏好：金汤力、吧台座位
+- 近期记忆：
+  - 上次和阿林一起来坐在吧台</code></pre>
+      </div>
+    </section>
+
+    <section>
+      <h2>五、Phase 4：Profile 自动聚合</h2>
+      <ul>
+        <li>新建 <code>lib/darkroom-entity-summary.ts</code>：<code>summarizeEntityProfile(entityId, isZh)</code> 与 <code>summarizeAllEntityProfiles(...)</code></li>
+        <li>新建 <code>scripts/summarize-entity-profiles.ts</code> 脚本</li>
+        <li>摘要字段：description、preferences、known_facts、relationship_hints、confidence</li>
+      </ul>
+
+      <p><strong>运行方式（需要 DEEPSEEK_API_KEY）：</strong></p>
+      <pre><code>export DEEPSEEK_API_KEY=...
+npx tsx --env-file=.env.local scripts/summarize-entity-profiles.ts</code></pre>
+      <p>建议先小批量试运行：</p>
+      <pre><code>SUMMARIZE_LIMIT=5 SUMMARIZE_MIN_MENTIONS=3 npx tsx --env-file=.env.local scripts/summarize-entity-profiles.ts</code></pre>
+    </section>
+
+    <section>
+      <h2>六、Phase 5：隐私与降级</h2>
+      <ul>
+        <li>新 <code>user_mentioned</code> 实体默认写入 <code>privacy: { consent: "implicit", ttl_days: 90, sensitive: false }</code></li>
+        <li><code>forgetEntity(name)</code>：标记 declined、清空 profile、删除关系</li>
+        <li><code>pruneExpiredEntityProfiles(90)</code>：清理过期第三方档案</li>
+        <li><code>detectForgetRequest(message, isZh)</code> 识别「忘了我」「别提小马了」「Forget about me」等</li>
+        <li>聊天 route 检测到遗忘请求后立即清除并返回确认</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>七、验证结果</h2>
+      <pre><code>npm run typecheck  ✓
+npm run test       ✓ (100 passed)
+npm run build      ✓</code></pre>
+    </section>
+
+    <section>
+      <h2>八、需要你人工检查确认的信息</h2>
+      <ul class="check-list">
+        <li><strong>已知实体描述是否准确</strong>：检查 11 个 knowledge_base 实体的 profile.description，来源是 KNOWN_ENTITIES 的 zhHint/enHint，有误请改 JSON 后重新迁移。</li>
+        <li><strong>记忆关联是否张冠李戴</strong>：抽查 darkroom_memory_entities 表，确认无错误关联。</li>
+        <li><strong>人物卡注入后的回复风格</strong>：部署后测试聊到「小马」「阿林」等人物，确认 AI 基于档案回复、不编造。</li>
+        <li><strong>LLM 自动摘要的可信度</strong>：运行 summarize-entity-profiles.ts 后抽查 entity.profile，低 confidence 要人工复核。</li>
+        <li><strong>「遗忘」指令是否符合预期</strong>：测试「忘了我」「别提小明了」，确认只清除 profile/关系、保留名字的软删除程度足够。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>九、推荐后续操作</h2>
+      <ol>
+        <li>本地/生产部署前再次验证：<pre><code>npm run typecheck && npm run test && npm run build</code></pre>
+        </li>
+        <li>部署后观察 Vercel log：<pre><code>[darkroom:extract] batch=... raw_memories=... entities=... relations=...</code></pre>
+        </li>
+        <li>运行 profile 聚合前，先小批量测试。</li>
+        <li>如需定时 TTL 清理，可配置 Vercel Cron 或本地定时任务。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>十、修改文件清单</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>文件</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>lib/darkroom-memory.ts</code></td><td>实体/关系/记忆关联表、人物卡、隐私/TTL 函数</td></tr>
+          <tr><td><code>lib/darkroom-chat.ts</code></td><td>自然实体提取、遗忘请求识别</td></tr>
+          <tr><td><code>lib/darkroom-budget.ts</code></td><td>prompt 预算中加入 entityCards</td></tr>
+          <tr><td><code>lib/darkroom-entity-summary.ts</code>（新建）</td><td>LLM 自动聚合实体 profile</td></tr>
+          <tr><td><code>app/api/darkroom/extract/route.ts</code></td><td>解析 entities/relations 并存储</td></tr>
+          <tr><td><code>app/api/darkroom/chat/route.ts</code></td><td>人物卡注入、实体优先召回、遗忘指令</td></tr>
+          <tr><td><code>data/darkroom-messages-zh.json</code> / <code>-messages.json</code></td><td>extraction prompt 输出 entities + relations</td></tr>
+          <tr><td><code>scripts/seed-known-entities-to-db.ts</code></td><td>一次性迁移脚本</td></tr>
+          <tr><td><code>scripts/summarize-entity-profiles.ts</code>（新建）</td><td>定期聚合脚本</td></tr>
+          <tr><td><code>scripts/fix-entity-sources.ts</code>（新建）</td><td>一次性修复 entity source 脚本</td></tr>
+          <tr><td><code>lib/darkroom-memory.test.ts</code> / <code>-chat.test.ts</code></td><td>新增测试</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer>
+      JIUWO Shanghai · Darkroom 记忆系统改造报告 · 2026-06-20
+    </footer>
+  </div>
+</body>
+</html>

@@ -42,6 +42,7 @@ export interface ChatPromptComponents {
   memoryBlock: string;
   identityReminder: string;
   identityProbeInstruction?: string;
+  entityCards?: string;
   topicReminder: string;
   topicLockInstruction: string;
   searchBlock: string;
@@ -116,6 +117,7 @@ export function buildChatPromptWithinBudget(
     memoryBlock,
     identityReminder,
     identityProbeInstruction,
+    entityCards,
     topicReminder,
     topicLockInstruction,
     searchBlock,
@@ -127,6 +129,7 @@ export function buildChatPromptWithinBudget(
   let currentMemoryBlock = memoryBlock;
   let currentIdentityReminder = identityReminder;
   const currentIdentityProbe = identityProbeInstruction ?? '';
+  let currentEntityCards = entityCards ?? '';
   let currentHistory = history;
   let currentSearchBlock = searchBlock;
   let currentKnowledgeBase = knowledgeBase;
@@ -140,6 +143,7 @@ export function buildChatPromptWithinBudget(
       currentMemoryBlock,
       currentIdentityReminder,
       currentIdentityProbe,
+      currentEntityCards,
       topicReminder,
       topicLockInstruction,
       currentSearchBlock,
@@ -175,7 +179,14 @@ export function buildChatPromptWithinBudget(
     }
   }
 
-  // 3. Strip name memories from identity reminder.
+  // 3. Drop entity cards if still over budget (memory block was already reduced).
+  if (currentEntityCards) {
+    currentEntityCards = "";
+    dropped.push("entity-cards");
+    if (reduce() <= MAX_INPUT_TOKENS) return { systemContent, history: currentHistory, dropped };
+  }
+
+  // 4. Strip name memories from identity reminder.
   if (currentIdentityReminder) {
     const reduced = stripIdentityNameMemories(currentIdentityReminder, isZh);
     if (reduced !== currentIdentityReminder) {
@@ -185,7 +196,7 @@ export function buildChatPromptWithinBudget(
     }
   }
 
-  // 4. Shorten history.
+  // 5. Shorten history.
   const historyLimits = [6, 4, 2];
   for (const limit of historyLimits) {
     if (currentHistory.length > limit) {
@@ -195,7 +206,7 @@ export function buildChatPromptWithinBudget(
     }
   }
 
-  // 5. Truncate knowledgeBase tail by paragraphs.
+  // 6. Truncate knowledgeBase tail by paragraphs.
   const protectedTokens =
     countTokens(systemPrompt) +
     countTokens(activeTimeContext) +
@@ -203,6 +214,7 @@ export function buildChatPromptWithinBudget(
     countTokens(currentMemoryBlock) +
     countTokens(currentIdentityReminder) +
     countTokens(currentIdentityProbe) +
+    countTokens(currentEntityCards) +
     countTokens(topicReminder) +
     countTokens(topicLockInstruction) +
     countTokens(userMessage) +

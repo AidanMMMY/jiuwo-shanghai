@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
 import { getDarkroomData, matchKnownEntity } from "@/lib/darkroom";
 import {
+  detectForgetRequest,
   TopicState,
   HistoryMessage,
   buildTopicState,
   buildTopicReminder,
   classifyMessageWithModel,
   containsPronoun,
+  extractEntitiesFromText,
   extractExplicitName,
   extractUserMentionedNames,
   extractUserNameFromHistory,
@@ -32,6 +34,16 @@ import {
   upsertSessionState,
   findSimilarMemory,
   updateIdentityProbeState,
+  findEntityByName,
+  getEntityRelations,
+  getMemoriesForEntity,
+  getEntityNamesByIds,
+  buildEntityCard,
+  forgetEntity,
+  PRIVACY_FEATURES_ENABLED,
+  type Entity,
+  type FormattedEntityRelation,
+  type Memory,
 } from "@/lib/darkroom-memory";
 import {
   buildChatPromptWithinBudget,
@@ -48,6 +60,63 @@ import {
 const SEARCH_ENABLED = process.env.DARKROOM_WEB_SEARCH_ENABLED === "true";
 const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 const MAX_SEARCHES_PER_HOUR = 10;
+
+async function buildEntityCardsForTopic(
+  topicEntity: string | undefined,
+  history: HistoryMessage[],
+  isZh: boolean,
+  maxCards = 2
+): Promise<string[]> {
+  if (!topicEntity) return [];
+
+  const candidateNames = new Set<string>([topicEntity]);
+
+  // Add recently mentioned names from user messages.
+  const recentMessages = history.filter((m) => m.role === "user").slice(-6);
+  for (const msg of recentMessages) {
+    const mentioned = extractEntitiesFromText(msg.content, isZh);
+    for (const name of mentioned) {
+      candidateNames.add(name);
+    }
+  }
+
+  const entityCards: string[] = [];
+  const seenEntityIds = new Set<number>();
+
+  for (const name of candidateNames) {
+    if (entityCards.length >= maxCards) break;
+
+    const entity = await findEntityByName(name);
+    if (!entity || seenEntityIds.has(entity.id)) continue;
+    seenEntityIds.add(entity.id);
+
+    const [relations, memories] = await Promise.all([
+      getEntityRelations(entity.id),
+      getMemoriesForEntity(entity.id, 3),
+    ]);
+
+    // Resolve relation partner names.
+    const relatedIds = new Set<number>();
+    for (const r of relations) {
+      relatedIds.add(r.entity_a_id === entity.id ? r.entity_b_id : r.entity_a_id);
+    }
+    const idToName = await getEntityNamesByIds(Array.from(relatedIds));
+
+    const formattedRelations: FormattedEntityRelation[] = relations
+      .slice(0, 3)
+      .map((r) => {
+        const otherId = r.entity_a_id === entity.id ? r.entity_b_id : r.entity_a_id;
+        return {
+          relation_type: r.relation_type,
+          other_name: idToName.get(otherId) || (isZh ? "某人" : "someone"),
+        };
+      });
+
+    entityCards.push(buildEntityCard(entity, isZh, formattedRelations, memories));
+  }
+
+  return entityCards;
+}
 
 function getShanghaiTime(): { date: Date; hour: number; minute: number; timeString: string } {
   const now = new Date();
@@ -170,6 +239,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Handle explicit "forget me" / "don't mention X" requests.
+    // NOTE: privacy features are currently disabled by default. The code path
+    // is kept in place so it can be re-enabled by setting PRIVACY_FEATURES_ENABLED.
+    const forgetRequest = PRIVACY_FEATURES_ENABLED ? detectForgetRequest(message, isZh) : null;
+    if (forgetRequest && sessionId) {
+      const targetName = forgetRequest.isSelf
+        ? (userName || sessionState?.user_identity || undefined)
+        : forgetRequest.name;
+      if (targetName) {
+        const ok = await forgetEntity(targetName);
+        if (ok) {
+          return NextResponse.json({
+            content: isZh
+              ? `关于 ${forgetRequest.isSelf ? "你" : targetName} 的记忆已经清除了。继续聊别的吧。`
+              : `What I knew about ${forgetRequest.isSelf ? "you" : targetName} has been cleared. Let's move on.`,
+            source: "system",
+            timestamp: new Date().toISOString(),
+          });
+        }
+      }
+    }
+
     // Check if API key is available (lazy check)
     const apiKey = process.env.DEEPSEEK_API_KEY;
     if (!apiKey || apiKey === "dummy-key-for-build") {
@@ -198,6 +289,8 @@ export async function POST(req: NextRequest) {
     let memoryBlock = "";
     let sessionBlock = "";
     let topicState: TopicState;
+    let entityCards: string[] = [];
+    let entityMemories: Memory[] = [];
 
     try {
       const isAmbiguous =
@@ -260,7 +353,27 @@ export async function POST(req: NextRequest) {
 
       console.log("[darkroom:chat] topicState:", JSON.stringify(topicState));
 
-      const memories = filterMemoriesForChat(rawMemories);
+      // Fetch entity cards and entity-linked memories for the current topic.
+      [entityCards, entityMemories] = await Promise.all([
+        buildEntityCardsForTopic(topicState.primaryEntity, history, isZh, 2),
+        topicState.primaryEntity
+          ? findEntityByName(topicState.primaryEntity).then(async (entity) => {
+              if (!entity) return [];
+              return getMemoriesForEntity(entity.id, 3);
+            })
+          : Promise.resolve([] as Memory[]),
+      ]);
+
+      // Merge entity-specific memories with vector/keyword retrieved memories,
+      // deduplicating by id and prioritizing entity-linked memories.
+      const memoryMap = new Map<number, Memory>();
+      for (const m of entityMemories) memoryMap.set(m.id, m);
+      for (const m of rawMemories) {
+        if (!memoryMap.has(m.id)) memoryMap.set(m.id, m);
+      }
+      const mergedMemories = Array.from(memoryMap.values());
+
+      const memories = filterMemoriesForChat(mergedMemories);
       if (memories.length > 0) {
         const topicEntity = topicState.primaryEntity;
         const topicNames = topicEntity
@@ -339,6 +452,7 @@ export async function POST(req: NextRequest) {
         memoryBlock,
         identityReminder,
         identityProbeInstruction,
+        entityCards: entityCards.join("\n\n"),
         topicReminder,
         topicLockInstruction,
         searchBlock,

@@ -4,7 +4,10 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { sendDarkroomMessage, type ChatMessage } from '@/lib/darkroom';
 
 function getNowTime(): string {
-  return new Date().toLocaleTimeString('en-GB', { hour12: false });
+  return new Date().toLocaleTimeString('en-GB', {
+    hour12: false,
+    timeZone: 'Asia/Shanghai',
+  });
 }
 
 const MAX_STORED_MESSAGES = 20;

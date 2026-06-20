@@ -3,7 +3,9 @@ import { deepseekClient, DEFAULT_MODEL } from "@/lib/deepseek/client";
 import { getDarkroomData } from "@/lib/darkroom";
 import {
   extractUserMentionedNames,
+  extractEntitiesFromText,
   safeJsonParseArray,
+  safeJsonParse,
   updateSessionSummary,
 } from "@/lib/darkroom-chat";
 import {
@@ -19,10 +21,136 @@ import {
   normalizeKeywords,
   getSessionIdentities,
   upsertSessionState,
+  upsertEntity,
+  linkMemoryToEntities,
+  recordEntityRelation,
+  getDynamicEntities,
+  findEntityByName,
+  type Entity,
 } from "@/lib/darkroom-memory";
 
 const BATCH_SIZE = 5;
 const MAX_BATCHES_PER_REQUEST = 4; // Process up to 20 conversations per call
+
+function buildKnownEntitiesHint(entities: Entity[], isZh: boolean): string {
+  if (entities.length === 0) return "";
+  const lines = entities
+    .filter((e) => e.entity_type === "person" || !e.entity_type)
+    .map((e) => {
+      const aliases = e.aliases.length > 0 ? `（${e.aliases.join("、")}）` : "";
+      return `- ${e.name}${aliases}`;
+    });
+  if (lines.length === 0) return "";
+  return isZh
+    ? `\n以下是我们已经知道的人物。如果用户提到他们的别名，请使用规范名：\n${lines.join("\n")}\n`
+    : `\nPeople already known to the system. If the user mentions an alias, use the canonical name:\n${lines.join("\n")}\n`;
+}
+
+interface ProcessEntitiesOptions {
+  isZh: boolean;
+  extractedEntities: unknown[];
+  extractedRelations: unknown[];
+  storedMemories: Array<{ id: number; content: string }>;
+  identity?: string;
+}
+
+async function processExtractedEntitiesAndRelations(
+  options: ProcessEntitiesOptions
+): Promise<void> {
+  const { isZh, extractedEntities, extractedRelations, storedMemories, identity } = options;
+
+  // Upsert extracted entities and build a name -> entity map.
+  const entityNameToId = new Map<string, number>();
+  for (const raw of extractedEntities) {
+    if (typeof raw !== "object" || raw === null) continue;
+    const e = raw as Record<string, unknown>;
+    const name = typeof e.name === "string" ? e.name.trim() : "";
+    if (!name || name.length < 2) continue;
+
+    const aliases = Array.isArray(e.aliases)
+      ? e.aliases.filter((a): a is string => typeof a === "string").map((a) => a.trim())
+      : [];
+    const entityType = typeof e.type === "string" ? e.type : "person";
+
+    const entity = await upsertEntity(name, {
+      aliases,
+      source: "memory",
+      entityType,
+      bumpMention: false,
+    });
+    if (entity) {
+      entityNameToId.set(name.toLowerCase(), entity.id);
+      for (const alias of entity.aliases) {
+        entityNameToId.set(alias.toLowerCase(), entity.id);
+      }
+    }
+  }
+
+  // Also ensure the known user identity is in the map.
+  if (identity) {
+    const userEntity = await upsertEntity(identity, {
+      source: "memory",
+      entityType: "person",
+      profile: { is_user: true },
+      bumpMention: false,
+    });
+    if (userEntity) {
+      entityNameToId.set(identity.toLowerCase(), userEntity.id);
+    }
+  }
+
+  // Link stored memories to entities mentioned in their content.
+  for (const memory of storedMemories) {
+    const namesFromContent = extractEntitiesFromText(memory.content, isZh);
+    // Also match against extracted entity names/aliases.
+    const matchedNames: string[] = [...namesFromContent];
+    for (const lowerName of entityNameToId.keys()) {
+      const regex = new RegExp(
+        `(^|[^a-zA-Z0-9一-龥])${lowerName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}($|[^a-zA-Z0-9一-龥])`,
+        "i"
+      );
+      if (regex.test(memory.content)) {
+        const entity = await findEntityByName(lowerName);
+        if (entity && !matchedNames.some((n) => n.toLowerCase() === lowerName)) {
+          matchedNames.push(entity.name);
+        }
+      }
+    }
+
+    if (matchedNames.length > 0) {
+      await linkMemoryToEntities(memory.id, matchedNames, {
+        subjectName: identity,
+        confidence: 0.8,
+        source: "memory",
+      });
+    }
+  }
+
+  // Record relations.
+  const validRelationTypes = new Set([
+    "friend",
+    "partner",
+    "lover",
+    "fwb",
+    "date",
+    "affair",
+    "colleague",
+    "ex",
+    "sibling",
+    "knows",
+    "mentioned_with",
+  ]);
+  for (const raw of extractedRelations) {
+    if (typeof raw !== "object" || raw === null) continue;
+    const r = raw as Record<string, unknown>;
+    const a = typeof r.a === "string" ? r.a.trim() : "";
+    const b = typeof r.b === "string" ? r.b.trim() : "";
+    const type = typeof r.type === "string" ? r.type.trim().toLowerCase() : "";
+    if (!a || !b || a === b || !validRelationTypes.has(type)) continue;
+
+    await recordEntityRelation(a, b, type, { confidence: 0.75 });
+  }
+}
 
 export async function POST(req: NextRequest) {
   let isZh = false;
@@ -116,6 +244,14 @@ export async function POST(req: NextRequest) {
       ];
       const identityMap = await getSessionIdentities(sessionIds);
 
+      // Fetch known/dynamic entities so the extraction model can normalize
+      // aliases (e.g. 老王 -> Tee) and emit consistent entity names.
+      const dynamicEntities = await getDynamicEntities().catch((err) => {
+        console.error("[darkroom:extract] dynamic entities fetch error:", err);
+        return [];
+      });
+      const knownEntitiesHint = buildKnownEntitiesHint(dynamicEntities, isZh);
+
       // Group by session_id so each batch has consistent identity context.
       const groups = new Map<string, typeof pending>();
       for (const conv of pending) {
@@ -153,7 +289,9 @@ export async function POST(req: NextRequest) {
             : "";
 
           const batchPrompt = isZh
-            ? `基于以下 ${batch.length} 段连续对话，提取 0–4 个值得持久化的记忆。每条记忆必须包含以下字段：
+            ? `基于以下 ${batch.length} 段连续对话，提取 0–4 个值得持久化的记忆，以及对话中提到的人物实体和人物关系。
+
+每条记忆必须包含以下字段：
 
 {
   "content": "记忆内容（简洁、具体、不含敏感信息）",
@@ -168,14 +306,29 @@ export async function POST(req: NextRequest) {
 - system_inferred：系统从对话中合理推断出的关系动态或总结，但不是用户直接陈述的事实。
 - self_fact：当已知用户身份且用户用第一人称讲关于自己的事实（偏好、计划、情绪）。
 
-${identityHint}
+时间信息：
+- 如果用户消息中包含时间线索（如「去年夏天」、「上周三」、「最近」、「以前」、「目前」、「计划下个月」等），请把该时间描述明确写进 content 开头。
+- 保留用户原话中的相对时间描述，不要换算成绝对日期。例如「去年夏天」保留为「去年夏天」，不要写成「2025年夏天」。
+- 同时把时间描述词加入 keywords 数组，例如「去年夏天」、「最近」、「目前」、「计划中」。
 
+输出格式改为单个 JSON 对象：
+{
+  "memories": [...],
+  "entities": [{"name": "小马", "aliases": ["Phillip"], "type": "person"}],
+  "relations": [{"a": "小马", "b": "阿林", "type": "partner"}]
+}
+
+关系类型可选：friend（朋友）、partner（伴侣/恋人）、lover（恋人/爱人）、fwb（friends with benefits）、date（约会中/约会过）、affair（婚外情/外遇/私情）、colleague（同事）、ex（前任）、sibling（兄弟姐妹）、knows（认识）、mentioned_with（一起被提到）。
+${identityHint}
+${knownEntitiesHint}
 注意跨对话的重复主题。如果某条信息与已有记忆高度重复，请降低其优先级或不包含。
 
 ${transcript}
 
-请提取记忆，只返回 JSON 数组：`
-            : `Based on the following ${batch.length} consecutive exchanges, extract 0–4 memories worth persisting. Each memory must include these fields:
+请提取，只返回 JSON 对象：`
+            : `Based on the following ${batch.length} consecutive exchanges, extract 0–4 memories worth persisting, plus any people mentioned and relationships between them.
+
+Each memory must include these fields:
 
 {
   "content": "Concise, specific memory content without sensitive info",
@@ -190,13 +343,26 @@ Types:
 - system_inferred: a reasonable inference about relationship dynamics or summary, not directly stated by the user.
 - self_fact: when the user's identity is known and they use first-person to state a fact about themselves (preference, plan, mood).
 
-${identityHint}
+Temporal information:
+- If the user's message contains a time reference (e.g. "last summer", "last Wednesday", "recently", "before", "currently", "planning next month"), include that time reference at the beginning of the content field.
+- Keep the user's original relative time wording; do NOT convert it into an absolute date. For example, "last summer" stays "last summer", not "summer 2025".
+- Also add the time reference words to the keywords array, e.g. "last summer", "recently", "currently", "planning".
 
+Output a single JSON object:
+{
+  "memories": [...],
+  "entities": [{"name": "Alex", "aliases": [], "type": "person"}],
+  "relations": [{"a": "Alex", "b": "Sam", "type": "friend"}]
+}
+
+Relation types: friend, partner, lover, fwb, date, affair, colleague, ex, sibling, knows, mentioned_with.
+${identityHint}
+${knownEntitiesHint}
 Look for recurring themes across exchanges. If a memory overlaps heavily with existing traces, deprioritize or omit it.
 
 ${transcript}
 
-Extract memories as a JSON array only:`;
+Extract as a JSON object only:`;
 
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 15000);
@@ -224,16 +390,25 @@ Extract memories as a JSON array only:`;
           }
 
           let memories: unknown[] = [];
+          let extractedEntities: unknown[] = [];
+          let extractedRelations: unknown[] = [];
 
-          const parsed = safeJsonParseArray(raw);
-          if (parsed) {
-            memories = parsed;
+          const arrayParsed = safeJsonParseArray(raw);
+          if (arrayParsed) {
+            memories = arrayParsed;
           } else {
-            console.log("[darkroom:extract] failed to parse memories JSON");
+            const objectParsed = safeJsonParse(raw);
+            if (objectParsed) {
+              memories = Array.isArray(objectParsed.memories) ? objectParsed.memories : [];
+              extractedEntities = Array.isArray(objectParsed.entities) ? objectParsed.entities : [];
+              extractedRelations = Array.isArray(objectParsed.relations) ? objectParsed.relations : [];
+            } else {
+              console.log("[darkroom:extract] failed to parse extraction JSON");
+            }
           }
 
           console.log(
-            `[darkroom:extract] batch=${totalBatches} session=${sessionId || "none"} raw_memories=${memories.length}`
+            `[darkroom:extract] batch=${totalBatches} session=${sessionId || "none"} raw_memories=${memories.length} entities=${extractedEntities.length} relations=${extractedRelations.length}`
           );
 
           const batchStored = [];
@@ -334,6 +509,19 @@ Extract memories as a JSON array only:`;
               });
               batchStored.push(memory);
             }
+          }
+
+          // ── Process entities and relations extracted by the model ────────────
+          try {
+            await processExtractedEntitiesAndRelations({
+              isZh,
+              extractedEntities,
+              extractedRelations,
+              storedMemories: batchStored,
+              identity,
+            });
+          } catch (err) {
+            console.error("[darkroom:extract] entity/relation processing error:", err);
           }
 
           // Mark conversations as processed even if no new memories were stored

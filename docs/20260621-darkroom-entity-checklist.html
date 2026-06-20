@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Darkroom 人物档案改造检查清单</title>
+  <style>
+    :root {
+      --gold: #c9a227;
+      --black: #0a0a0a;
+      --off-white: #f5f5f0;
+      --gray: #888;
+      --light-gray: #e5e5e5;
+      --red: #c94a4a;
+      --green: #4ac984;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--black);
+      color: var(--off-white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    header {
+      border-bottom: 1px solid rgba(201, 162, 39, 0.3);
+      padding-bottom: 24px;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      color: var(--gold);
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0 0 12px;
+      line-height: 1.3;
+    }
+
+    .meta {
+      color: var(--gray);
+      font-size: 13px;
+    }
+
+    h2 {
+      color: var(--gold);
+      font-size: 20px;
+      font-weight: 600;
+      margin: 40px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+    }
+
+    h3 {
+      color: var(--off-white);
+      font-size: 16px;
+      font-weight: 600;
+      margin: 28px 0 12px;
+    }
+
+    p { margin: 12px 0; }
+
+    ul, ol { margin: 12px 0; padding-left: 24px; }
+    li { margin: 8px 0; }
+
+    code {
+      background-color: rgba(245, 245, 240, 0.08);
+      color: var(--gold);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+      font-size: 13px;
+    }
+
+    pre {
+      background-color: rgba(245, 245, 240, 0.06);
+      border-left: 3px solid var(--gold);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: var(--off-white);
+      display: block;
+      line-height: 1.6;
+    }
+
+    .status-disabled {
+      display: inline-block;
+      background-color: rgba(201, 74, 74, 0.15);
+      color: var(--red);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+
+    .status-enabled {
+      display: inline-block;
+      background-color: rgba(74, 201, 132, 0.15);
+      color: var(--green);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+
+    .highlight-box {
+      background-color: rgba(201, 162, 39, 0.08);
+      border: 1px solid rgba(201, 162, 39, 0.25);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+
+    .highlight-box h3 {
+      margin-top: 0;
+      color: var(--gold);
+    }
+
+    .check-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .check-list li {
+      position: relative;
+      padding-left: 28px;
+      margin: 12px 0;
+    }
+
+    .check-list li::before {
+      content: "☐";
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+    }
+
+    .check-list li.checked::before {
+      content: "☑";
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(245, 245, 240, 0.1);
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--gold);
+      font-weight: 600;
+      background-color: rgba(201, 162, 39, 0.08);
+    }
+
+    tr:hover td {
+      background-color: rgba(245, 245, 240, 0.03);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .summary-card {
+      background-color: rgba(245, 245, 240, 0.05);
+      border: 1px solid rgba(245, 245, 240, 0.1);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .summary-card .number {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gold);
+      display: block;
+    }
+
+    .summary-card .label {
+      font-size: 12px;
+      color: var(--gray);
+      margin-top: 4px;
+    }
+
+    footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(201, 162, 39, 0.2);
+      color: var(--gray);
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 32px 16px; }
+      h1 { font-size: 22px; }
+      h2 { font-size: 17px; }
+      table { font-size: 12px; }
+      th, td { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Darkroom 人物档案改造检查清单</h1>
+      <div class="meta">
+        生成时间：2026-06-21 &nbsp;|&nbsp; 范围：当前数据库实体、人物卡及需确认信息
+      </div>
+    </header>
+
+    <section>
+      <h2>一、功能调整说明</h2>
+      <h3>1. 关系图新增 lover、fwb、date、affair 类型</h3>
+      <p><strong>是否冲突？</strong> 不冲突。关系类型在数据库中只是字符串，新增类型不影响已有数据。</p>
+      <p><strong>是否合适？</strong> 技术上可行，但属于高敏感度关系类型。建议：</p>
+      <ul>
+        <li>仅在用户明确表达时使用，不让 LLM 主动推断</li>
+        <li>人物卡展示时用模糊、八卦感措辞，不直接贴标签</li>
+      </ul>
+      <p>当前已支持的关系类型：</p>
+      <pre><code>friend, partner, lover, fwb, date, affair, colleague, ex, sibling, knows, mentioned_with</code></pre>
+
+      <h3>2. 隐私与降级功能已暂时禁用</h3>
+      <p><span class="status-disabled">已禁用</span></p>
+      <ul>
+        <li>统一开关：<code>PRIVACY_FEATURES_ENABLED = false</code>（位于 <code>lib/darkroom-memory.ts</code>）</li>
+        <li>保留的代码：遗忘指令识别、forgetEntity、TTL 清理、chat route 处理路径</li>
+        <li>当前不会触发：聊天中「忘了我 / 别提他了」不会真正清除数据；新实体不再自动写入 90 天 TTL</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>二、KNOWN_ENTITIES 当前清单</h2>
+      <p>数据库中 <code>source = 'knowledge_base'</code> 的实体共 <strong>11 个</strong>：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>规范名</th>
+            <th>别名</th>
+            <th>当前 description</th>
+            <th>提及次数</th>
+            <th>最近提及</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>AGNOSIA</td><td>agnosia, 勺子</td><td>生而如此。Lady Gaga 的死忠粉，阳光帅气，是很多人眼中的天菜。</td><td>13</td><td>2026-06-20</td></tr>
+          <tr><td>Aidan</td><td>aidan</td><td>啾喔的核心面孔之一。与老板和常客都很熟。爱喝葡萄酒，喜欢霸占啾喔的音响放歌，对喜欢的人会忍不住动手动脚。与老王有互相爆料的制衡关系。</td><td>107</td><td>2026-06-20</td></tr>
+          <tr><td>D.F</td><td>d.f, df, 豆腐</td><td>有他在，气氛永远在线。对朋友重情重义，注重自身形象，出场自带气场。</td><td>7</td><td>2026-06-20</td></tr>
+          <tr><td>Dex</td><td>dex</td><td>话不多，心很热。生活作息规律，不喜欢节奏被打破。Instagram: dex0912f。感情稳定长跑中，在店内与少数几人亲近。</td><td>47</td><td>2026-06-20</td></tr>
+          <tr><td>Icky</td><td>icky, 阿远</td><td>腹有典籍，身有筋骨。精通汝瓷与茶文化，能从一只杯子的开片里讲出时间。小红书可追踪。</td><td>29</td><td>2026-06-20</td></tr>
+          <tr><td>Josh_Hu</td><td>josh_hu, josh hu, josh, josh_hmy</td><td>自带好心情的老朋友。Instagram: Josh_hmy，小红书。不管房间多吵，他一来气氛就稳了。</td><td>6</td><td>2026-06-20</td></tr>
+          <tr><td>Morris</td><td>morris, 莫里斯</td><td>眼神锋利，笑却温柔。无论长发短发都很帅气，外形自带辨识度。</td><td>1</td><td>2026-06-20</td></tr>
+          <tr><td>PP</td><td>pp, 鹏鹏</td><td>缺少此签名，周末协议不完整。小红书。有 PP 在的周末才完整。</td><td>0</td><td>2026-06-20</td></tr>
+          <tr><td>Phillip</td><td>phillip, 小马, 马哥</td><td>又名小马、马哥。从陌生人变成了这里的老面孔，大概是啾喔最常来的客人之一。与很多常客关系都好，外形迷人，被不少人喜欢。</td><td>34</td><td>2026-06-20</td></tr>
+          <tr><td>Tee</td><td>tee, 老王</td><td>又名老王。这家酒吧是他与 Gary 一起打理的地方。话不多，情绪稳定，被很多人喜欢。情史丰富，与 Aidan 有互相爆料的制衡关系。</td><td>49</td><td>2026-06-20</td></tr>
+          <tr><td>Zack</td><td>zack, 扎克, 渣克</td><td>情感模块高温运行，每次输入都重新编译。Instagram: zack121391，小红书。会为日落、酒和人心动。嘴硬型选手，真相往往在逼问后才姗姗来迟。</td><td>21</td><td>2026-06-20</td></tr>
+        </tbody>
+      </table>
+
+      <h3>已完成的别名更新</h3>
+      <ul>
+        <li>PP：新增「鹏鹏」</li>
+        <li>Phillip：新增「马哥」</li>
+        <li>Tee：保留「老王」（原本已有）</li>
+        <li>Zack：新增「扎克」「渣克」</li>
+      </ul>
+
+      <h3>需要确认</h3>
+      <ul class="check-list">
+        <li class="checked">以上 11 个人的 description 已按普通版 Gallery 描述 + 聊天记忆重新整理</li>
+        <li>当前 description 是否准确、是否符合你希望他们被 AI 记住的方式</li>
+        <li>是否还需要补充其他别名</li>
+        <li>PP 的 mention_count = 0 是因为数据库里之前没有提到过他；上线后若用户提到会自动增加</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>三、人物卡（Entity Profile）当前状态</h2>
+      <p>当前数据库中有 <strong>11 个实体有非空 profile</strong>，全部是 <code>knowledge_base</code> 的已知人物。<code>user_mentioned</code> / <code>memory</code> 实体目前只有名字和关联记忆，没有 LLM 生成的 profile。</p>
+
+      <h3>人物卡注入 prompt 的格式已扩展</h3>
+      <p><code>buildEntityCard</code>（<code>lib/darkroom-memory.ts</code>）现在会按顺序输出：</p>
+      <pre><code>[人物卡：小马]
+- 身份：酒吧熟客，常与阿林一起来
+- 已知事实：...；...；...
+- 关系线索：...
+- 关系：阿林（partner） · 2026-06-20、Dex（friend）
+- 偏好：金汤力、吧台座位
+- 近期记忆：
+  - 上次和阿林一起来坐在吧台</code></pre>
+
+      <p>新增内容：</p>
+      <ul>
+        <li><strong>已知事实</strong>（<code>profile.known_facts</code>）</li>
+        <li><strong>关系线索</strong>（<code>profile.relationship_hints</code>）</li>
+        <li>无 description 的 <code>user_mentioned</code> / <code>memory</code> 实体会显示兜底说明：<br><code>- 身份：从 7 条聊天记忆中识别出的人物</code></li>
+      </ul>
+
+      <h3>需要确认</h3>
+      <ul class="check-list">
+        <li>这些 description 作为人物卡注入 prompt 时，是否会让 AI 说出你希望它说的话</li>
+        <li>如果要让 user_mentioned / memory 实体也有丰满 profile，需要运行 <code>scripts/summarize-entity-profiles.ts</code>（需要 <code>DEEPSEEK_API_KEY</code>）</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>四、关系数据当前状态</h2>
+      <ul>
+        <li><code>darkroom_entity_relations</code> 表中当前关系数：<strong>0</strong></li>
+        <li>原因：Phase 2 的新 extraction prompt 要求 LLM 返回 relations，但尚未部署上线；旧记忆提取时没有生成关系</li>
+        <li>部署上线后，新对话会开始产生关系记录</li>
+      </ul>
+
+      <h3>关系已支持 date、affair</h3>
+      <p>关系表 <code>darkroom_entity_relations</code> 本身已有 <code>created_at</code>。人物卡显示关系时<strong>不带日期</strong>，仅显示关系类型。</p>
+
+      <p>新增关系类型：</p>
+      <ul>
+        <li><code>date</code>：约会中 / 约会过</li>
+        <li><code>affair</code>：婚外情 / 外遇 / 私情</li>
+      </ul>
+      <p>这两个类型与 <code>lover</code> / <code>fwb</code> 一样属于敏感关系，建议在展示时用模糊、八卦感的措辞，不直接贴标签。</p>
+
+      <h3>需要确认</h3>
+      <ul class="check-list">
+        <li>关系类型列表是否接受 lover、fwb、date、affair（已添加）</li>
+        <li>是否希望在 AI 回复中对 lover / fwb / date / affair / ex / partner 等关系使用更隐晦/八卦的措辞（当前 prompt 已要求如此）</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>五、记忆关联当前状态</h2>
+      <ul>
+        <li><code>darkroom_memory_entities</code> 中共有 <strong>151</strong> 条记忆-实体关联</li>
+        <li>来源：Phase 1 迁移脚本扫描了全部记忆，把出现实体名字/别名的记忆关联为 <code>mentioned</code></li>
+        <li>关联规则：如果记忆内容中出现了某个实体的名字或别名，就建立 <code>mentioned</code> 关系</li>
+      </ul>
+
+      <h3>抽查结果</h3>
+      <p>最近 50 条关联总体合理，大部分人名都是因为用户主动询问或提到而被标记。例如：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>时间</th>
+            <th>实体</th>
+            <th>记忆摘要</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>06-20 17:23</td><td>Dex</td><td>用户好奇 dex 和老王之间是否有好感及互动</td></tr>
+          <tr><td>06-20 17:23</td><td>Tee, Josh_Hu</td><td>用户询问 tee 与阿远、josh、榴莲、alex、arthur 之间的关系</td></tr>
+          <tr><td>06-20 17:22</td><td>Aidan</td><td>用户否认 Aidan 有偷窥癖的说法</td></tr>
+          <tr><td>06-20 17:21</td><td>AGNOSIA</td><td>用户询问常客「勺子」信息</td></tr>
+          <tr><td>06-20 17:21</td><td>Dex, Aidan</td><td>Aidan 对 Dex 有感情投入，Reborn 多次接吻</td></tr>
+          <tr><td>06-20 17:20</td><td>Tee, Zack, Icky, Aidan, Phillip, AGNOSIA</td><td>用户梳理多位常客情感关系</td></tr>
+        </tbody>
+      </table>
+
+      <h3>需要注意的风险</h3>
+      <ul>
+        <li><strong>同名混淆</strong>：有几条记忆提到「一位名叫 Aidan 的用户」，可能是与 knowledge_base 的 Aidan 同名的其他客人，目前系统无法区分。</li>
+        <li><strong>否认/纠正类记忆</strong>：比如「用户否认 Aidan 有偷窥癖」这条记忆本身是被否认的内容，但仍被关联到了 Aidan。</li>
+      </ul>
+
+      <h3>需要确认</h3>
+      <ul class="check-list">
+        <li>抽查 darkroom_memory_entities，确认没有明显张冠李戴</li>
+        <li>例如：某条关于「小马」的记忆是否错误地关联到了「Aidan」</li>
+        <li>是否有记忆被关联到了非人物实体（如把「重庆森林」鸡尾酒关联到某个人）</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>六、隐私与降级功能当前状态</h2>
+      <p><span class="status-disabled">已禁用</span> 开关：<code>PRIVACY_FEATURES_ENABLED = false</code>（<code>lib/darkroom-memory.ts</code>）</p>
+      <ul>
+        <li>已保留代码：detectForgetRequest、forgetEntity、pruneExpiredEntityProfiles、chat route 处理路径</li>
+        <li>当前不会触发：聊天中「忘了我 / 别提他了」不会真正清除数据</li>
+        <li>当前不会触发：新 user_mentioned 实体不再自动写入 90 天 TTL</li>
+      </ul>
+
+      <h3>需要确认</h3>
+      <ul class="check-list">
+        <li>暂时禁用是否符合预期</li>
+        <li>日后启用时，是否接受「软删除」方案：保留实体名字，清空 profile 和关系</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>七、上线前建议测试项</h2>
+      <ul class="check-list">
+        <li>中文：「小马最近怎样？」→ AI 应基于小马的人物卡/记忆回复</li>
+        <li>中文：「阿林和小马是什么关系？」→ 如果有关系数据，AI 应能回答；没有则应表示不知道</li>
+        <li>英文："Tell me about Tee" → AI 应识别 Tee/老王</li>
+        <li>测试关系提取：用户说「小马和阿林在约会」→ 部署后检查 darkroom_entity_relations 是否出现 date 关系</li>
+        <li>测试关系提取：用户说「小马和勺子有过一段私情」→ 部署后检查是否出现 affair</li>
+        <li>确认无 description 的 user_mentioned 实体会显示「从 X 条聊天记忆中识别出的人物」</li>
+        <li>确认「忘了我」暂时不会触发任何清除操作（隐私功能已禁用）</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>八、修改后的文件</h2>
+      <ul>
+        <li><code>app/api/darkroom/extract/route.ts</code> — 增加 lover、fwb、date、affair 到有效关系类型</li>
+        <li><code>data/darkroom-messages-zh.json</code> / <code>data/darkroom-messages.json</code> — 更新 extraction prompt 中的关系类型说明</li>
+        <li><code>lib/darkroom-memory.ts</code> — 增加 PRIVACY_FEATURES_ENABLED 开关；upsertEntity 仅在开关开启时写入默认隐私 TTL；扩展 buildEntityCard 输出 known_facts、relationship_hints、无 description 实体的兜底提示</li>
+        <li><code>app/api/darkroom/chat/route.ts</code> — 遗忘请求处理仅在 PRIVACY_FEATURES_ENABLED = true 时生效</li>
+        <li><code>lib/darkroom-memory.test.ts</code> — 更新 buildEntityCard 测试，覆盖兜底提示</li>
+        <li><code>lib/darkroom.ts</code> — 更新 KNOWN_ENTITIES 的 hint 和别名</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>九、如何启用隐私功能（日后）</h2>
+      <p>把 <code>lib/darkroom-memory.ts</code> 中的：</p>
+      <pre><code>export const PRIVACY_FEATURES_ENABLED = false;</code></pre>
+      <p>改为：</p>
+      <pre><code>export const PRIVACY_FEATURES_ENABLED = true;</code></pre>
+      <p>即可启用：</p>
+      <ul>
+        <li>聊天中的「忘了我 / 别提他了」会真正清除对应实体信息</li>
+        <li>新 user_mentioned 实体会自动写入 90 天 TTL</li>
+        <li>可定期运行 pruneExpiredEntityProfiles() 清理过期档案</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>十、数据摘要</h2>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span class="number">61</span>
+          <span class="label">实体总数</span>
+        </div>
+        <div class="summary-card">
+          <span class="number">11</span>
+          <span class="label">knowledge_base</span>
+        </div>
+        <div class="summary-card">
+          <span class="number">47</span>
+          <span class="label">user_mentioned</span>
+        </div>
+        <div class="summary-card">
+          <span class="number">11</span>
+          <span class="label">有 profile</span>
+        </div>
+        <div class="summary-card">
+          <span class="number">0</span>
+          <span class="label">关系记录</span>
+        </div>
+        <div class="summary-card">
+          <span class="number">151</span>
+          <span class="label">记忆-实体关联</span>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      JIUWO Shanghai · Darkroom 人物档案改造检查清单 · 2026-06-21
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Darkroom Chat UI 方案对比 | JIUWO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050505;
+      --fg: #a0a0a0;
+      --muted: #555;
+      --accent: #c9a227;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Share Tech Mono", "SFMono-Regular", Consolas, monospace;
+      line-height: 1.6;
+      padding: 32px 20px 80px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #f5f5f0;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      font-size: clamp(20px, 4vw, 28px);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 44px;
+      letter-spacing: 0.06em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 28px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .card {
+      border: 1px solid #1a1a1a;
+      background: #080808;
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid #111;
+    }
+
+    .card-header h2 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      color: #d0d0d0;
+    }
+
+    .card-header p {
+      margin: 0;
+      font-size: 12px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .preview {
+      flex: 1;
+      position: relative;
+      min-height: 420px;
+      overflow: hidden;
+    }
+
+    .terminal {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+    }
+
+    /* ── Common terminal parts ── */
+    .term-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(128,128,128,0.15);
+      margin-bottom: 12px;
+      opacity: 0.7;
+    }
+
+    .term-signal {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .term-pulse {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .term-back { opacity: 0.6; }
+
+    .term-messages {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 14px;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .term-line {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .term-meta {
+      font-size: 10px;
+      opacity: 0.5;
+      letter-spacing: 0.1em;
+    }
+
+    .term-action {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    .term-text {
+      word-break: break-word;
+    }
+
+    .term-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 12px;
+      margin-top: 12px;
+      border-top: 1px solid rgba(128,128,128,0.15);
+      font-size: 14px;
+    }
+
+    .term-cursor {
+      animation: blink 1s step-end infinite;
+    }
+
+    /* ── Scanlines overlay ── */
+    .scanlines::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.28) 2px,
+        rgba(0,0,0,0.28) 3px
+      );
+      z-index: 10;
+    }
+
+    .vignette::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
+      z-index: 9;
+    }
+
+    /* ── Scheme A: Matrix Green CRT ── */
+    .scheme-a {
+      background: #000;
+      color: #0fa85c;
+      font-family: "VT323", "Share Tech Mono", monospace;
+      text-shadow: 0 0 6px rgba(15, 168, 92, 0.55);
+    }
+
+    .scheme-a .term-header,
+    .scheme-a .term-input {
+      border-color: rgba(15, 168, 92, 0.18);
+      color: #0a7a42;
+    }
+
+    .scheme-a .term-pulse {
+      background: #0fa85c;
+      box-shadow: 0 0 8px rgba(15, 168, 92, 0.8);
+    }
+
+    .scheme-a .term-meta { color: #0a5a32; }
+    .scheme-a .term-action { color: #0c8a4c; }
+    .scheme-a .term-cursor { color: #0fa85c; }
+
+    .scheme-a.scanlines::after {
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 1px,
+        rgba(0,0,0,0.45) 1px,
+        rgba(0,0,0,0.45) 2px
+      );
+    }
+
+    /* ── Scheme B: Amber Retro Terminal ── */
+    .scheme-b {
+      background: #080502;
+      color: #a6882a;
+      font-family: "Share Tech Mono", "SFMono-Regular", monospace;
+      text-shadow: 0 0 5px rgba(166, 136, 42, 0.35);
+    }
+
+    .scheme-b .term-header,
+    .scheme-b .term-input {
+      border-color: rgba(166, 136, 42, 0.18);
+      color: #7a6320;
+    }
+
+    .scheme-b .term-pulse {
+      background: #a6882a;
+      box-shadow: 0 0 8px rgba(166, 136, 42, 0.6);
+    }
+
+    .scheme-b .term-meta { color: #5a4a18; }
+    .scheme-b .term-action { color: #8a7020; }
+    .scheme-b .term-cursor { color: #a6882a; }
+
+    .scheme-b.scanlines::after {
+      opacity: 0.6;
+    }
+
+    /* ── Scheme C: Black Mirror Cold White ── */
+    .scheme-c {
+      background: #030303;
+      color: #c8d0d0;
+      font-family: "Space Mono", "SFMono-Regular", monospace;
+      letter-spacing: 0.03em;
+    }
+
+    .scheme-c .term-header,
+    .scheme-c .term-input {
+      border-color: rgba(200, 208, 208, 0.12);
+      color: #606868;
+    }
+
+    .scheme-c .term-pulse {
+      background: #c8d0d0;
+      box-shadow: 0 0 8px rgba(200, 208, 208, 0.35);
+    }
+
+    .scheme-c .term-meta { color: #4a5050; }
+    .scheme-c .term-action { color: #788080; }
+    .scheme-c .term-cursor { color: #c8d0d0; }
+
+    .scheme-c.scanlines::after {
+      opacity: 0.25;
+    }
+
+    /* Glitch stripe on scheme C */
+    .scheme-c .glitch-stripe {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(200,208,208,0.12);
+      animation: glitchMove 4s infinite;
+      pointer-events: none;
+      z-index: 11;
+    }
+
+    /* ── Feature list ── */
+    .features {
+      padding: 18px;
+      border-top: 1px solid #111;
+      font-size: 12px;
+      color: #777;
+      list-style: none;
+      margin: 0;
+    }
+
+    .features li {
+      padding: 4px 0;
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .features li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      opacity: 0.5;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border: 1px solid #333;
+      border-radius: 2px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      margin-top: 10px;
+      color: #888;
+    }
+
+    .recommend {
+      border-color: #4a7a8a;
+    }
+
+    .recommend .card-header h2 {
+      color: #c9a227;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    @keyframes glitchMove {
+      0%, 90%, 100% { top: 20%; opacity: 0; }
+      91% { opacity: 1; }
+      92% { top: 65%; }
+      93% { opacity: 0; }
+    }
+
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+      .preview { min-height: 360px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>DARKROOM CHAT UI 方案对比</h1>
+  <p class="subtitle">三种复古科幻终端风格，选一个最贴近你想要的黑客帝国感</p>
+
+  <div class="grid">
+    <!-- Scheme A: Matrix Green CRT -->
+    <div class="card">
+      <div class="card-header">
+        <h2>方案 A · Matrix 绿 CRT 终端</h2>
+        <p>像老 NEC 显示器里运行的终端。绿色荧光粉、强扫描线、信号不稳。</p>
+      </div>
+      <div class="preview">
+        <div class="terminal scheme-a scanlines vignette">
+          <div class="term-header">
+            <span class="term-back">← 返回</span>
+            <span class="term-signal"><span class="term-pulse"></span> 118.7 MHz · UNTRACED · AFTER HOURS</span>
+            <span></span>
+          </div>
+          <div class="term-messages">
+            <div class="term-line">
+              <span class="term-meta">[02:33:08] · SYSTEM</span>
+              <span class="term-action">> New signal checked in</span>
+              <span class="term-text">You're not on the regular schedule. That's fine.</span>
+            </div>
+            <div class="term-line">
+              <span class="term-meta">[02:33:09] · ? ? ?</span>
+              <span class="term-action">> Connection established</span>
+              <span class="term-text">"Most people stop at the front door. You kept going."</span>
+            </div>
+            <div class="term-line">
+              <span class="term-meta">[02:33:11] · LOCAL</span>
+              <span class="term-action">> Local log updated</span>
+              <span class="term-text">There's a side entrance left unlocked on purpose.</span>
+            </div>
+          </div>
+          <div class="term-input">
+            <span>&gt;</span>
+            <span style="opacity:0.4">Enter command...</span>
+            <span class="term-cursor">_</span>
+          </div>
+        </div>
+      </div>
+      <ul class="features">
+        <li>黑底 + 高饱和绿字，最强黑客帝国符号</li>
+        <li>像素字体 VT323，老式显示器质感</li>
+        <li>强扫描线 + 绿色荧光辉光</li>
+        <li>偶尔 glitch 水平错位条</li>
+        <span class="badge">最有辨识度 · 但长时间阅读可能累眼</span>
+      </ul>
+    </div>
+
+    <!-- Scheme B: Amber Retro Terminal -->
+    <div class="card recommend">
+      <div class="card-header">
+        <h2>方案 B · 琥珀单色老式终端（推荐）</h2>
+        <p>像 80 年代机房里的 DEC VT100。暗琥珀荧光、沉稳、有重量。</p>
+      </div>
+      <div class="preview">
+        <div class="terminal scheme-b scanlines vignette">
+          <div class="term-header">
+            <span class="term-back">← 返回</span>
+            <span class="term-signal"><span class="term-pulse"></span> 118.7 MHz · UNTRACED · AFTER HOURS</span>
+            <span></span>
+          </div>
+          <div class="term-messages">
+            <div class="term-line">
+              <span class="term-meta">[02:33:08] · SYSTEM</span>
+              <span class="term-action">> New signal checked in</span>
+              <span class="term-text">You're not on the regular schedule. That's fine.</span>
+            </div>
+            <div class="term-line">
+              <span class="term-meta">[02:33:09] · ? ? ?</span>
+              <span class="term-action">> Connection established</span>
+              <span class="term-text">"Most people stop at the front door. You kept going."</span>
+            </div>
+            <div class="term-line">
+              <span class="term-meta">[02:33:11] · LOCAL</span>
+              <span class="term-action">> Local log updated</span>
+              <span class="term-text">There's a side entrance left unlocked on purpose.</span>
+            </div>
+          </div>
+          <div class="term-input">
+            <span>&gt;</span>
+            <span style="opacity:0.4">Enter command...</span>
+            <span class="term-cursor">_</span>
+          </div>
+        </div>
+      </div>
+      <ul class="features">
+        <li>黑底 + 暗琥珀文字，与 JIUWO 金色暗合</li>
+        <li>Share Tech Mono 等宽字体，复古但不极端</li>
+        <li>淡扫描线 + CRT 暗角，温润的老显示器感</li>
+        <li>中文可读性更好，长时间聊天不刺眼</li>
+        <span class="badge">复古神秘 · 耐看 · 推荐</span>
+      </ul>
+    </div>
+
+    <!-- Scheme C: Black Mirror Cold White -->
+    <div class="card">
+      <div class="card-header">
+        <h2>方案 C · 黑镜式冷白故障终端</h2>
+        <p>像《黑镜》里的 AI 界面。冷、干净、极简，但偶尔信号错乱。</p>
+      </div>
+      <div class="preview">
+        <div class="terminal scheme-c scanlines">
+          <div class="glitch-stripe"></div>
+          <div class="term-header">
+            <span class="term-back">← 返回</span>
+            <span class="term-signal"><span class="term-pulse"></span> 118.7 MHz · UNTRACED · AFTER HOURS</span>
+            <span></span>
+          </div>
+          <div class="term-messages">
+            <div class="term-line">
+              <span class="term-meta">[02:33:08] · SYSTEM</span>
+              <span class="term-action">> New signal checked in</span>
+              <span class="term-text">You're not on the regular schedule. That's fine.</span>
+            </div>
+            <div class="term-line">
+              <span class="term-meta">[02:33:09] · ? ? ?</span>
+              <span class="term-action">> Connection established</span>
+              <span class="term-text">"Most people stop at the front door. You kept going."</span>
+            </div>
+            <div class="term-line">
+              <span class="term-meta">[02:33:11] · LOCAL</span>
+              <span class="term-action">> Local log updated</span>
+              <span class="term-text">There's a side entrance left unlocked on purpose.</span>
+            </div>
+          </div>
+          <div class="term-input">
+            <span>&gt;</span>
+            <span style="opacity:0.4">Enter command...</span>
+            <span class="term-cursor">_</span>
+          </div>
+        </div>
+      </div>
+      <ul class="features">
+        <li>纯黑 + 冷白文字，极简未来感</li>
+        <li>Space Mono 等宽，冷静、无情绪</li>
+        <li>轻微扫描线 + 随机 glitch 白条</li>
+        <li>大量留白，像高级 AI 界面</li>
+        <span class="badge">未来感强 · 但缺少古老质感</span>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

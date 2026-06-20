@@ -9,7 +9,7 @@
 
 - 所有改动基于 **After Hours Darkroom（黑白彩蛋）模式**
 - 若改动会影响正常模式内容在彩蛋模式中的显示，需提示冲突并等待用户确认
-- 详见：[darkroom-mode.md](darkroom-mode.md)
+- 详见：[darkroom-mode.md](20260608-darkroom-mode.md)
 
 ---
 

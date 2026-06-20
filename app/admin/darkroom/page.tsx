@@ -40,7 +40,9 @@ export default async function Page({ searchParams }: PageProps) {
         <div className="flex items-center justify-between mb-10">
           <h1 className="text-2xl md:text-3xl text-[#f5f5f0]">Darkroom Admin</h1>
           <p className="text-xs text-[#a0a0a0]">
-            {new Date().toLocaleString("zh-CN")}
+            {new Date().toLocaleString("zh-CN", {
+              timeZone: "Asia/Shanghai",
+            })}
           </p>
         </div>
 
@@ -140,7 +142,9 @@ export default async function Page({ searchParams }: PageProps) {
                     <td className="py-3 text-[#a0a0a0]">{m.confidence}</td>
                     <td className="py-3 text-[#a0a0a0]">{m.retrieval_count ?? 0}</td>
                     <td className="py-3 text-[#a0a0a0] whitespace-nowrap">
-                      {new Date(m.created_at).toLocaleString("zh-CN")}
+                      {new Date(m.created_at).toLocaleString("zh-CN", {
+                        timeZone: "Asia/Shanghai",
+                      })}
                     </td>
                   </tr>
                 ))}
@@ -168,7 +172,9 @@ export default async function Page({ searchParams }: PageProps) {
                     </span>
                   )}
                   <span className="text-xs text-[#666] ml-auto">
-                    {new Date(c.created_at).toLocaleString("zh-CN")}
+                    {new Date(c.created_at).toLocaleString("zh-CN", {
+                      timeZone: "Asia/Shanghai",
+                    })}
                   </span>
                 </div>
                 <p className="text-[#f5f5f0] text-sm mb-1"><span className="text-[#c9a227]">User:</span> {c.user_message}</p>

@@ -7,6 +7,8 @@ import {
   parseTopicLock,
   formatTopicLockInstruction,
   extractUserMentionedNames,
+  extractEntitiesFromText,
+  detectForgetRequest,
   isConcreteTopicEntityForTest,
   safeJsonParse,
   safeJsonParseArray,
@@ -52,6 +54,63 @@ describe('extractUserMentionedNames', () => {
   });
 });
 
+describe('extractEntitiesFromText', () => {
+  it('extracts names from Chinese natural mentions', () => {
+    const names = extractEntitiesFromText('我昨天和阿林一起去了一家酒吧', true);
+    expect(names).toContain('阿林');
+  });
+
+  it('extracts names from Chinese "X said" pattern', () => {
+    const names = extractEntitiesFromText('小马说这家酒吧不错', true);
+    expect(names).toContain('小马');
+  });
+
+  it('extracts names from English natural mentions', () => {
+    const names = extractEntitiesFromText('I went out with Alex last night', false);
+    expect(names).toContain('Alex');
+  });
+
+  it('extracts names from English "X and I" pattern', () => {
+    const names = extractEntitiesFromText('Sam and I had a drink', false);
+    expect(names).toContain('Sam');
+  });
+
+  it('filters out stopwords and MBTI types', () => {
+    expect(extractEntitiesFromText('我是ENFP', true)).toHaveLength(0);
+    expect(extractEntitiesFromText('I am not sure', false)).toHaveLength(0);
+  });
+});
+
+describe('detectForgetRequest', () => {
+  it('detects Chinese self-forget request', () => {
+    const req = detectForgetRequest('把我忘了吧', true);
+    expect(req).not.toBeNull();
+    expect(req?.isSelf).toBe(true);
+  });
+
+  it('detects Chinese forget-other request', () => {
+    const req = detectForgetRequest('别提小马了', true);
+    expect(req?.name).toBe('小马');
+    expect(req?.isSelf).toBe(false);
+  });
+
+  it('detects English self-forget request', () => {
+    const req = detectForgetRequest('Forget about me', false);
+    expect(req?.isSelf).toBe(true);
+  });
+
+  it('detects English forget-other request', () => {
+    const req = detectForgetRequest("Don't mention Alex anymore", false);
+    expect(req?.name).toBe('Alex');
+    expect(req?.isSelf).toBe(false);
+  });
+
+  it('returns null for normal chat', () => {
+    expect(detectForgetRequest('今天天气不错', true)).toBeNull();
+    expect(detectForgetRequest('Tell me about the menu', false)).toBeNull();
+  });
+});
+
 describe('buildTopicState', () => {
   it('prioritizes user-mentioned names over known entities', () => {
     const history: HistoryMessage[] = [
@@ -76,7 +135,7 @@ describe('buildTopicState', () => {
       { role: 'user', content: '司徒最近来店里了吗？' },
     ];
     const dynamicEntities = [
-      { id: 1, name: '司徒', aliases: ['situ'], source: 'user_mentioned' as const, created_at: '' },
+      { id: 1, name: '司徒', aliases: ['situ'], source: 'user_mentioned' as const, entity_type: 'person', profile: {}, mention_count: 0, first_seen_at: '', last_mentioned_at: '', created_at: '' },
     ];
     const state = buildTopicState(history, true, dynamicEntities);
     expect(state.primaryEntity).toBe('司徒');

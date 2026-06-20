@@ -33,7 +33,10 @@ const TYPE_SPEED = 15; // ms per char
 // ── Helpers ───────────────────────────────────────────────────────────
 
 function getNowTime(): string {
-  return new Date().toLocaleTimeString('en-GB', { hour12: false });
+  return new Date().toLocaleTimeString('en-GB', {
+    hour12: false,
+    timeZone: 'Asia/Shanghai',
+  });
 }
 
 // ── useTypewriter hook ────────────────────────────────────────────────

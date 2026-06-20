@@ -895,7 +895,7 @@ export async function getRecentConversationsGroupedBySession(): Promise<SessionC
       MAX(c.created_at) AS last_message_at
     FROM darkroom_conversations c
     LEFT JOIN darkroom_sessions s ON c.session_id = s.session_id
-    GROUP BY COALESCE(c.session_id, 'unassigned'), s.session_id, s.summary
+    GROUP BY COALESCE(c.session_id, 'unassigned'), s.summary
     ORDER BY MAX(c.created_at) DESC
   `;
 
@@ -903,9 +903,10 @@ export async function getRecentConversationsGroupedBySession(): Promise<SessionC
     return [];
   }
 
-  const sessionIds = sessionResult.rows
-    .map((row) => row.session_id as string)
-    .filter((id) => id !== null && id !== undefined);
+  const sessionIds = sessionResult.rows.map((row) => row.session_id as string);
+  if (sessionIds.length === 0) {
+    return [];
+  }
 
   const convResult = await sql`
     SELECT
@@ -917,13 +918,13 @@ export async function getRecentConversationsGroupedBySession(): Promise<SessionC
       COALESCE(session_id, 'unassigned') AS session_id,
       created_at
     FROM darkroom_conversations
-    WHERE COALESCE(session_id, 'unassigned') IN (${sessionIds})
+    WHERE COALESCE(session_id, 'unassigned') = ANY(${sessionIds}::text[])
     ORDER BY created_at ASC
   `;
 
   const conversationsBySession = new Map<string, Conversation[]>();
   for (const conv of convResult.rows as Conversation[]) {
-    const sid = conv.session_id ?? "unassigned";
+    const sid = conv.session_id as string;
     if (!conversationsBySession.has(sid)) {
       conversationsBySession.set(sid, []);
     }

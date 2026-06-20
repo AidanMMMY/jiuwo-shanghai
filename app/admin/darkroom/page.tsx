@@ -8,11 +8,11 @@ import LoginForm from "./LoginForm";
 import { RecentConversationList } from "@/components/darkroom/RecentConversationList";
 
 interface PageProps {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: { token?: string };
 }
 
 export default async function Page({ searchParams }: PageProps) {
-  const { token } = await searchParams;
+  const { token } = searchParams;
   const adminToken = process.env.DARKROOM_ADMIN_TOKEN;
 
   if (!adminToken || token !== adminToken) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState, useCallback } from "react";
 import type { SessionConversationGroup, Conversation } from "@/lib/darkroom-memory";
 
 type SortField = "firstMessageAt" | "lastMessageAt";
@@ -11,11 +11,11 @@ interface SortState {
   order: SortOrder;
 }
 
-const SORT_OPTIONS: { label: string; value: SortState }[] = [
-  { label: "最早开始 ↑", value: { field: "firstMessageAt", order: "asc" } },
-  { label: "最近开始 ↓", value: { field: "firstMessageAt", order: "desc" } },
-  { label: "最早活跃 ↑", value: { field: "lastMessageAt", order: "asc" } },
-  { label: "最近活跃 ↓", value: { field: "lastMessageAt", order: "desc" } },
+const SORT_OPTIONS: { id: string; label: string; value: SortState }[] = [
+  { id: "first-asc", label: "最早开始 ↑", value: { field: "firstMessageAt", order: "asc" } },
+  { id: "first-desc", label: "最近开始 ↓", value: { field: "firstMessageAt", order: "desc" } },
+  { id: "last-asc", label: "最早活跃 ↑", value: { field: "lastMessageAt", order: "asc" } },
+  { id: "last-desc", label: "最近活跃 ↓", value: { field: "lastMessageAt", order: "desc" } },
 ];
 
 interface RecentConversationListProps {
@@ -26,15 +26,13 @@ export function RecentConversationList({ groups }: RecentConversationListProps) 
   const [sort, setSort] = useState<SortState>({ field: "lastMessageAt", order: "desc" });
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  const sortedGroups = useMemo(() => {
-    return [...groups].sort((a, b) => {
-      const aTime = new Date(a[sort.field]).getTime();
-      const bTime = new Date(b[sort.field]).getTime();
-      return sort.order === "asc" ? aTime - bTime : bTime - aTime;
-    });
-  }, [groups, sort]);
+  const sortedGroups = [...groups].sort((a, b) => {
+    const aTime = new Date(a[sort.field]).getTime();
+    const bTime = new Date(b[sort.field]).getTime();
+    return sort.order === "asc" ? aTime - bTime : bTime - aTime;
+  });
 
-  const toggleExpanded = (sessionId: string) => {
+  const toggleExpanded = useCallback((sessionId: string) => {
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(sessionId)) {
@@ -44,7 +42,7 @@ export function RecentConversationList({ groups }: RecentConversationListProps) 
       }
       return next;
     });
-  };
+  }, []);
 
   return (
     <>
@@ -58,7 +56,7 @@ export function RecentConversationList({ groups }: RecentConversationListProps) 
               sort.field === option.value.field && sort.order === option.value.order;
             return (
               <button
-                key={option.label}
+                key={option.id}
                 onClick={() => setSort(option.value)}
                 className={`text-xs px-2 py-1 border transition-colors ${
                   active

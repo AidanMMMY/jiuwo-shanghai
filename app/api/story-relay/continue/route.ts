@@ -10,9 +10,11 @@ import {
   getSegments,
   getRecentSummaries,
   updateSegmentSummary,
+  getCharacters,
+  upsertCharacter,
   type StorySegment,
 } from '@/lib/story-relay';
-import { generateStoryContinuation, extractNamesFromMemories, generateSegmentSummary } from '@/lib/story-relay-ai';
+import { generateStoryContinuation, extractNamesFromMemories, generateSegmentSummary, extractCharactersFromSegment } from '@/lib/story-relay-ai';
 import { rateLimitByIp } from '@/lib/rate-limit';
 
 const continueSchema = z.object({
@@ -90,6 +92,12 @@ export async function POST(req: NextRequest) {
     const segments = await getSegments();
     const latestQuestion = latest.aiQuestionZh || latest.aiQuestionEn || '';
     const recentSummaries = (await getRecentSummaries(4)).reverse();
+    const characters = await getCharacters();
+    const characterRoster = characters.map((c) => ({
+      name: c.name,
+      descriptionZh: c.descriptionZh,
+      descriptionEn: c.descriptionEn,
+    }));
 
     const generated = await generateStoryContinuation(
       names,
@@ -99,7 +107,8 @@ export async function POST(req: NextRequest) {
       authorName,
       latest.storyZh,
       latest.storyEn,
-      recentSummaries
+      recentSummaries,
+      characterRoster
     );
 
     const nextSequence = await getNextSequence();
@@ -127,6 +136,25 @@ export async function POST(req: NextRequest) {
       newSegment = await updateSegmentSummary(newSegment.id, summary.summaryZh, summary.summaryEn);
     } catch (summaryErr) {
       console.error('[story-relay/continue] summary generation failed:', summaryErr);
+    }
+
+    try {
+      const extracted = await extractCharactersFromSegment(
+        newSegment.storyZh,
+        newSegment.storyEn,
+        characterRoster
+      );
+      for (const entry of extracted) {
+        const existing = characters.find((c) => c.name === entry.name);
+        await upsertCharacter(
+          entry.name,
+          entry.descriptionZh,
+          entry.descriptionEn,
+          existing ? existing.firstSegmentSequence : newSegment.sequence
+        );
+      }
+    } catch (characterErr) {
+      console.error('[story-relay/continue] character extraction failed:', characterErr);
     }
 
     const cookieStore = await cookies();

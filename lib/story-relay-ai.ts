@@ -54,6 +54,9 @@ export const CONTINUE_PROMPT = `你是 JIUWO（啾喔）酒吧的驻场 storytel
 Previous segment:
 {previousStoryEn}
 
+【已登场角色档案】
+{characterRoster}
+
 上一段结尾的问题是：{latestQuestion}
 用户的回答是：{userInput}
 用户的名字是：{userName}。如果合适，可以以微妙、自然的方式将这个名字融入剧情（例如作为一个新推门而入的客人、一个被提及的旧友、或一个旁观的酒保），但不要强行插入，更不要为了出现用户名字而抢占上一段的主角或主线。
@@ -62,7 +65,7 @@ Previous segment:
 1.5. 用户的回答是剧情指令，但要先判断它的性质：
    - 如果它描述的是当前场景下可以立刻发生的具体动作或事件（例如“某人把纸条扔进酒杯”），请在本段开头把这个动作实际演出来，写出发生过程、即时反应和气氛变化，不要默认已经发生。
    - 如果它表达的是整体走向、情绪基调、伏笔铺设或未来发展方向（例如“让故事更悬疑”“之后让两人和解”“引入一个新角色”），请把这条方向自然渗透进本段，可以体现在人物念头、对话暗示、细节铺垫或氛围变化里，不要强行在开头完成一个具体动作，也不要把它写成已经发生过的事件。
-1.6. 已在本故事中出现过的角色可直接称呼名字；若有新角色首次登场，请在他第一次出场时用一两句话给出外形、穿着或身份标签，帮助读者建立印象，不要直接扔出一个名字。
+1.6. 必须严格保持【已登场角色档案】中的设定：外形、穿着、性格、关系、性取向等不得与档案矛盾。已建档角色可直接称呼名字；若有新角色首次登场，请在他第一次出场时用一两句话给出外形、穿着或身份标签，帮助读者建立印象，不要直接扔出一个名字。如果用户的回答要求让某个角色做出与他既定性格完全相反的行为，请用内心挣扎、反常情境或玩笑方式处理，而不是默默改写人设。
 2. 人物性格贱兮兮、俏皮、毒舌又温柔，对话和互动要有戏。
 3. 故事要频繁分段，每段最多 2-3 句话；对话部分严格按照说话人换行，每个角色说的话单独成段。段落之间用换行符（\\n）分隔。
 4. 性别与取向：Mavis、摄影、梦子用"她"，但尽量少出场；小刘和卡特是直男；其他男性角色默认是 gay，用"他"。英文里 Mavis, Sheying, Mengzi use she/her but keep their appearances minimal; Xiao Liu 和 Carter（卡特）是 straight men；其他男性用 he/him。故事以男性角色互动为主，女性角色作为背景或短暂出现即可。
@@ -133,6 +136,84 @@ export async function generateSegmentSummary(storyZh: string, storyEn: string): 
   return parsed;
 }
 
+export interface CharacterRosterEntry {
+  name: string;
+  descriptionZh: string;
+  descriptionEn: string;
+}
+
+const CHARACTER_EXTRACTION_SCHEMA = `{ "characters": [{ "name": "...", "descriptionZh": "...", "descriptionEn": "..." }] }`;
+
+export const CHARACTER_EXTRACTION_PROMPT = `你是 JIUWO（啾喔）酒吧的角色档案管理员。请根据以下故事段落，提取本段中出现的主要角色。
+对每个角色，用一句话总结他的外形、穿着、神态或身份标签（中文 15-30 字，英文 10-20 words）。
+只提取有名字、有实际戏份的角色，不要提取只被提及但没有登场的名字。如果某角色已经在前情中出现过，你可以保留或精简他的描述，但不要改变已确立的核心设定。
+已建档角色（如无则忽略）：
+{existingRoster}
+
+本段故事：
+{storyZh}
+
+英文段落：
+{storyEn}
+
+输出严格 JSON：{ "characters": [{ "name", "descriptionZh", "descriptionEn" }] }`;
+
+export function buildCharacterExtractionPrompt(storyZh: string, storyEn: string, existingRoster: CharacterRosterEntry[]): string {
+  const rosterText = existingRoster.length > 0
+    ? existingRoster.map((c) => `- ${c.name}：${c.descriptionZh}`).join("\n")
+    : "（暂无）";
+  return CHARACTER_EXTRACTION_PROMPT
+    .replace("{existingRoster}", rosterText)
+    .replace("{storyZh}", storyZh)
+    .replace("{storyEn}", storyEn);
+}
+
+export function parseCharacterExtractionResponse(raw: string): CharacterRosterEntry[] | null {
+  const parsed = _safeJsonParse(raw);
+  if (!parsed || !Array.isArray(parsed.characters)) return null;
+  const entries: CharacterRosterEntry[] = [];
+  for (const item of parsed.characters) {
+    if (
+      typeof item.name === "string" &&
+      typeof item.descriptionZh === "string" &&
+      typeof item.descriptionEn === "string" &&
+      item.name.trim().length > 0 &&
+      item.descriptionZh.trim().length > 0 &&
+      item.descriptionEn.trim().length > 0
+    ) {
+      entries.push({
+        name: item.name.trim(),
+        descriptionZh: item.descriptionZh.trim(),
+        descriptionEn: item.descriptionEn.trim(),
+      });
+    }
+  }
+  return entries.length > 0 ? entries : null;
+}
+
+export async function extractCharactersFromSegment(
+  storyZh: string,
+  storyEn: string,
+  existingRoster: CharacterRosterEntry[]
+): Promise<CharacterRosterEntry[]> {
+  const prompt = buildCharacterExtractionPrompt(storyZh, storyEn, existingRoster);
+  const completion = await deepseekClient.chat.completions.create({
+    model: DEFAULT_MODEL,
+    messages: [
+      { role: "system", content: "You are a bilingual character archivist. Always respond with valid JSON matching the requested schema." },
+      { role: "user", content: prompt + "\n\n必须输出 JSON：" + CHARACTER_EXTRACTION_SCHEMA },
+    ],
+    temperature: 0.3,
+    max_tokens: 512,
+  });
+
+  const raw = completion.choices[0]?.message?.content || "";
+  const parsed = parseCharacterExtractionResponse(raw);
+  if (!parsed) throw new Error("Failed to parse character extraction response: " + raw);
+
+  return parsed;
+}
+
 export function buildContinuePrompt(
   names: string[],
   n: number,
@@ -141,13 +222,18 @@ export function buildContinuePrompt(
   userName: string,
   previousStoryZh: string,
   previousStoryEn: string,
-  recentSummaries: SegmentSummary[]
+  recentSummaries: SegmentSummary[],
+  characterRoster: CharacterRosterEntry[]
 ): string {
   const summariesText = recentSummaries.length > 0
     ? recentSummaries
         .map((s, i) => `第 ${i + 1} 段摘要：${s.summaryZh}\nSegment ${i + 1} summary: ${s.summaryEn}`)
         .join("\n\n")
     : "（暂无更早摘要）\n(No earlier summaries yet)";
+
+  const rosterText = characterRoster.length > 0
+    ? characterRoster.map((c) => `- ${c.name}：${c.descriptionZh} / ${c.descriptionEn}`).join("\n")
+    : "（暂无角色档案）\n(No character roster yet)";
 
   return CONTINUE_PROMPT
     .replace("{names}", names.join("、"))
@@ -157,7 +243,8 @@ export function buildContinuePrompt(
     .replace("{userName}", userName)
     .replace("{previousStoryZh}", previousStoryZh)
     .replace("{previousStoryEn}", previousStoryEn)
-    .replace("{recentSummaries}", summariesText);
+    .replace("{recentSummaries}", summariesText)
+    .replace("{characterRoster}", rosterText);
 }
 
 export function parseStoryRelayResponse(raw: string): StoryRelayResponse | null {
@@ -311,7 +398,8 @@ export async function generateStoryContinuation(
   userName: string,
   previousStoryZh: string,
   previousStoryEn: string,
-  recentSummaries: SegmentSummary[]
+  recentSummaries: SegmentSummary[],
+  characterRoster: CharacterRosterEntry[]
 ): Promise<StoryRelayResponse> {
   const prompt = buildContinuePrompt(
     names,
@@ -321,7 +409,8 @@ export async function generateStoryContinuation(
     userName,
     previousStoryZh,
     previousStoryEn,
-    recentSummaries
+    recentSummaries,
+    characterRoster
   );
   const completion = await deepseekClient.chat.completions.create({
     model: DEFAULT_MODEL,

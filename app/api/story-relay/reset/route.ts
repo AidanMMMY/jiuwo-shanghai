@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { archiveCurrentChapter, insertSegment, getNextSequence, getMemoriesForNameExtraction } from '@/lib/story-relay';
-import { generateStoryOpening, extractNamesFromMemories } from '@/lib/story-relay-ai';
+import { archiveCurrentChapter, insertSegment, getNextSequence, getMemoriesForNameExtraction, deleteAllCharacters, upsertCharacter } from '@/lib/story-relay';
+import { generateStoryOpening, extractNamesFromMemories, extractCharactersFromSegment } from '@/lib/story-relay-ai';
 
 const resetSchema = z.object({
   token: z.string(),
@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     const chapter = await archiveCurrentChapter();
+    await deleteAllCharacters();
 
     const memoryRows = await getMemoriesForNameExtraction(100);
     const names = extractNamesFromMemories(memoryRows);
@@ -49,6 +50,15 @@ export async function POST(req: NextRequest) {
       summaryEn: null,
       sessionId: null,
     });
+
+    try {
+      const extracted = await extractCharactersFromSegment(segment.storyZh, segment.storyEn, []);
+      for (const entry of extracted) {
+        await upsertCharacter(entry.name, entry.descriptionZh, entry.descriptionEn, segment.sequence);
+      }
+    } catch (characterErr) {
+      console.error('[story-relay/reset] character extraction failed:', characterErr);
+    }
 
     return NextResponse.json({ chapter, segment });
   } catch (err) {

@@ -9,8 +9,11 @@ import {
   insertSegment,
   getNextSequence,
   getMemoriesForNameExtraction,
+  getCharacters,
+  deleteAllCharacters,
+  upsertCharacter,
 } from '@/lib/story-relay';
-import { generateStoryOpening, extractNamesFromMemories } from '@/lib/story-relay-ai';
+import { generateStoryOpening, extractNamesFromMemories, extractCharactersFromSegment } from '@/lib/story-relay-ai';
 
 interface PageProps {
   searchParams: Promise<{ key?: string }>;
@@ -24,7 +27,7 @@ export default async function StoryRelayAdminPage({ searchParams }: PageProps) {
     redirect('/');
   }
 
-  const [segments, chapters] = await Promise.all([getSegments(), getChapters()]);
+  const [segments, chapters, characters] = await Promise.all([getSegments(), getChapters(), getCharacters()]);
   const contributors = buildContributors(segments);
   const latestSegment = segments[segments.length - 1];
 
@@ -37,6 +40,7 @@ export default async function StoryRelayAdminPage({ searchParams }: PageProps) {
     const names = extractNamesFromMemories(memoryRows);
 
     await archiveCurrentChapter();
+    await deleteAllCharacters();
     const generated = await generateStoryOpening(names);
     const sequence = await getNextSequence();
     await insertSegment({
@@ -57,6 +61,15 @@ export default async function StoryRelayAdminPage({ searchParams }: PageProps) {
       summaryEn: null,
       sessionId: null,
     });
+
+    try {
+      const extracted = await extractCharactersFromSegment(generated.storyZh, generated.storyEn, []);
+      for (const entry of extracted) {
+        await upsertCharacter(entry.name, entry.descriptionZh, entry.descriptionEn, sequence);
+      }
+    } catch (characterErr) {
+      console.error('[admin/story-relay] character extraction failed:', characterErr);
+    }
 
     revalidatePath('/admin/story-relay');
   }
@@ -92,6 +105,23 @@ export default async function StoryRelayAdminPage({ searchParams }: PageProps) {
               归档并生成新开头
             </button>
           </form>
+        </section>
+
+        <section className="mb-10 border border-[#c9a22733] p-5">
+          <h2 className="mb-5 text-sm uppercase tracking-wider text-[#c9a227]">角色档案</h2>
+          {characters.length === 0 ? (
+            <p className="text-[#a0a0a0]">暂无角色档案。</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {characters.map((character) => (
+                <div key={character.name} className="border border-[#222] p-3">
+                  <div className="mb-1 text-sm text-[#f5f5f0]">{character.name}</div>
+                  <div className="text-xs text-[#a0a0a0]">首次登场：第 {character.firstSegmentSequence} 段</div>
+                  <p className="mt-2 text-xs leading-relaxed text-[#888]">{character.descriptionZh}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="mb-10 border border-[#c9a22733] p-5">

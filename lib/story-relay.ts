@@ -35,6 +35,16 @@ export interface Contributor {
   segments: number[];
 }
 
+export interface StoryRelayCharacter {
+  id: number;
+  name: string;
+  descriptionZh: string;
+  descriptionEn: string;
+  firstSegmentSequence: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 function getSql() {
   const url = process.env.POSTGRES_URL || process.env.DATABASE_URL || process.env.GUESTBOOK_POSTGRES_URL;
   if (!url) throw new Error('POSTGRES_URL or DATABASE_URL is not set');
@@ -213,4 +223,51 @@ export async function getChapters(): Promise<Chapter[]> {
     createdAt: toIsoString(row.created_at),
     archivedAt: toIsoString(row.archived_at),
   }));
+}
+
+export async function getCharacters(): Promise<StoryRelayCharacter[]> {
+  const sql = getSql();
+  const result = await sql`SELECT * FROM story_relay_characters ORDER BY first_segment_sequence ASC, id ASC`;
+  return (result.rows as Record<string, unknown>[]).map((row) => ({
+    id: row.id as number,
+    name: row.name as string,
+    descriptionZh: row.description_zh as string,
+    descriptionEn: row.description_en as string,
+    firstSegmentSequence: row.first_segment_sequence as number,
+    createdAt: toIsoString(row.created_at),
+    updatedAt: toIsoString(row.updated_at),
+  }));
+}
+
+export async function upsertCharacter(
+  name: string,
+  descriptionZh: string,
+  descriptionEn: string,
+  firstSegmentSequence: number
+): Promise<StoryRelayCharacter> {
+  const sql = getSql();
+  const result = await sql`
+    INSERT INTO story_relay_characters (name, description_zh, description_en, first_segment_sequence)
+    VALUES (${name}, ${descriptionZh}, ${descriptionEn}, ${firstSegmentSequence})
+    ON CONFLICT (name) DO UPDATE SET
+      description_zh = EXCLUDED.description_zh,
+      description_en = EXCLUDED.description_en,
+      updated_at = NOW()
+    RETURNING *
+  `;
+  const row = (result.rows as Record<string, unknown>[])[0];
+  return {
+    id: row.id as number,
+    name: row.name as string,
+    descriptionZh: row.description_zh as string,
+    descriptionEn: row.description_en as string,
+    firstSegmentSequence: row.first_segment_sequence as number,
+    createdAt: toIsoString(row.created_at),
+    updatedAt: toIsoString(row.updated_at),
+  };
+}
+
+export async function deleteAllCharacters(): Promise<void> {
+  const sql = getSql();
+  await sql`DELETE FROM story_relay_characters`;
 }

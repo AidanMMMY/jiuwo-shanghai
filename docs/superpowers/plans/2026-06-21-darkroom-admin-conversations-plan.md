@@ -51,7 +51,7 @@ export async function getRecentConversationsGroupedBySession(): Promise<SessionC
   // 1. Get all sessions with their first/last message times
   const sessionResult = await sql`
     SELECT
-      c.session_id,
+      COALESCE(c.session_id, 'unassigned') AS session_id,
       COALESCE(MAX(s.summary), '') AS summary,
       MIN(c.created_at) AS first_message_at,
       MAX(c.created_at) AS last_message_at
@@ -67,13 +67,20 @@ export async function getRecentConversationsGroupedBySession(): Promise<SessionC
 
   // 2. Get all conversations for these sessions in one query
   const sessionIds = sessionResult.rows
-    .map((row) => row.session_id)
-    .filter((id): id is string => id !== null && id !== undefined);
+    .map((row) => row.session_id as string)
+    .filter((id) => id !== null && id !== undefined);
 
   const convResult = await sql`
-    SELECT id, user_message, assistant_response, source_lang, processed_for_memory, session_id, created_at
+    SELECT
+      id,
+      user_message,
+      assistant_response,
+      source_lang,
+      processed_for_memory,
+      COALESCE(session_id, 'unassigned') AS session_id,
+      created_at
     FROM darkroom_conversations
-    WHERE session_id IN (${sessionIds})
+    WHERE COALESCE(session_id, 'unassigned') IN (${sessionIds})
     ORDER BY created_at ASC
   `;
 
@@ -87,7 +94,7 @@ export async function getRecentConversationsGroupedBySession(): Promise<SessionC
   }
 
   return sessionResult.rows.map((row) => {
-    const sid = row.session_id ?? "unassigned";
+    const sid = (row.session_id as string) ?? "unassigned";
     const summary = (row.summary as string) || shortenSessionId(sid);
     return {
       sessionId: sid,

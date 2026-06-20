@@ -25,12 +25,15 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
   const questionText = isZh ? latestQuestion?.zh : latestQuestion?.en;
   const questionLabel = isZh ? '接下来' : 'What next?';
   const inputLabels = {
-    nameLabel: isZh ? '你的名字' : 'Your name',
-    namePlaceholder: isZh ? '想好笔名，一经采纳概不退换' : 'Pick a pen name — no refunds once used',
+    nameLabel: isZh ? '留下一个名字' : 'Leave a name',
+    namePlaceholder: isZh ? '笔名、真名、或是你想被写进故事的名字' : 'A pen name, real name, or any name you want in the story',
     inputPlaceholder: isZh ? '写下你的续写，或提出你想让故事怎么发展...' : 'Write your continuation, or steer the story...',
     submit: isZh ? '续写故事' : 'Continue story',
     submitting: isZh ? '续写中...' : 'Continuing...',
   };
+  const nameHint = isZh
+    ? '这个名字会悄悄潜入故事，变成某个角落的角色。想好再写——一经落笔，概不退换。'
+    : "This name will slip into the story as a character somewhere in the corner. Choose wisely — once written, no refunds.";
   const hintText = isZh
     ? '不想自己写？直接选一个剧情方向：'
     : "Don't want to write? Pick a direction:";
@@ -59,6 +62,7 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
           placeholder={inputLabels.namePlaceholder}
           className="w-full rounded border border-[#2a2a2a] bg-[#0a0a0a] px-3 py-2 text-[#f5f5f0] placeholder:text-[#555] focus:border-[#c9a227] focus:outline-none"
         />
+        <p className="mt-1.5 text-xs leading-relaxed text-[#666]">{nameHint}</p>
       </div>
 
       <textarea

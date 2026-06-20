@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import HomePage from '@/app/components/pages/HomePage';
 import DarkroomClassRestorer from '@/components/DarkroomClassRestorer';
-import { getHeroSlides, getJournalEntries, getJournalEntriesDarkroom, getSiteData, getUpcomingEvents, getFeatured, getCalendarEvents } from '@/lib/data';
+import { getHeroSlides, getSiteData, getUpcomingEvents, getFeatured, getCalendarEvents } from '@/lib/data';
 import { listEntries, countEntries } from '@/lib/guestbook';
 import type { GuestbookHookLabels } from '@/lib/guestbook';
 
@@ -19,11 +19,9 @@ const guestbookLabels: GuestbookHookLabels = {
 };
 
 export default async function Page() {
-  const [site, slides, entries, entriesDarkroom, guestbookEntries, guestbookTotal, upcomingEvents, featured, calendarEvents] = await Promise.all([
+  const [site, slides, guestbookEntries, guestbookTotal, upcomingEvents, featured, calendarEvents] = await Promise.all([
     getSiteData(),
     getHeroSlides(),
-    getJournalEntries(),
-    getJournalEntriesDarkroom(),
     listEntries(10),
     countEntries(),
     getUpcomingEvents(),
@@ -52,9 +50,6 @@ export default async function Page() {
       <HomePage
         site={site}
         slides={slides}
-        entries={entries}
-        entriesDarkroom={entriesDarkroom}
-        journalTitle="Updates"
         guestbookEntries={guestbookEntries}
         guestbookTotal={guestbookTotal}
         guestbookLabels={guestbookLabels}

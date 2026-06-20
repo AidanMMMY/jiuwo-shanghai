@@ -19,6 +19,13 @@ const RELATION_TYPES = [
 
 const validRelationTypes = new Set(RELATION_TYPES);
 
+function normalizeEntityName(name: string): string {
+  // Strip parenthetical aliases like "小马（Phillip）" -> "小马" or "勺子（AGNOSIA）" -> "勺子".
+  const withoutParens = name.replace(/[（(].*?[）)]/g, "").trim();
+  if (withoutParens) return withoutParens;
+  return name;
+}
+
 function buildPrompt(content: string, isZh: boolean): string {
   const typesText = RELATION_TYPES.join(", ");
   if (isZh) {
@@ -100,8 +107,8 @@ export async function POST(req: NextRequest) {
           validRelationTypes.has((r as Record<string, unknown>).type as string)
         ) {
           relations.push({
-            a: ((r as Record<string, unknown>).a as string).trim(),
-            b: ((r as Record<string, unknown>).b as string).trim(),
+            a: normalizeEntityName(((r as Record<string, unknown>).a as string).trim()),
+            b: normalizeEntityName(((r as Record<string, unknown>).b as string).trim()),
             type: ((r as Record<string, unknown>).type as string).trim().toLowerCase(),
           });
         }

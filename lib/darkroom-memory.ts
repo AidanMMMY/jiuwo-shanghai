@@ -40,6 +40,19 @@ export interface Conversation {
   created_at: string;
 }
 
+export interface SessionConversationGroup {
+  sessionId: string;
+  summary: string;
+  firstMessageAt: string;
+  lastMessageAt: string;
+  conversations: Conversation[];
+}
+
+function shortenSessionId(sessionId: string): string {
+  if (sessionId.length <= 16) return sessionId;
+  return `${sessionId.slice(0, 12)}…${sessionId.slice(-4)}`;
+}
+
 const MAX_MEMORIES_TOTAL = 3000;
 const MIN_MEMORY_CONFIDENCE = 0.6;
 
@@ -868,6 +881,68 @@ export async function searchConversationsByKeyword(
     LIMIT ${limit}
   `;
   return result.rows as Conversation[];
+}
+
+export async function getRecentConversationsGroupedBySession(): Promise<SessionConversationGroup[]> {
+  await ensureConversationsTable();
+  const sql = getSql();
+
+  const sessionResult = await sql`
+    SELECT
+      COALESCE(c.session_id, 'unassigned') AS session_id,
+      COALESCE(s.summary, '') AS summary,
+      MIN(c.created_at) AS first_message_at,
+      MAX(c.created_at) AS last_message_at
+    FROM darkroom_conversations c
+    LEFT JOIN darkroom_sessions s ON c.session_id = s.session_id
+    GROUP BY COALESCE(c.session_id, 'unassigned'), s.session_id, s.summary
+    ORDER BY MAX(c.created_at) DESC
+  `;
+
+  if (sessionResult.rows.length === 0) {
+    return [];
+  }
+
+  const sessionIds = sessionResult.rows
+    .map((row) => row.session_id as string)
+    .filter((id) => id !== null && id !== undefined);
+
+  const convResult = await sql`
+    SELECT
+      id,
+      user_message,
+      assistant_response,
+      source_lang,
+      processed_for_memory,
+      COALESCE(session_id, 'unassigned') AS session_id,
+      created_at
+    FROM darkroom_conversations
+    WHERE COALESCE(session_id, 'unassigned') IN (${sessionIds})
+    ORDER BY created_at ASC
+  `;
+
+  const conversationsBySession = new Map<string, Conversation[]>();
+  for (const conv of convResult.rows as Conversation[]) {
+    const sid = conv.session_id ?? "unassigned";
+    if (!conversationsBySession.has(sid)) {
+      conversationsBySession.set(sid, []);
+    }
+    conversationsBySession.get(sid)!.push(conv);
+  }
+
+  return sessionResult.rows.map((row) => {
+    const sid = (row.session_id as string) ?? "unassigned";
+    const summary = sid === "unassigned"
+      ? "Unassigned"
+      : (row.summary as string) || shortenSessionId(sid);
+    return {
+      sessionId: sid,
+      summary,
+      firstMessageAt: (row.first_message_at as string) ?? new Date(0).toISOString(),
+      lastMessageAt: (row.last_message_at as string) ?? new Date(0).toISOString(),
+      conversations: conversationsBySession.get(sid) ?? [],
+    };
+  });
 }
 
 export async function getRecentConversations(limit: number = 20): Promise<Conversation[]> {

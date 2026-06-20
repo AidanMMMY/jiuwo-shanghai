@@ -13,186 +13,103 @@ export default function AfterHoursGateway({ isZh = false }: AfterHoursGatewayPro
 
   const content = {
     ai: {
-      eyebrow: isZh ? '深夜之后' : 'AFTER HOURS',
-      headline: isZh ? '我们得聊聊' : 'We need to talk',
-      subline: isZh ? '关于你今晚看到的事。' : 'About what you saw tonight.',
-      cta: isZh ? '进来' : 'Step in',
+      tag: isZh ? 'AI' : 'AI',
+      title: isZh ? '深夜 AI 对话' : 'After-hours AI chat',
+      subline: isZh ? '营业结束后，和这里的 AI 聊聊。' : 'Talk to the bar’s AI after closing.',
     },
     story: {
-      eyebrow: isZh ? '公开接龙' : 'OPEN RELAY',
-      headline: isZh ? '故事还开着' : 'The story is still open',
-      subline: isZh ? '下一句你来写。' : 'You write the next line.',
-      cta: isZh ? '接一句' : 'Continue',
+      tag: isZh ? '接龙' : 'RELAY',
+      title: isZh ? '故事接龙' : 'Story relay',
+      subline: isZh ? '每人写一句，继续这段故事。' : 'Add one line to the ongoing story.',
     },
   };
 
   return (
     <>
-      <section className="weather-normal-section relative overflow-hidden px-4 md:px-12 py-5 md:py-20 bg-[#080808]">
+      <section className="weather-normal-section relative overflow-hidden px-4 md:px-12 py-4 md:py-20 bg-[#080808]">
         {/* Compact ambient background */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[400px] rounded-full bg-[radial-gradient(ellipse,rgba(201,162,39,0.06)_0%,transparent_65%)] blur-[80px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[320px] rounded-full bg-[radial-gradient(ellipse,rgba(201,162,39,0.05)_0%,transparent_65%)] blur-[80px]" />
         </div>
 
-        <div className="relative mx-auto max-w-5xl">
+        <div className="relative mx-auto max-w-3xl">
           {/* Section header */}
-          <div className="text-center mb-2.5 md:mb-10">
-            <span className="inline-block text-[10px] md:text-xs tracking-[0.25em] text-[#c9a227]/60">
-              {isZh ? '过了打烊时间 · 两盏灯还亮着' : 'PAST CLOSING HOURS · Two lights still on'}
+          <div className="text-center mb-2 md:mb-8">
+            <span className="inline-block text-[10px] tracking-[0.25em] text-[#c9a227]/50">
+              {isZh ? '过了打烊时间' : 'PAST CLOSING HOURS'}
             </span>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-2.5 md:gap-5">
-            {/* AI chat entry */}
+          {/* Unified feature tray */}
+          <div className="rounded-2xl overflow-hidden bg-[#0c0c0c]/70 backdrop-blur-sm shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
+            {/* AI chat row */}
             <Link
               href={aiHref}
-              className="group relative overflow-hidden rounded-xl border border-[#c9a227]/25 md:border-[#c9a227]/30 bg-gradient-to-br from-[#141208] via-[#0e0e0a] to-[#0a0a0a] p-3 md:p-6 transition-all duration-500 hover:border-[#c9a227]/60 md:hover:border-[#c9a227] hover:shadow-[0_0_30px_rgba(201,162,39,0.10)] md:hover:shadow-[0_0_50px_rgba(201,162,39,0.15)] hover:-translate-y-0.5"
+              className="group relative flex items-center gap-3 md:gap-4 p-3 md:p-5 overflow-hidden transition-colors duration-300 hover:bg-white/[0.03]"
             >
-              {/* Matrix rain background */}
-              <MatrixRain />
-
-              {/* Top sheen line */}
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c9a227]/60 to-transparent" />
-
-              {/* Hover sweep */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#c9a227]/8 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
-
-              <div className="relative z-10 flex flex-row items-center gap-3 md:flex-col md:items-stretch md:gap-0">
-                <div className="flex-1 min-w-0 flex flex-col">
-                  <div className="flex items-start justify-between mb-0.5 md:mb-3">
-                    <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.2em] text-[#c9a227]/80">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c9a227] opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#c9a227]" />
-                      </span>
-                      {content.ai.eyebrow}
-                    </span>
-                    <svg
-                      className="hidden md:block w-5 h-5 text-[#c9a227]/25 transition-all duration-300 group-hover:text-[#c9a227]/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                    </svg>
-                  </div>
-
-                  <h3 className="text-base md:text-2xl font-medium text-[#f5f5f0] mb-0 md:mb-1.5 transition-colors duration-300 group-hover:text-[#c9a227]">
-                    {content.ai.headline}
-                  </h3>
-                  <p className="text-[11px] md:text-sm text-[#a0a0a0] leading-snug md:leading-relaxed truncate md:whitespace-normal md:mb-5">
-                    {content.ai.subline}
-                  </p>
-                </div>
-
-                {/* Mobile compact action */}
-                <span className="md:hidden flex-shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full border border-[#c9a227]/30 text-[#c9a227]/70 transition-all duration-300 group-hover:border-[#c9a227]/60 group-hover:text-[#c9a227]">
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                  </svg>
-                </span>
-
-                {/* Desktop CTA */}
-                <span className="hidden md:inline-flex mt-auto items-center gap-2 self-start px-5 py-2 bg-[#c9a227] text-[#0a0a0a] text-xs tracking-[0.12em] font-semibold rounded-full transition-all duration-300 group-hover:bg-[#f5f5f0] group-hover:gap-3 group-hover:shadow-[0_0_20px_rgba(245,245,240,0.2)]">
-                  {content.ai.cta}
-                  <svg
-                    className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                  </svg>
-                </span>
+              {/* Background animation — dimmed on mobile */}
+              <div className="absolute inset-0 opacity-40 md:opacity-100 transition-opacity duration-500 pointer-events-none">
+                <MatrixRain />
               </div>
+
+              <div className="relative z-10 flex-1 min-w-0 flex flex-col">
+                <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.18em] text-[#c9a227]/70 mb-0.5">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c9a227] opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#c9a227]" />
+                  </span>
+                  {content.ai.tag}
+                </span>
+                <h3 className="text-sm md:text-xl font-medium text-[#f5f5f0] transition-colors duration-300 group-hover:text-[#c9a227]">
+                  {content.ai.title}
+                </h3>
+                <p className="text-[11px] md:text-sm text-[#a0a0a0] leading-snug md:leading-relaxed truncate md:whitespace-normal">
+                  {content.ai.subline}
+                </p>
+              </div>
+
+              {/* Function icon */}
+              <span className="relative z-10 flex-shrink-0 inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full border border-white/10 bg-white/[0.03] text-[#c9a227]/80 transition-all duration-300 group-hover:border-[#c9a227]/40 group-hover:text-[#c9a227] group-hover:bg-[#c9a227]/10">
+                <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M7.5 15.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m11.25-3.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H18M3 12c0 4.97 4.03 9 9 9a9.76 9.76 0 003.5-.65L21 21l-1.35-5.5a8.96 8.96 0 001.6-5c0-4.97-4.03-9-9-9s-9 4.03-9 9z" />
+                </svg>
+              </span>
             </Link>
 
-            {/* Story relay entry */}
+            {/* Divider */}
+            <div className="h-px bg-white/[0.06]" />
+
+            {/* Story relay row */}
             <Link
               href={storyHref}
-              className="group relative overflow-hidden rounded-xl border border-[#c9a227]/12 md:border-[#c9a227]/15 bg-gradient-to-br from-[#1a160c] via-[#0f0d08] to-[#080808] p-3 md:p-6 transition-all duration-500 hover:border-[#c9a227]/40 hover:shadow-[0_0_30px_rgba(201,162,39,0.08)] md:hover:shadow-[0_0_50px_rgba(201,162,39,0.12)] hover:-translate-y-0.5"
+              className="group relative flex items-center gap-3 md:gap-4 p-3 md:p-5 overflow-hidden transition-colors duration-300 hover:bg-white/[0.03]"
             >
-              {/* Abstract living forms background */}
-              <StoryFlow />
-
-              {/* Warm ambient base glow */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background:
-                    'radial-gradient(ellipse at 50% 60%, rgba(201,162,39,0.10) 0%, rgba(201,162,39,0.04) 35%, transparent 70%)',
-                }}
-              />
-
-              {/* Top sheen line */}
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c9a227]/30 to-transparent" />
-
-              {/* Hover sweep */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#c9a227]/8 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
-
-              <div className="relative z-10 flex flex-row items-center gap-3 md:flex-col md:items-stretch md:gap-0">
-                <div className="flex-1 min-w-0 flex flex-col">
-                  <div className="flex items-start justify-between mb-0.5 md:mb-3">
-                    <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.2em] text-[#c9a227]/80">
-                      <svg className="w-3 h-3 text-[#c9a227]/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                      </svg>
-                      {content.story.eyebrow}
-                    </span>
-                    <svg
-                      className="hidden md:block w-5 h-5 text-[#c9a227]/25 transition-all duration-300 group-hover:text-[#c9a227]/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                    </svg>
-                  </div>
-
-                  <h3 className="text-base md:text-2xl font-medium text-[#f5f5f0] mb-0 md:mb-1.5 transition-colors duration-300 group-hover:text-[#c9a227]">
-                    {content.story.headline}
-                  </h3>
-                  <p className="text-[11px] md:text-sm text-[#a0a0a0] leading-snug md:leading-relaxed truncate md:whitespace-normal md:mb-5">
-                    {content.story.subline}
-                  </p>
-                </div>
-
-                {/* Mobile compact action */}
-                <span className="md:hidden flex-shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full border border-[#c9a227]/30 text-[#c9a227]/70 transition-all duration-300 group-hover:border-[#c9a227]/60 group-hover:text-[#c9a227]">
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                  </svg>
-                </span>
-
-                {/* Desktop CTA */}
-                <span className="hidden md:inline-flex mt-auto items-center gap-2 self-start px-5 py-2 bg-[#c9a227] text-[#0a0a0a] text-xs tracking-[0.12em] font-semibold rounded-full transition-all duration-300 group-hover:bg-[#f5f5f0] group-hover:gap-3 group-hover:shadow-[0_0_20px_rgba(245,245,240,0.2)]">
-                  {content.story.cta}
-                  <svg
-                    className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                  </svg>
-                </span>
+              {/* Background animation — dimmed on mobile */}
+              <div className="absolute inset-0 opacity-40 md:opacity-100 transition-opacity duration-500 pointer-events-none">
+                <StoryFlow />
               </div>
+
+              <div className="relative z-10 flex-1 min-w-0 flex flex-col">
+                <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.18em] text-[#c9a227]/70 mb-0.5">
+                  <svg className="w-3 h-3 text-[#c9a227]/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                  </svg>
+                  {content.story.tag}
+                </span>
+                <h3 className="text-sm md:text-xl font-medium text-[#f5f5f0] transition-colors duration-300 group-hover:text-[#c9a227]">
+                  {content.story.title}
+                </h3>
+                <p className="text-[11px] md:text-sm text-[#a0a0a0] leading-snug md:leading-relaxed truncate md:whitespace-normal">
+                  {content.story.subline}
+                </p>
+              </div>
+
+              {/* Function icon */}
+              <span className="relative z-10 flex-shrink-0 inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full border border-white/10 bg-white/[0.03] text-[#c9a227]/80 transition-all duration-300 group-hover:border-[#c9a227]/40 group-hover:text-[#c9a227] group-hover:bg-[#c9a227]/10">
+                <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                </svg>
+              </span>
             </Link>
           </div>
         </div>

@@ -160,17 +160,20 @@ export async function POST(req: NextRequest) {
     const { userMessage, assistantResponse } = body;
     const sessionId = typeof body.sessionId === "string" ? body.sessionId : "";
     isZh = !!body.isZh;
+    const backfill = body.backfill === true;
 
-    if (
-      !userMessage ||
-      !assistantResponse ||
-      typeof userMessage !== "string" ||
-      typeof assistantResponse !== "string"
-    ) {
-      return NextResponse.json(
-        { error: isZh ? "输入无效" : "Invalid input" },
-        { status: 400 }
-      );
+    if (!backfill) {
+      if (
+        !userMessage ||
+        !assistantResponse ||
+        typeof userMessage !== "string" ||
+        typeof assistantResponse !== "string"
+      ) {
+        return NextResponse.json(
+          { error: isZh ? "输入无效" : "Invalid input" },
+          { status: 400 }
+        );
+      }
     }
 
     const apiKey = process.env.DEEPSEEK_API_KEY;
@@ -180,37 +183,39 @@ export async function POST(req: NextRequest) {
     }
 
     const sourceLang = isZh ? "zh" : "en";
-    console.log(`[darkroom:extract] start lang=${sourceLang} session=${sessionId || "none"}`);
+    console.log(`[darkroom:extract] start lang=${sourceLang} session=${sessionId || "none"} backfill=${backfill}`);
 
-    // Ensure the session row exists before storing conversations; the
-    // darkroom_conversations table has a foreign key on darkroom_sessions.
-    if (sessionId) {
-      await upsertSessionState(sessionId, {});
-    }
+    if (!backfill) {
+      // Ensure the session row exists before storing conversations; the
+      // darkroom_conversations table has a foreign key on darkroom_sessions.
+      if (sessionId) {
+        await upsertSessionState(sessionId, {});
+      }
 
-    // Step 1: always store the raw conversation exchange
-    const storedConv = await storeConversation({
-      user_message: userMessage,
-      assistant_response: assistantResponse,
-      source_lang: sourceLang,
-      session_id: sessionId || undefined,
-    });
-    console.log(`[darkroom:extract] conversation stored id=${storedConv.id}`);
+      // Step 1: always store the raw conversation exchange
+      const storedConv = await storeConversation({
+        user_message: userMessage,
+        assistant_response: assistantResponse,
+        source_lang: sourceLang,
+        session_id: sessionId || undefined,
+      });
+      console.log(`[darkroom:extract] conversation stored id=${storedConv.id}`);
 
-    // Record any new names the user mentioned, and update session summary asynchronously
-    if (sessionId) {
-      const mentionedNames = extractUserMentionedNames(
-        [{ role: "user", content: userMessage }],
-        isZh
-      );
-      if (mentionedNames.length > 0) {
-        recordMentionedNames(mentionedNames).catch((err) =>
-          console.error("[darkroom:extract] record entities error:", err)
+      // Record any new names the user mentioned, and update session summary asynchronously
+      if (sessionId) {
+        const mentionedNames = extractUserMentionedNames(
+          [{ role: "user", content: userMessage }],
+          isZh
+        );
+        if (mentionedNames.length > 0) {
+          recordMentionedNames(mentionedNames).catch((err) =>
+            console.error("[darkroom:extract] record entities error:", err)
+          );
+        }
+        updateSessionSummary(sessionId, userMessage, assistantResponse, isZh).catch((err) =>
+          console.error("[darkroom:extract] summary update error:", err)
         );
       }
-      updateSessionSummary(sessionId, userMessage, assistantResponse, isZh).catch((err) =>
-        console.error("[darkroom:extract] summary update error:", err)
-      );
     }
 
     const data = getDarkroomData(isZh);

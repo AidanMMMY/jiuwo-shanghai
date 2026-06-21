@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Darkroom 全量人物关系图谱</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f5f5f0;
+      --muted: #888;
+      --accent: #c9a227;
+      --border: #333;
+      --current: #4caf50;
+      --past: #ff9800;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      line-height: 1.7;
+    }
+    h1 { color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 12px; }
+    h2 { color: var(--accent); margin-top: 48px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    h3 { color: var(--fg); margin-top: 0; }
+    h4 { color: var(--muted); margin: 0 0 8px; font-size: 14px; text-transform: uppercase; }
+    p.meta { color: var(--muted); font-size: 14px; }
+    code {
+      background: #1a1a1a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SF Mono", Monaco, monospace;
+      font-size: 0.9em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+    }
+    th { background: #1a1a1a; color: var(--accent); }
+    tr:nth-child(even) { background: #111; }
+    .current { color: var(--current); font-weight: 600; }
+    .past { color: var(--past); font-weight: 600; }
+    .muted { color: var(--muted); }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      background: #111;
+    }
+    .group { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .group { grid-template-columns: 1fr; } }
+    ul { margin: 0; padding-left: 18px; }
+    li { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+
+<h1>Darkroom 全量人物关系图谱</h1>
+<p class="meta">
+  <strong>生成日期</strong>：2026-06-21<br>
+  <strong>数据来源</strong>：<code>darkroom_entity_relations</code> 表<br>
+  <strong>统计</strong>：共 48 条关系（当前 44 / 过去 4），涉及 105 个实体
+</p>
+
+<h2>关系总览表</h2>
+<table>
+  <thead>
+    <tr>
+      <th>实体 A</th>
+      <th>关系</th>
+      <th>实体 B</th>
+      <th>时态</th>
+      <th>置信度</th>
+      <th>证据记忆 ID</th>
+      <th>创建时间</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+    <tr>
+      <td>Ray</td>
+      <td>同事</td>
+      <td>梦子</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Tee</td>
+      <td>同事</td>
+      <td>Gary</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Aidan</td>
+      <td>暗恋/好感</td>
+      <td>Dex</td>
+      <td class="current">当前</td>
+      <td>0.90</td>
+      <td>-</td>
+      <td>2026/06/21 16:57</td>
+    </tr>
+  
+    <tr>
+      <td>Aidan</td>
+      <td>约会</td>
+      <td>Icky</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Marco</td>
+      <td>约会</td>
+      <td>大介</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Zack</td>
+      <td>约会</td>
+      <td>阿林</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Arthur</td>
+      <td>前任</td>
+      <td>Ethan</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Bob</td>
+      <td>前任</td>
+      <td>Arthur</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>D.F</td>
+      <td>前任</td>
+      <td>川川</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Icky</td>
+      <td>前任</td>
+      <td>Tee</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Phillip</td>
+      <td>前任</td>
+      <td>司徒</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Tee</td>
+      <td>前任</td>
+      <td>Alex</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Tee</td>
+      <td>前任</td>
+      <td>Arthur</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Tee</td>
+      <td>前任</td>
+      <td>Phillip</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Tee</td>
+      <td>前任</td>
+      <td>榴莲</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>一号羊</td>
+      <td>前任</td>
+      <td>Eric</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>一号羊</td>
+      <td>前任</td>
+      <td>小老虎</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>AGNOSIA</td>
+      <td>朋友</td>
+      <td>Phillip</td>
+      <td class="current">当前</td>
+      <td>0.90</td>
+      <td>-</td>
+      <td>2026/06/21 17:12</td>
+    </tr>
+  
+    <tr>
+      <td>Aidan</td>
+      <td>朋友</td>
+      <td>Bob</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Aidan</td>
+      <td>朋友</td>
+      <td>Dex</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Aidan</td>
+      <td>朋友</td>
+      <td>Phillip</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Aidan</td>
+      <td>朋友</td>
+      <td>Ray</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Aidan</td>
+      <td>朋友</td>
+      <td>Tee</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Aidan</td>
+      <td>朋友</td>
+      <td>ZZ</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Tee</td>
+      <td>朋友</td>
+      <td>大介</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Zack</td>
+      <td>朋友</td>
+      <td>Mavis</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Zack</td>
+      <td>朋友</td>
+      <td>Phillip</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>阿林</td>
+      <td>朋友</td>
+      <td>蛤蟆</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Phillip</td>
+      <td>炮友</td>
+      <td>颜鸣</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>owen</td>
+      <td>炮友</td>
+      <td>Phillip</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Aidan</td>
+      <td>认识</td>
+      <td>Gary</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Dex</td>
+      <td>认识</td>
+      <td>D.F</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Dex</td>
+      <td>认识</td>
+      <td>Phillip</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Dex</td>
+      <td>认识</td>
+      <td>Tee</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Icky</td>
+      <td>认识</td>
+      <td>Arthur</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>谢翔</td>
+      <td>认识</td>
+      <td>Tee</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>D.F</td>
+      <td>恋人</td>
+      <td>David</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Tee</td>
+      <td>一起提及</td>
+      <td>大鹏</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>白二</td>
+      <td>一起提及</td>
+      <td>Tee</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Icky</td>
+      <td>伴侣</td>
+      <td>黄坚</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Phillip</td>
+      <td>伴侣</td>
+      <td>ff</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Phillip</td>
+      <td>伴侣</td>
+      <td>锋锋</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Ray</td>
+      <td>伴侣</td>
+      <td>ZZ</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>小绿</td>
+      <td>伴侣</td>
+      <td>Devil</td>
+      <td class="current">当前</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>AGNOSIA</td>
+      <td>婚外情</td>
+      <td>Phillip</td>
+      <td class="past">过去</td>
+      <td>0.75</td>
+      <td>-</td>
+      <td>2026/06/21 16:56</td>
+    </tr>
+  
+    <tr>
+      <td>Aidan</td>
+      <td>暗恋/好感</td>
+      <td>Bob</td>
+      <td class="past">过去</td>
+      <td>0.90</td>
+      <td>-</td>
+      <td>2026/06/21 16:57</td>
+    </tr>
+  
+    <tr>
+      <td>Zack</td>
+      <td>约会</td>
+      <td>Phillip</td>
+      <td class="past">过去</td>
+      <td>0.90</td>
+      <td>-</td>
+      <td>2026/06/21 16:57</td>
+    </tr>
+  
+    <tr>
+      <td>Zack</td>
+      <td>炮友</td>
+      <td>Phillip</td>
+      <td class="past">过去</td>
+      <td>0.90</td>
+      <td>-</td>
+      <td>2026/06/21 16:57</td>
+    </tr>
+  
+  </tbody>
+</table>
+
+<h2>按人物分组的关系</h2>
+
+      <div class="card">
+        <h3>阿林</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>约会(当前): Zack</li><li>朋友(当前): 蛤蟆</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>白二</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>一起提及(当前): Tee</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>川川</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>前任(当前): D.F</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>大介</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>约会(当前): Marco</li><li>朋友(当前): Tee</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>大鹏</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>一起提及(当前): Tee</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>锋锋</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>伴侣(当前): Phillip</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>蛤蟆</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>朋友(当前): 阿林</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>黄坚</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>伴侣(当前): Icky</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>榴莲</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>前任(当前): Tee</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>梦子</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>同事(当前): Ray</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>司徒</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>前任(当前): Phillip</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>小老虎</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>前任(当前): 一号羊</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>小绿</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>伴侣(当前): Devil</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>谢翔</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>认识(当前): Tee</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>颜鸣</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>炮友(当前): Phillip</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>一号羊</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>前任(当前): Eric</li><li>前任(当前): 小老虎</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>AGNOSIA</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>朋友(当前): Phillip</li></ul></div>
+          <div><h4>过去关系</h4><ul><li>婚外情(过去): Phillip</li></ul></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Aidan</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>暗恋/好感(当前): Dex</li><li>约会(当前): Icky</li><li>朋友(当前): Bob</li><li>朋友(当前): Dex</li><li>朋友(当前): Phillip</li><li>朋友(当前): Ray</li><li>朋友(当前): Tee</li><li>朋友(当前): ZZ</li><li>认识(当前): Gary</li></ul></div>
+          <div><h4>过去关系</h4><ul><li>暗恋/好感(过去): Bob</li></ul></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Alex</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>前任(当前): Tee</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Arthur</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>前任(当前): Ethan</li><li>前任(当前): Bob</li><li>前任(当前): Tee</li><li>认识(当前): Icky</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Bob</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>前任(当前): Arthur</li><li>朋友(当前): Aidan</li></ul></div>
+          <div><h4>过去关系</h4><ul><li>暗恋/好感(过去): Aidan</li></ul></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>D.F</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>前任(当前): 川川</li><li>认识(当前): Dex</li><li>恋人(当前): David</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>David</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>恋人(当前): D.F</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Devil</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>伴侣(当前): 小绿</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Dex</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>暗恋/好感(当前): Aidan</li><li>朋友(当前): Aidan</li><li>认识(当前): D.F</li><li>认识(当前): Phillip</li><li>认识(当前): Tee</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Eric</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>前任(当前): 一号羊</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Ethan</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>前任(当前): Arthur</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>ff</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>伴侣(当前): Phillip</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Gary</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>同事(当前): Tee</li><li>认识(当前): Aidan</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Icky</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>约会(当前): Aidan</li><li>前任(当前): Tee</li><li>认识(当前): Arthur</li><li>伴侣(当前): 黄坚</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Marco</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>约会(当前): 大介</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Mavis</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>朋友(当前): Zack</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>owen</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>炮友(当前): Phillip</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Phillip</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>前任(当前): 司徒</li><li>前任(当前): Tee</li><li>朋友(当前): AGNOSIA</li><li>朋友(当前): Aidan</li><li>朋友(当前): Zack</li><li>炮友(当前): 颜鸣</li><li>炮友(当前): owen</li><li>认识(当前): Dex</li><li>伴侣(当前): ff</li><li>伴侣(当前): 锋锋</li></ul></div>
+          <div><h4>过去关系</h4><ul><li>婚外情(过去): AGNOSIA</li><li>约会(过去): Zack</li><li>炮友(过去): Zack</li></ul></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Ray</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>同事(当前): 梦子</li><li>朋友(当前): Aidan</li><li>伴侣(当前): ZZ</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Tee</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>同事(当前): Gary</li><li>前任(当前): Icky</li><li>前任(当前): Alex</li><li>前任(当前): Arthur</li><li>前任(当前): Phillip</li><li>前任(当前): 榴莲</li><li>朋友(当前): Aidan</li><li>朋友(当前): 大介</li><li>认识(当前): Dex</li><li>认识(当前): 谢翔</li><li>一起提及(当前): 大鹏</li><li>一起提及(当前): 白二</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>Zack</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>约会(当前): 阿林</li><li>朋友(当前): Mavis</li><li>朋友(当前): Phillip</li></ul></div>
+          <div><h4>过去关系</h4><ul><li>约会(过去): Phillip</li><li>炮友(过去): Phillip</li></ul></div>
+        </div>
+      </div>
+    
+      <div class="card">
+        <h3>ZZ</h3>
+        <div class="group">
+          <div><h4>当前关系</h4><ul><li>朋友(当前): Aidan</li><li>伴侣(当前): Ray</li></ul></div>
+          <div><h4>过去关系</h4><p class="muted">无过去关系</p></div>
+        </div>
+      </div>
+    
+
+<p class="meta">本文件由 Claude 在自动生成，用于人工审阅 Darkroom 人物关系网络。</p>
+
+</body>
+</html>

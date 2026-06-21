@@ -77,7 +77,7 @@
 | Aidan - Dex | friend + crush | — |
 | Aidan - Bob | friend | crush |
 | Zack - Phillip | friend | date + fwb |
-| Phillip - AGNOSIA | — | affair / date / fwb / knows / partner |
+| Phillip - AGNOSIA | friend | affair |
 
 注意：Phillip - AGNOSIA 当前没有任何 `is_current = true` 的关系。如果实际现在仍是某种关系，需要手动更正其中一条为 current。
 
@@ -123,7 +123,7 @@ entities 表中仍存在早期提取错误的占位符，例如：
 | 类型 | current=true | current=false | 合计 |
 |---|---|---|---|
 | ex | 11 | 0 | 11 |
-| friend | 10 | 0 | 10 |
+| friend | 11 | 0 | 11 |
 | knows | 6 | 0 | 6 |
 | partner | 5 | 0 | 5 |
 | fwb | 2 | 1 | 3 |
@@ -131,7 +131,7 @@ entities 表中仍存在早期提取错误的占位符，例如：
 | crush | 1 | 1 | 2 |
 | colleague | 2 | 0 | 2 |
 | mentioned_with | 2 | 0 | 2 |
-| affair | 1 | 0 | 1 |
+| affair | 0 | 1 | 1 |
 | lover | 1 | 0 | 1 |
 | **合计** | **44** | **3** | **47** |
 
@@ -144,8 +144,8 @@ entities 表中仍存在早期提取错误的占位符，例如：
   - current: friend(Phillip, Dex, Bob, Ray, Tee, ZZ)、crush(Dex)、date(Icky)、knows(Gary)
   - past: crush(Bob)
 - **Phillip**
-  - current: partner(ff, 锋锋)、ex(司徒, Tee)、fwb(颜鸣, owen)、knows(Dex)、friend(Zack)、affair(AGNOSIA)
-  - past: fwb(Zack)、date(Zack)
+  - current: partner(ff, 锋锋)、ex(司徒, Tee)、fwb(颜鸣, owen)、knows(Dex)、friend(Zack, AGNOSIA)
+  - past: fwb(Zack)、date(Zack)、affair(AGNOSIA)
 - **Tee**
   - current: ex(Alex, Arthur, Icky, 榴莲, Phillip)、friend(大介, Aidan)、colleague(Gary)、knows(谢翔)
 - **Arthur**

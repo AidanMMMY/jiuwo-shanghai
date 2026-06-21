@@ -1,5 +1,5 @@
 // Clean entity relations: normalize duplicate entity aliases, unify direction,
-// and resolve conflicting relation types by priority.
+// and deduplicate exact same (a, b, type) records while preserving multiplex relations.
 //
 // Run with: node --env-file=.env.local ./node_modules/.bin/tsx scripts/clean-entity-relations.ts
 
@@ -27,6 +27,7 @@ interface Relation {
   entity_a_id: number;
   entity_b_id: number;
   relation_type: string;
+  is_current: boolean;
   evidence_memory_id: number | null;
   confidence: number;
 }
@@ -37,21 +38,6 @@ const CANONICAL_ALIASES: Record<string, string[]> = {
   Aidan: ['Aiden'],
   Tee: ['tee（老王）', '老王'],
   Icky: ['阿远（Icky）', '阿远'],
-};
-
-// Higher number = more specific, kept when multiple relation types exist for the same pair.
-const RELATION_PRIORITY: Record<string, number> = {
-  ex: 100,
-  affair: 95,
-  partner: 90,
-  lover: 85,
-  fwb: 80,
-  date: 70,
-  colleague: 60,
-  friend: 50,
-  sibling: 40,
-  knows: 30,
-  mentioned_with: 10,
 };
 
 async function findEntityByName(name: string): Promise<Entity | null> {
@@ -86,14 +72,18 @@ async function upsertEntityAliases(name: string, aliases: string[]): Promise<voi
 }
 
 async function main() {
-  console.log('=== Step 1: Register canonical aliases ===\n');
+  console.log('=== Step 0: Ensure schema includes is_current ===\n');
+  await sql`ALTER TABLE darkroom_entity_relations ADD COLUMN IF NOT EXISTS is_current BOOLEAN NOT NULL DEFAULT TRUE`;
+  console.log('is_current column ensured');
+
+  console.log('\n=== Step 1: Register canonical aliases ===\n');
   for (const [canonical, aliases] of Object.entries(CANONICAL_ALIASES)) {
     await upsertEntityAliases(canonical, aliases);
   }
 
   console.log('\n=== Step 2: Load relations and entities ===\n');
   const relationsRes = await sql`
-    SELECT id, entity_a_id, entity_b_id, relation_type, evidence_memory_id, confidence
+    SELECT id, entity_a_id, entity_b_id, relation_type, is_current, evidence_memory_id, confidence
     FROM darkroom_entity_relations
     ORDER BY id
   `;
@@ -106,7 +96,7 @@ async function main() {
     entityById.set(e.id, e);
   }
 
-  console.log('\n=== Step 3: Normalize and deduplicate ===\n');
+  console.log('\n=== Step 3: Normalize direction and deduplicate exact triples ===\n');
   const kept = new Map<string, Relation>();
   const dropped: Relation[] = [];
 
@@ -126,57 +116,30 @@ async function main() {
     // Unify direction: smaller id first.
     const leftId = Math.min(aId, bId);
     const rightId = Math.max(aId, bId);
-    const pairKey = `${leftId}-${rightId}`;
+    const tripleKey = `${leftId}-${rightId}-${r.relation_type}`;
 
-    const priority = RELATION_PRIORITY[r.relation_type] ?? 0;
-    const existing = kept.get(pairKey);
-
-    if (
-      !existing ||
-      priority > (RELATION_PRIORITY[existing.relation_type] ?? 0) ||
-      (priority === (RELATION_PRIORITY[existing.relation_type] ?? 0) && r.id < existing.id)
-    ) {
+    const existing = kept.get(tripleKey);
+    if (!existing || r.id < existing.id) {
       if (existing) dropped.push(existing);
-      kept.set(pairKey, { ...r, entity_a_id: leftId, entity_b_id: rightId });
+      kept.set(tripleKey, { ...r, entity_a_id: leftId, entity_b_id: rightId });
     } else {
       dropped.push(r);
     }
   }
 
-  console.log(`Kept ${kept.size} unique relations, dropping ${dropped.length}`);
-
-  // Show conflicts resolved.
-  const conflictGroups = new Map<string, Relation[]>();
-  for (const r of relations) {
-    const entityA = entityById.get(r.entity_a_id);
-    const entityB = entityById.get(r.entity_b_id);
-    if (!entityA || !entityB) continue;
-    const canonicalA = await findEntityByName(entityA.name);
-    const canonicalB = await findEntityByName(entityB.name);
-    const leftId = Math.min(canonicalA?.id ?? r.entity_a_id, canonicalB?.id ?? r.entity_b_id);
-    const rightId = Math.max(canonicalA?.id ?? r.entity_a_id, canonicalB?.id ?? r.entity_b_id);
-    const key = `${leftId}-${rightId}`;
-    if (!conflictGroups.has(key)) conflictGroups.set(key, []);
-    conflictGroups.get(key)!.push(r);
-  }
-  for (const [key, group] of conflictGroups) {
-    if (group.length > 1) {
-      const names = group.map((r) => `${entityById.get(r.entity_a_id)?.name}-${entityById.get(r.entity_b_id)?.name}(${r.relation_type})`);
-      const winner = kept.get(key);
-      console.log(`  conflict resolved: ${names.join(', ')} -> kept ${winner?.relation_type}`);
-    }
-  }
+  console.log(`Kept ${kept.size} unique (a, b, type) relations, dropping ${dropped.length}`);
 
   console.log('\n=== Step 4: Rewrite relation table ===\n');
   await sql`DELETE FROM darkroom_entity_relations`;
 
   for (const rel of kept.values()) {
     await sql`
-      INSERT INTO darkroom_entity_relations (entity_a_id, entity_b_id, relation_type, evidence_memory_id, confidence)
+      INSERT INTO darkroom_entity_relations (entity_a_id, entity_b_id, relation_type, is_current, evidence_memory_id, confidence)
       VALUES (
         ${rel.entity_a_id},
         ${rel.entity_b_id},
         ${rel.relation_type},
+        ${rel.is_current},
         ${rel.evidence_memory_id ?? null},
         ${rel.confidence}
       )

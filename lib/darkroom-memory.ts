@@ -1135,6 +1135,7 @@ export interface EntityRelation {
   entity_a_id: number;
   entity_b_id: number;
   relation_type: string;
+  is_current: boolean;
   evidence_memory_id?: number;
   confidence: number;
   created_at: string;
@@ -1192,6 +1193,7 @@ export async function ensureEntityRelationsTable(): Promise<void> {
       entity_a_id       INTEGER NOT NULL REFERENCES darkroom_entities(id) ON DELETE CASCADE,
       entity_b_id       INTEGER NOT NULL REFERENCES darkroom_entities(id) ON DELETE CASCADE,
       relation_type     VARCHAR(32) NOT NULL,
+      is_current        BOOLEAN NOT NULL DEFAULT TRUE,
       evidence_memory_id INTEGER REFERENCES darkroom_memories(id) ON DELETE SET NULL,
       confidence        NUMERIC(3,2) NOT NULL DEFAULT 0.7,
       created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -1200,6 +1202,7 @@ export async function ensureEntityRelationsTable(): Promise<void> {
   `;
   await sql`CREATE INDEX IF NOT EXISTS idx_entity_relations_a ON darkroom_entity_relations(entity_a_id)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_entity_relations_b ON darkroom_entity_relations(entity_b_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_entity_relations_current ON darkroom_entity_relations(is_current)`;
 }
 
 export async function getDynamicEntities(): Promise<Entity[]> {
@@ -1408,6 +1411,7 @@ export async function recordEntityRelation(
   options: {
     evidenceMemoryId?: number;
     confidence?: number;
+    isCurrent?: boolean;
   } = {}
 ): Promise<EntityRelation | null> {
   const entityA = await findEntityByName(entityAName);
@@ -1416,17 +1420,18 @@ export async function recordEntityRelation(
 
   await ensureEntityRelationsTable();
   const sql = getSql();
-  const { evidenceMemoryId, confidence = 0.7 } = options;
+  const { evidenceMemoryId, confidence = 0.7, isCurrent = true } = options;
 
   try {
     const result = await sql`
-      INSERT INTO darkroom_entity_relations (entity_a_id, entity_b_id, relation_type, evidence_memory_id, confidence)
-      VALUES (${entityA.id}, ${entityB.id}, ${relationType}, ${evidenceMemoryId ?? null}, ${confidence})
+      INSERT INTO darkroom_entity_relations (entity_a_id, entity_b_id, relation_type, is_current, evidence_memory_id, confidence)
+      VALUES (${entityA.id}, ${entityB.id}, ${relationType}, ${isCurrent}, ${evidenceMemoryId ?? null}, ${confidence})
       ON CONFLICT (entity_a_id, entity_b_id, relation_type) DO UPDATE SET
+        is_current = EXCLUDED.is_current,
         evidence_memory_id = COALESCE(EXCLUDED.evidence_memory_id, darkroom_entity_relations.evidence_memory_id),
         confidence = GREATEST(EXCLUDED.confidence, darkroom_entity_relations.confidence),
         created_at = NOW()
-      RETURNING id, entity_a_id, entity_b_id, relation_type, evidence_memory_id, confidence, created_at
+      RETURNING id, entity_a_id, entity_b_id, relation_type, is_current, evidence_memory_id, confidence, created_at
     `;
     return result.rows[0] as EntityRelation;
   } catch (err) {
@@ -1441,10 +1446,10 @@ export async function getEntityRelations(
   await ensureEntityRelationsTable();
   const sql = getSql();
   const result = await sql`
-    SELECT id, entity_a_id, entity_b_id, relation_type, evidence_memory_id, confidence, created_at
+    SELECT id, entity_a_id, entity_b_id, relation_type, is_current, evidence_memory_id, confidence, created_at
     FROM darkroom_entity_relations
     WHERE entity_a_id = ${entityId} OR entity_b_id = ${entityId}
-    ORDER BY confidence DESC, created_at DESC
+    ORDER BY is_current DESC, confidence DESC, created_at DESC
   `;
   return result.rows as EntityRelation[];
 }

@@ -75,7 +75,7 @@
 <ul>
   <li><strong>文件</strong>：<code>scripts/extract-relations-from-memories.ts</code></li>
   <li><strong>内容</strong>：扫描 282 条含关系线索的历史记忆，调用 extract-relations API</li>
-  <li><strong>结果</strong>：提取 139 条关系，最终清洗后 43 条</li>
+  <li><strong>结果</strong>：提取 139 条关系，初步清洗后 43 条</li>
   <li><strong>状态</strong>：<span class="done">✅ 已完成</span></li>
 </ul>
 
@@ -123,39 +123,54 @@
   <li><strong>实体总数</strong>：109 → 105</li>
   <li><strong>状态</strong>：<span class="done">✅ 已完成</span></li>
 </ul>
+
+<h3>7. 多重关系模型改造</h3>
+<ul>
+  <li><strong>文件</strong>：<code>lib/darkroom-memory.ts</code>、<code>app/api/darkroom/extract-relations/route.ts</code>、<code>scripts/clean-entity-relations.ts</code>、<code>scripts/add-multiplex-relations.ts</code></li>
+  <li><strong>内容</strong>：
+    <ul>
+      <li><code>darkroom_entity_relations</code> 表增加 <code>is_current</code> BOOLEAN 字段</li>
+      <li><code>recordEntityRelation</code> 支持 <code>isCurrent</code> 参数</li>
+      <li>关系类型增加 <code>crush</code>（暗恋/好感）</li>
+      <li>extract-relations API 的 prompt 要求 LLM 输出 <code>is_current</code></li>
+      <li>clean 脚本改为保留同一人对的多重关系，只去重方向/实体名完全相同的记录</li>
+      <li>手动添加指定关系：
+        <ul>
+          <li>Aidan - Dex：<code>friend</code>(current) + <code>crush</code>(current)</li>
+          <li>Aidan - Bob：<code>friend</code>(current) + <code>crush</code>(past)</li>
+          <li>Zack - Phillip：<code>friend</code>(current) + <code>date</code>(past) + <code>fwb</code>(past)</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong>结果</strong>：43 条 → 47 条</li>
+  <li><strong>状态</strong>：<span class="done">✅ 已完成</span></li>
+</ul>
 </div>
 
 <div class="section">
 <h2>二、待你检查 / 确认</h2>
 
-<h3>1. affair 与 partner 的优先级</h3>
-<p>当前优先级把 <code>affair</code> 放在 <code>partner</code> 之前。因此 <strong>Phillip - AGNOSIA</strong> 最终保留了 <code>affair</code> 而不是 <code>partner</code>。</p>
-<ul>
-  <li>如果同意：保持现状</li>
-  <li>如果调整：改为 <code>partner > affair</code>，需要再跑一次 <code>clean-entity-relations.ts</code></li>
-</ul>
-
-<h3>2. 冲突解决结果抽查</h3>
+<h3>1. 多重关系设计是否合理</h3>
+<p>当前表结构允许同一人对存在多种关系，并用 <code>is_current</code> 区分时态。请确认以下示例是否符合你的预期：</p>
 <table>
   <thead>
-    <tr><th>人物对</th><th>保留关系</th><th>被合并的关系</th></tr>
+    <tr><th>人物对</th><th>当前关系</th><th>过去关系</th></tr>
   </thead>
   <tbody>
-    <tr><td>Aidan - Phillip</td><td>friend</td><td>knows / partner / mentioned_with</td></tr>
-    <tr><td>Phillip - AGNOSIA</td><td>affair</td><td>fwb / date / knows / partner</td></tr>
-    <tr><td>Arthur - Ethan</td><td>ex</td><td>friend / partner</td></tr>
-    <tr><td>Tee - Arthur</td><td>ex</td><td>partner</td></tr>
-    <tr><td>Zack - Phillip</td><td>friend</td><td>date / fwb</td></tr>
-    <tr><td>D.F - David</td><td>lover</td><td>partner</td></tr>
-    <tr><td>Aidan - Dex</td><td>friend</td><td>knows / lover</td></tr>
-    <tr><td>Aidan - Bob</td><td>friend</td><td>lover / mentioned_with</td></tr>
+    <tr><td>Aidan - Dex</td><td>friend + crush</td><td>—</td></tr>
+    <tr><td>Aidan - Bob</td><td>friend</td><td>crush</td></tr>
+    <tr><td>Zack - Phillip</td><td>friend</td><td>date + fwb</td></tr>
+    <tr><td>Phillip - AGNOSIA</td><td>—</td><td>affair / date / fwb / knows / partner</td></tr>
   </tbody>
 </table>
+<p>注意：Phillip - AGNOSIA 当前没有任何 <code>is_current = true</code> 的关系。如果实际现在仍是某种关系，需要手动更正其中一条为 current。</p>
 
-<h3>3. 是否 push</h3>
-<p>当前本地有两个 commit 未 push：</p>
+<h3>2. 是否 push</h3>
+<p>当前本地有多个 commit 未 push：</p>
 <ul>
-  <li><code>3895c33</code> feat(darkroom): clean entity relations - unify direction and resolve conflicts</li>
+  <li><code>d6b0841</code> docs: update relation corrections...</li>
+  <li><code>3895c33</code> feat(darkroom): clean entity relations...</li>
   <li>更早的 <code>06946ac</code>（normalizeEntityName）</li>
 </ul>
 <p>如需 push，请明确说 push。</p>
@@ -171,16 +186,16 @@
   <li>关系角色占位符：<code>男朋友</code>、<code>约会对象</code>、<code>男性朋友</code>、<code>当前伴侣</code>、<code>长期男友</code>、<code>现任男友</code></li>
   <li>泛化指代：<code>用户</code>、<code>一位用户</code>、<code>某位顾客</code></li>
 </ul>
-<p>清理后 entities 表会更干净，但不会改变当前 43 条关系。</p>
+<p>清理后 entities 表会更干净，但不会改变当前 47 条关系。</p>
 
 <h3>2. 从 conversation 重新提取关系</h3>
-<p>当前 43 条关系主要来自 memory-based 提取。可以重新打开 conversation backfill，让 <code>/api/darkroom/extract</code> 的 batchPrompt 也输出关系，补充可能遗漏的线索。</p>
+<p>当前 47 条关系主要来自 memory-based 提取。可以重新打开 conversation backfill，让 <code>/api/darkroom/extract</code> 的 batchPrompt 也输出关系，补充可能遗漏的线索，并带上 <code>is_current</code>。</p>
 
-<h3>3. 给关系增加证据来源</h3>
+<h3>3. 在 Admin 界面展示关系图</h3>
+<p>当前 admin 只显示实体列表，没有可视化关系网络。可以添加一个关系表格或简单图视图，按 <code>is_current</code> 分组显示。</p>
+
+<h3>4. 给关系增加证据上下文</h3>
 <p>当前 <code>evidence_memory_id</code> 在清洗过程中已保留，但部分关系证据为空。可以后续补全 evidence 或 confidence 评分机制。</p>
-
-<h3>4. 在 Admin 界面展示关系图</h3>
-<p>当前 admin 只显示实体列表，没有可视化关系网络。可以添加一个关系表格或简单图视图。</p>
 </div>
 
 <div class="section">
@@ -188,23 +203,30 @@
 
 <h3>关系表统计</h3>
 <ul>
-  <li><strong>总数</strong>：43 条</li>
+  <li><strong>总数</strong>：47 条</li>
   <li><strong>方向统一</strong>：<code>entity_a_id <= entity_b_id</code>，无反向重复</li>
-  <li><strong>关系类型分布</strong>：
-    <ul>
-      <li>ex: 13</li>
-      <li>friend: 8</li>
-      <li>knows: 5</li>
-      <li>partner: 5</li>
-      <li>fwb: 2</li>
-      <li>date: 2</li>
-      <li>affair: 1</li>
-      <li>lover: 1</li>
-      <li>colleague: 2</li>
-      <li>mentioned_with: 2</li>
-    </ul>
-  </li>
+  <li><strong>同一人对多重关系</strong>：已支持</li>
+  <li><strong>关系类型分布</strong>（按 <code>is_current</code> 分组）：</li>
 </ul>
+<table>
+  <thead>
+    <tr><th>类型</th><th>current=true</th><th>current=false</th><th>合计</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>ex</td><td>11</td><td>0</td><td>11</td></tr>
+    <tr><td>friend</td><td>10</td><td>0</td><td>10</td></tr>
+    <tr><td>knows</td><td>6</td><td>0</td><td>6</td></tr>
+    <tr><td>partner</td><td>5</td><td>0</td><td>5</td></tr>
+    <tr><td>fwb</td><td>2</td><td>1</td><td>3</td></tr>
+    <tr><td>date</td><td>3</td><td>1</td><td>4</td></tr>
+    <tr><td>crush</td><td>1</td><td>1</td><td>2</td></tr>
+    <tr><td>colleague</td><td>2</td><td>0</td><td>2</td></tr>
+    <tr><td>mentioned_with</td><td>2</td><td>0</td><td>2</td></tr>
+    <tr><td>affair</td><td>1</td><td>0</td><td>1</td></tr>
+    <tr><td>lover</td><td>1</td><td>0</td><td>1</td></tr>
+    <tr><td><strong>合计</strong></td><td><strong>44</strong></td><td><strong>3</strong></td><td><strong>47</strong></td></tr>
+  </tbody>
+</table>
 
 <h3>实体表统计</h3>
 <ul>
@@ -212,13 +234,41 @@
   <li><strong>重复实体</strong>：0（按 lowercase name 检查）</li>
 </ul>
 
-<h3>核心关系网络</h3>
+<h3>核心关系网络（含时态）</h3>
 <ul>
-  <li><strong>Aidan</strong>：friend(Phillip, Dex, Bob, Ray, Tee, ZZ)、date(Icky)、knows(Gary)</li>
-  <li><strong>Phillip</strong>：partner(ff, 锋锋)、ex(司徒, Tee)、fwb(Zack, 颜鸣, owen)、affair(AGNOSIA)、knows(Dex)、friend(Zack)</li>
-  <li><strong>Tee</strong>：ex(Alex, Arthur, Icky, 榴莲, Phillip)、friend(大介, Aidan)、colleague(Gary)、knows(谢翔)</li>
-  <li><strong>Arthur</strong>：ex(Ethan, Tee, Bob)、knows(Icky)</li>
-  <li><strong>Icky</strong>：partner(黄坚)、ex(Tee)、date(Aidan)、knows(Arthur)</li>
+  <li><strong>Aidan</strong>
+    <ul>
+      <li>current: friend(Phillip, Dex, Bob, Ray, Tee, ZZ)、crush(Dex)、date(Icky)、knows(Gary)</li>
+      <li>past: crush(Bob)</li>
+    </ul>
+  </li>
+  <li><strong>Phillip</strong>
+    <ul>
+      <li>current: partner(ff, 锋锋)、ex(司徒, Tee)、fwb(颜鸣, owen)、knows(Dex)、friend(Zack)、affair(AGNOSIA)</li>
+      <li>past: fwb(Zack)、date(Zack)</li>
+    </ul>
+  </li>
+  <li><strong>Tee</strong>
+    <ul>
+      <li>current: ex(Alex, Arthur, Icky, 榴莲, Phillip)、friend(大介, Aidan)、colleague(Gary)、knows(谢翔)</li>
+    </ul>
+  </li>
+  <li><strong>Arthur</strong>
+    <ul>
+      <li>current: ex(Ethan, Tee, Bob)、knows(Icky)</li>
+    </ul>
+  </li>
+  <li><strong>Icky</strong>
+    <ul>
+      <li>current: partner(黄坚)、ex(Tee)、date(Aidan)、knows(Arthur)</li>
+    </ul>
+  </li>
+  <li><strong>Zack</strong>
+    <ul>
+      <li>current: friend(Mavis, Phillip)、date(阿林)</li>
+      <li>past: date(Phillip)、fwb(Phillip)</li>
+    </ul>
+  </li>
 </ul>
 </div>
 
@@ -229,13 +279,15 @@
     <tr><th>文件</th><th>作用</th></tr>
   </thead>
   <tbody>
-    <tr><td><code>app/api/darkroom/extract-relations/route.ts</code></td><td>单条记忆关系提取 API</td></tr>
+    <tr><td><code>app/api/darkroom/extract-relations/route.ts</code></td><td>单条记忆关系提取 API（支持 <code>is_current</code> 和 <code>crush</code>）</td></tr>
     <tr><td><code>scripts/extract-relations-from-memories.ts</code></td><td>历史记忆批量提取脚本</td></tr>
-    <tr><td><code>scripts/clean-entity-relations.ts</code></td><td>关系表清洗脚本（方向 + 冲突）</td></tr>
+    <tr><td><code>scripts/clean-entity-relations.ts</code></td><td>关系表清洗脚本（保留多重关系，统一方向）</td></tr>
+    <tr><td><code>scripts/add-multiplex-relations.ts</code></td><td>手动添加指定多重关系</td></tr>
     <tr><td><code>scripts/merge-duplicate-entities.ts</code></td><td>重复实体合并脚本</td></tr>
     <tr><td><code>scripts/backfill-darkroom-relations.ts</code></td><td>旧对话 backfill 触发脚本</td></tr>
     <tr><td><code>scripts/continue-darkroom-relations-backfill.ts</code></td><td>backfill 循环脚本</td></tr>
     <tr><td><code>scripts/reset-relationship-conversations.ts</code></td><td>关系相关对话重置脚本</td></tr>
+    <tr><td><code>scripts/correct-relations-manual.ts</code></td><td>手动单条关系类型修正脚本</td></tr>
     <tr><td><code>app/api/darkroom/extract/route.ts</code></td><td>主提取 API（含 backfill 模式）</td></tr>
     <tr><td><code>lib/darkroom-memory.ts</code></td><td>实体/关系/记忆数据库操作</td></tr>
     <tr><td><code>lib/darkroom-chat.ts</code></td><td>聊天逻辑 + 名字识别 + 测试</td></tr>

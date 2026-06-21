@@ -65,14 +65,14 @@
 
 | 人物对 | 保留关系 | 被合并的关系 |
 |---|---|---|
-| Aidan - Phillip | partner | knows / friend / mentioned_with |
+| Aidan - Phillip | friend | knows / partner / mentioned_with |
 | Phillip - AGNOSIA | affair | fwb / date / knows / partner |
 | Arthur - Ethan | ex | friend / partner |
 | Tee - Arthur | ex | partner |
-| Zack - Phillip | fwb | date / friend |
-| D.F - David | partner | lover |
-| Aidan - Dex | lover | knows |
-| Aidan - Bob | lover | mentioned_with |
+| Zack - Phillip | friend | date / fwb |
+| D.F - David | lover | partner |
+| Aidan - Dex | friend | knows / lover |
+| Aidan - Bob | friend | lover / mentioned_with |
 
 ### 3. 是否 push
 当前本地有两个 commit 未 push：
@@ -111,13 +111,13 @@ entities 表中仍存在早期提取错误的占位符，例如：
 - **方向统一**：`entity_a_id <= entity_b_id`，无反向重复
 - **关系类型分布**：
   - ex: 13
-  - partner: 7
-  - friend: 6
+  - friend: 8
   - knows: 5
-  - fwb: 3
-  - lover: 2
+  - partner: 5
+  - fwb: 2
   - date: 2
   - affair: 1
+  - lover: 1
   - colleague: 2
   - mentioned_with: 2
 
@@ -126,8 +126,8 @@ entities 表中仍存在早期提取错误的占位符，例如：
 - **重复实体**：0（按 lowercase name 检查）
 
 ### 核心关系网络
-- **Aidan**：partner(Phillip)、lover(Dex, Bob)、friend(Ray, Tee, ZZ)、date(Icky)、knows(Gary)
-- **Phillip**：partner(ff, 锋锋, Aidan)、ex(司徒, Tee)、fwb(Zack, 颜鸣, owen)、affair(AGNOSIA)、knows(Dex)
+- **Aidan**：friend(Phillip, Dex, Bob, Ray, Tee, ZZ)、date(Icky)、knows(Gary)
+- **Phillip**：partner(ff, 锋锋)、ex(司徒, Tee)、fwb(Zack, 颜鸣, owen)、affair(AGNOSIA)、knows(Dex)、friend(Zack)
 - **Tee**：ex(Alex, Arthur, Icky, 榴莲, Phillip)、friend(大介, Aidan)、colleague(Gary)、knows(谢翔)
 - **Arthur**：ex(Ethan, Tee, Bob)、knows(Icky)
 - **Icky**：partner(黄坚)、ex(Tee)、date(Aidan)、knows(Arthur)

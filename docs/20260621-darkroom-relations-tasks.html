@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Darkroom 关系提取与清理任务清单</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f5f5f0;
+      --muted: #888;
+      --accent: #c9a227;
+      --border: #333;
+      --done: #4caf50;
+      --warn: #ff9800;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      line-height: 1.7;
+    }
+    h1 { color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 12px; }
+    h2 { color: var(--accent); margin-top: 48px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    h3 { color: var(--fg); margin-top: 32px; }
+    p.meta { color: var(--muted); font-size: 14px; }
+    code {
+      background: #1a1a1a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SF Mono", Monaco, monospace;
+      font-size: 0.9em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+    }
+    th { background: #1a1a1a; color: var(--accent); }
+    tr:nth-child(even) { background: #111; }
+    ul li { margin-bottom: 8px; }
+    .done { color: var(--done); }
+    .warn { color: var(--warn); }
+    .check { color: var(--warn); }
+    .section { margin-bottom: 48px; }
+  </style>
+</head>
+<body>
+
+<h1>Darkroom 关系提取与清理任务清单</h1>
+<p class="meta"><strong>生成日期</strong>：2026-06-21<br>
+<strong>涉及系统</strong>：Darkroom Chat 记忆/实体/关系提取<br>
+<strong>数据表</strong>：<code>darkroom_entities</code>、<code>darkroom_entity_relations</code>、<code>darkroom_memories</code>、<code>darkroom_memory_entities</code>、<code>darkroom_conversations</code></p>
+
+<div class="section">
+<h2>一、已完成任务</h2>
+
+<h3>1. 关系提取能力补齐</h3>
+<ul>
+  <li><strong>文件</strong>：<code>app/api/darkroom/extract-relations/route.ts</code></li>
+  <li><strong>内容</strong>：新增独立端点，从单条记忆文本中提取人物关系</li>
+  <li><strong>状态</strong>：<span class="done">✅ 已完成并部署</span></li>
+</ul>
+
+<h3>2. 历史记忆批量提取</h3>
+<ul>
+  <li><strong>文件</strong>：<code>scripts/extract-relations-from-memories.ts</code></li>
+  <li><strong>内容</strong>：扫描 282 条含关系线索的历史记忆，调用 extract-relations API</li>
+  <li><strong>结果</strong>：提取 139 条关系，最终清洗后 43 条</li>
+  <li><strong>状态</strong>：<span class="done">✅ 已完成</span></li>
+</ul>
+
+<h3>3. 时区显示修复</h3>
+<ul>
+  <li><strong>文件</strong>：<code>app/admin/darkroom/page.tsx</code>、<code>components/DarkroomChat.tsx</code>、<code>hooks/useDarkroomChat.ts</code></li>
+  <li><strong>内容</strong>：数据库 TIMESTAMPTZ（UTC）统一按 <code>Asia/Shanghai</code> 显示</li>
+  <li><strong>状态</strong>：<span class="done">✅ 已完成</span></li>
+</ul>
+
+<h3>4. 身份锁定 false positive 修复</h3>
+<ul>
+  <li><strong>文件</strong>：<code>lib/darkroom-chat.ts</code></li>
+  <li><strong>内容</strong>：修复 <code>looksLikeName</code>、<code>extractExplicitName</code>、<code>extractUserNameFromHistory</code></li>
+  <li><strong>验证</strong>：111 个测试全部通过</li>
+  <li><strong>状态</strong>：<span class="done">✅ 已完成</span></li>
+</ul>
+
+<h3>5. 关系表清洗（冲突 + 方向）</h3>
+<ul>
+  <li><strong>文件</strong>：<code>scripts/clean-entity-relations.ts</code></li>
+  <li><strong>内容</strong>：
+    <ul>
+      <li>注册 canonical 别名：Philip→Phillip、Aiden→Aidan、tee（老王）→Tee、阿远（Icky）→Icky</li>
+      <li>统一关系方向：<code>entity_a_id <= entity_b_id</code></li>
+      <li>按优先级解决冲突：<code>ex > affair > partner > lover > fwb > date > colleague > friend > sibling > knows > mentioned_with</code></li>
+    </ul>
+  </li>
+  <li><strong>结果</strong>：79 条 → 43 条，19 组冲突已解决，方向全部统一</li>
+  <li><strong>状态</strong>：<span class="done">✅ 已完成</span></li>
+</ul>
+
+<h3>6. 重复实体合并</h3>
+<ul>
+  <li><strong>文件</strong>：<code>scripts/merge-duplicate-entities.ts</code></li>
+  <li><strong>内容</strong>：合并 4 组重复实体</li>
+  <li><strong>结果</strong>：
+    <ul>
+      <li><code>Aiden</code> → <code>Aidan</code></li>
+      <li><code>阿远（Icky）</code> → <code>Icky</code></li>
+      <li><code>tee（老王）</code> → <code>Tee</code></li>
+      <li><code>Philip</code> → <code>Phillip</code></li>
+    </ul>
+  </li>
+  <li><strong>实体总数</strong>：109 → 105</li>
+  <li><strong>状态</strong>：<span class="done">✅ 已完成</span></li>
+</ul>
+</div>
+
+<div class="section">
+<h2>二、待你检查 / 确认</h2>
+
+<h3>1. affair 与 partner 的优先级</h3>
+<p>当前优先级把 <code>affair</code> 放在 <code>partner</code> 之前。因此 <strong>Phillip - AGNOSIA</strong> 最终保留了 <code>affair</code> 而不是 <code>partner</code>。</p>
+<ul>
+  <li>如果同意：保持现状</li>
+  <li>如果调整：改为 <code>partner > affair</code>，需要再跑一次 <code>clean-entity-relations.ts</code></li>
+</ul>
+
+<h3>2. 冲突解决结果抽查</h3>
+<table>
+  <thead>
+    <tr><th>人物对</th><th>保留关系</th><th>被合并的关系</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Aidan - Phillip</td><td>partner</td><td>knows / friend / mentioned_with</td></tr>
+    <tr><td>Phillip - AGNOSIA</td><td>affair</td><td>fwb / date / knows / partner</td></tr>
+    <tr><td>Arthur - Ethan</td><td>ex</td><td>friend / partner</td></tr>
+    <tr><td>Tee - Arthur</td><td>ex</td><td>partner</td></tr>
+    <tr><td>Zack - Phillip</td><td>fwb</td><td>date / friend</td></tr>
+    <tr><td>D.F - David</td><td>partner</td><td>lover</td></tr>
+    <tr><td>Aidan - Dex</td><td>lover</td><td>knows</td></tr>
+    <tr><td>Aidan - Bob</td><td>lover</td><td>mentioned_with</td></tr>
+  </tbody>
+</table>
+
+<h3>3. 是否 push</h3>
+<p>当前本地有两个 commit 未 push：</p>
+<ul>
+  <li><code>3895c33</code> feat(darkroom): clean entity relations - unify direction and resolve conflicts</li>
+  <li>更早的 <code>06946ac</code>（normalizeEntityName）</li>
+</ul>
+<p>如需 push，请明确说 push。</p>
+</div>
+
+<div class="section">
+<h2>三、可选下一步</h2>
+
+<h3>1. 清理非人占位符实体</h3>
+<p>entities 表中仍存在早期提取错误的占位符，例如：</p>
+<ul>
+  <li>疑问碎片：<code>这个目标是谁</code>、<code>是谁</code>、<code>我是什</code></li>
+  <li>关系角色占位符：<code>男朋友</code>、<code>约会对象</code>、<code>男性朋友</code>、<code>当前伴侣</code>、<code>长期男友</code>、<code>现任男友</code></li>
+  <li>泛化指代：<code>用户</code>、<code>一位用户</code>、<code>某位顾客</code></li>
+</ul>
+<p>清理后 entities 表会更干净，但不会改变当前 43 条关系。</p>
+
+<h3>2. 从 conversation 重新提取关系</h3>
+<p>当前 43 条关系主要来自 memory-based 提取。可以重新打开 conversation backfill，让 <code>/api/darkroom/extract</code> 的 batchPrompt 也输出关系，补充可能遗漏的线索。</p>
+
+<h3>3. 给关系增加证据来源</h3>
+<p>当前 <code>evidence_memory_id</code> 在清洗过程中已保留，但部分关系证据为空。可以后续补全 evidence 或 confidence 评分机制。</p>
+
+<h3>4. 在 Admin 界面展示关系图</h3>
+<p>当前 admin 只显示实体列表，没有可视化关系网络。可以添加一个关系表格或简单图视图。</p>
+</div>
+
+<div class="section">
+<h2>四、当前关键数据</h2>
+
+<h3>关系表统计</h3>
+<ul>
+  <li><strong>总数</strong>：43 条</li>
+  <li><strong>方向统一</strong>：<code>entity_a_id <= entity_b_id</code>，无反向重复</li>
+  <li><strong>关系类型分布</strong>：
+    <ul>
+      <li>ex: 13</li>
+      <li>partner: 7</li>
+      <li>friend: 6</li>
+      <li>knows: 5</li>
+      <li>fwb: 3</li>
+      <li>lover: 2</li>
+      <li>date: 2</li>
+      <li>affair: 1</li>
+      <li>colleague: 2</li>
+      <li>mentioned_with: 2</li>
+    </ul>
+  </li>
+</ul>
+
+<h3>实体表统计</h3>
+<ul>
+  <li><strong>总数</strong>：105</li>
+  <li><strong>重复实体</strong>：0（按 lowercase name 检查）</li>
+</ul>
+
+<h3>核心关系网络</h3>
+<ul>
+  <li><strong>Aidan</strong>：partner(Phillip)、lover(Dex, Bob)、friend(Ray, Tee, ZZ)、date(Icky)、knows(Gary)</li>
+  <li><strong>Phillip</strong>：partner(ff, 锋锋, Aidan)、ex(司徒, Tee)、fwb(Zack, 颜鸣, owen)、affair(AGNOSIA)、knows(Dex)</li>
+  <li><strong>Tee</strong>：ex(Alex, Arthur, Icky, 榴莲, Phillip)、friend(大介, Aidan)、colleague(Gary)、knows(谢翔)</li>
+  <li><strong>Arthur</strong>：ex(Ethan, Tee, Bob)、knows(Icky)</li>
+  <li><strong>Icky</strong>：partner(黄坚)、ex(Tee)、date(Aidan)、knows(Arthur)</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>五、相关文件清单</h2>
+<table>
+  <thead>
+    <tr><th>文件</th><th>作用</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>app/api/darkroom/extract-relations/route.ts</code></td><td>单条记忆关系提取 API</td></tr>
+    <tr><td><code>scripts/extract-relations-from-memories.ts</code></td><td>历史记忆批量提取脚本</td></tr>
+    <tr><td><code>scripts/clean-entity-relations.ts</code></td><td>关系表清洗脚本（方向 + 冲突）</td></tr>
+    <tr><td><code>scripts/merge-duplicate-entities.ts</code></td><td>重复实体合并脚本</td></tr>
+    <tr><td><code>scripts/backfill-darkroom-relations.ts</code></td><td>旧对话 backfill 触发脚本</td></tr>
+    <tr><td><code>scripts/continue-darkroom-relations-backfill.ts</code></td><td>backfill 循环脚本</td></tr>
+    <tr><td><code>scripts/reset-relationship-conversations.ts</code></td><td>关系相关对话重置脚本</td></tr>
+    <tr><td><code>app/api/darkroom/extract/route.ts</code></td><td>主提取 API（含 backfill 模式）</td></tr>
+    <tr><td><code>lib/darkroom-memory.ts</code></td><td>实体/关系/记忆数据库操作</td></tr>
+    <tr><td><code>lib/darkroom-chat.ts</code></td><td>聊天逻辑 + 名字识别 + 测试</td></tr>
+    <tr><td><code>app/admin/darkroom/page.tsx</code></td><td>Admin 界面</td></tr>
+    <tr><td><code>components/DarkroomChat.tsx</code></td><td>聊天组件</td></tr>
+    <tr><td><code>hooks/useDarkroomChat.ts</code></td><td>聊天 hook</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p class="meta">本清单由 Claude 在 2026-06-21 生成，用于人工逐项检查。</p>
+
+</body>
+</html>

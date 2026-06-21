@@ -2,9 +2,10 @@ import {
   getMemoryStats,
   getRecentMemories,
   getConversationStats,
-  getRecentConversations,
+  getRecentConversationsGroupedBySession,
 } from "@/lib/darkroom-memory";
 import LoginForm from "./LoginForm";
+import { RecentConversationList } from "@/components/darkroom/RecentConversationList";
 
 interface PageProps {
   searchParams: Promise<{ token?: string }>;
@@ -18,12 +19,12 @@ export default async function Page({ searchParams }: PageProps) {
     return <LoginForm />;
   }
 
-  const [memoryStats, recentMemories, conversationStats, recentConversations] =
+  const [memoryStats, recentMemories, conversationStats, recentConversationGroups] =
     await Promise.all([
       getMemoryStats(),
       getRecentMemories(20),
       getConversationStats(),
-      getRecentConversations(20),
+      getRecentConversationsGroupedBySession(),
     ]);
 
   const typeColors: Record<string, string> = {
@@ -155,33 +156,7 @@ export default async function Page({ searchParams }: PageProps) {
 
         {/* Recent conversations */}
         <section className="border border-[#c9a22733] p-5">
-          <h2 className="text-sm uppercase tracking-wider text-[#c9a227] mb-5">
-            Recent Conversations
-          </h2>
-          <div className="space-y-4">
-            {recentConversations.map((c) => (
-              <div key={c.id} className="border-b border-[#222] last:border-0 pb-4 last:pb-0">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-xs text-[#a0a0a0]">#{c.id}</span>
-                  <span className="text-xs px-2 py-0.5 border border-[#c9a22733] text-[#c9a227]">
-                    {c.source_lang}
-                  </span>
-                  {!c.processed_for_memory && (
-                    <span className="text-xs px-2 py-0.5 bg-[#c9a227] text-[#0a0a0a]">
-                      unprocessed
-                    </span>
-                  )}
-                  <span className="text-xs text-[#666] ml-auto">
-                    {new Date(c.created_at).toLocaleString("zh-CN", {
-                      timeZone: "Asia/Shanghai",
-                    })}
-                  </span>
-                </div>
-                <p className="text-[#f5f5f0] text-sm mb-1"><span className="text-[#c9a227]">User:</span> {c.user_message}</p>
-                <p className="text-[#a0a0a0] text-sm"><span className="text-[#c9a227]">AI:</span> {c.assistant_response}</p>
-              </div>
-            ))}
-          </div>
+          <RecentConversationList groups={recentConversationGroups} />
         </section>
       </div>
     </main>

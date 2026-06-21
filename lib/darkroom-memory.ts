@@ -40,6 +40,19 @@ export interface Conversation {
   created_at: string;
 }
 
+export interface SessionConversationGroup {
+  sessionId: string;
+  summary: string;
+  firstMessageAt: string;
+  lastMessageAt: string;
+  conversations: Conversation[];
+}
+
+function shortenSessionId(sessionId: string): string {
+  if (sessionId.length <= 16) return sessionId;
+  return `${sessionId.slice(0, 12)}…${sessionId.slice(-4)}`;
+}
+
 const MAX_MEMORIES_TOTAL = 3000;
 const MIN_MEMORY_CONFIDENCE = 0.6;
 
@@ -868,6 +881,66 @@ export async function searchConversationsByKeyword(
     LIMIT ${limit}
   `;
   return result.rows as Conversation[];
+}
+
+export async function getRecentConversationsGroupedBySession(): Promise<SessionConversationGroup[]> {
+  await ensureConversationsTable();
+  await ensureSessionsTable();
+  const sql = getSql();
+
+  const result = await sql`
+    SELECT
+      c.id,
+      c.user_message,
+      c.assistant_response,
+      c.source_lang,
+      c.processed_for_memory,
+      COALESCE(c.session_id, 'unassigned') AS session_id,
+      c.created_at,
+      s.summary
+    FROM darkroom_conversations c
+    LEFT JOIN darkroom_sessions s ON c.session_id = s.session_id
+    ORDER BY c.created_at ASC
+  `;
+
+  const groups = new Map<string, SessionConversationGroup>();
+
+  for (const row of result.rows) {
+    const sid = row.session_id as string;
+    const createdAt = new Date(row.created_at as string).toISOString();
+
+    if (!groups.has(sid)) {
+      const summary = sid === 'unassigned'
+        ? 'Unassigned'
+        : (row.summary as string | null) || shortenSessionId(sid);
+      groups.set(sid, {
+        sessionId: sid,
+        summary,
+        firstMessageAt: createdAt,
+        lastMessageAt: createdAt,
+        conversations: [],
+      });
+    }
+
+    const group = groups.get(sid)!;
+    const ts = new Date(row.created_at as string).getTime();
+    group.firstMessageAt = new Date(Math.min(new Date(group.firstMessageAt).getTime(), ts)).toISOString();
+    group.lastMessageAt = new Date(Math.max(new Date(group.lastMessageAt).getTime(), ts)).toISOString();
+
+    group.conversations.push({
+      id: row.id as number,
+      user_message: row.user_message as string,
+      assistant_response: row.assistant_response as string,
+      source_lang: row.source_lang as 'en' | 'zh',
+      processed_for_memory: row.processed_for_memory as boolean,
+      session_id: sid,
+      created_at: createdAt,
+    });
+  }
+
+  return Array.from(groups.values()).sort(
+    (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+  );
 }
 
 export async function getRecentConversations(limit: number = 20): Promise<Conversation[]> {

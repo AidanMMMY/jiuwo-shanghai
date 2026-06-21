@@ -89,7 +89,7 @@ async function main() {
       `,
       [s.session_id, messagesPerSession]
     );
-    sessionDetails.push({ session: s, messages: convResult.rows as any });
+    sessionDetails.push({ session: s, messages: convResult.rows as { user_message: string; assistant_response: string; source_lang: string; created_at: string }[] });
   }
 
   const html = `<!DOCTYPE html>

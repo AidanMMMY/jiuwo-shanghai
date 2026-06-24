@@ -9,3 +9,7 @@ export const deepseekClient = new OpenAI({
 });
 
 export const DEFAULT_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-chat";
+
+export function isDeepseekConfigured(): boolean {
+  return !!apiKey && apiKey !== "dummy-key-for-build";
+}

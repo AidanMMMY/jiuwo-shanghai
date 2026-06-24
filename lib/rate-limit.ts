@@ -1,9 +1,5 @@
-interface RateLimitEntry {
-  count: number;
-  resetAt: number;
-}
-
-const store = new Map<string, RateLimitEntry>();
+import { createHash } from 'crypto';
+import { getSql } from './story-relay';
 
 export interface RateLimitResult {
   allowed: boolean;
@@ -12,34 +8,31 @@ export interface RateLimitResult {
   resetAt: number;
 }
 
-export function rateLimitByIp(
+export async function rateLimitByIp(
   identifier: string,
   limit: number,
   windowMs: number
-): RateLimitResult {
-  const now = Date.now();
-  const entry = store.get(identifier);
+): Promise<RateLimitResult> {
+  const ipHash = createHash('sha256').update(identifier).digest('hex').slice(0, 16);
+  const windowIndex = Math.floor(Date.now() / windowMs);
+  const sql = getSql();
 
-  if (!entry || now >= entry.resetAt) {
-    const resetAt = now + windowMs;
-    store.set(identifier, { count: 1, resetAt });
-    return { allowed: true, limit, remaining: limit - 1, resetAt };
-  }
+  const result = await sql`
+    INSERT INTO story_relay_rate_limits (ip_hash, window_index, request_count)
+    VALUES (${ipHash}, ${windowIndex}, 1)
+    ON CONFLICT (ip_hash, window_index) DO UPDATE SET
+      request_count = story_relay_rate_limits.request_count + 1,
+      updated_at = NOW()
+    RETURNING request_count
+  `;
 
-  if (entry.count >= limit) {
-    return { allowed: false, limit, remaining: 0, resetAt: entry.resetAt };
-  }
+  const count = (result.rows[0] as { request_count: number }).request_count;
+  const resetAt = (windowIndex + 1) * windowMs;
 
-  entry.count += 1;
-  return { allowed: true, limit, remaining: limit - entry.count, resetAt: entry.resetAt };
+  return {
+    allowed: count <= limit,
+    limit,
+    remaining: Math.max(0, limit - count),
+    resetAt,
+  };
 }
-
-// Simple cleanup every 5 minutes to prevent unbounded growth
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of store.entries()) {
-    if (now >= entry.resetAt) {
-      store.delete(key);
-    }
-  }
-}, 5 * 60 * 1000);

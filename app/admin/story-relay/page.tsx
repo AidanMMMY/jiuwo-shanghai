@@ -1,50 +1,69 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import {
   getSegments,
   getChapters,
-  buildContributors,
-  archiveCurrentChapter,
-  insertSegment,
-  getNextSequence,
+  buildPublicContributors,
+  archiveAndInsertOpening,
   getMemoriesForNameExtraction,
   getCharacters,
-  deleteAllCharacters,
   upsertCharacter,
 } from '@/lib/story-relay';
 import { generateStoryOpening, extractNamesFromMemories, extractCharactersFromSegment } from '@/lib/story-relay-ai';
+import { StoryRelayAdminLoginForm } from '@/components/StoryRelayAdminLoginForm';
 
-interface PageProps {
-  searchParams: Promise<{ key?: string }>;
+const ADMIN_COOKIE_NAME = 'story_relay_admin_token';
+
+async function validateAdminCookie(): Promise<boolean> {
+  const adminKey = process.env.STORY_RELAY_ADMIN_TOKEN;
+  if (!adminKey) return false;
+  const cookieStore = await cookies();
+  const cookieToken = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
+  return !!cookieToken && cookieToken === adminKey;
 }
 
-export default async function StoryRelayAdminPage({ searchParams }: PageProps) {
-  const { key } = await searchParams;
-  const adminKey = process.env.STORY_RELAY_ADMIN_TOKEN;
+export default async function StoryRelayAdminPage() {
+  const isAuthenticated = await validateAdminCookie();
 
-  if (!adminKey || key !== adminKey) {
-    redirect('/');
+  if (!isAuthenticated) {
+    async function loginAction(_prevState: { error?: string }, formData: FormData) {
+      'use server';
+      const adminKey = process.env.STORY_RELAY_ADMIN_TOKEN;
+      const token = formData.get('token') as string;
+      if (!adminKey || token !== adminKey) {
+        return { error: 'Token 不正确' };
+      }
+      const cookieStore = await cookies();
+      cookieStore.set(ADMIN_COOKIE_NAME, token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 24,
+      });
+      redirect('/admin/story-relay');
+    }
+
+    return <StoryRelayAdminLoginForm loginAction={loginAction} />;
   }
 
   const [segments, chapters, characters] = await Promise.all([getSegments(), getChapters(), getCharacters()]);
-  const contributors = buildContributors(segments);
+  const contributors = buildPublicContributors(segments);
   const latestSegment = segments[segments.length - 1];
 
-  async function handleReset(formData: FormData) {
+  async function handleReset() {
     'use server';
-    const submittedKey = formData.get('adminKey');
-    if (!adminKey || submittedKey !== adminKey) return;
+    const adminKey = process.env.STORY_RELAY_ADMIN_TOKEN;
+    const cookieStore = await cookies();
+    const cookieToken = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
+    if (!adminKey || cookieToken !== adminKey) return;
 
     const memoryRows = await getMemoriesForNameExtraction(100);
     const names = extractNamesFromMemories(memoryRows);
-
-    await archiveCurrentChapter();
-    await deleteAllCharacters();
     const generated = await generateStoryOpening(names);
-    const sequence = await getNextSequence();
-    await insertSegment({
-      sequence,
+
+    const { segment } = await archiveAndInsertOpening({
       authorName: 'AI',
       userPrompt: null,
       aiQuestionZh: generated.questionZh,
@@ -65,7 +84,7 @@ export default async function StoryRelayAdminPage({ searchParams }: PageProps) {
     try {
       const extracted = await extractCharactersFromSegment(generated.storyZh, generated.storyEn, []);
       for (const entry of extracted) {
-        await upsertCharacter(entry.name, entry.descriptionZh, entry.descriptionEn, sequence);
+        await upsertCharacter(entry.name, entry.descriptionZh, entry.descriptionEn, segment.sequence);
       }
     } catch (characterErr) {
       console.error('[admin/story-relay] character extraction failed:', characterErr);
@@ -97,7 +116,6 @@ export default async function StoryRelayAdminPage({ searchParams }: PageProps) {
             归档当前故事为一个新章节，然后让 AI 生成新的开头。此操作不可撤销。
           </p>
           <form action={handleReset}>
-            <input type="hidden" name="adminKey" value={key} />
             <button
               type="submit"
               className="rounded border border-red-800 bg-red-950/30 px-5 py-2 text-sm text-red-200 transition-colors hover:bg-red-900/40"

@@ -5,22 +5,36 @@ import {
   getLatestSegment,
   getNextSequence,
   insertSegment,
-  buildContributors,
+  buildPublicContributors,
   getMemoriesForNameExtraction,
   getSegments,
   getRecentSummaries,
   updateSegmentSummary,
   getCharacters,
   upsertCharacter,
-  type StorySegment,
+  sanitizeSegmentForPublic,
 } from '@/lib/story-relay';
-import { generateStoryContinuation, extractNamesFromMemories, generateSegmentSummary, extractCharactersFromSegment } from '@/lib/story-relay-ai';
+import {
+  generateStoryContinuation,
+  extractNamesFromMemories,
+  generateSegmentSummary,
+  fallbackSegmentSummary,
+  extractCharactersFromSegment,
+} from '@/lib/story-relay-ai';
 import { rateLimitByIp } from '@/lib/rate-limit';
 
 const continueSchema = z.object({
   authorName: z.string().min(1).max(64),
   userInput: z.string().min(1).max(2000),
 });
+
+function getClientIp(req: NextRequest): string {
+  const vercelIp = req.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim();
+  if (vercelIp) return vercelIp;
+  const forwarded = req.headers.get('x-forwarded-for')?.split(',');
+  if (forwarded && forwarded.length > 0) return forwarded[forwarded.length - 1].trim();
+  return 'anonymous';
+}
 
 async function getOrCreateSessionId(): Promise<string> {
   const cookieStore = await cookies();
@@ -36,35 +50,10 @@ async function getOrCreateSessionId(): Promise<string> {
   return sessionId;
 }
 
-function isUniqueViolation(err: unknown): boolean {
-  if (!(err instanceof Error)) return false;
-  const message = err.message.toLowerCase();
-  return message.includes('unique constraint') || message.includes('23505');
-}
-
-async function insertSegmentWithRetry(segment: Omit<StorySegment, 'id' | 'createdAt'>): Promise<StorySegment> {
-  try {
-    return await insertSegment(segment);
-  } catch (err) {
-    if (isUniqueViolation(err)) {
-      segment.sequence = await getNextSequence();
-      try {
-        return await insertSegment(segment);
-      } catch (err2) {
-        if (isUniqueViolation(err2)) {
-          throw new Error('CONCURRENCY_CONFLICT');
-        }
-        throw err2;
-      }
-    }
-    throw err;
-  }
-}
-
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'anonymous';
-    const limit = rateLimitByIp(`story-relay-continue:${ip}`, 10, 60 * 60 * 1000);
+    const ip = getClientIp(req);
+    const limit = await rateLimitByIp(`story-relay-continue:${ip}`, 10, 60 * 60 * 1000);
     if (!limit.allowed) {
       return NextResponse.json(
         { error: '本小时接力次数已达上限，请稍后再试。' },
@@ -112,7 +101,7 @@ export async function POST(req: NextRequest) {
     );
 
     const nextSequence = await getNextSequence();
-    let newSegment = await insertSegmentWithRetry({
+    const newSegment = await insertSegment({
       sequence: nextSequence,
       authorName,
       userPrompt: userInput,
@@ -133,9 +122,15 @@ export async function POST(req: NextRequest) {
 
     try {
       const summary = await generateSegmentSummary(newSegment.storyZh, newSegment.storyEn);
-      newSegment = await updateSegmentSummary(newSegment.id, summary.summaryZh, summary.summaryEn);
+      await updateSegmentSummary(newSegment.id, summary.summaryZh, summary.summaryEn);
     } catch (summaryErr) {
-      console.error('[story-relay/continue] summary generation failed:', summaryErr);
+      console.error('[story-relay/continue] summary generation failed, using fallback:', summaryErr);
+      const fallback = fallbackSegmentSummary(newSegment.storyZh, newSegment.storyEn);
+      try {
+        await updateSegmentSummary(newSegment.id, fallback.summaryZh, fallback.summaryEn);
+      } catch (updateErr) {
+        console.error('[story-relay/continue] fallback summary update failed:', updateErr);
+      }
     }
 
     try {
@@ -159,35 +154,30 @@ export async function POST(req: NextRequest) {
 
     const cookieStore = await cookies();
     cookieStore.set('story_relay_author_name', authorName, {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24,
     });
 
-    const allSegments = [...segments, newSegment];
+    const allSegments = [...segments, { ...newSegment, summaryZh: newSegment.summaryZh, summaryEn: newSegment.summaryEn }];
     return NextResponse.json({
-      segment: {
-        sequence: newSegment.sequence,
-        authorName: newSegment.authorName,
-        storyZh: newSegment.storyZh,
-        storyEn: newSegment.storyEn,
-        aiQuestionZh: newSegment.aiQuestionZh,
-        aiQuestionEn: newSegment.aiQuestionEn,
-        suggestion1Zh: newSegment.suggestion1Zh,
-        suggestion1En: newSegment.suggestion1En,
-        suggestion2Zh: newSegment.suggestion2Zh,
-        suggestion2En: newSegment.suggestion2En,
-        suggestion3Zh: newSegment.suggestion3Zh,
-        suggestion3En: newSegment.suggestion3En,
-        summaryZh: newSegment.summaryZh,
-        summaryEn: newSegment.summaryEn,
-      },
-      contributors: buildContributors(allSegments),
+      segment: sanitizeSegmentForPublic(newSegment),
+      contributors: buildPublicContributors(allSegments),
     });
   } catch (err) {
     console.error('story-relay/continue error:', err);
     const message = err instanceof Error ? err.message : 'Unknown error';
+
+    if (message === 'DEEPSEEK_NOT_CONFIGURED') {
+      return NextResponse.json({ error: 'AI 服务未配置，请联系管理员。' }, { status: 503 });
+    }
+    if (message === 'AI_TIMEOUT') {
+      return NextResponse.json({ error: 'AI 响应超时，请重试。' }, { status: 504 });
+    }
+    if (message === 'AI_RATE_LIMIT') {
+      return NextResponse.json({ error: 'AI 服务繁忙，请稍后再试。' }, { status: 503 });
+    }
     if (message.startsWith('CONTENT_BLOCKED')) {
       return NextResponse.json(
         { error: 'AI 觉得这一段写得太直白了，啾喔的故事更喜欢用氛围和隐喻来说。换一种含蓄点的写法？' },
@@ -200,6 +190,6 @@ export async function POST(req: NextRequest) {
         { status: 409 }
       );
     }
-    return NextResponse.json({ error: 'AI 走神了，请重试' }, { status: 500 });
+    return NextResponse.json({ error: '服务器暂时不可用，请刷新页面重试。' }, { status: 500 });
   }
 }

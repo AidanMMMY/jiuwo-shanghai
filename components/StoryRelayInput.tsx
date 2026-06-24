@@ -5,7 +5,7 @@ import { useState } from 'react';
 interface StoryRelayInputProps {
   latestQuestion: { zh: string | null; en: string | null } | null;
   suggestions: { zh: string | null; en: string | null }[];
-  onSubmit: (authorName: string, userInput: string) => void;
+  onSubmit: (authorName: string, userInput: string) => Promise<void> | void;
   disabled?: boolean;
   isZh?: boolean;
   defaultName?: string;
@@ -15,10 +15,10 @@ export function StoryRelayInput({ latestQuestion, suggestions, onSubmit, disable
   const [authorName, setAuthorName] = useState(defaultName ?? '');
   const [userInput, setUserInput] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!authorName.trim() || !userInput.trim()) return;
-    onSubmit(authorName.trim(), userInput.trim());
+    await onSubmit(authorName.trim(), userInput.trim());
     setUserInput('');
   };
 

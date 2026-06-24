@@ -31,7 +31,6 @@ export interface Chapter {
 
 export interface Contributor {
   name: string;
-  sessionId: string | null;
   segments: number[];
 }
 
@@ -45,7 +44,7 @@ export interface StoryRelayCharacter {
   updatedAt: string;
 }
 
-function getSql() {
+export function getSql() {
   const url = process.env.POSTGRES_URL || process.env.DATABASE_URL || process.env.GUESTBOOK_POSTGRES_URL;
   if (!url) throw new Error('POSTGRES_URL or DATABASE_URL is not set');
   return neon(url, { fullResults: true });
@@ -143,44 +142,157 @@ export async function getRecentSummaries(limit: number = 4): Promise<
 
 export async function getNextSequence(): Promise<number> {
   const sql = getSql();
-  const result = await sql`SELECT COALESCE(MAX(sequence), -1) + 1 AS next FROM story_relay_segments`;
+  const result = await sql`SELECT nextval('story_relay_segment_seq') AS next`;
   return (result.rows[0] as { next: number }).next;
 }
 
-export function buildContributors(segments: StorySegment[]): Contributor[] {
+export function buildPublicContributors(segments: StorySegment[]): Contributor[] {
   const map = new Map<string, Contributor>();
   for (const seg of segments) {
     const key = seg.sessionId || seg.authorName;
     if (!map.has(key)) {
-      map.set(key, { name: seg.authorName, sessionId: seg.sessionId, segments: [] });
+      map.set(key, { name: seg.authorName, segments: [] });
     }
     map.get(key)!.segments.push(seg.sequence);
   }
   return Array.from(map.values());
 }
 
+export function sanitizeUserPrompt(prompt: string | null): string | null {
+  if (!prompt) return null;
+  const injectionPatterns = [/<system\b/i, /<instruction\b/i, /ignore previous/i, /forget all/i, /disregard/i];
+  for (const pattern of injectionPatterns) {
+    if (pattern.test(prompt)) return null;
+  }
+  if (prompt.length > 500) return prompt.slice(0, 500) + '...';
+  return prompt;
+}
+
+export function sanitizeSegmentForPublic(segment: StorySegment): Omit<StorySegment, 'sessionId'> {
+  return {
+    id: segment.id,
+    sequence: segment.sequence,
+    authorName: segment.authorName,
+    userPrompt: sanitizeUserPrompt(segment.userPrompt),
+    aiQuestionZh: segment.aiQuestionZh,
+    aiQuestionEn: segment.aiQuestionEn,
+    storyZh: segment.storyZh,
+    storyEn: segment.storyEn,
+    suggestion1Zh: segment.suggestion1Zh,
+    suggestion1En: segment.suggestion1En,
+    suggestion2Zh: segment.suggestion2Zh,
+    suggestion2En: segment.suggestion2En,
+    suggestion3Zh: segment.suggestion3Zh,
+    suggestion3En: segment.suggestion3En,
+    summaryZh: segment.summaryZh,
+    summaryEn: segment.summaryEn,
+    createdAt: segment.createdAt,
+  };
+}
+
+export function isUniqueViolation(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && (err as { code?: string }).code === '23505';
+}
+
+function sanitizeSegmentsForArchive(segments: StorySegment[]): unknown[] {
+  return segments.map((seg) => ({ ...seg, sessionId: null }));
+}
+
 export async function archiveCurrentChapter(): Promise<Chapter> {
   const sql = getSql();
   const segments = await getSegments();
-  const chapterResult = await sql`SELECT COALESCE(MAX(chapter_number), 0) + 1 AS next FROM story_relay_chapters`;
-  const chapterNumber = (chapterResult.rows[0] as { next: number }).next;
+  const segmentsJson = JSON.stringify(sanitizeSegmentsForArchive(segments));
 
   const result = await sql`
-    INSERT INTO story_relay_chapters (chapter_number, segments_json)
-    VALUES (${chapterNumber}, ${JSON.stringify(segments)})
-    RETURNING *
+    WITH chapter_number AS (
+      SELECT COALESCE(MAX(chapter_number), 0) + 1 AS next FROM story_relay_chapters
+    ),
+    inserted AS (
+      INSERT INTO story_relay_chapters (chapter_number, segments_json)
+      SELECT chapter_number.next, ${segmentsJson}::jsonb
+      FROM chapter_number
+      RETURNING id, chapter_number, created_at, archived_at
+    ),
+    deleted_segments AS (
+      DELETE FROM story_relay_segments RETURNING id
+    ),
+    deleted_chars AS (
+      DELETE FROM story_relay_characters RETURNING id
+    ),
+    reset_seq AS (
+      SELECT setval('story_relay_segment_seq', 0, false)
+    )
+    SELECT id, chapter_number, created_at, archived_at FROM inserted
   `;
-
-  await sql`DELETE FROM story_relay_segments`;
 
   const row = (result.rows as Record<string, unknown>[])[0];
   return {
     id: row.id as number,
     chapterNumber: row.chapter_number as number,
-    segmentsJson: row.segments_json as unknown,
-    createdAt: row.created_at as string,
-    archivedAt: row.archived_at as string,
+    segmentsJson: sanitizeSegmentsForArchive(segments),
+    createdAt: toIsoString(row.created_at),
+    archivedAt: toIsoString(row.archived_at),
   };
+}
+
+export async function archiveAndInsertOpening(
+  newSegment: Omit<StorySegment, 'id' | 'createdAt' | 'sequence'>
+): Promise<{ chapter: Chapter; segment: StorySegment }> {
+  const sql = getSql();
+  const segments = await getSegments();
+  const segmentsJson = JSON.stringify(sanitizeSegmentsForArchive(segments));
+
+  const result = await sql`
+    WITH chapter_number AS (
+      SELECT COALESCE(MAX(chapter_number), 0) + 1 AS next FROM story_relay_chapters
+    ),
+    current_segments AS (
+      SELECT ${segmentsJson}::jsonb AS segments_json
+    ),
+    inserted_chapter AS (
+      INSERT INTO story_relay_chapters (chapter_number, segments_json)
+      SELECT chapter_number.next, current_segments.segments_json
+      FROM chapter_number, current_segments
+      RETURNING id, chapter_number, created_at, archived_at
+    ),
+    deleted_segments AS (
+      DELETE FROM story_relay_segments RETURNING id
+    ),
+    deleted_chars AS (
+      DELETE FROM story_relay_characters RETURNING id
+    ),
+    reset_seq AS (
+      SELECT setval('story_relay_segment_seq', 0, false)
+    ),
+    inserted_segment AS (
+      INSERT INTO story_relay_segments (
+        sequence, author_name, user_prompt, ai_question_zh, ai_question_en,
+        story_zh, story_en, suggestion_1_zh, suggestion_1_en, suggestion_2_zh, suggestion_2_en, suggestion_3_zh, suggestion_3_en, session_id
+      ) VALUES (
+        nextval('story_relay_segment_seq'), ${newSegment.authorName}, ${newSegment.userPrompt}, ${newSegment.aiQuestionZh}, ${newSegment.aiQuestionEn},
+        ${newSegment.storyZh}, ${newSegment.storyEn}, ${newSegment.suggestion1Zh}, ${newSegment.suggestion1En}, ${newSegment.suggestion2Zh}, ${newSegment.suggestion2En}, ${newSegment.suggestion3Zh}, ${newSegment.suggestion3En}, ${newSegment.sessionId}
+      )
+      RETURNING *
+    )
+    SELECT
+      inserted_chapter.id AS chapter_id,
+      inserted_chapter.chapter_number AS chapter_number,
+      inserted_chapter.created_at AS chapter_created_at,
+      inserted_chapter.archived_at AS chapter_archived_at,
+      inserted_segment.*
+    FROM inserted_chapter, inserted_segment
+  `;
+
+  const row = (result.rows as Record<string, unknown>[])[0];
+  const chapter: Chapter = {
+    id: row.chapter_id as number,
+    chapterNumber: row.chapter_number as number,
+    segmentsJson: sanitizeSegmentsForArchive(segments),
+    createdAt: toIsoString(row.chapter_created_at),
+    archivedAt: toIsoString(row.chapter_archived_at),
+  };
+  const segment = rowToSegment(row);
+  return { chapter, segment };
 }
 
 export async function getMemoriesForNameExtraction(limit: number = 100): Promise<{ content: string; confidence: number }[]> {

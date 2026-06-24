@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getChapterByNumber } from '@/lib/story-relay';
 
+function sanitizeArchivedSegment(seg: unknown): unknown {
+  if (typeof seg !== 'object' || seg === null) return seg;
+  const copy = { ...(seg as Record<string, unknown>) };
+  delete copy.sessionId;
+  return copy;
+}
+
 export async function GET(_req: Request, { params }: { params: Promise<{ number: string }> }) {
   try {
     const { number } = await params;
@@ -14,7 +21,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ number:
       return NextResponse.json({ error: 'Chapter not found' }, { status: 404 });
     }
 
-    const segments = Array.isArray(chapter.segmentsJson) ? chapter.segmentsJson : [];
+    const segments = Array.isArray(chapter.segmentsJson)
+      ? chapter.segmentsJson.map(sanitizeArchivedSegment)
+      : [];
 
     return NextResponse.json({
       chapter: {

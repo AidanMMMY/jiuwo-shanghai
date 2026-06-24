@@ -1,30 +1,14 @@
 import { NextResponse } from 'next/server';
-import { getSegments, buildContributors } from '@/lib/story-relay';
+import { getSegments, buildPublicContributors, sanitizeSegmentForPublic } from '@/lib/story-relay';
 
 export async function GET() {
   try {
     const segments = await getSegments();
-    const contributors = buildContributors(segments);
+    const contributors = buildPublicContributors(segments);
     const latest = segments[segments.length - 1];
 
     return NextResponse.json({
-      segments: segments.map((s) => ({
-        sequence: s.sequence,
-        authorName: s.authorName,
-        userPrompt: s.userPrompt,
-        storyZh: s.storyZh,
-        storyEn: s.storyEn,
-        aiQuestionZh: s.aiQuestionZh,
-        aiQuestionEn: s.aiQuestionEn,
-        suggestion1Zh: s.suggestion1Zh,
-        suggestion1En: s.suggestion1En,
-        suggestion2Zh: s.suggestion2Zh,
-        suggestion2En: s.suggestion2En,
-        suggestion3Zh: s.suggestion3Zh,
-        suggestion3En: s.suggestion3En,
-        summaryZh: s.summaryZh,
-        summaryEn: s.summaryEn,
-      })),
+      segments: segments.map((s) => sanitizeSegmentForPublic(s)),
       latestQuestion: latest
         ? { zh: latest.aiQuestionZh, en: latest.aiQuestionEn }
         : null,

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import { getSegments, buildContributors } from '@/lib/story-relay';
+import { getSegments, buildPublicContributors } from '@/lib/story-relay';
 import { StoryRelayTerminal } from '@/components/StoryRelayTerminal';
 import { StoryRelayContributors } from '@/components/StoryRelayContributors';
 
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default async function StoryRelayPageZh() {
   const segments = await getSegments();
-  const contributors = buildContributors(segments);
+  const contributors = buildPublicContributors(segments);
   const cookieStore = await cookies();
   const defaultAuthorName = cookieStore.get('story_relay_author_name')?.value ?? '';
 

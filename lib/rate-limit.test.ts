@@ -1,46 +1,61 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { rateLimitByIp } from './rate-limit';
+// @vitest-environment node
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { neon } from '@neondatabase/serverless';
+
+vi.mock('@neondatabase/serverless', () => ({
+  neon: vi.fn(),
+}));
 
 describe('rateLimitByIp', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.clearAllMocks();
+    process.env.POSTGRES_URL = 'postgres://mock';
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  it('allows requests under limit', async () => {
+    const mockSql = vi.fn().mockResolvedValue({ rows: [{ request_count: 1 }] });
+    (neon as unknown as ReturnType<typeof vi.fn>).mockReturnValue(mockSql);
+
+    const { rateLimitByIp } = await import('./rate-limit');
+    const result = await rateLimitByIp('1.2.3.4', 10, 60 * 60 * 1000);
+    expect(result.allowed).toBe(true);
+    expect(result.remaining).toBe(9);
   });
 
-  it('allows requests up to the limit', () => {
-    for (let i = 0; i < 5; i++) {
-      const result = rateLimitByIp('ip-a', 5, 60_000);
-      expect(result.allowed).toBe(true);
-      expect(result.remaining).toBe(5 - i - 1);
-    }
-  });
+  it('blocks requests over limit', async () => {
+    const mockSql = vi.fn().mockResolvedValue({ rows: [{ request_count: 11 }] });
+    (neon as unknown as ReturnType<typeof vi.fn>).mockReturnValue(mockSql);
 
-  it('blocks requests over the limit within the window', () => {
-    for (let i = 0; i < 5; i++) {
-      rateLimitByIp('ip-b', 5, 60_000);
-    }
-    const result = rateLimitByIp('ip-b', 5, 60_000);
+    const { rateLimitByIp } = await import('./rate-limit');
+    const result = await rateLimitByIp('1.2.3.4', 10, 60 * 60 * 1000);
     expect(result.allowed).toBe(false);
     expect(result.remaining).toBe(0);
   });
 
-  it('resets after the window expires', () => {
-    for (let i = 0; i < 5; i++) {
-      rateLimitByIp('ip-c', 5, 60_000);
-    }
-    vi.advanceTimersByTime(60_001);
-    const result = rateLimitByIp('ip-c', 5, 60_000);
-    expect(result.allowed).toBe(true);
-    expect(result.remaining).toBe(4);
+  it('tracks different IPs independently', async () => {
+    const counts = new Map<string, number>();
+    const mockSql = vi.fn().mockImplementation((_strings: TemplateStringsArray, ...values: unknown[]) => {
+      const ipHash = values[0] as string;
+      const next = (counts.get(ipHash) || 0) + 1;
+      counts.set(ipHash, next);
+      return { rows: [{ request_count: next }] };
+    });
+    (neon as unknown as ReturnType<typeof vi.fn>).mockReturnValue(mockSql);
+
+    const { rateLimitByIp } = await import('./rate-limit');
+    const a = await rateLimitByIp('1.2.3.4', 1, 60 * 60 * 1000);
+    const b = await rateLimitByIp('5.6.7.8', 1, 60 * 60 * 1000);
+    expect(a.allowed).toBe(true);
+    expect(b.allowed).toBe(true);
   });
 
-  it('tracks different identifiers independently', () => {
-    rateLimitByIp('ip-x', 2, 60_000);
-    rateLimitByIp('ip-x', 2, 60_000);
-    const result = rateLimitByIp('ip-y', 2, 60_000);
-    expect(result.allowed).toBe(true);
+  it('does not store raw IP in the database', async () => {
+    const mockSql = vi.fn().mockResolvedValue({ rows: [{ request_count: 1 }] });
+    (neon as unknown as ReturnType<typeof vi.fn>).mockReturnValue(mockSql);
+
+    const { rateLimitByIp } = await import('./rate-limit');
+    await rateLimitByIp('1.2.3.4', 10, 60 * 60 * 1000);
+    const values = mockSql.mock.calls[0].slice(1);
+    expect(values).not.toContain('1.2.3.4');
   });
 });
